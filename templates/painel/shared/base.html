@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Painel</title>
+    <link rel="stylesheet" href="{% static 'painel/theme/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'painel/theme/fonts/fontawesome-all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'painel/theme/fonts/ionicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'painel/theme/css/styles.min.css' %}">
+    {% block css_custom %}{% endblock %}
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        {% include 'painel/partials/_sidebar.html' %}
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                {% include 'painel/partials/_navibar.html' %}
+                <div class="container-fluid">
+                    <h3 class="text-dark mb-4">{% block title_page %}{% endblock %}</h3>
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+            {% include 'painel/partials/_footer.html' %}
+        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    </div>
+    <script src="{% static 'painel/theme/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'painel/theme/js/script.min.js' %}"></script>
+    {% block js_custom %}{% endblock %}
+</body>
+
+</html>

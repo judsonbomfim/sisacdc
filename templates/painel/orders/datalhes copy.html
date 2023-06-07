@@ -1,0 +1,147 @@
+{% extends 'painel/shared/base.html' %}
+{% load static %}
+{% block title_page %}Detalhes do Pedido{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Main content -->
+            <div class="invoice p-3 mb-3">
+                <!-- title row -->
+                <div class="row">
+                    <div class="col-12">
+                        <h4>
+                            <i class="fas fa-hashtag"></i> {{ ped.id }} - {{ ped.status }}
+                            <small class="float-right">DATA: {{ ped.date_created }}</small>
+                        </h4>
+                        <br>
+                    </div>
+                    <!-- /.col -->
+                </div>
+                <!-- info row -->
+                <div class="row invoice-info">
+                    <div class="col-sm-4 invoice-col">
+                        Faturamento
+                        <address>
+                            <strong>{{ ped.billing.first_name }} {{ ped.billing.last_name }}</strong><br>
+                            {{ ped.billing.address_1 }}, {{ ped.billing.number }}<br>
+                            {{ ped.billing.neighborhood }}, {{ ped.billing.city }}, {{ ped.billing.state }}<br>
+                            CEP: {{ ped.billing.postcode }}<br>
+                        </address>
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-sm-4 invoice-col">
+                        Entrega
+                        <address>
+                            <strong>{{ ped.shipping.first_name }} {{ ped.shipping.last_name }}</strong><br>
+                            {{ ped.shipping.address_1 }}, {{ ped.shipping.number }}<br>
+                            {{ ped.shipping.neighborhood }}, {{ ped.shipping.city }}, {{ ped.shipping.state }}<br>
+                            CEP: {{ ped.shipping.postcode }}<br>
+                        </address>
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-sm-4 invoice-col">
+                        INFORMAÇÕES DO CLIENTE<br>
+                        <b>CPF:</b> {{ ped.billing.cpf }}<br>
+                        <b>E-mail:</b> {{ ped.billing.email }}<br>
+                        <b>Telefone:</b> {{ ped.billing.phone }}<br>
+                        <b>Celular:</b> {{ ped.billing.cellphone }}<br>
+                    </div>
+                    <!-- /.col -->
+                </div>
+                <!-- /.row -->
+
+                <!-- Table row -->
+                <div class="row">
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-striped text-nowrap">
+                            <thead>
+                                <tr>
+                                    <th>Qty</th>
+                                    <th>Produto</th>
+                                    <th>Descrição</th>
+                                    <th>Dias</th>
+                                    <th>Dt. Ativação</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for items in ped.line_items %}
+                                <tr>
+                                    <td>{{ items.quantity }}</td>
+                                    <td>{{ items.name }}</td>
+                                    <td>
+                                        {% for desc in items.meta_data %}
+                                        {% if desc.key != '_WCPA_order_meta_data' %}
+                                        {% if desc.key != 'pa_dias' %}
+                                        {% if 'Visitará algum desses países?' in desc.key %}
+                                        <span class="text-dark">Países</span>: </spam>: <spam class="font-weight-light">
+                                            {{ desc.display_value }}</spam><br>
+                                        {% else %}
+                                        <spam class="text-dark">{{ desc.display_key }}</spam>: <spam
+                                            class="font-weight-light">{{ desc.display_value }}</spam><br>
+                                        {% endif %}
+                                        {% endif %}
+                                        {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% for desc in items.meta_data %}{% if desc.key == 'pa_dias' %}
+                                        {{ desc.display_value }}
+                                        {% endif %}{% endfor %}
+                                    </td>
+                                    <td>
+                                        {% for desc in items.meta_data %}{% if desc.key == 'Data de Ativação' %}
+                                        {{ desc.display_value }}
+                                        {% endif %}{% endfor %}
+                                    </td>
+                                    <td>{{ items.subtotal }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.col -->
+                </div>
+                <!-- /.row -->
+
+                <div class="row">
+                    <!-- accepted payments column -->
+                    <div class="col-6">
+                        <p class="lead">Métodos de Pagamento:</p>
+                        <p>{{ ped.payment_method_title }} ({{ ped.payment_method }})</p>
+                        <p class="lead">Frete</p>
+                        <p>{{ ped.shipping_lines.0.method_title }}</p>
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-6">
+                        <p class="lead">TOTAIS</p>
+
+                        <div class="table-responsive">
+                            <table class="table">
+                                <tr>
+                                    {% if ped.fee_lines %}
+                                    <th>{{ ped.fee_lines.0.name }}:</th>
+                                    <td>R$ {{ ped.fee_lines.0.total }}</td>
+                                    {% endif %}
+                                </tr>
+                                <tr>
+                                    <th>Frete ({{ ped.shipping_lines.0.method_title }}):</th>
+                                    <td>R$ {{ ped.shipping_lines.0.total }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Total:</th>
+                                    <td>R$ {{ ped.total }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /.col -->
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.invoice -->
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+</div><!-- /.container-fluid -->
+{% endblock %}
