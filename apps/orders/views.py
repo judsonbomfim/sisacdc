@@ -33,21 +33,26 @@ def dateF(d):
     return dataForm
 
 # Order list
-def orders(request,id=1):
-    apiStore = conectApiStore()
+def orders_list(request):
     if request.method == 'GET':
-        ord = apiStore.get('orders', params={'per_page': 20, 'page': id})
-        ord_list = ord.json()
-        total_pages = int(ord.headers['X-WP-TotalPages'])
+        orders = Orders.objects.all().order_by('activation_date')
 
         context = {
-            'ord': ord_list,
-            'total_pages': total_pages,
+            'orders': orders,
         }
         return render(request, 'painel/orders/index.html', context)
-
+    
 # Order details
-def order_det(request,id):
+# def order_det(request,id):
+#     apiStore = conectApiStore()
+#     ord = apiStore.get(f'orders/{id}').json()
+#     context = {
+#         'ord': ord,
+#     }
+#     return render(request, 'painel/orders/details.html', context)
+
+# Store order details
+def store_order_det(request,id):
     apiStore = conectApiStore()
     ord = apiStore.get(f'orders/{id}').json()
     context = {
@@ -75,10 +80,11 @@ def ord_update(request):
                                     
             # Listar pedidos         
             for order in ord:
-         
+                n_item = 1
+                
                 # Listar itens do pedido
                 for item in order['line_items']:
-
+                    
                     # Especificar produto a serem listados
                     prod_sel = [50760, 8873, 8791, 8761]
                     if item['product_id'] not in prod_sel:
@@ -86,7 +92,6 @@ def ord_update(request):
                                         
                     qtd = item['quantity']
                     q_i = 1 
-                    n_item = 1
                     
                     while q_i <= qtd:
                         order_id_i = order['id']

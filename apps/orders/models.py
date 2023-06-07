@@ -51,7 +51,7 @@ class Orders(models.Model):
     activation_date = models.DateField()
     order_status = models.CharField(max_length=20, choices=ORDER_STATUS, default='PR')
     id_sim = models.ForeignKey(Sims, on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
-    condition = models.CharField(max_length=15, default='novo-sim') 
+    condition = models.CharField(max_length=15, choices=CONDITION, default='novo-sim') 
     notes = models.IntegerField(null=True, blank=True, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

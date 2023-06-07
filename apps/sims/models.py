@@ -18,7 +18,7 @@ SIM_TYPES = [
 class Sims(models.Model):
     id = models.AutoField(primary_key=True, serialize=False)
     sim = models.CharField(max_length=20)
-    link = models.URLField(null=True, blank=True)
+    link = models.URLField(null=True, blank=True, default='-')
     type_sim =  models.CharField(max_length=20, choices=SIM_TYPES)
     operator = models.CharField(max_length=20, choices=SIM_OPERATOR)
     sim_status = models.CharField(max_length=20, choices=SIM_STATUS, default='DS')
