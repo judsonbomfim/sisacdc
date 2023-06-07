@@ -60,6 +60,8 @@ def ord_update(request):
     apiStore = conectApiStore()
        
     if request.method == 'GET':
+        global n_item_total
+        n_item_total = 0
         
         # Definir números de páginas
         per_page = 100
@@ -68,81 +70,101 @@ def ord_update(request):
         
         # Pedidos com status 'processing'
         for p in range(total_pages):
-            ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': p+1}).json()
             
-            # Listar Ordens         
+            ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': p+1}).json()
+                                    
+            # Listar pedidos         
             for order in ord:
-                n_item = 1          
-                
+         
                 # Listar itens do pedido
                 for item in order['line_items']:
-                    qtd = item['quantity']
-                    q_i = 1
-                    listTest = []
+
                     # Especificar produto a serem listados
-                    if item['product_id'] == 50760 or item['product_id'] == 8873 or item['product_id'] == 8791 or item['product_id'] == 8761:
-                        while q_i <= qtd:
-                            order_id_i = order['id']
-                            item_id_i = f'{order_id_i}-{n_item}'
-                            client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
-                            product_i = slugify(item['name'])
-                            qty_i = 1
-                            if order['coupon_lines']:
-                                coupon_i = order['coupon_lines'][0]['code']
-                            else: coupon_i = '-'
-                            # Definir valor padrão para variáveis
-                            ord_chip_nun_i = '-'
-                            # Percorrer itens do pedido
-                            for i in item['meta_data']:
-                                if i['key'] == 'pa_tipo-de-sim': tipo_sim_i = i['value']
-                                if i['key'] == 'pa_condicao-do-chip': condition_i = i['value']
-                                if i['key'] == 'pa_dados-diarios': data_day_i = i['value']
-                                if i['key'] == 'pa_dias': days_i = i['value']
-                                if i['key'] == 'pa_plano-de-voz': 
-                                    if i['value'] == 'sem-ligacoes': calls_i = False
-                                    else: calls_i = True
-                                if 'Visitará' in i['key']:
-                                    if i['value'] == 'Não': countries_i = False 
-                                    else: countries_i = True
-                                if i['key'] == 'Data de Ativação': activation_date_i = dateF(i['value'])
-                                if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
-                                if i['key'] == 'Número de pedido ou do chip': ord_chip_nun_i = i['value']
-                            shipping_i = order['shipping_lines'][0]['method_title']
-                            order_date_i = dateHour(order['date_created'])
-                            order_status_i = 'PR'
-                            notes_i = 0
-                            
-                            # Definir variáveis para salvar no banco de dados                            
-                            order_add = Orders(                    
-                                order_id = order_id_i,
-                                item_id = item_id_i,
-                                client = client_i,
-                                product = product_i,
-                                data_day = data_day_i,
-                                qty = qty_i,
-                                coupon = coupon_i,
-                                condition = condition_i,
-                                days = days_i,
-                                calls = calls_i,
-                                countries = countries_i,
-                                cell_mod = cell_mod_i,
-                                ord_chip_nun = ord_chip_nun_i,
-                                shipping = shipping_i,
-                                order_date = order_date_i,
-                                activation_date = activation_date_i,
-                                order_status = order_status_i,
-                                notes = notes_i
-                            )
-                            
-                            # Salvar itens no banco de dados
-                            order_add.save()
-                            # Esvaziar variáveis
-                            locals().clear()
-                            # Incrementar variáveis
-                            n_item += 1
-                            q_i += 1
+                    prod_sel = [50760, 8873, 8791, 8761]
+                    if item['product_id'] not in prod_sel:
+                        continue
                                         
-        context = {
-            'ord': 'Tudo certo!',
-        }   
-        return render(request, 'painel/orders/update.html', context)
+                    qtd = item['quantity']
+                    q_i = 1 
+                    n_item = 1
+                    
+                    while q_i <= qtd:
+                        order_id_i = order['id']
+                        item_id_i = f'{order_id_i}-{n_item}'
+                        client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
+                        product_i = slugify(item['name'])
+                        qty_i = 1
+                        if order['coupon_lines']:
+                            coupon_i = order['coupon_lines'][0]['code']
+                        else: coupon_i = '-'
+                        # Definir valor padrão para variáveis
+                        ord_chip_nun_i = '-'
+                        # Percorrer itens do pedido
+                        for i in item['meta_data']:
+                            if i['key'] == 'pa_tipo-de-sim': tipo_sim_i = i['value']
+                            if i['key'] == 'pa_condicao-do-chip': condition_i = i['value']
+                            if i['key'] == 'pa_dados-diarios': data_day_i = i['value']
+                            if i['key'] == 'pa_dias': days_i = i['value']
+                            if i['key'] == 'pa_plano-de-voz': 
+                                if i['value'] == 'sem-ligacoes': calls_i = False
+                                else: calls_i = True
+                            if 'Visitará' in i['key']:
+                                if i['value'] == 'Não': countries_i = False 
+                                else: countries_i = True
+                            if i['key'] == 'Data de Ativação': activation_date_i = dateF(i['value'])
+                            if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
+                            if i['key'] == 'Número de pedido ou do chip': ord_chip_nun_i = i['value']
+                        shipping_i = order['shipping_lines'][0]['method_title']
+                        order_date_i = dateHour(order['date_created'])
+                        order_status_i = 'PR'
+                        notes_i = 0
+                        
+                        # Definir variáveis para salvar no banco de dados                            
+                        order_add = Orders(                    
+                            order_id = order_id_i,
+                            item_id = item_id_i,
+                            client = client_i,
+                            product = product_i,
+                            data_day = data_day_i,
+                            qty = qty_i,
+                            coupon = coupon_i,
+                            condition = condition_i,
+                            days = days_i,
+                            calls = calls_i,
+                            countries = countries_i,
+                            cell_mod = cell_mod_i,
+                            ord_chip_nun = ord_chip_nun_i,
+                            shipping = shipping_i,
+                            order_date = order_date_i,
+                            activation_date = activation_date_i,
+                            order_status = order_status_i,
+                            notes = notes_i
+                        )
+                        
+                        # Salvar itens no banco de dados
+                        order_add.save()
+                        
+                        # Esvaziar variáveis
+                        # locals().clear()
+                        
+                        # Alterar status do pedido para 'completed'
+                        data = {
+                            'status': 'completed'
+                        }
+                        apiStore.put(f'orders/{order_id_i}', data).json()
+                        
+                        # Definir variáveis
+                        q_i += 1 
+                        n_item += 1
+                        n_item_total += 1
+
+    # Mensagem de sucesso
+    if n_item_total == 0:
+        msg = "Nenhum pedido atualizado!!"
+    else:
+        msg = f"{n_item_total} pedidos atualizados com sucesso!!"
+
+    context = {
+        'msg': msg,
+    }   
+    return render(request, 'painel/orders/update.html', context)
