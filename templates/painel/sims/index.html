@@ -34,8 +34,8 @@
                         <td>{{ sim.sim }}</td>
                         <td>{{ sim.link }}</td>
                         <td>{{ sim.type_sim }}</td>
-                        <td>{{ sim.operadora }}</td>
-                        <td>{{ sim.status }}</td>
+                        <td>{{ sim.get_operator_display }}</td>
+                        <td>{{ sim.get_sim_status_display }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

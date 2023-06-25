@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from django.contrib.messages import constants
 from woocommerce import API
 from dotenv import load_dotenv
 load_dotenv()
@@ -138,10 +139,11 @@ MEDIA_URL = "media/"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Messages
-
-from django.contrib.messages import constants as messages
+# Message
 MESSAGE_TAGS = {
-    messages.ERROR: 'danger',
-    messages.SUCCESS: 'success'
+    constants.DEBUG: 'primary',
+    constants.ERROR: 'danger',
+    constants.SUCCESS: 'success',
+    constants.INFO: 'info',
+    constants.WARNING: 'warning',
 }

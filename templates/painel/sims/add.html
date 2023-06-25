@@ -8,6 +8,19 @@
         <p class="text-primary m-0 fw-bold">Adicionar SIMS</p>
     </div>
     <div class="card-body">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="toast align-items-center text-white bg-{{message.tags}} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                        <div class="toast-body">
+                        {{message}}
+                        </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>            
+            <br>
+            {% endfor %}
+        {% endif %}
         <form action="{% url 'sims_add' %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <label class="form-label">Tipo de Chip</label>
@@ -22,19 +35,19 @@
             <label class="form-label">Operadora</label>
             <div class="form-group">
 
-                <input type="radio" class="btn-check" name="operator" id="operator1" value="TM" autocomplete="off">
+                <input type="radio" class="btn-check" name="operator" id="operator1" value="TM" required>
                 <label class="btn btn-outline-primary" for="operator1">T-mobile</label>
                 
-                <input type="radio" class="btn-check" name="operator" id="operator2" value="CM" autocomplete="off">
+                <input type="radio" class="btn-check" name="operator" id="operator2" value="CM" required>
                 <label class="btn btn-outline-primary" for="operator2">China Mobile</label>
                 
-                <input type="radio" class="btn-check" name="operator" id="operator3" value="TC" autocomplete="off">
+                <input type="radio" class="btn-check" name="operator" id="operator3" value="TC"required>
                 <label class="btn btn-outline-primary" for="operator3">Telcom</label>
             </div>
             <br>
             <div class="form-group">
                 <label for="formFile" class="form-label">Enviar arquivo CSV</label>
-                <input class="form-control" type="file" id="formFile" name="sim">
+                <input class="form-control" type="file" id="formFile" name="sim" required>
             </div>
             <br>
             <div class="form-group">
@@ -43,4 +56,14 @@
         </form>
     </div>
 </div>
+
+{% endblock %}
+{% block scrip_custom %}
+
+<script>
+    const toastContant = document.querySelector('.toast');
+    const toast = new bootstrap.Toast(toastContant);
+    toast.show();
+</script>
+
 {% endblock %}
