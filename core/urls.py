@@ -7,6 +7,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('pedidos/', include('apps.orders.urls')),
+    path('sims/', include('apps.sims.urls')),
 ]
 
 if settings.DEBUG:

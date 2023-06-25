@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 import os
+from django.contrib import messages
 from woocommerce import API
+import datetime
 from django.utils.text import slugify
 from apps.orders.models import Orders
 from apps.sims.models import Sims
@@ -14,7 +16,8 @@ def conectApiStore():
         consumer_secret = str(os.getenv('consumer_secret')),
         wp_api = True,
         version = 'wc/v3',
-        query_string_auth = True
+        query_string_auth = True,
+        timeout = 50
     )
     return wcapi
 
@@ -22,7 +25,7 @@ def conectApiStore():
 def dateHour(dh):
     date = dh[0:10]
     hour = dh[11:19]
-    date_hour = f'{date} {hour}-03'
+    date_hour = f'{date} {hour}'
     return date_hour
 # Date - 17/06/2023
 def dateF(d):
@@ -35,8 +38,8 @@ def dateF(d):
 # Order list
 def orders_list(request):
     if request.method == 'GET':
-        orders = Orders.objects.all().order_by('activation_date')
-
+        orders = Orders.objects.all().order_by('id')
+    
         context = {
             'orders': orders,
         }
@@ -85,7 +88,7 @@ def ord_update(request):
                 # Listar itens do pedido
                 for item in order['line_items']:
                     
-                    # Especificar produto a serem listados
+                    # Especificar produtos a serem listados
                     prod_sel = [50760, 8873, 8791, 8761]
                     if item['product_id'] not in prod_sel:
                         continue
@@ -104,6 +107,7 @@ def ord_update(request):
                         else: coupon_i = '-'
                         # Definir valor padrão para variáveis
                         ord_chip_nun_i = '-'
+                        countries_i = False
                         # Percorrer itens do pedido
                         for i in item['meta_data']:
                             if i['key'] == 'pa_tipo-de-sim': tipo_sim_i = i['value']
@@ -167,7 +171,7 @@ def ord_update(request):
     if n_item_total == 0:
         msg = "Nenhum pedido atualizado!!"
     else:
-        msg = f"{n_item_total} pedidos atualizados com sucesso!!"
+        msg = f"{n_item_total} items atualizados com sucesso!!"
 
     context = {
         'msg': msg,

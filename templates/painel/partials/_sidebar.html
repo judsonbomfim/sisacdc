@@ -20,6 +20,14 @@
                         <a class="nav-link" href="{% url 'ord_update' %}">
                             <i class="fas fa-user"></i><span class="mx-2">Update</span>
                         </a>
+                    </li>                                        
+                    <li class="nav-item dropdown {% if '/sims/' in request.path %}show{% endif %}">
+                        <a class="dropdown-toggle nav-link" aria-expanded="{% if '/sims/' in request.path %}true{% else %}false{% endif %}" data-bs-toggle="dropdown" href="#">
+                            <i class="bi bi-sim"></i><span class="mx-2">Estoque de SIMs</span></a>
+                        <div class="dropdown-menu {% if '/sims/' in request.path %}show{% endif %}" style="background: rgb(33,80,111);border-style: none;border-radius: 0; {% if request.path == url %}data-bs-popper='static'{% endif %}">
+                            <a class="dropdown-item link-light {% if '/sims/lista/' in request.path %}active{% endif %}" href="{% url 'sims_index' %}"><i class="bi bi-sim"></i> Estoque</a>
+                            <a class="dropdown-item link-light {% if '/sims/adicionar/' in request.path %}active{% endif %}" href="{% url 'sims_add' %}"><i class="bi bi-sim"></i> Adicionar SIMs</a>
+                        </div>
                     </li>
                 </ul>
             </div>
