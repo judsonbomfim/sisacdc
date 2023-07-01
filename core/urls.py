@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('pedidos/', include('apps.orders.urls')),
     path('sims/', include('apps.sims.urls')),
+    path('dashboard/', include('apps.dashboard.urls')),
 ]
 
 if settings.DEBUG:

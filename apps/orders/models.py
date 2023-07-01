@@ -4,8 +4,6 @@ from apps.sims.models import Sims
 
 # make choice
 
-
-
 PRODUCT = [
     ('chip-internacional-eua', 'USA'),
     ('chip-internacional-eua-e-canada', 'USA e CANADA'),
@@ -25,7 +23,9 @@ ORDER_STATUS = [
     ('CC', 'Cancelado'),
     ('RB', 'Reembolsado'),
     ('RP', 'Reprocessar'),
-    ('PR', 'Processando')
+    ('PR', 'Processando'),
+    ('VS', 'Verificar SIM'),
+    ('AC', 'Atribuir SIM'),
 ]
 CONDITION = [
     ('novo-sim', 'Novo SIM'),
@@ -37,7 +37,7 @@ class Orders(models.Model):
     order_id = models.IntegerField()
     item_id = models.CharField(max_length=15)
     client = models.CharField(max_length=70)
-    product = models.CharField(max_length=35, choices=PRODUCT)
+    product = models.CharField(max_length=50, choices=PRODUCT)
     data_day = models.CharField(max_length=15, choices=DATA)
     qty = models.IntegerField()
     coupon = models.CharField(max_length=15, default=None)

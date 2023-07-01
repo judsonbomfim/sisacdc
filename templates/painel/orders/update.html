@@ -7,18 +7,17 @@
         <p class="text-secondary m-0 fw-bold">Update de pedidos</p>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-6 text-nowrap">
+        {% include 'painel/partials/_messages.html' %}
+        <form action="{% url 'ord_update' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary mb-3">Fazer update dos pedidos da loja</button>
             </div>
-            <div class="col-md-6">
-                <div id="dataTable_filter" class="text-md-end dataTables_filter"><label class="form-label"><input class="form-control form-control-sm" type="search" aria-controls="dataTable" placeholder="Search" /></label></div>
-            </div>
-        </div>
-        <div id="dataTable" class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
-            <table id="dataTable" class="table table-hover my-0">
-                {{msg}}
-            </table>
-        </div>
+        </form>
     </div>
 </div>
+{% endblock %}
+
+{% block scrip_custom %}
+    {% include 'painel/partials/_messages_script.html' %}
 {% endblock %}

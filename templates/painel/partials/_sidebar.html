@@ -1,4 +1,10 @@
-        <nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0" style="background: linear-gradient(#18425e, #12364e 33%);">
+{% url 'orders_list' as orders_list %}
+{% url 'ord_update' as ord_update %}
+{% url 'sims_index' as sims_index %}
+{% url 'sims_add_sim' as sims_add_sim %}
+{% url 'sims_add_esim' as sims_add_esim %}
+        
+        <nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0" style="background: linear-gradient(#18425e, #12364e 150px);">
             <div class="container-fluid d-flex flex-column p-0">
                 <a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#">
                     <div class="sidebar-brand-icon rotate-n-15"><i class="icon ion-ios-gear-outline"></i></div>
@@ -7,26 +13,27 @@
                 <hr class="sidebar-divider my-0">
                 <ul class="navbar-nav text-light" id="accordionSidebar">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'orders_list' %}">
-                            <i class="fas fa-tachometer-alt"></i><span class="mx-2">Dashboard</span>
+                        <a class="nav-link" href="{% url 'dashboard' %}">
+                            <i class="bi bi-speedometer2"></i><span class="mx-2">Dashboard</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'orders_list' %}">
-                            <i class="fas fa-user"></i><span class="mx-2">Pedidos</span>
+                        <a class="dropdown-toggle nav-link" aria-expanded="{% if '/pedidos/' in request.path %}true{% else %}false{% endif %}" data-bs-toggle="dropdown" href="#">
+                            <i class="bi bi-sim"></i><span class="mx-2">Pedidoss</span>
                         </a>
-                    </li>                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'ord_update' %}">
-                            <i class="fas fa-user"></i><span class="mx-2">Update</span>
-                        </a>
-                    </li>                                        
+                        <div class="dropdown-menu {% if '/pedidos/' in request.path %}show{% endif %}" style="background: rgb(33,80,111);border-style: none;border-radius: 0; {% if '/pedidos/' in request.path %}data-bs-popper='static'{% endif %}">
+                            <a class="dropdown-item link-light {% if request.path == orders_list %}active{% endif %}" href="{% url 'orders_list' %}"><i class="bi bi-sim"></i> Pedidos</a>
+                            <a class="dropdown-item link-light {% if request.path == ord_update %}active{% endif %}" href="{% url 'ord_update' %}"><i class="bi bi-sim"></i> Atualizar Pedidos</a>
+                        </div>
+                    </li>                                     
                     <li class="nav-item dropdown {% if '/sims/' in request.path %}show{% endif %}">
                         <a class="dropdown-toggle nav-link" aria-expanded="{% if '/sims/' in request.path %}true{% else %}false{% endif %}" data-bs-toggle="dropdown" href="#">
-                            <i class="bi bi-sim"></i><span class="mx-2">Estoque de SIMs</span></a>
-                        <div class="dropdown-menu {% if '/sims/' in request.path %}show{% endif %}" style="background: rgb(33,80,111);border-style: none;border-radius: 0; {% if request.path == url %}data-bs-popper='static'{% endif %}">
-                            <a class="dropdown-item link-light {% if '/sims/lista/' in request.path %}active{% endif %}" href="{% url 'sims_index' %}"><i class="bi bi-sim"></i> Estoque</a>
-                            <a class="dropdown-item link-light {% if '/sims/adicionar/' in request.path %}active{% endif %}" href="{% url 'sims_add' %}"><i class="bi bi-sim"></i> Adicionar SIMs</a>
+                            <i class="bi bi-sim"></i><span class="mx-2">Estoque de SIMs</span>
+                        </a>
+                        <div class="dropdown-menu {% if '/sims/' in request.path %}show{% endif %}" style="background: rgb(33,80,111);border-style: none;border-radius: 0; {% if '/sims/' in request.path %}data-bs-popper='static'{% endif %}">
+                            <a class="dropdown-item link-light {% if request.path == sims_index %}active{% endif %}" href="{% url 'sims_index' %}"><i class="bi bi-sim"></i> Estoque</a>
+                            <a class="dropdown-item link-light {% if request.path == sims_add_sim %}active{% endif %}" href="{% url 'sims_add_sim' %}"><i class="bi bi-sim"></i> Adicionar SIMs</a>
+                            <a class="dropdown-item link-light {% if request.path == sims_add_esim %}active{% endif %}" href="{% url 'sims_add_esim' %}"><i class="bi bi-sim"></i> Adicionar eSIMs</a>
                         </div>
                     </li>
                 </ul>

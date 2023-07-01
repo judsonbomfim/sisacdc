@@ -5,23 +5,11 @@
 {% block content %}
 <div class="card shadow">
     <div class="card-header py-3">
-        <p class="text-primary m-0 fw-bold">Adicionar SIMS</p>
+        <p class="text-secondary m-0 fw-bold">Adicionar SIMS</p>
     </div>
     <div class="card-body">
-        {% if messages %}
-            {% for message in messages %}
-            <div class="toast align-items-center text-white bg-{{message.tags}} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                        <div class="toast-body">
-                        {{message}}
-                        </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>            
-            <br>
-            {% endfor %}
-        {% endif %}
-        <form action="{% url 'sims_add' %}" method="POST" enctype="multipart/form-data">
+        {% include 'painel/partials/_messages.html' %}
+        <form action="{% url 'sims_add_sim' %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <label class="form-label">Tipo de Chip</label>
             <div class="form-group">
@@ -58,12 +46,7 @@
 </div>
 
 {% endblock %}
+
 {% block scrip_custom %}
-
-<script>
-    const toastContant = document.querySelector('.toast');
-    const toast = new bootstrap.Toast(toastContant);
-    toast.show();
-</script>
-
+    {% include 'painel/partials/_messages_script.html' %}
 {% endblock %}
