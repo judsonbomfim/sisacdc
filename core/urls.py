@@ -3,12 +3,13 @@ from django.urls import path, include
 
 from django.conf import settings
 from django.conf.urls.static import static
+from apps.dashboard.views import index
 
 urlpatterns = [
+    path('', index, name='dashboard'),
     path('admin/', admin.site.urls),
     path('pedidos/', include('apps.orders.urls')),
     path('sims/', include('apps.sims.urls')),
-    path('dashboard/', include('apps.dashboard.urls')),
 ]
 
 if settings.DEBUG:

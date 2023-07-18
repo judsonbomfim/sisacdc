@@ -1,7 +1,11 @@
 {% extends 'painel/shared/base.html' %}
+
 {% load static %}
 {% load date_day %}
+
 {% block title_page %}<i class="bi bi-speedometer2"></i> Dashboard{% endblock %}
+{% block js_custom %}<script src="https://cdnjs.com/libraries/Chart.js"></script>{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-md-6 col-xl-3 mb-4">
@@ -15,7 +19,7 @@
                         </div>
                         <div class="row g-0 align-items-center">
                             <div class="col-auto col-xxl-9">
-                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">Ativação para hoje</span></div>
+                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">Ativações para hoje</span></div>
                             </div>
                             <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tm }}</span></div>
                         </div>
@@ -99,4 +103,27 @@
         </div>
     </div>
 </div>
+
+{% endblock %}
+
+{% block script_custom %}
+<script>
+    const config = {
+        type: 'line',
+        data: data,
+    };
+
+    const labels = [65, 59, 80, 81, 56, 55, 40];
+    const data = {
+    labels: labels,
+        datasets: [{
+            label: 'My First Dataset',
+            data: [65, 59, 80, 81, 56, 55, 40],
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    };
+
+</script>
 {% endblock %}

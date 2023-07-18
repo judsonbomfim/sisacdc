@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{% static 'painel/theme/css/styles_custom.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     {% block css_custom %}{% endblock %}
+    {% block js_custom %}{% endblock %}
 </head>
 
 <body id="page-top">
@@ -31,7 +32,7 @@
     </div>
     <script src="{% static 'painel/theme/bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'painel/theme/js/script.min.js' %}"></script>
-    {% block scrip_custom %}{% endblock %}
+    {% block script_custom %}{% endblock %}
 </body>
 
 </html>
