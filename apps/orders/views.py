@@ -85,7 +85,6 @@ def ord_update(request):
             for order in ord:
                 n_item = 1
                 
-                
                 # Listar itens do pedido
                 for item in order['line_items']:
                     
@@ -184,7 +183,7 @@ def ord_update(request):
                             pass
                         else:
                             # Status Atribuir SIM
-                            order_status_i = 'AC'
+                            order_status_i = 'AS'
                             
                             msg_sim.append(f'Não há estoque de {operator_i} - {type_sim_i} no sistema')
                             continue
@@ -193,6 +192,10 @@ def ord_update(request):
                         order_put = Orders.objects.get(pk=register_id)
                         order_put.id_sim_id = sim_ds.id
                         order_put.save()
+                        
+                        # Verificar Status SIM
+                        if order_status_i == 'AS':
+                            continue
                         
                         # update sim
                         sim_put = Sims.objects.get(pk=sim_ds.id)
