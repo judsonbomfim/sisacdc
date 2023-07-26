@@ -18,7 +18,7 @@ SECRET_KEY = str(os.getenv('SECRET_KEY'))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['146.190.125.14','172.69.3.235','localhost','sistema.acasadochip.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -123,32 +123,32 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
-
+# Moving static assets to DigitalOcean Spaces as per:
+# https://www.digitalocean.com/community/tutorials/how-to-set-up-object-storage-with-django
 AWS_ACCESS_KEY_ID = str(os.getenv('AWS_ACCESS_KEY_ID'))
 AWS_SECRET_ACCESS_KEY = str(os.getenv('AWS_SECRET_ACCESS_KEY'))
 AWS_STORAGE_BUCKET_NAME = str(os.getenv('AWS_STORAGE_BUCKET_NAME'))
 AWS_S3_ENDPOINT_URL = 'https://nyc3.digitaloceanspaces.com'
+AWS_S3_CUSTOM_DOMAIN = 'sisacdc-teste.nyc3.cdn.digitaloceanspaces.com'
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
 AWS_LOCATION = 'static'
 AWS_LOCATION_M = 'media'
+AWS_DEFAULT_ACL = 'public-read'
+
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static')
 ]
-STATIC_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_LOCATION)
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
+STATIC_URL = '{}/{}/'.format(AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-# Media
 
+MEDIA_URL = '{}/{}/'.format(AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION_M)
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-MEDIA_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_LOCATION_M)
 
 
 # Default primary key field type
@@ -156,24 +156,10 @@ MEDIA_URL = 'https://%s/%s/' % (AWS_S3_ENDPOINT_URL, AWS_LOCATION_M)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# # Static files (CSS, JavaScript, Images)
-# # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-# STATIC_URL = '/static/'
-
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, '/core/static/')
-# ]
-
-# STATIC_ROOT = os.path.join(BASE_DIR, '/var/www/painel.acasadochip.com/html/static/')
-
-# # Media
-
-# MEDIA_ROOT = os.path.join(BASE_DIR, '/var/www/painel.acasadochip.com/html/media/')
-
-# MEDIA_URL = "/media/"
-
-# # Default primary key field type
-# # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
-# DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+MESSAGE_TAGS = {
+    constants.DEBUG: 'primary',
+    constants.ERROR: 'danger',
+    constants.SUCCESS: 'success',
+    constants.INFO: 'info',
+    constants.WARNING: 'warning',
+}
