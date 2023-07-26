@@ -26,6 +26,8 @@ ORDER_STATUS = [
     ('PR', 'Processando'),
     ('VS', 'Verificar SIM'),
     ('AS', 'Atribuir SIM'),
+    ('RT', 'Retirada'),
+    ('MB', 'Motoboy'),
 ]
 CONDITION = [
     ('novo-sim', 'Novo SIM'),

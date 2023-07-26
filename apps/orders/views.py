@@ -1,7 +1,5 @@
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.conf.urls.static import static
 import os
 from django.contrib import messages
 from woocommerce import API
@@ -18,7 +16,7 @@ def conectApiStore():
         wp_api = True,
         version = 'wc/v3',
         query_string_auth = True,
-        timeout = 50
+        timeout = 500
     )
     return wcapi
 
@@ -75,11 +73,12 @@ def ord_update(request):
         per_page = 100
         order_p = apiStore.get('orders', params={'status': 'processing', 'per_page': per_page})
         total_pages = int(order_p.headers['X-WP-TotalPages'])
+        n_page = 1
         
-        # Pedidos com status 'processing'
-        for p in range(total_pages):
-            
-            ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': p+1}).json()
+        while n_page <= total_pages:
+            print(f'Per_Page {total_pages}')
+            # Pedidos com status 'processing'
+            ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page}).json()
                                     
             # Listar pedidos         
             for order in ord:
@@ -170,7 +169,7 @@ def ord_update(request):
                         n_item_total += 1                        
 
                         # Add SIMs
-                        if product_i == 'chip-internacional-europa' and countries_i == False and type_sim_i == 'esim':
+                        if product_i == 'chip-internacional-europa' and countries_i == False:
                             operator_i = 'TC'
                         elif product_i == 'chip-internacional-eua':
                             operator_i = 'TM'
@@ -188,20 +187,26 @@ def ord_update(request):
                             msg_sim.append(f'Não há estoque de {operator_i} - {type_sim_i} no sistema')
                             continue
                         
+                        # Verificar Status SIM 
+                        # 'VS', 'Verificar SIM'
+                        # 'AS', 'Atribuir SIM'
+                        # 'RT', 'Retirada'
+                        # 'MB', 'Motoboy'
+                        status_ver = ['VS','AS','RT','MB']
+                        if order_status_i in status_ver:
+                            continue
+                        
                         # update order
                         order_put = Orders.objects.get(pk=register_id)
                         order_put.id_sim_id = sim_ds.id
                         order_put.save()
-                        
-                        # Verificar Status SIM
-                        if order_status_i == 'AS':
-                            continue
-                        
+                         
                         # update sim
                         sim_put = Sims.objects.get(pk=sim_ds.id)
                         sim_put.sim_status = 'AT'
                         sim_put.save()
-
+            n_page += 1
+            
                             
     # Mensagem de sucesso
     if n_item_total == 0:
