@@ -5,6 +5,7 @@ from apps.sims.models import Sims
 def index(request):
     
     sims = Sims.objects.all()
+    
     # Verificar estoque de operadoras
     sim_tm = sims.filter(sim_status='DS',operator='TM', type_sim='sim').count()
     esim_tm = sims.filter(sim_status='DS',operator='TM', type_sim='esim').count()
@@ -12,6 +13,8 @@ def index(request):
     esim_cm = sims.filter(sim_status='DS',operator='CM', type_sim='esim').count()
     sim_tc = sims.filter(sim_status='DS',operator='TC', type_sim='sim').count()
     esim_tc = sims.filter(sim_status='DS',operator='TC', type_sim='esim').count()
+    
+       
     
     context= {
         'sims': sims,

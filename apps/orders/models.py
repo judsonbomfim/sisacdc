@@ -6,9 +6,9 @@ from apps.sims.models import Sims
 
 PRODUCT = [
     ('chip-internacional-eua', 'USA'),
-    ('chip-internacional-eua-e-canada', 'USA e CANADA'),
+    ('chip-internacional-eua-e-canada', 'USA/CANADA'),
     ('chip-internacional-europa', 'EUROPA'),
-    ('chip-internacional-global', 'GLOBAL PREMIUM')
+    ('chip-internacional-global', 'GLOBAL')
 ]
 
 DATA = [
@@ -19,15 +19,18 @@ DATA = [
 ]
 
 ORDER_STATUS = [
+    ('AE', 'Agd. Envio'),
+    ('AA', 'Agd. Ativação'),
+    ('AS', 'Atribuir SIM'),
     ('AT', 'Ativado'),
     ('CC', 'Cancelado'),
-    ('RB', 'Reembolsado'),
-    ('RP', 'Reprocessar'),
-    ('PR', 'Processando'),
-    ('VS', 'Verificar SIM'),
-    ('AS', 'Atribuir SIM'),
-    ('RT', 'Retirada'),
     ('MB', 'Motoboy'),
+    ('PR', 'Processando'),
+    ('RB', 'Reembolsado'),
+    ('RS', 'Reuso'),
+    ('RP', 'Reprocessar'),
+    ('RT', 'Retirada'),
+    ('VS', 'Verificar SIM'),
 ]
 CONDITION = [
     ('novo-sim', 'Novo SIM'),
@@ -39,6 +42,7 @@ class Orders(models.Model):
     order_id = models.IntegerField()
     item_id = models.CharField(max_length=15)
     client = models.CharField(max_length=70)
+    email = models.CharField(max_length=70, null=True, blank=True)
     product = models.CharField(max_length=50, choices=PRODUCT)
     data_day = models.CharField(max_length=15, choices=DATA)
     qty = models.IntegerField()
@@ -48,10 +52,11 @@ class Orders(models.Model):
     countries = models.BooleanField(default=False)
     cell_mod = models.CharField(max_length=35)
     ord_chip_nun = models.CharField(max_length=25, null=True, blank=True, default='-')
-    shipping = models.CharField(max_length=35)
+    shipping = models.CharField(max_length=40)
     order_date = models.DateTimeField()
     activation_date = models.DateField()
     order_status = models.CharField(max_length=20, choices=ORDER_STATUS, default='PR')
+    type_sim = models.CharField(max_length=4, null=True, blank=True, default='sim')
     id_sim = models.ForeignKey(Sims, on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
     condition = models.CharField(max_length=15, choices=CONDITION, default='novo-sim') 
     notes = models.IntegerField(null=True, blank=True, default=0)

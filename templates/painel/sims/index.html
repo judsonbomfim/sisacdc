@@ -3,92 +3,93 @@
 {% load date_day %}
 {% block title_page %}<i class="bi bi-sim"></i> SIMs{% endblock %}
 {% block content %}
+
+<div class="row">
+    <div class="col-md-6 col-xl-4 mb-4">
+        <div class="card shadow border-start-info py-2">
+            <div class="card-body">
+                <div class="row align-items-center no-gutters">
+                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
+                    <div class="col me-2">
+                        <div class="text-info fw-bold text-xs mb-1">
+                            <h6 class="text-primary fw-bold m-0">Estoque T-mobile</h6>
+                        </div>
+                        <div class="row g-0 align-items-center">
+                            <div class="col-auto col-xxl-3">
+                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
+                            </div>
+                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_tm }}</span></div>
+                            <div class="col-auto col-xxl-3">
+                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
+                            </div>
+                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tm }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4 mb-4">
+        <div class="card shadow border-start-info py-2">
+            <div class="card-body">
+                <div class="row align-items-center no-gutters">
+                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
+                    <div class="col me-2">
+                        <div class="text-info fw-bold text-xs mb-1">
+                            <h6 class="text-success fw-bold m-0">Estoque China Mobile</h6>
+                        </div>
+                        <div class="row g-0 align-items-center">
+                            <div class="col-auto col-xxl-3">
+                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
+                            </div>
+                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_cm }}</span></div>
+                            <div class="col-auto col-xxl-3">
+                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
+                            </div>
+                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_cm }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-4 mb-4">
+        <div class="card shadow border-start-info py-2">
+            <div class="card-body">
+                <div class="row align-items-center no-gutters">
+                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
+                    <div class="col me-2">
+                        <div class="text-info fw-bold text-xs mb-1">
+                            <h6 class="text-info fw-bold m-0">Estoque Telcom</h6>
+                        </div>
+                        <div class="row g-0 align-items-center">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-auto col-xxl-3">
+                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
+                                </div>
+                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_tc }}</span></div>
+                                <div class="col-auto col-xxl-3">
+                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
+                                </div>
+                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tc }}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card shadow">
     <div class="card-header py-3">
         <p class="text-secondary m-0 fw-bold">Estoque SIMS</p>
     </div>
-    <div class="row">
-        <div class="col-md-6 col-xl-4 mb-4">
-            <div class="card shadow border-start-info py-2">
-                <div class="card-body">
-                    <div class="row align-items-center no-gutters">
-                        <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
-                        <div class="col me-2">
-                            <div class="text-info fw-bold text-xs mb-1">
-                                <h6 class="text-primary fw-bold m-0">Estoque T-mobile</h6>
-                            </div>
-                            <div class="row g-0 align-items-center">
-                                <div class="col-auto col-xxl-3">
-                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
-                                </div>
-                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_tm }}</span></div>
-                                <div class="col-auto col-xxl-3">
-                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
-                                </div>
-                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tm }}</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-4 mb-4">
-            <div class="card shadow border-start-info py-2">
-                <div class="card-body">
-                    <div class="row align-items-center no-gutters">
-                        <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
-                        <div class="col me-2">
-                            <div class="text-info fw-bold text-xs mb-1">
-                                <h6 class="text-success fw-bold m-0">Estoque China Mobile</h6>
-                            </div>
-                            <div class="row g-0 align-items-center">
-                                <div class="col-auto col-xxl-3">
-                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
-                                </div>
-                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_cm }}</span></div>
-                                <div class="col-auto col-xxl-3">
-                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
-                                </div>
-                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_cm }}</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-4 mb-4">
-            <div class="card shadow border-start-info py-2">
-                <div class="card-body">
-                    <div class="row align-items-center no-gutters">
-                        <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
-                        <div class="col me-2">
-                            <div class="text-info fw-bold text-xs mb-1">
-                                <h6 class="text-info fw-bold m-0">Estoque Telcom</h6>
-                            </div>
-                            <div class="row g-0 align-items-center">
-                                <div class="row g-0 align-items-center">
-                                    <div class="col-auto col-xxl-3">
-                                        <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
-                                    </div>
-                                    <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_tc }}</span></div>
-                                    <div class="col-auto col-xxl-3">
-                                        <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
-                                    </div>
-                                    <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tc }}</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="card-body">
         <div class="row">
-            <div class="col-md-6 text-nowrap">
+            <div class="col-md-6 text-nowrap">                
             </div>
             <div class="col-md-6">
-                <div id="dataTable_filter" class="text-md-end dataTables_filter"><label class="form-label"><input class="form-control form-control-sm" type="search" aria-controls="dataTable" placeholder="Search" /></label></div>
             </div>
         </div>
         <div id="dataTable" class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
@@ -109,7 +110,7 @@
                     <tr>
                         <td>{{ sim.id }}</td>
                         <td>{{ sim.sim }}</td>
-                        <td><a href="">{{ sim.link }}</a></td>
+                        <td><a href="https://{{ sim.link }}">{{ sim.sim }}</a></td>
                         <td>{{ sim.type_sim }}</td>
                         <td>{{ sim.get_operator_display }}</td>
                         <td>{{ sim.get_sim_status_display }}</td>
@@ -118,6 +119,25 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <nav aria-label="navigation">
+                <ul class="pagination">
+                    {% if sims.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ sims.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                  <li class="page-item"><a class="page-link" href="">{{ sims.number }} de {{ sims.paginator.num_pages }}</a></li>
+                    {% if sims.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ sims.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        </a>
+                      </li>
+                    {% endif %}
+                </ul>
+              </nav>
         </div>
     </div>
 </div>

@@ -1,17 +1,23 @@
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from apps.sims.models import Sims
+from apps.orders.models import Orders
 
 def sims_list(request):
-    sims = Sims.objects.all()
+    sims_p = Sims.objects.all()
+    paginator = Paginator(sims_p, 50)
+    page = request.GET.get('page')
+    sims = paginator.get_page(page)
+    
     # Verificar estoque de operadoras
-    sim_tm = sims.filter(sim_status='DS',operator='TM', type_sim='sim').count()
-    esim_tm = sims.filter(sim_status='DS',operator='TM', type_sim='esim').count()
-    sim_cm = sims.filter(sim_status='DS',operator='CM', type_sim='sim').count()
-    esim_cm = sims.filter(sim_status='DS',operator='CM', type_sim='esim').count()
-    sim_tc = sims.filter(sim_status='DS',operator='TC', type_sim='sim').count()
-    esim_tc = sims.filter(sim_status='DS',operator='TC', type_sim='esim').count()
+    sim_tm = sims_p.filter(sim_status='DS',operator='TM', type_sim='sim').count()
+    esim_tm = sims_p.filter(sim_status='DS',operator='TM', type_sim='esim').count()
+    sim_cm = sims_p.filter(sim_status='DS',operator='CM', type_sim='sim').count()
+    esim_cm = sims_p.filter(sim_status='DS',operator='CM', type_sim='esim').count()
+    sim_tc = sims_p.filter(sim_status='DS',operator='TC', type_sim='sim').count()
+    esim_tc = sims_p.filter(sim_status='DS',operator='TC', type_sim='esim').count()
     
     context= {
         'sims': sims,
@@ -60,7 +66,6 @@ def sims_add_sim(request):
                         return render(request, 'painel/sims/add-sim.html')
                                
                 # Save SIMs
-                print(linha_h)
                 add_sim = Sims(
                     sim = linha,
                     type_sim = type_sim,
@@ -91,20 +96,87 @@ def sims_add_esim(request):
                            
         try:
             for sim_img in esims:
+                sim_i = sim_img.name.split('.')
+                # Save image
+                fs = FileSystemStorage()
+                file = fs.save(sim_img.name, sim_img)
+                fileurl = fs.url(file)
                 # Save SIMs
                 add_sim = Sims(
-                    sim = sim_img.name[0:-5],
-                    link = sim_img.name,
+                    sim = sim_i[0],
+                    link = fileurl,
                     type_sim = type_sim,
                     operator = operator
                 )
                 add_sim.save()
-                # Save image
-                fs = FileSystemStorage()
-                fs.save(sim_img.name, sim_img)
+
 
             messages.success(request,'Lista gravada com sucesso')
             return render(request, 'painel/sims/add-esim.html')
         except:
             messages.error(request,'Houve um erro ao gravar os eSIMs')
             return render(request, 'painel/sims/add-esim.html')
+
+def sims_ord(request):
+    if request.method == "GET":
+        return render(request, 'painel/sims/sim-order.html')
+    
+    if request.method == 'POST':
+        orders = Orders.objects.filter(order_status='AS')
+        
+        global n_item_total
+        n_item_total = 0
+        global msg_ord
+        msg_info = []
+        global msg_error
+        msg_error = []
+        
+        for ord in orders:
+            
+            id_id_i = ord.id
+            order_id_i = ord.order_id
+            product_i = ord.product
+            countries_i = ord.countries
+            type_sim_i = ord.type_sim
+            
+            # Escolher operadora
+            if product_i == 'chip-internacional-europa' and countries_i == False:
+                operator_i = 'TC'
+            elif product_i == 'chip-internacional-eua':
+                operator_i = 'TM'
+            else: operator_i = 'CM'
+            
+            # First SIM
+            sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
+            if sim_ds:
+                pass
+            else:                
+                msg_error.append(f'Não há estoque de {operator_i} - {type_sim_i} no sistema')
+                continue
+            
+            # update order
+            # Save SIMs           
+            order_put = Orders.objects.get(pk=id_id_i)
+            order_put.order_status = 'AA'
+            order_put.id_sim_id = sim_ds.id
+            order_put.save()
+                
+            # update sim
+            sim_put = Sims.objects.get(pk=sim_ds.id)
+            sim_put.sim_status = 'AT'
+            sim_put.save()
+            
+            # mensagem
+            msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
+            
+            n_item_total += 1 
+    if n_item_total == 0:
+        messages.info(request,'Não há pedido(s) para atualizar!')
+    else:
+        for msg_e in msg_error:
+            messages.error(request,msg_e)
+        for msg_o in msg_info:
+            messages.info(request,msg_o)
+        messages.success(request,'Todos os pedido(s) atualizados com sucesso')   
+        
+    return render(request, 'painel/sims/sim-order.html')

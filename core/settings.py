@@ -125,36 +125,57 @@ USE_TZ = True
 
 # Moving static assets to DigitalOcean Spaces as per:
 # https://www.digitalocean.com/community/tutorials/how-to-set-up-object-storage-with-django
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+
+# AWS COnfigurações
 AWS_ACCESS_KEY_ID = str(os.getenv('AWS_ACCESS_KEY_ID'))
 AWS_SECRET_ACCESS_KEY = str(os.getenv('AWS_SECRET_ACCESS_KEY'))
 AWS_STORAGE_BUCKET_NAME = str(os.getenv('AWS_STORAGE_BUCKET_NAME'))
-AWS_S3_ENDPOINT_URL = 'https://nyc3.digitaloceanspaces.com'
-AWS_S3_CUSTOM_DOMAIN = 'sisacdc-teste.nyc3.cdn.digitaloceanspaces.com'
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.sa-east-1.amazonaws.com'
+AWS_DEFAULT_ACL = 'public-read'
 AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
+    'CacheControl': 'max-age=86400'
 }
 AWS_LOCATION = 'static'
-AWS_LOCATION_M = 'media'
-AWS_DEFAULT_ACL = 'public-read'
+AWS_QUERYSTRING_AUTH = False
+AWS_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+}
+AWS_DEFAULT_REGION = 'sa-east-1'
 
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.1/howto/static-files/
+
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static')
 ]
-
-STATIC_URL = '{}/{}/'.format(AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-
-MEDIA_URL = '{}/{}/'.format(AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION_M)
+# Media
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+
+
+# STORAGES = {
+#     'default': {
+#         'BACKEND": "storages.backends.s3boto3.S3Boto3Storage',
+#     },
+#     'staticfiles': {
+#         'BACKEND": "storages.backends.s3boto3.S3StaticStorage',
+#     }
+# }
+
 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MESSAGE_TAGS = {
     constants.DEBUG: 'primary',

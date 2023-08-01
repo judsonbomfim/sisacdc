@@ -38,26 +38,20 @@
                 <label class="btn btn-outline-primary" for="operator2">China Mobile</label>
                 
                 <input type="radio" class="btn-check" name="operator" id="operator3" value="TC"required {% if order.id_sim.operator == 'TC' %}checked{% endif %}>
-                <label class="btn btn-outline-primary" for="operator3">Telcom</label>
-
-                <span class="input-group-text ms-3" id="sim"><i class="bi bi-sim"></i></span>
-                <input type="text" class="form-control" name="sim" placeholder="(e)SIM" aria-label="(e)SIM" value="{{ order.id_sim.sim }}">
-                
-                <input class="form-check-input ms-3" type="radio" name="confirm" id="confirm1" checked>
-                <label class="form-check-label ms-3" for="confirm1">
-                  Não alterar
-                </label>
-
-                <input class="form-check-input ms-3" type="radio" name="confirm" id="confirm2">
-                <label class="form-check-label ms-3" for="confirm2">
-                  Alterar automaticamente
-                </label>
-
-                <input class="form-check-input ms-3" type="radio" name="confirm" id="confirm3">
-                <label class="form-check-label ms-3" for="confirm3">
-                  Inserir manualmente
-                </label>
+                <label class="btn btn-outline-primary" for="operator3">Telcom</label>                
             </div>
+            <br>
+            <label class="form-label">(e)SIM</label>
+            <br>
+            <div class="input-group flex-nowrap">
+                <span class="input-group-text" id="sim"><i class="bi bi-sim"></i></span>
+                <input type="text" class="form-control" name="sim" placeholder="(e)SIM" aria-label="(e)SIM" value="{{ order.id_sim.sim }}" disabled>
+                <span class="input-group-text ms-3" id="order_date">Novo SIM</span>
+                <input type="date" class="form-control" placeholder="{{ order.order_date|date:'d/m/Y' }}" aria-label="{{ order.order_date|date:'d/m/Y' }}" value="{{ order.order_date|date:'d/m/Y' }}">
+                <div id="textSim" class="form-text ms-3">Só preencha o campo ao lado se for alterar a data do pedido.</div>
+            </div>
+            <br>
+            <label class="form-label">Data de ativação</label>
             <br>
             <div class="input-group flex-nowrap">
                 <span class="input-group-text" id="order_date"><i class="bi bi-calendar3"></i></span>
@@ -65,7 +59,6 @@
                 <span class="input-group-text ms-3" id="order_date">Nova data</span>
                 <input type="date" class="form-control" placeholder="{{ order.order_date|date:'d/m/Y' }}" aria-label="{{ order.order_date|date:'d/m/Y' }}" value="{{ order.order_date|date:'d/m/Y' }}">
                 <div id="textSim" class="form-text ms-3">Só preencha o campo ao lado se for alterar a data do pedido.</div>
-                <br>
             </div>
             <br>
             <div class="form-group">

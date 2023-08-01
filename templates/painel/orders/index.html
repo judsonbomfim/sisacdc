@@ -12,7 +12,6 @@
             <div class="col-md-6 text-nowrap">
             </div>
             <div class="col-md-6">
-                <div id="dataTable_filter" class="text-md-end dataTables_filter"><label class="form-label"><input class="form-control form-control-sm" type="search" aria-controls="dataTable" placeholder="Search" /></label></div>
             </div>
         </div>
         <div id="dataTable" class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
@@ -43,7 +42,7 @@
                         <td>{{ order.client }}</td>
                         <td>{{ order.id_sim.operator }}</td>
                         <td>{{ order.id_sim }}</td>
-                        <td>{% if order.id_sim.type_sim == 'sim' %}SIM{% else %}eSIM{% endif %}</td></td>
+                        <td>{% if order.id_sim.type_sim == 'sim' %}SIM{% elif order.id_sim.type_sim == 'esim' %}eSIM{% endif %}</td>
                         <td>{{ order.get_product_display }} {{ order.get_data_day_display }}</td>
                         <td>{% if order.countries == 0 %}-{% else %}Sim{% endif %}</td>
                         <td>{% if order.calls == 0 %}-{% else %}Sim{% endif %}</td>
@@ -58,13 +57,34 @@
                         </td>
                         <td>{{ order.get_order_status_display }}</td>
                         <td>
-                            <a href="{% url 'ord_edit' order.id %}"><i class="bi-pencil-square me-2 text-info"></i></a>
+                            <a href="{% url 'ord_edit' order.id %}">
+                                <i class="bi-pencil-square me-2 text-info"></i>
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        <nav aria-label="navigation">
+            <ul class="pagination">
+                {% if orders.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+              <li class="page-item"><a class="page-link" href="">{{ orders.number }} de {{ orders.paginator.num_pages }}</a></li>
+                {% if orders.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                {% endif %}
+            </ul>
+          </nav>
     </div>
 </div>
 {% endblock %}

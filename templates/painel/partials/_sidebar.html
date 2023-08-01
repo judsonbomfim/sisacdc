@@ -1,3 +1,4 @@
+{% load static %}
 {% url 'orders_list' as orders_list %}
 {% url 'ord_update' as ord_update %}
 {% url 'sims_index' as sims_index %}
@@ -6,9 +7,11 @@
         
         <nav class="navbar navbar-dark align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0" style="background: linear-gradient(#18425e, #12364e 150px);">
             <div class="container-fluid d-flex flex-column p-0">
-                <a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#">
+                <a class="navbar-brand d-flex justify-content-center align-items-center m-0" href="#">
                     <div class="sidebar-brand-icon rotate-n-15"><i class="icon ion-ios-gear-outline"></i></div>
-                    <div class="sidebar-brand-text mx-3"><span class="fs-4">PAINEL</span></div>
+                    <div class="mx-3">
+                        <img src="{% static 'painel/theme/img/logo-painel.png' %}" style="width: 180px"></a>
+                    </div>
                 </a>
                 <hr class="sidebar-divider my-0">
                 <ul class="navbar-nav text-light" id="accordionSidebar">
@@ -34,6 +37,7 @@
                             <a class="dropdown-item link-light {% if request.path == sims_index %}active{% endif %}" href="{% url 'sims_index' %}"><i class="bi bi-sim"></i> Estoque</a>
                             <a class="dropdown-item link-light {% if request.path == sims_add_sim %}active{% endif %}" href="{% url 'sims_add_sim' %}"><i class="bi bi-sim"></i> Adicionar SIMs</a>
                             <a class="dropdown-item link-light {% if request.path == sims_add_esim %}active{% endif %}" href="{% url 'sims_add_esim' %}"><i class="bi bi-sim"></i> Adicionar eSIMs</a>
+                            <a class="dropdown-item link-light {% if request.path == sims_ord %}active{% endif %}" href="{% url 'sims_ord' %}"><i class="bi bi-sim"></i> Add a Pedidos</a>
                         </div>
                     </li>
                 </ul>

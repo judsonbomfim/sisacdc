@@ -1,6 +1,8 @@
+import datetime
+import os
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-import os
+from django.core.paginator import Paginator
 from django.contrib import messages
 from woocommerce import API
 from django.utils.text import slugify
@@ -34,11 +36,16 @@ def dateF(d):
     dataForm = f'{ano}-{mes}-{dia}'
     return dataForm
 
+
 # Order list
 def orders_list(request):
     if request.method == 'GET':
-        orders = Orders.objects.all().order_by('id')
+        orders_p = Orders.objects.all().order_by('id')
         sims = Sims.objects.all()
+        
+        paginator = Paginator(orders_p, 5)
+        page = request.GET.get('page')
+        orders = paginator.get_page(page)
     
         context = {
             'orders': orders,
@@ -50,6 +57,7 @@ def orders_list(request):
 def store_order_det(request,id):
     apiStore = conectApiStore()
     ord = apiStore.get(f'orders/{id}').json()
+    
     context = {
         'ord': ord,
     }
@@ -66,8 +74,10 @@ def ord_update(request):
         
         global n_item_total
         n_item_total = 0
-        global msg_sim
-        msg_sim = []
+        global msg_info
+        msg_info = []
+        global msg_error
+        msg_error = []
         
         # Definir números de páginas
         per_page = 100
@@ -99,7 +109,12 @@ def ord_update(request):
                         order_id_i = order['id']
                         item_id_i = f'{order_id_i}-{n_item}'
                         client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
-                        product_i = slugify(item['name'])
+                        email_i = order['billing']['email']
+                        if "Global" in item['name']:
+                            product_i = 'chip-internacional-global'
+                        else:
+                            product_i = slugify(item['name'])
+                        
                         qty_i = 1
                         if order['coupon_lines']:
                             coupon_i = order['coupon_lines'][0]['code']
@@ -124,18 +139,29 @@ def ord_update(request):
                             if i['key'] == 'Número de pedido ou do chip': ord_chip_nun_i = i['value']
                         shipping_i = order['shipping_lines'][0]['method_title']
                         order_date_i = dateHour(order['date_created'])
-                        # Definir status do pedido
-                        if 'retirada' in shipping_i or 'motoboy' in shipping_i or condition_i == 'reuso-sim':
-                            order_status_i = 'VS'
-                        else:
-                            order_status_i = 'PR'
                         # notes_i = 0
+                        
+                        # Definir status do pedido
+                        # 'RT', 'Retirada'
+                        # 'MB', 'Motoboy'
+                        # 'RS', 'Reuso'
+                        # 'AS', 'Atribuir SIM'
+                        if 'RETIRADA' in shipping_i:
+                            shipping_i = 'Retirada SP'
+                            order_status_i = 'RT'
+                        elif 'Motoboy' in shipping_i:
+                            order_status_i = 'MB'
+                        elif condition_i == 'reuso-sim':
+                            order_status_i = 'RS'
+                        else:
+                            order_status_i = 'AS'                    
                         
                         # Definir variáveis para salvar no banco de dados                            
                         order_add = Orders(                    
                             order_id = order_id_i,
                             item_id = item_id_i,
                             client = client_i,
+                            email = email_i,
                             product = product_i,
                             data_day = data_day_i,
                             qty = qty_i,
@@ -150,61 +176,37 @@ def ord_update(request):
                             order_date = order_date_i,
                             activation_date = activation_date_i,
                             order_status = order_status_i,
+                            type_sim = type_sim_i,
                             # notes = notes_i
                         )
                         
                         # Salvar itens no banco de dados
                         register = order_add.save()
-                        register
+                        try:
+                            register
+                        except:
+                            msg_error.append(f'Pedido {order_id_i} atualizados com sucesso')                            
                         
-                        # Alterar status do pedido para 'completed'
-                        data = {
-                            'status': 'completed'
+                        # Alterar status
+                        # Status sis : Status Loja
+                        status_def_sis = {
+                            'RT': 'retirada',
+                            'MB': 'motoboy',
+                            'RS': 'reuso',
+                            'AS': 'agd-envio',
                         }
-                        apiStore.put(f'orders/{order_id_i}', data).json()
+                        status_ped = {
+                            'status': status_def_sis[order_status_i]
+                        }                      
+                        apiStore.put(f'orders/{order_id_i}', status_ped).json()    
                         
                         # Definir variáveis
                         q_i += 1 
                         n_item += 1
-                        n_item_total += 1                        
-
-                        # Add SIMs
-                        if product_i == 'chip-internacional-europa' and countries_i == False:
-                            operator_i = 'TC'
-                        elif product_i == 'chip-internacional-eua':
-                            operator_i = 'TM'
-                        else: operator_i = 'CM'
+                        n_item_total += 1
                         
-                        # First SIM
-                        register_id = order_add.id
-                        sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
-                        if sim_ds:
-                            pass
-                        else:
-                            # Status Atribuir SIM
-                            order_status_i = 'AS'
-                            
-                            msg_sim.append(f'Não há estoque de {operator_i} - {type_sim_i} no sistema')
-                            continue
+                        msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
                         
-                        # Verificar Status SIM 
-                        # 'VS', 'Verificar SIM'
-                        # 'AS', 'Atribuir SIM'
-                        # 'RT', 'Retirada'
-                        # 'MB', 'Motoboy'
-                        status_ver = ['VS','AS','RT','MB']
-                        if order_status_i in status_ver:
-                            continue
-                        
-                        # update order
-                        order_put = Orders.objects.get(pk=register_id)
-                        order_put.id_sim_id = sim_ds.id
-                        order_put.save()
-                         
-                        # update sim
-                        sim_put = Sims.objects.get(pk=sim_ds.id)
-                        sim_put.sim_status = 'AT'
-                        sim_put.save()
             n_page += 1
             
                             
@@ -212,11 +214,12 @@ def ord_update(request):
     if n_item_total == 0:
         messages.info(request,'Não há pedido(s) para atualizar!')
     else:
-        for msg in msg_sim:
-            messages.error(request,msg)
-        messages.success(request,'Pedido(s) atualizados com sucesso')        
+        for msg_e in msg_error:
+            messages.error(request,msg_e)
+        for msg_o in msg_info:
+            messages.info(request,msg_o)
+        messages.success(request,'Todos os pedido(s) atualizados com sucesso')
     return render(request, 'painel/orders/update.html')
-
 
 def ord_edit(request,id):
     order = Orders.objects.get(pk=id)
@@ -224,3 +227,12 @@ def ord_edit(request,id):
         'order': order
     }
     return render(request, 'painel/orders/edit.html', context)
+
+# # def vendasSem(request):
+# apiStore = conectApiStore()
+# dateNow = datetime.datetime.now()  
+
+# dateSem = datetime.datetime.now() - datetime.timedelta(days=7)
+# print(dateSem)
+# print(dateNow)
+# vendasDaSemana = apiStore.get('reports/sales', params={'date_min': dateSem, 'date_max': dateNow})
