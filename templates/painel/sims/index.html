@@ -110,7 +110,7 @@
                     <tr>
                         <td>{{ sim.id }}</td>
                         <td>{{ sim.sim }}</td>
-                        <td><a href="{{ sim.link }}" tar>{{ sim.sim }}</a></td>
+                        <td>{% if sim.type_sim == 'esim' %}<a href="{{ sim.link }}" target="_blank">{{ sim.sim }}{% else %}-{% endif %}</a></td>
                         <td>{{ sim.type_sim }}</td>
                         <td>{{ sim.get_operator_display }}</td>
                         <td>{{ sim.get_sim_status_display }}</td>

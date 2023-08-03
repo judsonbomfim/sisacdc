@@ -1,6 +1,9 @@
 {% extends 'painel/shared/base.html' %}
 {% load static %}
 {% load date_day %}
+{% block js_custom %}
+    {% include 'painel/partials/_messages_script.html' %}
+{% endblock %}
 {% block title_page %}<i class="bi bi-shop"></i> Pedidos{% endblock %}
 {% block content %}
 <div class="card shadow">
@@ -41,7 +44,7 @@
                         <td>{{ order.item_id }}</td>
                         <td>{{ order.client }}</td>
                         <td>{{ order.id_sim.operator }}</td>
-                        <td>{{ order.id_sim }}</td>
+                        <td>{{ order.id_sim }}{% if order.id_sim.type_sim == 'esim' %} <a href="{{ order.id_sim.link }}" target="_blank"><i class="bi bi-box-arrow-in-up-right"></i></a>{% endif %}</td>
                         <td>{% if order.id_sim.type_sim == 'sim' %}SIM{% elif order.id_sim.type_sim == 'esim' %}eSIM{% endif %}</td>
                         <td>{{ order.get_product_display }} {{ order.get_data_day_display }}</td>
                         <td>{% if order.countries == 0 %}-{% else %}Sim{% endif %}</td>

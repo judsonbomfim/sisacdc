@@ -43,7 +43,7 @@ def orders_list(request):
         orders_p = Orders.objects.all().order_by('id')
         sims = Sims.objects.all()
         
-        paginator = Paginator(orders_p, 5)
+        paginator = Paginator(orders_p, 50)
         page = request.GET.get('page')
         orders = paginator.get_page(page)
     

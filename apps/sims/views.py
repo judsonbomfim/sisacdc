@@ -46,7 +46,7 @@ def sims_add_sim(request):
         
         # Validations
         if ext != 'csv':
-            messages.error(request,'O arquivo não é um CSV')
+            messages.error(request,'O arquivo está incorreto. Verifique por favor!')
             return render(request, 'painel/sims/add-sim.html')     
         if type_sim == '' or operator == '' or sim == '':
             messages.error(request,'Preencha todos os campos')
