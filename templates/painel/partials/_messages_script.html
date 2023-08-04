@@ -1,4 +1,5 @@
-{% comment %} <script>
-    const alertList = document.querySelectorAll('.alert')
-    const alerts = [...alertList].map(element => new bootstrap.Alert(element))
-</script> {% endcomment %}
+<script>
+    const toastContant = document.querySelector('.toast');
+    const toast = new bootstrap.Toast(toastContant);
+    toast.show();
+</script>
