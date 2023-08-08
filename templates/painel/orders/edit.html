@@ -71,6 +71,13 @@
                 <div id="textSim" class="form-text ms-3">Só preencha o campo ao lado se for alterar a IMEI/EID do pedido.</div>
             </div>
             <br>
+            <label class="form-label">Rastreio</label>
+            <br>
+            <div class="input-group flex-nowrap col-md-3">
+                <span class="input-group-text" id="tracking"><i class="bi bi-truck"></i></span>
+                <input type="text" class="form-control" name="tracking" placeholder="Rastreio" value="{% if order.tracking %}{{ order.tracking }}{% endif %}">
+            </div>
+            <br>
             <div class="form-group">
                 <button type="submit" class="btn btn-primary mb-3">Editar Pedido</button>
             </div>

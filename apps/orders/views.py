@@ -40,6 +40,7 @@ def dateF(d):
 # Order list
 def orders_list(request):
     if request.method == 'GET':
+        orders_l = Orders.objects.all().order_by('id')
         orders_p = Orders.objects.all().order_by('id')
         sims = Sims.objects.all()
         ord_status = Orders.order_status.field.choices
@@ -48,7 +49,7 @@ def orders_list(request):
         orders = paginator.get_page(page)
     
         context = {
-            'orders_p': orders_p,
+            'orders_l': orders_l,
             'orders': orders,
             'sims': sims,
             'ord_status': ord_status,
@@ -255,6 +256,7 @@ def ord_edit(request,id):
         activation_date = request.POST.get('activation_date')
         cell_imei = request.POST.get('cell_imei')
         cell_eid = request.POST.get('cell_eid')
+        tracking = request.POST.get('tracking')
         
         if order.id_sim_id != None and (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim): 
             if sim == '':
@@ -295,16 +297,13 @@ def ord_edit(request,id):
             
         # Update Order
         if activation_date == '':
-            activation_date = order.activation_date
-        if cell_imei == '':
-            cell_imei = order.cell_imei
-        if cell_eid == '':
-            cell_eid = order.cell_eid            
+            activation_date = order.activation_date        
         
         order_put = Orders.objects.get(pk=id)
         order_put.activation_date = activation_date
         order_put.cell_imei = cell_imei
         order_put.cell_eid = cell_eid
+        order_put.tracking = tracking
         order_put.save()
     
         for msg_e in msg_error:
@@ -314,6 +313,7 @@ def ord_edit(request,id):
         messages.success(request,f'Pedido {order.order_id} atualizado com sucesso!')
         return redirect('orders_list')
 
+# Orders Actions
 def ord_actions(request, filter='all'):
     if request.method == 'POST':
         if 'up_status' in request.POST:
@@ -349,6 +349,7 @@ def ord_actions(request, filter='all'):
             return redirect('orders_list')
         
         if 'up_filter' in request.POST:
+            orders_l = Orders.objects.all().order_by('id').filter()
             if request.POST['ord_staus_f'] == 'todos':
                 orders_p = Orders.objects.all().order_by('id').filter()
             else:   
@@ -360,7 +361,7 @@ def ord_actions(request, filter='all'):
             orders = paginator.get_page(page)
         
             context = {
-                'orders_p': orders_p,
+                'orders_l': orders_l,
                 'orders': orders,
                 'sims': sims,
                 'ord_status': ord_status,

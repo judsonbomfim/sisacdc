@@ -29,11 +29,11 @@
         <p class="text-secondary m-0 fw-bold">Lista de pedidos</p>
     </div>
     <div class="card-body">
-        <div class="col-md-12 pb-2">
+        {% comment %} <div class="col-md-12 pb-2">
             {% for ord_s in ord_status %}
-            <button type="button" class="btn btn-light" name="{{ord_s.0}}">{{ord_s.1}} ({% with list=orders_p status=ord_s.0 %}{% status_filter list status %}{% endwith %})</button>
+            <button type="button" class="btn btn-light" name="{{ord_s.0}}">{{ord_s.1}} ({% with list=orders_l status=ord_s.0 %}{% status_filter list status %}{% endwith %})</button>
             {% endfor %}
-        </div>
+        </div> {% endcomment %}
         {% include 'painel/partials/_messages.html' %}
         <form class="row g-3" action="{% url 'ord_actions' %}" method="POST">
             {% csrf_token %}
@@ -52,7 +52,7 @@
                 <select class="form-select form-select-sm" aria-label="Small select example" name="ord_staus_f">
                     <option value="todos" selected>Filtrar todos</option>
                     {% for ord_s in ord_status %}
-                    <option value="{{ord_s.0}}">{{ord_s.1}} ({% with list=orders_p status=ord_s.0 %}{% status_filter list status %}{% endwith %})</option>
+                    <option value="{{ord_s.0}}">{{ord_s.1}} ({% with list=orders_l status=ord_s.0 %}{% status_filter list status %}{% endwith %})</option>
                     {% endfor %}
                 </select>
             </div>
