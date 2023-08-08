@@ -1,93 +1,205 @@
 {% extends 'painel/shared/base.html' %}
 {% load static %}
 {% load date_day %}
-{% block js_custom %}
-    {% include 'painel/partials/_messages_script.html' %}
-{% endblock %}
+{% load status_count %}
 {% block title_page %}<i class="bi bi-shop"></i> Pedidos{% endblock %}
+
+{% block css_custom %}
+<style>
+    .custom-tooltip {
+        --bs-tooltip-bg: var(--bs-secondary);
+        --bs-popover-body-padding-x: 0.1rem;
+        --bs-popover-body-padding-y: 0.1rem;
+        }
+        .custom-popover {
+        --bs-popover-border-color: var(--bs-secondary);
+        --bs-popover-body-padding-x: 1rem;
+        --bs-popover-body-padding-y: .5rem;
+        }
+</style>
+{% endblock %}
+
+{%block js_custom %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="card shadow">
     <div class="card-header py-3">
         <p class="text-secondary m-0 fw-bold">Lista de pedidos</p>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-6 text-nowrap">
-            </div>
-            <div class="col-md-6">
-            </div>
+        <div class="col-md-12 pb-2">
+            {% for ord_s in ord_status %}
+            <button type="button" class="btn btn-light" name="{{ord_s.0}}">{{ord_s.1}} ({% with list=orders_p status=ord_s.0 %}{% status_filter list status %}{% endwith %})</button>
+            {% endfor %}
         </div>
-        <div id="dataTable" class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
-            <table id="dataTable" class="table table-bordered table-striped table-hover my-0">
-                <thead>
-                    <tr>
-                        <th>Pedido</th>
-                        <th>Cliente</th>
-                        <th>Oper.</th>
-                        <th>Tipo</th>
-                        <th>(e)SIM</th>
-                        <th>Produto</th>
-                        <th>Países</th>
-                        <th>Voz</th>
-                        <th>Dias</th>
-                        <th>Mod. Celular</th>
-                        <th>Ped./Chip</th>
-                        <th>Ativação</th>
-                        <th>Término</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in orders %}
-                    <tr>
-                        <td>{{ order.item_id }}</td>
-                        <td>{{ order.client }}</td>
-                        <td>{{ order.id_sim.operator }}</td>
-                        <td>{{ order.id_sim }}{% if order.id_sim.type_sim == 'esim' %} <a href="{{ order.id_sim.link }}" target="_blank"><i class="bi bi-box-arrow-in-up-right"></i></a>{% endif %}</td>
-                        <td>{% if order.id_sim.type_sim == 'sim' %}SIM{% elif order.id_sim.type_sim == 'esim' %}eSIM{% endif %}</td>
-                        <td>{{ order.get_product_display }} {{ order.get_data_day_display }}</td>
-                        <td>{% if order.countries == 0 %}-{% else %}Sim{% endif %}</td>
-                        <td>{% if order.calls == 0 %}-{% else %}Sim{% endif %}</td>
-                        <td>{{ order.days }}</td>
-                        <td>{{ order.cell_mod }}</td>
-                        <td>{{ order.ord_chip_nun }}</td>
-                        <td>{{ order.activation_date|date:"d/m/Y" }}</td>
-                        <td>
-                            {% with a=order.activation_date b=order.days %}
-                                {% dateaddday a b %}
-                            {% endwith %}
-                        </td>
-                        <td>{{ order.get_order_status_display }}</td>
-                        <td>
-                            <a href="{% url 'ord_edit' order.id %}">
-                                <i class="bi-pencil-square me-2 text-info"></i>
-                            </a>
-                        </td>
-                    </tr>
+        {% include 'painel/partials/_messages.html' %}
+        <form class="row g-3" action="{% url 'ord_actions' %}" method="POST">
+            {% csrf_token %}
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" aria-label="Small select example" name="ord_staus">
+                    <option selected>Alterar Status</option>
+                    {% for ord_s in ord_status %}
+                    <option value="{{ord_s.0}}">{{ord_s.1}}</option>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <nav aria-label="navigation">
-            <ul class="pagination">
-                {% if orders.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                    </a>
-                </li>
-                {% endif %}
-              <li class="page-item"><a class="page-link" href="">{{ orders.number }} de {{ orders.paginator.num_pages }}</a></li>
-                {% if orders.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                    </a>
-                  </li>
-                {% endif %}
-            </ul>
-          </nav>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary" name="up_status">Alterar</button>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" aria-label="Small select example" name="ord_staus_f">
+                    <option value="todos" selected>Filtrar todos</option>
+                    {% for ord_s in ord_status %}
+                    <option value="{{ord_s.0}}">{{ord_s.1}} ({% with list=orders_p status=ord_s.0 %}{% status_filter list status %}{% endwith %})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary" name="up_filter">Filtrar</button>
+            </div>
+            <div id="dataTable" class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
+                <table id="dataTable" class="table table-bordered table-striped table-hover my-0">
+                    <thead>
+                        <tr>
+                            <th><input class="form-check-input" type="checkbox" id="checkAll"></th>
+                            <th>Pedido</th>
+                            <th>Cliente</th>
+                            <th>Tipo</th>
+                            <th>Produto</th>
+                            <th>Países</th>
+                            <th>Voz</th>
+                            <th>Dias</th>
+                            <th>Celular</th>
+                            <th>Ped./Chip</th>
+                            <th>Ativação</th>
+                            <th>Término</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if orders %}
+                            {% for order in orders %}
+                            <tr>
+                                <td>
+                                    <div class="rows">
+                                    <input class="checkItem form-check-input" type="checkbox" value="{{order.id}}" name="ord_id">
+                                    </div>
+                                </td>
+                                <td>{{ order.item_id }}</td>
+                                <td>{{ order.client }}</td>
+                                <td>
+                                    <span
+                                        data-bs-toggle="popover" data-bs-placement="top"
+                                        data-bs-custom-class="custom-popover"
+                                        data-bs-content="{{order.id_sim.get_operator_display}} - {% if order.id_sim.type_sim == 'sim' %}SIM{% elif order.id_sim.type_sim == 'esim' %}eSIM{% endif %}">
+                                        {{ order.id_sim }}
+                                    </span>
+                                    
+                                    {% if order.id_sim.type_sim == 'esim' %} <a href="{{ order.id_sim.link }}" target="_blank">
+                                        <i class="bi bi-box-arrow-in-up-right text-info" 
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        data-bs-custom-class="custom-tooltip"
+                                        data-bs-title="Ver QRCode">
+                                        </i></a>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.get_product_display }} {{ order.get_data_day_display }}</td>
+                                <td>{% if order.countries == 0 %}-{% else %}Sim{% endif %}</td>
+                                <td>{% if order.calls == 0 %}-{% else %}Sim{% endif %}</td>
+                                <td>{{ order.days }}</td>
+                                <td>
+                                    {% if order.cell_mod  %}
+                                    <a href="#"><i class="bi bi-phone text-primary"
+                                        data-bs-toggle="popover" data-bs-placement="top"
+                                        data-bs-custom-class="custom-popover"
+                                        data-bs-content="{{order.cell_mod}}">
+                                    </i></a>
+                                    {% endif %}
+                                    {% if order.cell_imei  %}
+                                    <a href="#"><i class="bi bi-phone text-secondary"
+                                        data-bs-toggle="popover" data-bs-placement="top"
+                                        data-bs-custom-class="custom-popover"
+                                        data-bs-content="IMEI - {{order.cell_imei}}">
+                                    </i></a>
+                                    {% endif %}
+                                    {% if order.cell_eid  %}
+                                    <a href="#"><i class="bi bi-phone text-secondary"
+                                        data-bs-toggle="popover" data-bs-placement="top"
+                                        data-bs-custom-class="custom-popover"
+                                        data-bs-content="EID - {{order.cell_eid}}">
+                                    </i></a>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.ord_chip_nun }}</td>
+                                <td>{{ order.activation_date|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% with a=order.activation_date b=order.days %}
+                                        {% dateaddday a b %}
+                                    {% endwith %}
+                                </td>
+                                <td>{{ order.get_order_status_display }}</td>
+                                <td>
+                                    <a href="{% url 'ord_edit' order.id %}">
+                                        <i class="bi-pencil-square me-2 text-info" data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        data-bs-custom-class="custom-tooltip"
+                                        data-bs-title="Editar">
+                                        </i></a>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="14">Nenhum pedido encontrado.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <nav aria-label="navigation">
+                <ul class="pagination">
+                    {% if orders.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item"><a class="page-link" href="">{{ orders.number }} de {{ orders.paginator.num_pages }}</a></li>
+                    {% if orders.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </form>
     </div>
 </div>
+{% endblock %}
+{% block script_custom %}
+<script>
+    $(document).ready(function () {
+        // Ação do botão "Marcar Todos"
+        $('#checkAll').on('change', function () {
+        $('.checkItem').prop('checked', this.checked);
+        });
+    });
+</script>
+<script>
+    /* Tooltips */
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    /* Popovers */
+    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+    const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+</script>
+{% include 'painel/partials/_messages_script.html' %}
 {% endblock %}

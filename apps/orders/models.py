@@ -24,8 +24,10 @@ ORDER_STATUS = [
     ('AS', 'Atribuir SIM'),
     ('AT', 'Ativado'),
     ('CC', 'Cancelado'),
+    ('CN', 'Concluido'),
     ('MB', 'Motoboy'),
     ('PR', 'Processando'),
+    ('RE', 'Reembolsar'),
     ('RB', 'Reembolsado'),
     ('RS', 'Reuso'),
     ('RP', 'Reprocessar'),
@@ -50,14 +52,16 @@ class Orders(models.Model):
     days = models.IntegerField()
     calls = models.BooleanField(default=False)
     countries = models.BooleanField(default=False)
-    cell_mod = models.CharField(max_length=35)
-    ord_chip_nun = models.CharField(max_length=25, null=True, blank=True, default='-')
+    cell_mod = models.CharField(max_length=35, null=True, blank=True)
+    cell_imei = models.CharField(max_length=35, null=True, blank=True)
+    cell_eid = models.CharField(max_length=35, null=True, blank=True)
+    ord_chip_nun = models.CharField(max_length=25, null=True, blank=True)
     shipping = models.CharField(max_length=40)
     order_date = models.DateTimeField()
     activation_date = models.DateField()
     order_status = models.CharField(max_length=20, choices=ORDER_STATUS, default='PR')
     type_sim = models.CharField(max_length=4, null=True, blank=True, default='sim')
-    id_sim = models.ForeignKey(Sims, on_delete=models.DO_NOTHING, null=True, blank=True, default=None)
+    id_sim = models.ForeignKey(Sims, on_delete=models.DO_NOTHING, null=True, blank=True)
     condition = models.CharField(max_length=15, choices=CONDITION, default='novo-sim') 
     notes = models.IntegerField(null=True, blank=True, default=0)
     created_at = models.DateTimeField(auto_now_add=True)

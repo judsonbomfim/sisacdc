@@ -8,6 +8,7 @@
         <p class="text-primary m-0 fw-bold">Adicionar SIMS</p>
     </div>
     <div class="card-body">
+        {% include 'painel/partials/_messages.html' %}
         <form action="{% url 'sims_add_esim' %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <label class="form-label">Tipo de Chip</label>

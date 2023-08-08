@@ -17,15 +17,15 @@
             </div>
         </div>
         <br>
-        <form action="{% url 'sims_add_sim' %}" method="POST" enctype="multipart/form-data">
+        <form action="{% url 'ord_edit' order.id %}" method="POST">
             {% csrf_token %}
             <label class="form-label">Tipo de Chip</label>
             <div class="form-group">
                 <input type="radio" class="btn-check" name="type_sim" id="type_sim1" value="sim" {% if order.id_sim.type_sim == 'sim' %}checked{% endif %}>
                 <label class="btn btn-outline-primary" for="type_sim1">SIM Físico</label>
-                
+
                 <input type="radio" class="btn-check" name="type_sim" id="type_sim2" value="esim" {% if order.id_sim.type_sim == 'esim' %}checked{% endif %}>
-                <label class="btn btn-outline-primary" for="type_sim2">eSIM Virtual</label>
+                <label class="btn btn-outline-primary" for="type_sim2">eSIM Virtual</label>                
             </div>
             <br>
             <label class="form-label">Operadora / SIM</label>
@@ -41,24 +41,34 @@
                 <label class="btn btn-outline-primary" for="operator3">Telcom</label>                
             </div>
             <br>
-            <label class="form-label">(e)SIM</label>
+            <label class="form-label" for="type_sim1">(e)SIM</label>
             <br>
             <div class="input-group flex-nowrap">
                 <span class="input-group-text" id="sim"><i class="bi bi-sim"></i></span>
-                <input type="text" class="form-control" name="sim" placeholder="(e)SIM" aria-label="(e)SIM" value="{{ order.id_sim.sim }}" disabled>
-                <span class="input-group-text ms-3" id="order_date">Novo SIM</span>
-                <input type="date" class="form-control" placeholder="{{ order.order_date|date:'d/m/Y' }}" aria-label="{{ order.order_date|date:'d/m/Y' }}" value="{{ order.order_date|date:'d/m/Y' }}">
-                <div id="textSim" class="form-text ms-3">Só preencha o campo ao lado se for alterar a data do pedido.</div>
+                <input type="text" class="form-control" value="{{ order.id_sim.sim }}" disabled>
+                <span class="input-group-text ms-3" id="sim">Novo SIM</span>
+                <input type="text" class="form-control" name="sim" placeholder="(e)SIM" aria-label="(e)SIM">
+                <div id="textSim" class="form-text ms-3">Só preencha o campo ao lado se for alterar o SIM do pedido.</div>
             </div>
             <br>
             <label class="form-label">Data de ativação</label>
             <br>
             <div class="input-group flex-nowrap">
-                <span class="input-group-text" id="order_date"><i class="bi bi-calendar3"></i></span>
-                <input type="type" class="form-control" name="order_date" value="{{ order.order_date|date:'d/m/Y' }}" disabled>
-                <span class="input-group-text ms-3" id="order_date">Nova data</span>
-                <input type="date" class="form-control" placeholder="{{ order.order_date|date:'d/m/Y' }}" aria-label="{{ order.order_date|date:'d/m/Y' }}" value="{{ order.order_date|date:'d/m/Y' }}">
+                <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                <input type="type" class="form-control" value="{{ order.activation_date|date:'d/m/Y' }}" disabled>
+                <span class="input-group-text ms-3" id="activation_date">Nova data</span>
+                <input type="date" class="form-control" name="activation_date">
                 <div id="textSim" class="form-text ms-3">Só preencha o campo ao lado se for alterar a data do pedido.</div>
+            </div>
+            <br>
+            <label class="form-label">IMEI/EID</label>
+            <br>
+            <div class="input-group flex-nowrap">
+                <span class="input-group-text" id="cell_imei"><i class="bi bi-phone"></i></span>
+                <input type="text" class="form-control" name="cell_imei" placeholder="IMEI" value="{% if order.cell_imei %}{{ order.cell_imei }}{% endif %}">
+                <span class="input-group-text" id="cell_eid"><i class="bi bi-phone"></i></span>
+                <input type="text" class="form-control" name="cell_eid" placeholder="EID" value="{% if order.cell_eid %}{{ order.cell_eid }}{% endif %}">
+                <div id="textSim" class="form-text ms-3">Só preencha o campo ao lado se for alterar a IMEI/EID do pedido.</div>
             </div>
             <br>
             <div class="form-group">

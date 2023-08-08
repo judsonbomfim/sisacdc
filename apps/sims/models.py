@@ -3,16 +3,17 @@ from django.db import models
 SIM_STATUS = [
     ('DS', 'Disponível'),
     ('AT', 'Ativado'),
-    ('CC', 'Cancelado')
+    ('CC', 'Cancelado'),
+    ('TC', 'Troca'),
 ]
 SIM_OPERATOR = [
     ('TM', 'T-Mobile'), 
     ('CM', 'China Mobile'),
-    ('TC', 'Telcom')
+    ('TC', 'Telcom'),
 ]
 SIM_TYPES = [
     ('sim', 'SIM (Físico)'),   
-    ('esim', 'eSIM (Virtual)')  
+    ('esim', 'eSIM (Virtual)'),
 ]
 
 class Sims(models.Model):
