@@ -8,7 +8,6 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -19,7 +18,6 @@ SECRET_KEY = str(os.getenv('SECRET_KEY'))
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -33,6 +31,7 @@ INSTALLED_APPS = [
     'apps.orders.apps.OrdersConfig',
     'apps.sims.apps.SimsConfig',
     'apps.dashboard.apps.DashboardConfig',
+    'apps.users.apps.UsersConfig',
     'storages',
 ]
 

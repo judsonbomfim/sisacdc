@@ -13,6 +13,7 @@ from apps.sims.models import Sims
 
 
 # Conect woocommerce api
+@login_required(login_url='/login/')
 def conectApiStore():
     wcapi = API(
         url = str(os.getenv('url_site')),
@@ -26,12 +27,14 @@ def conectApiStore():
     return wcapi
 
 # Date - 2023-05-16T18:40:27
+@login_required(login_url='/login/')
 def dateHour(dh):
     date = dh[0:10]
     hour = dh[11:19]
     date_hour = f'{date} {hour}'
     return date_hour
 # Date - 17/06/2023
+@login_required(login_url='/login/')
 def dateF(d):
     dia = d[0:2]
     mes = d[3:5]
@@ -40,6 +43,7 @@ def dateF(d):
     return dataForm
 
 # Date - 2023-05-17 00:56:18+00:00 > 00/00/00
+@login_required(login_url='/login/')
 def dateDMA(dma):
     ano = dma[2:4]
     mes = dma[5:7]
@@ -48,6 +52,7 @@ def dateDMA(dma):
     return data_dma
 
 # Order list
+@login_required(login_url='/login/')
 def orders_list(request):
     global orders_l
     orders_l = ''
@@ -113,6 +118,7 @@ def orders_list(request):
     return render(request, 'painel/orders/index.html', context)
     
 # Store order details
+@login_required(login_url='/login/')
 def store_order_det(request,id):
     apiStore = conectApiStore()
     ord = apiStore.get(f'orders/{id}').json()
@@ -123,6 +129,7 @@ def store_order_det(request,id):
     return render(request, 'painel/orders/details.html', context)
 
 # Update orders
+@login_required(login_url='/login/')
 def ord_import(request):
     if request.method == 'GET':
 
@@ -284,6 +291,7 @@ def ord_import(request):
     return render(request, 'painel/orders/import.html')
 
 # Order Edit
+@login_required(login_url='/login/')
 def ord_edit(request,id):
     if request.method == 'GET':
             
@@ -367,10 +375,12 @@ def ord_edit(request,id):
         return redirect('orders_list')
 
 # Orders Actions
+@login_required(login_url='/login/')
 def ord_actions(request, filter='all'):
     if request.method == 'POST':
        pass
 
+@login_required(login_url='/login/')
 def ord_export_op(request):
     
     if request.method == 'POST':

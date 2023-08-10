@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -5,6 +6,7 @@ from django.core.files.storage import FileSystemStorage
 from apps.sims.models import Sims
 from apps.orders.models import Orders
 
+@login_required(login_url='/login/')
 def sims_list(request):
     global sims_l
     sims_l = ''
@@ -53,6 +55,7 @@ def sims_list(request):
     
     return render(request, 'painel/sims/index.html', context)
 
+@login_required(login_url='/login/')
 def sims_add_sim(request):
     if request.method == "GET":
         
@@ -101,6 +104,7 @@ def sims_add_sim(request):
             messages.error(request,'Houve um ero ao gravar a lista. Verifique se o arquivo está no formato correto')
             return render(request, 'painel/sims/add-sim.html')
 
+@login_required(login_url='/login/')
 def sims_add_esim(request):
     if request.method == "GET":
         
@@ -139,6 +143,7 @@ def sims_add_esim(request):
             messages.error(request,'Houve um erro ao gravar os eSIMs')
             return render(request, 'painel/sims/add-esim.html')
 
+@login_required(login_url='/login/')
 def sims_ord(request):
     if request.method == "GET":
         return render(request, 'painel/sims/sim-order.html')
