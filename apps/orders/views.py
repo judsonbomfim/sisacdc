@@ -1,4 +1,6 @@
 import os
+import csv
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
@@ -8,6 +10,7 @@ from woocommerce import API
 from django.utils.text import slugify
 from apps.orders.models import Orders
 from apps.sims.models import Sims
+
 
 # Conect woocommerce api
 def conectApiStore():
@@ -36,28 +39,78 @@ def dateF(d):
     dataForm = f'{ano}-{mes}-{dia}'
     return dataForm
 
+# Date - 2023-05-17 00:56:18+00:00 > 00/00/00
+def dateDMA(dma):
+    ano = dma[2:4]
+    mes = dma[5:7]
+    dia = dma[8:10]
+    data_dma = f'{dia}/{mes}/{ano}'
+    return data_dma
 
 # Order list
 def orders_list(request):
-    if request.method == 'GET':
-        orders_l = Orders.objects.all().order_by('id')
-        orders_p = Orders.objects.all().order_by('id')
-        sims = Sims.objects.all()
-        ord_status = Orders.order_status.field.choices
-        paginator = Paginator(orders_p, 50)
-        page = request.GET.get('page')
-        orders = paginator.get_page(page)
+    global orders_l
+    orders_l = ''
     
-        context = {
-            'orders_l': orders_l,
-            'orders': orders,
-            'sims': sims,
-            'ord_status': ord_status,
-        }
-        return render(request, 'painel/orders/index.html', context)
+    orders_all = Orders.objects.all().order_by('id')
     
+    orders_l = orders_all
     if request.method == 'POST':
-        pass
+        if 'up_filter' in request.POST:
+            name_f = request.POST['ord_name_f']
+            order_f = request.POST['ord_order_f']
+            sim_f = request.POST['ord_sim_f']
+            status_F = request.POST['ord_st_f']
+            
+            if sim_f:
+                orders_l = Orders.objects.all().order_by('id').filter(id_sim_id__sim__icontains=sim_f,client__icontains=name_f,item_id__icontains=order_f,order_status__icontains=status_F)
+            else:
+                orders_l = Orders.objects.all().order_by('id').filter(client__icontains=name_f,item_id__icontains=order_f,order_status__icontains=status_F)
+         
+        if 'up_status' in request.POST:
+            ord_id = request.POST.getlist('ord_id')
+            ord_s = request.POST.get('ord_staus')
+            if ord_id and ord_s:
+                for o_id in ord_id:
+                    order = Orders.objects.get(pk=o_id)
+                    order.order_status = ord_s
+                    order.save()
+                    
+                    # Alterar status
+                    # Status sis : Status Loja
+                    status_def_sis = {
+                        'AE': 'agd-envio',
+                        'CC': 'cancelled',
+                        'MB': 'motoboy',
+                        'RS': 'reuso',
+                        'RT': 'retirada',
+                        'RE': 'reembolsar',
+                    }
+                    if ord_s in status_def_sis:
+                        status_ped = {
+                            'status': status_def_sis[ord_s]
+                        }
+                        apiStore = conectApiStore()                    
+                        apiStore.put(f'orders/{order.order_id}', status_ped).json()   
+                    
+                messages.success(request,f'Pedido(s) atualizado com sucesso!')
+            else:
+                messages.info(request,f'Você precisa marcar alguma opção')        
+        
+    sims = Sims.objects.all()
+    ord_status = Orders.order_status.field.choices
+    
+    paginator = Paginator(orders_l, 50)
+    page = request.GET.get('page')
+    orders = paginator.get_page(page)
+
+    context = {
+        'orders_l': orders_all,
+        'orders': orders,
+        'sims': sims,
+        'ord_status': ord_status,
+    }
+    return render(request, 'painel/orders/index.html', context)
     
 # Store order details
 def store_order_det(request,id):
@@ -316,60 +369,74 @@ def ord_edit(request,id):
 # Orders Actions
 def ord_actions(request, filter='all'):
     if request.method == 'POST':
-        if 'up_status' in request.POST:
-            ord_id = request.POST.getlist('ord_id')
-            ord_s = request.POST.get('ord_staus')
-            if ord_id and ord_s:
-                for o_id in ord_id:
-                    order = Orders.objects.get(pk=o_id)
-                    order.order_status = ord_s
-                    order.save()
-                    
-                    # Alterar status
-                    # Status sis : Status Loja
-                    status_def_sis = {
-                        'AE': 'agd-envio',
-                        'CC': 'cancelled',
-                        'MB': 'motoboy',
-                        'RS': 'reuso',
-                        'RT': 'retirada',
-                        'RE': 'reembolsar',
-                    }
-                    if ord_s in status_def_sis:
-                        status_ped = {
-                            'status': status_def_sis[ord_s]
-                        }
-                        apiStore = conectApiStore()                    
-                        apiStore.put(f'orders/{order.order_id}', status_ped).json()   
-                    
-                messages.success(request,f'Pedido(s) atualizado com sucesso!')
-            else:
-                messages.info(request,f'Você precisa marcar alguma opção')
+       pass
 
-            return redirect('orders_list')
+def ord_export_op(request):
+    
+    if request.method == 'POST':
         
-        if 'up_filter' in request.POST:
-            orders_l = Orders.objects.all().order_by('id').filter()
-            if request.POST['ord_staus_f'] == 'todos':
-                orders_p = Orders.objects.all().order_by('id').filter()
-            else:   
-                orders_p = Orders.objects.all().order_by('id').filter(order_status=request.POST['ord_staus_f'])
-            sims = Sims.objects.all()
-            ord_status = Orders.order_status.field.choices
-            paginator = Paginator(orders_p, 50)
-            page = request.GET.get('page')
-            orders = paginator.get_page(page)
-        
-            context = {
-                'orders_l': orders_l,
-                'orders': orders,
-                'sims': sims,
-                'ord_status': ord_status,
-            }
-            return render(request, 'painel/orders/index.html', context)
+        ord_date_f = request.POST.get('ord_date_f')
+        ord_op_f = request.POST.get('ord_op_f')
+    
+        orders_all = Orders.objects.all().order_by('id').filter(activation_date__icontains=ord_date_f,id_sim_id__operator__icontains=ord_op_f,order_status='AA')
 
-def ord_filters_st(request, filter='all'):
-    pass
+        # Crie uma lista com os dados que você deseja exportar para o CSV
+        data = [
+            ['Data Compra', 'Pedido', '(e)SIM', 'EID', 'IMEI','Plano', 'Dias', 'Data Aivação', 'Operadora']
+        ]
+        
+        for ord in orders_all:
+            ord_product = f'{ord.get_product_display()} {ord.get_data_day_display()}'
+            ord_op = ord.id_sim.operator
+            ord_date = dateDMA(str(ord.order_date))
+            ord_date_act = dateDMA(str(ord.activation_date))
+            data.append([ord_date,ord.item_id,ord.id_sim.sim,ord.cell_eid,ord.cell_imei,ord_product,ord.days,ord_date_act,ord_op])
+        
+        print(data)
+        
+        # Crie um objeto CSVWriter para escrever os dados no formato CSV
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="dados.csv"'
+        writer = csv.writer(response)
+
+        # Escreva os dados no objeto CSVWriter
+        for row in data:
+            writer.writerow(row)
+
+        return response
+            
+    sims_op = Sims.operator.field.choices
+    context= {
+        'sims_op': sims_op,
+    }
+    
+    return render(request, 'painel/orders/export_op.html', context)
+
+# def exportar(request):
+#     import csv
+#     from django.http import HttpResponse
+
+#     data = [
+#         ['Nome', 'Idade', 'Cidade'],
+#     ]
+
+#     i = 1
+#     while i <= 5:
+#         data.append(['João', '25', 'Rio de Janeiro'])
+#         i += 1
+        
+#     print(data)
+
+#     # Crie um objeto CSVWriter para escrever os dados no formato CSV
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = 'attachment; filename="dados.csv"'
+#     writer = csv.writer(response)
+
+#     # Escreva os dados no objeto CSVWriter
+#     for row in data:
+#         writer.writerow(row)
+
+#     return response
 
 # # def vendasSem(request):
 # apiStore = conectApiStore()

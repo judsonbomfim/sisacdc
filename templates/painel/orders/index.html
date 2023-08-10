@@ -29,16 +29,11 @@
         <p class="text-secondary m-0 fw-bold">Lista de pedidos</p>
     </div>
     <div class="card-body">
-        {% comment %} <div class="col-md-12 pb-2">
-            {% for ord_s in ord_status %}
-            <button type="button" class="btn btn-light" name="{{ord_s.0}}">{{ord_s.1}} ({% with list=orders_l status=ord_s.0 %}{% status_filter list status %}{% endwith %})</button>
-            {% endfor %}
-        </div> {% endcomment %}
         {% include 'painel/partials/_messages.html' %}
-        <form class="row g-3" action="{% url 'ord_actions' %}" method="POST">
+        <form class="row g-3" action="{% url 'orders_list' %}" method="POST">
             {% csrf_token %}
             <div class="col-md-2">
-                <select class="form-select form-select-sm" aria-label="Small select example" name="ord_staus">
+                <select class="form-control" aria-label="" name="ord_staus">
                     <option selected>Alterar Status</option>
                     {% for ord_s in ord_status %}
                     <option value="{{ord_s.0}}">{{ord_s.1}}</option>
@@ -49,8 +44,17 @@
                 <button type="submit" class="btn btn-primary" name="up_status">Alterar</button>
             </div>
             <div class="col-md-2">
-                <select class="form-select form-select-sm" aria-label="Small select example" name="ord_staus_f">
-                    <option value="todos" selected>Filtrar todos</option>
+                <input type="text" class="form-control" placeholder="Nome" name="ord_name_f">
+            </div>
+            <div class="col-md-1">
+                <input type="text" class="form-control" placeholder="Pedido" name="ord_order_f">
+            </div>
+            <div class="col-md-1">
+                <input type="text" class="form-control" placeholder="(e)SIM)" name="ord_sim_f">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="ord_st_f">
+                    <option value="" selected>Filtrar todos</option>
                     {% for ord_s in ord_status %}
                     <option value="{{ord_s.0}}">{{ord_s.1}} ({% with list=orders_l status=ord_s.0 %}{% status_filter list status %}{% endwith %})</option>
                     {% endfor %}

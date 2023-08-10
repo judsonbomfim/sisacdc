@@ -6,21 +6,43 @@ from apps.sims.models import Sims
 from apps.orders.models import Orders
 
 def sims_list(request):
-    sims_p = Sims.objects.all()
-    paginator = Paginator(sims_p, 50)
+    global sims_l
+    sims_l = ''
+    
+    sims_all = Sims.objects.all().order_by('id')
+    
+    if request.method == 'GET':
+        sims_l = sims_all
+    if request.method == 'POST':
+        if 'up_filter' in request.POST:
+            sim_f = request.POST['sim_f']
+            sim_type_f = request.POST['sim_type_f']
+            sim_status_f = request.POST['sim_status_f']            
+            if sim_f:
+                sims_l = Sims.objects.all().order_by('id').filter(sim__icontains=sim_f,type_sim__icontains=sim_type_f,sim_status__icontains=sim_status_f)
+            else:
+                sims_l = Sims.objects.all().order_by('id').filter(type_sim__startswith=sim_type_f,sim_status__icontains=sim_status_f)
+
+    
+    sims_types = Sims.type_sim.field.choices.__str__()
+    sims_status = Sims.sim_status.field.choices
+    
+    paginator = Paginator(sims_l, 50)
     page = request.GET.get('page')
     sims = paginator.get_page(page)
     
     # Verificar estoque de operadoras
-    sim_tm = sims_p.filter(sim_status='DS',operator='TM', type_sim='sim').count()
-    esim_tm = sims_p.filter(sim_status='DS',operator='TM', type_sim='esim').count()
-    sim_cm = sims_p.filter(sim_status='DS',operator='CM', type_sim='sim').count()
-    esim_cm = sims_p.filter(sim_status='DS',operator='CM', type_sim='esim').count()
-    sim_tc = sims_p.filter(sim_status='DS',operator='TC', type_sim='sim').count()
-    esim_tc = sims_p.filter(sim_status='DS',operator='TC', type_sim='esim').count()
+    sim_tm = sims_all.filter(sim_status='DS',operator='TM', type_sim='sim').count()
+    esim_tm = sims_all.filter(sim_status='DS',operator='TM', type_sim='esim').count()
+    sim_cm = sims_all.filter(sim_status='DS',operator='CM', type_sim='sim').count()
+    esim_cm = sims_all.filter(sim_status='DS',operator='CM', type_sim='esim').count()
+    sim_tc = sims_all.filter(sim_status='DS',operator='TC', type_sim='sim').count()
+    esim_tc = sims_all.filter(sim_status='DS',operator='TC', type_sim='esim').count()
     
     context= {
         'sims': sims,
+        'sims_types': sims_types,
+        'sims_status': sims_status,
         'sim_tm': sim_tm,
         'esim_tm': esim_tm,
         'sim_cm': sim_cm,

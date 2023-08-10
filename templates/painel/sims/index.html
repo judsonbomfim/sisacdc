@@ -86,12 +86,31 @@
         <p class="text-secondary m-0 fw-bold">Estoque SIMS</p>
     </div>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-6 text-nowrap">                
+        {% include 'painel/partials/_messages.html' %}
+        <form class="row g-3" action="" method="POST">
+            {% csrf_token %}
+            <div class="col-md-2">
+                <input type="text" class="form-control" placeholder="(e)SIM)" name="sim_f">
             </div>
-            <div class="col-md-6">
+            <div class="col-md-2">
+                <select class="form-select" name="sim_type_f">
+                    <option value="" selected>Filtrar Tipo - Todos</option>
+                    {% for sim_t in sims_types %}
+                    <option value="{{sim_t.0}}">{{sim_t.1}}</option>
+                    {% endfor %}
+                </select>
             </div>
-        </div>
+            <div class="col-md-2">
+                <select class="form-select" name="sim_status_f">
+                    <option value="" selected>Filtrar Status - Todos</option>
+                    {% for sim_s in sims_status %}
+                    <option value="{{sim_s.0}}">{{sim_s.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary" name="up_filter">Filtrar</button>
+            </div>
         <div id="dataTable" class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
             <table id="dataTable" class="table table-striped table-hover my-0">
                 <thead>
@@ -139,6 +158,7 @@
                 </ul>
               </nav>
         </div>
+        </form>
     </div>
 </div>
 

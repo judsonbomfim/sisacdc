@@ -27,6 +27,7 @@
                         <div class="dropdown-menu {% if '/pedidos/' in request.path %}show{% endif %}" style="background: rgb(33,80,111);border-style: none;border-radius: 0; {% if '/pedidos/' in request.path %}data-bs-popper='static'{% endif %}">
                             <a class="dropdown-item link-light {% if request.path == orders_list %}active{% endif %}" href="{% url 'orders_list' %}"><i class="bi bi-sim"></i> Pedidos</a>
                             <a class="dropdown-item link-light {% if request.path == ord_import %}active{% endif %}" href="{% url 'ord_import' %}"><i class="bi bi-sim"></i> Importar Pedidos</a>
+                            <a class="dropdown-item link-light {% if request.path == ord_export_op %}active{% endif %}" href="{% url 'ord_export_op' %}"><i class="bi bi-sim"></i> Exportar Ativação</a>
                         </div>
                     </li>                                     
                     <li class="nav-item dropdown {% if '/sims/' in request.path %}show{% endif %}">

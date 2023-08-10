@@ -1,0 +1,31 @@
+{% extends 'painel/shared/base.html' %}
+{% load static %}
+{% block title_page %}<i class="bi bi-shop"></i> Pedidos{% endblock %}
+{% block content %}
+<div class="card shadow">
+    <div class="card-header py-3">
+        <p class="text-secondary m-0 fw-bold">Exportar Pedidos para Operaddora</p>
+    </div>
+    <div class="card-body">
+        {% include 'painel/partials/_messages.html' %}
+        <form class="row g-3" action="{% url 'ord_export_op' %}" method="POST">
+            {% csrf_token %}
+            <div class="col-md-2">
+                <input type="date" class="form-control" placeholder="Nome" name="ord_date_f">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="ord_op_f">
+                    <option value="" selected>Operadora</option>
+                    {% for sims_o in sims_op %}
+                    <option value="{{sims_o.0}}">{{sims_o.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary" name="export_at">Exportar para Ativação</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block script_custom %}{% include 'painel/partials/_messages_script.html' %}{% endblock %}
