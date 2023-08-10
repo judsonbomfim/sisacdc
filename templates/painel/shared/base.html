@@ -24,6 +24,7 @@
                 {% include 'painel/partials/_navibar.html' %}
                 <div class="container-fluid">
                     <h3 class="text-dark mb-4">{% block title_page %}{% endblock %}</h3>
+                    {% include 'painel/partials/_messages.html' %}
                     {% block content %}{% endblock %}
                 </div>
             </div>
@@ -32,6 +33,7 @@
     </div>
     <script src="{% static 'painel/theme/bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'painel/theme/js/script.min.js' %}"></script>
+    {% include 'painel/partials/_messages_script.html' %}
     {% block script_custom %}{% endblock %}
 </body>
 </html>

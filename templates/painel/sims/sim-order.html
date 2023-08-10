@@ -7,7 +7,6 @@
         <p class="text-secondary m-0 fw-bold">Adicionar SIM aos pedidos</p>
     </div>
     <div class="card-body">
-        {% include 'painel/partials/_messages.html' %}
         <form action="{% url 'sims_ord' %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
@@ -20,4 +19,3 @@
     </div>
 </div>
 {% endblock %}
-{% block script_custom %}{% include 'painel/partials/_messages_script.html' %}{% endblock %}

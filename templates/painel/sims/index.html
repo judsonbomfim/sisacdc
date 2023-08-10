@@ -86,7 +86,6 @@
         <p class="text-secondary m-0 fw-bold">Estoque SIMS</p>
     </div>
     <div class="card-body">
-        {% include 'painel/partials/_messages.html' %}
         <form class="row g-3" action="" method="POST">
             {% csrf_token %}
             <div class="col-md-2">
@@ -162,8 +161,4 @@
     </div>
 </div>
 
-{% endblock %}
-
-{% block script_custom %}
-    {% include 'painel/partials/_messages_script.html' %}
 {% endblock %}

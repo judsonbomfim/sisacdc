@@ -29,7 +29,6 @@
         <p class="text-secondary m-0 fw-bold">Lista de pedidos</p>
     </div>
     <div class="card-body">
-        {% include 'painel/partials/_messages.html' %}
         <form class="row g-3" action="{% url 'orders_list' %}" method="POST">
             {% csrf_token %}
             <div class="col-md-2">
@@ -205,5 +204,4 @@
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
     const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
 </script>
-{% include 'painel/partials/_messages_script.html' %}
 {% endblock %}

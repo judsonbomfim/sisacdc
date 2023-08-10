@@ -7,7 +7,6 @@
         <p class="text-secondary m-0 fw-bold">Exportar Pedidos para Operaddora</p>
     </div>
     <div class="card-body">
-        {% include 'painel/partials/_messages.html' %}
         <form class="row g-3" action="{% url 'ord_export_op' %}" method="POST">
             {% csrf_token %}
             <div class="col-md-2">
@@ -28,4 +27,3 @@
     </div>
 </div>
 {% endblock %}
-{% block script_custom %}{% include 'painel/partials/_messages_script.html' %}{% endblock %}
