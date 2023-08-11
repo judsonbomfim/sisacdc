@@ -1,7 +1,6 @@
 from pathlib import Path
 import os
 from django.contrib.messages import constants
-from woocommerce import API
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -67,18 +66,6 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'mydjango',
-#         'USER': 'mydjangouser',
-#         'PASSWORD': 'QeScczGvKcJE',
-#         'HOST': 'localhost',
-#         'PORT': '',
-#     }
-# }
 
 DATABASES = {
     "default": {
