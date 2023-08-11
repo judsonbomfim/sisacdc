@@ -23,25 +23,20 @@ def conectApiStore():
         timeout = 500
     )
     return wcapi
-
 # Date - 2023-05-16T18:40:27
-@login_required(login_url='/login/')
 def dateHour(dh):
     date = dh[0:10]
     hour = dh[11:19]
     date_hour = f'{date} {hour}'
     return date_hour
 # Date - 17/06/2023
-@login_required(login_url='/login/')
 def dateF(d):
     dia = d[0:2]
     mes = d[3:5]
     ano = d[6:10]
     dataForm = f'{ano}-{mes}-{dia}'
     return dataForm
-
 # Date - 2023-05-17 00:56:18+00:00 > 00/00/00
-@login_required(login_url='/login/')
 def dateDMA(dma):
     ano = dma[2:4]
     mes = dma[5:7]
