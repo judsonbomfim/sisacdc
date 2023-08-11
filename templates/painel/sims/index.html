@@ -107,6 +107,14 @@
                     {% endfor %}
                 </select>
             </div>
+            <div class="col-md-2">
+                <select class="form-select" name="sim_oper_f">
+                    <option value="" selected>Filtrar Operadora - Todos</option>
+                    {% for sim_o in sims_oper %}
+                    <option value="{{sim_o.0}}">{{sim_o.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <div class="col-md-1">
                 <button type="submit" class="btn btn-primary" name="up_filter">Filtrar</button>
             </div>
