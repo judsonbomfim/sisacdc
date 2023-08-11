@@ -345,6 +345,7 @@ def ord_edit(request,id):
                 )
                 add_sim.save()
                 
+                # Update order                
                 order_put = Orders.objects.get(pk=order.id)
                 order_put.id_sim_id = add_sim.id
                 order_put.save()  
@@ -367,12 +368,6 @@ def ord_edit(request,id):
         messages.success(request,f'Pedido {order.order_id} atualizado com sucesso!')
         return redirect('orders_list')
 
-# Orders Actions
-@login_required(login_url='/login/')
-def ord_actions(request, filter='all'):
-    if request.method == 'POST':
-       pass
-
 @login_required(login_url='/login/')
 def ord_export_op(request):
     
@@ -390,16 +385,21 @@ def ord_export_op(request):
         
         for ord in orders_all:
             ord_product = f'{ord.get_product_display()} {ord.get_data_day_display()}'
-            ord_op = ord.id_sim.operator
+            if ord_op_f == 'Todas':
+                ord_op = ''
+            else:
+                ord_op = ord.id_sim.operator
             ord_date = dateDMA(str(ord.order_date))
             ord_date_act = dateDMA(str(ord.activation_date))
             data.append([ord_date,ord.item_id,ord.id_sim.sim,ord.cell_eid,ord.cell_imei,ord_product,ord.days,ord_date_act,ord_op])
-        
-        print(data)
-        
+            
+            order_put = Orders.objects.get(pk=ord.id)
+            order_put.order_status = 'CN'
+            order_put.save()  
+    
         # Crie um objeto CSVWriter para escrever os dados no formato CSV
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="dados.csv"'
+        response['Content-Disposition'] = f'attachment; filename="Ativação-{dateDMA(ord_date_f)}-{ord_op_f}.csv"'
         writer = csv.writer(response)
 
         # Escreva os dados no objeto CSVWriter

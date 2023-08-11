@@ -14,7 +14,7 @@
             </div>
             <div class="col-md-2">
                 <select class="form-select" name="ord_op_f">
-                    <option value="" selected>Operadora</option>
+                    <option value="Todas" selected>Operadora</option>
                     {% for sims_o in sims_op %}
                     <option value="{{sims_o.0}}">{{sims_o.1}}</option>
                     {% endfor %}

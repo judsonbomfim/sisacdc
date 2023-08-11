@@ -10,7 +10,9 @@
                 <a class="navbar-brand d-flex justify-content-center align-items-center m-0" href="#">
                     <div class="sidebar-brand-icon rotate-n-15"><i class="icon ion-ios-gear-outline"></i></div>
                     <div class="mx-3">
-                        <img src="{% static 'painel/theme/img/logo-painel.png' %}" style="width: 180px">
+                        <a href="{% url 'dashboard' %}">
+                            <img src="{% static 'painel/theme/img/logo-painel.png' %}" style="width: 180px">
+                        </a>
                     </div>
                 </a>
                 <hr class="sidebar-divider my-0">
