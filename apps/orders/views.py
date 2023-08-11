@@ -12,7 +12,6 @@ from apps.sims.models import Sims
 
 
 # Conect woocommerce api
-@login_required(login_url='/login/')
 def conectApiStore():
     wcapi = API(
         url = str(os.getenv('url_site')),
