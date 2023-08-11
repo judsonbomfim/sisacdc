@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import auth
 from django.contrib import messages
@@ -27,6 +28,7 @@ def login(request):
             messages.error(request, 'Usuário ou senha inválidos')
             return redirect('login')
 
+@login_required(login_url='/login/')
 def logout(request):
     auth.logout(request)
     messages.success(request, 'Logout efetuado com sucesso!')

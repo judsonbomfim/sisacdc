@@ -26,7 +26,7 @@ def sims_list(request):
                 sims_l = Sims.objects.all().order_by('id').filter(type_sim__startswith=sim_type_f,sim_status__icontains=sim_status_f)
 
     
-    sims_types = Sims.type_sim.field.choices.__str__()
+    sims_types = Sims.type_sim.field.choices
     sims_status = Sims.sim_status.field.choices
     
     paginator = Paginator(sims_l, 50)
