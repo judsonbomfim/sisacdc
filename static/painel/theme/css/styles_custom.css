@@ -3,11 +3,15 @@
     --bs-dropdown-link-hover-bg: #1b4661 !important;
     --bs-dropdown-link-active-bg: #1b4661 !important;
 }
+.menu-user{
+    --bs-dropdown-link-hover-bg: #EAEBEF !important;
+    --bs-dropdown-link-active-bg: #EAEBEF !important;
+}
+
 /* Color line table */
 .table {
     --bs-table-hover-bg: #dbe6ec !important;
 }
-
 
 .btn-outline-primary {
     --bs-btn-color: #21506f;
