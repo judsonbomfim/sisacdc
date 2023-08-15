@@ -10,11 +10,11 @@
         <form class="row g-3" action="{% url 'ord_export_op' %}" method="POST">
             {% csrf_token %}
             <div class="col-md-2">
-                <input type="date" class="form-control" placeholder="Nome" name="ord_date_f">
+                <input type="date" class="form-control" placeholder="Nome" name="ord_date_f" required>
             </div>
             <div class="col-md-2">
                 <select class="form-select" name="ord_op_f">
-                    <option value="Todas" selected>Operadora</option>
+                    <option value="op_all" selected>Todas as Operadoras</option>
                     {% for sims_o in sims_op %}
                     <option value="{{sims_o.0}}">{{sims_o.1}}</option>
                     {% endfor %}
@@ -24,6 +24,7 @@
                 <button type="submit" class="btn btn-primary" name="export_at">Exportar para Ativação</button>
             </div>
         </form>
+        <div class="form-text ms-3"><br>OBS: Para exportação os pedidos precisam estar com o status <b>Agd. Ativação</b>.</div>
     </div>
 </div>
 {% endblock %}
