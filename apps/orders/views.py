@@ -404,9 +404,13 @@ def ord_export_op(request):
         
         ord_date_f = request.POST.get('ord_date_f')
         ord_op_f = request.POST.get('ord_op_f')
-    
-        orders_all = Orders.objects.all().order_by('id').filter(activation_date__icontains=ord_date_f,id_sim_id__operator__icontains=ord_op_f,order_status='AA')
-
+        print(ord_date_f,ord_op_f,'-----------------------')
+        
+        if ord_op_f == 'op_all':
+            orders_all = Orders.objects.all().order_by('id').filter(activation_date__icontains=ord_date_f,order_status='AA')
+        else:
+            orders_all = Orders.objects.all().order_by('id').filter(activation_date__icontains=ord_date_f,id_sim_id__operator__icontains=ord_op_f,order_status='AA')
+            
         # Crie uma lista com os dados que você deseja exportar para o CSV
         data = [
             ['Data Compra', 'Pedido', '(e)SIM', 'EID', 'IMEI','Plano', 'Dias', 'Data Aivação', 'Operadora']
@@ -414,10 +418,7 @@ def ord_export_op(request):
         
         for ord in orders_all:
             ord_product = f'{ord.get_product_display()} {ord.get_data_day_display()}'
-            if ord_op_f == 'Todas':
-                ord_op = ''
-            else:
-                ord_op = ord.id_sim.operator
+            ord_op = ord.id_sim.get_operator_display()
             ord_date = dateDMA(str(ord.order_date))
             ord_date_act = dateDMA(str(ord.activation_date))
             data.append([ord_date,ord.item_id,ord.id_sim.sim,ord.cell_eid,ord.cell_imei,ord_product,ord.days,ord_date_act,ord_op])
