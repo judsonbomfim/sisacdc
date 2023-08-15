@@ -259,8 +259,11 @@ def ord_import(request):
                         }
                         status_ped = {
                             'status': status_def_sis[order_status_i]
-                        }                                      
-                        apiStore.put(f'orders/{order_id_i}', status_ped).json()    
+                        }
+                        try:                                  
+                            apiStore.put(f'orders/{order_id_i}', status_ped).json()
+                        except:
+                            msg_error.append(f'{order_id_i} - Falha ao atualizar status na loja!')
                         
                         # Definir variáveis
                         q_i += 1 
@@ -300,55 +303,79 @@ def ord_edit(request,id):
         msg_info = []
         global msg_error
         msg_error = []
-        global id_sim
-        id_sim = ''
+        # global id_sim
+        # id_sim = ''
         
         order = Orders.objects.get(pk=id)
         type_sim = request.POST.get('type_sim')
         operator = request.POST.get('operator')
+        print('operador veio do form-----------------------', operator)
         sim = request.POST.get('sim')
+        print('sim veio do form-----------------------', sim)
         activation_date = request.POST.get('activation_date')
         cell_imei = request.POST.get('cell_imei')
         cell_eid = request.POST.get('cell_eid')
         tracking = request.POST.get('tracking')
         
-        if order.id_sim_id != None and (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim): 
-            if sim == '':
-                # Delete SIM           
-                order_put = Orders.objects.get(pk=order.id)
-                order_put.id_sim_id = ''
-                order_put.save()
-                
-                # Update SIM
-                sim_put = Sims.objects.get(pk=order.id_sim.id)
-                sim_put.sim_status = 'TC'
+        # Update SIM in Order and update SIM
+        def updateSIM():
+            # Update SIM
+            sim_put = Sims.objects.get(pk=order.id_sim.id)
+            sim_put.sim_status = 'TC'
+            sim_put.save()
+            print('Update SIM')
+            # Delete SIM in Order       
+            order_put = Orders.objects.get(pk=order.id)
+            order_put.id_sim_id = ''
+            order_put.save()
+            print('Delete SIM in Order')
+        
+        # Insert SIM in Order
+        def insertSIM():
+            sim_up = Sims.objects.filter(sim_status='DS', type_sim=type_sim, operator=operator).first()
+            if sim_up:
+                sim_put = Sims.objects.get(pk=sim_up.id)
+                sim_put.sim_status = 'AT'
                 sim_put.save()
-                
-                # Insert SIM
-                sim_up = Sims.objects.filter(sim_status='DS', type_sim=type_sim, operator=operator).first()
-                if sim_up:
-                    sim_put = Sims.objects.get(pk=sim_up.id)
-                    sim_put.sim_status = 'AT'
-                    sim_put.save()
-                    order_put = Orders.objects.get(pk=order.id)
-                    order_put.id_sim_id = sim_put.id
-                    order_put.save()                    
-                else:                
-                    msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
-            else:
-                # Save SIMs
-                add_sim = Sims(
-                    sim = sim,
-                    type_sim = type_sim,
-                    operator = operator,
-                    sim_status = 'AT',
-                )
-                add_sim.save()
-                
-                # Update order                
                 order_put = Orders.objects.get(pk=order.id)
-                order_put.id_sim_id = add_sim.id
-                order_put.save()  
+                order_put.id_sim_id = sim_put.id
+                order_put.save()
+            else:       
+                msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
+            
+        # Verificar se SIM já existe
+        if sim:
+            if order.id_sim:
+                updateSIM()
+                print('update----------------')
+                
+            # Save SIMs
+            add_sim = Sims( 
+                sim = sim,
+                type_sim = type_sim,
+                operator = operator,
+                sim_status = 'AT',
+            )
+            add_sim.save()
+            
+            # Update order                
+            order_put = Orders.objects.get(pk=order.id)
+            order_put.id_sim_id = add_sim.id
+            order_put.save()  
+                    
+        else:
+            if order.id_sim:
+                print('id_sim-----------------------', order.id_sim)
+                
+                if (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim) and (operator != None and type_sim != None):                
+                    updateSIM()                    
+                    insertSIM()
+            else:
+                if operator != None and type_sim != None:
+                    print('inserir-----------------------', operator,type_sim,sim)                    
+                    insertSIM()
+                else:
+                    msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
             
         # Update Order
         if activation_date == '':

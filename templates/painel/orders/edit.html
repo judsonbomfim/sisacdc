@@ -31,13 +31,13 @@
             <label class="form-label">Operadora / SIM</label>
             <br>
             <div class="input-group flex-nowrap">
-                <input type="radio" class="btn-check" name="operator" id="operator1" value="TM" required {% if order.id_sim.operator == 'TM' %}checked{% endif %}>
+                <input type="radio" class="btn-check" name="operator" id="operator1" value="TM" {% if order.id_sim.operator == 'TM' %}checked{% endif %}>
                 <label class="btn btn-outline-primary" for="operator1">T-mobile</label>
                 
-                <input type="radio" class="btn-check" name="operator" id="operator2" value="CM" required {% if order.id_sim.operator == 'CM' %}checked{% endif %}>
+                <input type="radio" class="btn-check" name="operator" id="operator2" value="CM" {% if order.id_sim.operator == 'CM' %}checked{% endif %}>
                 <label class="btn btn-outline-primary" for="operator2">China Mobile</label>
                 
-                <input type="radio" class="btn-check" name="operator" id="operator3" value="TC"required {% if order.id_sim.operator == 'TC' %}checked{% endif %}>
+                <input type="radio" class="btn-check" name="operator" id="operator3" value="TC" {% if order.id_sim.operator == 'TC' %}checked{% endif %}>
                 <label class="btn btn-outline-primary" for="operator3">Telcom</label>                
             </div>
             <br>
@@ -47,7 +47,7 @@
                 <span class="input-group-text" id="sim"><i class="bi bi-sim"></i></span>
                 <input type="text" class="form-control" value="{{ order.id_sim.sim }}" disabled>
                 <span class="input-group-text ms-3" id="sim">Novo SIM</span>
-                <input type="text" class="form-control" name="sim" placeholder="(e)SIM" aria-label="(e)SIM">
+                <input type="text" class="form-control" name="sim" placeholder="SIM" aria-label="SIM">
                 <div id="textSim" class="form-text ms-3">Só preencha o campo ao lado se for alterar o SIM do pedido.</div>
             </div>
             <br>
