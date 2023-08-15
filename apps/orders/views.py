@@ -345,24 +345,26 @@ def ord_edit(request,id):
             
         # Verificar se SIM já existe
         if sim:
-            if order.id_sim:
-                updateSIM()
-                print('update----------------')
-                
-            # Save SIMs
-            add_sim = Sims( 
-                sim = sim,
-                type_sim = type_sim,
-                operator = operator,
-                sim_status = 'AT',
-            )
-            add_sim.save()
-            
-            # Update order                
-            order_put = Orders.objects.get(pk=order.id)
-            order_put.id_sim_id = add_sim.id
-            order_put.save()  
+            if operator != None and type_sim != None:            
+                if order.id_sim:
+                    updateSIM()
+                    print('update----------------')
                     
+                # Save SIMs
+                add_sim = Sims( 
+                    sim = sim,
+                    type_sim = type_sim,
+                    operator = operator,
+                    sim_status = 'AT',
+                )
+                add_sim.save()
+                
+                # Update order                
+                order_put = Orders.objects.get(pk=order.id)
+                order_put.id_sim_id = add_sim.id
+                order_put.save()  
+            else:
+                msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         else:
             if order.id_sim:
                 print('id_sim-----------------------', order.id_sim)
