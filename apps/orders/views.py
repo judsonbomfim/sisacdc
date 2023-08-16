@@ -421,15 +421,15 @@ def ord_export_op(request):
         ]
         
         for ord in orders_all:
-            ord_product = f'{ord.get_product_display()} {ord.get_data_day_display()}'
             ord_date = dateDMA(str(ord.order_date))
+            ord_product = f'{ord.get_product_display()} {ord.get_data_day_display()}'
             ord_date_act = dateDMA(str(ord.activation_date))
-            if ord_op_f == 'op_all':
-                ord_op = ''
-                ord_sim = ''
-            else:
+            if ord.id_sim:
                 ord_op = ord.id_sim.get_operator_display()
                 ord_sim = ord.id_sim.sim
+            else:
+                ord_op = '-'
+                ord_sim = '-'
             data.append([ord_date,ord.item_id,ord_sim,ord.cell_eid,ord.cell_imei,ord_product,ord.days,ord_date_act,ord_op])
 
         data_atual = date.today()
