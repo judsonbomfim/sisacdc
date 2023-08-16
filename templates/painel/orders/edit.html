@@ -4,13 +4,15 @@
 {% block content %}
 <div class="card shadow">
     <div class="card-body">
-        <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
+        <div>
             <div class="col">
                 <div class="card">
                     <div class="card-body">
                         <address>
-                            <strong>Pedido #{{ order.item_id }}</strong><br>
-                            {{ order.client }}<br>
+                            <span class='fs-5 text'><strong>PEDIDO #{{ order.item_id }}</strong></span><br>
+                            <span>NOME: {{ order.client }}</span><br>
+                            <span>E-MAIL: {{ order.email }}</span><br>
+                            <span>PLANO: {{ order.get_product_display }} {{ order.get_data_day_display }}</span>
                         </address>
                     </div>
                 </div>
@@ -73,9 +75,18 @@
             <br>
             <label class="form-label">Rastreio</label>
             <br>
-            <div class="input-group flex-nowrap col-md-3">
+            <div class="input-group flex-nowrap col-md-6 col-xl-3">
                 <span class="input-group-text" id="tracking"><i class="bi bi-truck"></i></span>
                 <input type="text" class="form-control" name="tracking" placeholder="Rastreio" value="{% if order.tracking %}{{ order.tracking }}{% endif %}">
+            </div>
+            <br>
+            <div class="col-md-6 col-xl-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="ord_st_f">
+                    {% for ord_s in ord_status %}
+                    <option value="{{ord_s.0}}"{% if ord_s.0 == order.order_status %} selected{% endif %}>{{ord_s.1}} </option>
+                    {% endfor %}
+                </select>
             </div>
             <br>
             <div class="form-group">

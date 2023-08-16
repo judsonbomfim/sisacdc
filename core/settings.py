@@ -110,8 +110,8 @@ USE_TZ = True
 
 DATA_UPLOAD_MAX_NUMBER_FILES = 1000
 
-# Expirar sessão em 12h
-SESSION_COOKIE_AGE = 43200
+# Expirar sessão em 10h
+SESSION_COOKIE_AGE = 36000
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/

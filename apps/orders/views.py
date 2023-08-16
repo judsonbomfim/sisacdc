@@ -1,6 +1,7 @@
 import os
 import csv
 from django.http import HttpResponse
+from datetime import date
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -292,8 +293,11 @@ def ord_edit(request,id):
     if request.method == 'GET':
             
         order = Orders.objects.get(pk=id)
+        ord_status = Orders.order_status.field.choices
+        
         context = {
-            'order': order
+            'order': order,
+            'ord_status': ord_status,
         }
         return render(request, 'painel/orders/edit.html', context)
         
@@ -316,6 +320,7 @@ def ord_edit(request,id):
         cell_imei = request.POST.get('cell_imei')
         cell_eid = request.POST.get('cell_eid')
         tracking = request.POST.get('tracking')
+        ord_st = request.POST.get('ord_st_f')
         
         # Update SIM in Order and update SIM
         def updateSIM():
@@ -388,6 +393,7 @@ def ord_edit(request,id):
         order_put.cell_imei = cell_imei
         order_put.cell_eid = cell_eid
         order_put.tracking = tracking
+        order_put.order_status = ord_st
         order_put.save()
     
         for msg_e in msg_error:
@@ -402,14 +408,12 @@ def ord_export_op(request):
     
     if request.method == 'POST':
         
-        ord_date_f = request.POST.get('ord_date_f')
         ord_op_f = request.POST.get('ord_op_f')
-        print(ord_date_f,ord_op_f,'-----------------------')
         
         if ord_op_f == 'op_all':
-            orders_all = Orders.objects.all().order_by('id').filter(activation_date__icontains=ord_date_f,order_status='AA')
+            orders_all = Orders.objects.all().order_by('id').filter(order_status='AA')
         else:
-            orders_all = Orders.objects.all().order_by('id').filter(activation_date__icontains=ord_date_f,id_sim_id__operator__icontains=ord_op_f,order_status='AA')
+            orders_all = Orders.objects.all().order_by('id').filter(id_sim_id__operator__icontains=ord_op_f,order_status='AA')
             
         # Crie uma lista com os dados que você deseja exportar para o CSV
         data = [
@@ -418,18 +422,21 @@ def ord_export_op(request):
         
         for ord in orders_all:
             ord_product = f'{ord.get_product_display()} {ord.get_data_day_display()}'
-            ord_op = ord.id_sim.get_operator_display()
             ord_date = dateDMA(str(ord.order_date))
             ord_date_act = dateDMA(str(ord.activation_date))
-            data.append([ord_date,ord.item_id,ord.id_sim.sim,ord.cell_eid,ord.cell_imei,ord_product,ord.days,ord_date_act,ord_op])
-            
-            order_put = Orders.objects.get(pk=ord.id)
-            order_put.order_status = 'CN'
-            order_put.save()  
-    
+            if ord_op_f == 'op_all':
+                ord_op = ''
+                ord_sim = ''
+            else:
+                ord_op = ord.id_sim.get_operator_display()
+                ord_sim = ord.id_sim.sim
+            data.append([ord_date,ord.item_id,ord_sim,ord.cell_eid,ord.cell_imei,ord_product,ord.days,ord_date_act,ord_op])
+
+        data_atual = date.today()
+        
         # Crie um objeto CSVWriter para escrever os dados no formato CSV
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="Ativação-{dateDMA(ord_date_f)}-{ord_op_f}.csv"'
+        response['Content-Disposition'] = f'attachment; filename="Ativacoes-{data_atual}-{ord_op_f}.csv"'
         writer = csv.writer(response)
 
         # Escreva os dados no objeto CSVWriter
