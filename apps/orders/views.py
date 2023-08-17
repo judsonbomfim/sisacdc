@@ -442,6 +442,7 @@ def ord_export_op(request):
             ord_date = dateDMA(str(ord.order_date))
             if ord.data_day != 'ilimitado': 
                 ord_data = ord.get_data_day_display()
+            else: ord_data = ''
             ord_product = f'{ord_prod_list[ord.product]}{ ord_data}'
             ord_date_act = dateDMA(str(ord.activation_date))
             if ord.id_sim:
