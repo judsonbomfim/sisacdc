@@ -10,9 +10,10 @@
                     <div class="card-body">
                         <address>
                             <span class='fs-5 text'><strong>PEDIDO #{{ order.item_id }}</strong></span><br>
-                            <span>NOME: {{ order.client }}</span><br>
-                            <span>E-MAIL: {{ order.email }}</span><br>
-                            <span>PLANO: {{ order.get_product_display }} {{ order.get_data_day_display }}</span>
+                            <span>NOME - {{ order.client }}</span><br>
+                            <span>E-MAIL - {{ order.email }}</span><br>
+                            <span>PLANO - {{ order.get_product_display }} {{ order.get_data_day_display }}</span><br>
+                            <span>DIAS - {{ order.days }}</span>
                         </address>
                     </div>
                 </div>

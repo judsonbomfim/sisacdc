@@ -45,6 +45,18 @@ def dateDMA(dma):
     data_dma = f'{dia}/{mes}/{ano}'
     return data_dma
 
+def st_sis_site():
+    status_sis_site = {
+        'AE': 'agd-envio',
+        'CC': 'cancelled',
+        'MB': 'motoboy',
+        'RS': 'reuso',
+        'RT': 'retirada',
+        'RE': 'reembolsar',
+        'CN': 'completed',        
+    }
+    return status_sis_site
+
 # Order list
 @login_required(login_url='/login/')
 def orders_list(request):
@@ -77,20 +89,14 @@ def orders_list(request):
                     
                     # Alterar status
                     # Status sis : Status Loja
-                    status_def_sis = {
-                        'AE': 'agd-envio',
-                        'CC': 'cancelled',
-                        'MB': 'motoboy',
-                        'RS': 'reuso',
-                        'RT': 'retirada',
-                        'RE': 'reembolsar',
-                    }
-                    if ord_s in status_def_sis:
+                    status_sis_site = st_sis_site()
+                    
+                    if ord_s in status_sis_site:
                         status_ped = {
-                            'status': status_def_sis[ord_s]
+                            'status': status_sis_site[ord_s]
                         }
                         apiStore = conectApiStore()                    
-                        apiStore.put(f'orders/{order.order_id}', status_ped).json()   
+                        apiStore.put(f'orders/{order.order_id}', status_ped).json()
                     
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
@@ -313,9 +319,7 @@ def ord_edit(request,id):
         order = Orders.objects.get(pk=id)
         type_sim = request.POST.get('type_sim')
         operator = request.POST.get('operator')
-        print('operador veio do form-----------------------', operator)
         sim = request.POST.get('sim')
-        print('sim veio do form-----------------------', sim)
         activation_date = request.POST.get('activation_date')
         cell_imei = request.POST.get('cell_imei')
         cell_eid = request.POST.get('cell_eid')
@@ -353,7 +357,6 @@ def ord_edit(request,id):
             if operator != None and type_sim != None:            
                 if order.id_sim:
                     updateSIM()
-                    print('update----------------')
                     
                 # Save SIMs
                 add_sim = Sims( 
@@ -372,14 +375,12 @@ def ord_edit(request,id):
                 msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         else:
             if order.id_sim:
-                print('id_sim-----------------------', order.id_sim)
                 
                 if (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim) and (operator != None and type_sim != None):                
                     updateSIM()                    
                     insertSIM()
             else:
-                if operator != None and type_sim != None:
-                    print('inserir-----------------------', operator,type_sim,sim)                    
+                if operator != None and type_sim != None:                 
                     insertSIM()
                 else:
                     msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
@@ -395,6 +396,16 @@ def ord_edit(request,id):
         order_put.tracking = tracking
         order_put.order_status = ord_st
         order_put.save()
+        
+        # Alterar status
+        # Status sis : Status Loja
+        status_sis_site = st_sis_site()
+        if ord_st in status_sis_site:
+            status_ped = {
+                'status': status_sis_site[ord_st]
+            }
+            apiStore = conectApiStore()                    
+            apiStore.put(f'orders/{order.order_id}', status_ped).json()
     
         for msg_e in msg_error:
             messages.error(request,msg_e)
@@ -420,12 +431,19 @@ def ord_export_op(request):
             ['Data Compra', 'Pedido', '(e)SIM', 'EID', 'IMEI','Plano', 'Dias', 'Data Aivação', 'Operadora']
         ]
         
+        ord_prod_list = {
+            'chip-internacional-eua': 'T-Mobile',
+            'chip-internacional-eua-e-canada': 'USA E CANADA',
+            'chip-internacional-europa': 'EUROPA',
+            'chip-internacional-global': 'GLOBAL PREMIUM',
+        }
+        
         for ord in orders_all:
             ord_date = dateDMA(str(ord.order_date))
-            ord_product = f'{ord.get_product_display()} {ord.get_data_day_display()}'
+            ord_product = f'{ord_prod_list[ord.product]} {ord.get_data_day_display()}'
             ord_date_act = dateDMA(str(ord.activation_date))
             if ord.id_sim:
-                ord_op = ord.id_sim.get_operator_display()
+                ord_op = ord.id_sim.operator
                 ord_sim = ord.id_sim.sim
             else:
                 ord_op = '-'
@@ -451,32 +469,6 @@ def ord_export_op(request):
     }
     
     return render(request, 'painel/orders/export_op.html', context)
-
-# def exportar(request):
-#     import csv
-#     from django.http import HttpResponse
-
-#     data = [
-#         ['Nome', 'Idade', 'Cidade'],
-#     ]
-
-#     i = 1
-#     while i <= 5:
-#         data.append(['João', '25', 'Rio de Janeiro'])
-#         i += 1
-        
-#     print(data)
-
-#     # Crie um objeto CSVWriter para escrever os dados no formato CSV
-#     response = HttpResponse(content_type='text/csv')
-#     response['Content-Disposition'] = 'attachment; filename="dados.csv"'
-#     writer = csv.writer(response)
-
-#     # Escreva os dados no objeto CSVWriter
-#     for row in data:
-#         writer.writerow(row)
-
-#     return response
 
 # # def vendasSem(request):
 # apiStore = conectApiStore()
