@@ -443,7 +443,7 @@ def ord_export_op(request):
             ord_product = f'{ord_prod_list[ord.product]} {ord.get_data_day_display()}'
             ord_date_act = dateDMA(str(ord.activation_date))
             if ord.id_sim:
-                ord_op = ord.id_sim.operator
+                ord_op = ord.id_sim.get_operator_display()
                 ord_sim = ord.id_sim.sim
             else:
                 ord_op = '-'
