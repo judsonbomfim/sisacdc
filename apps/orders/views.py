@@ -21,7 +21,7 @@ def conectApiStore():
         wp_api = True,
         version = 'wc/v3',
         query_string_auth = True,
-        timeout = 500
+        timeout = 5000
     )
     return wcapi
 # Date - 2023-05-16T18:40:27
