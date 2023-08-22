@@ -31,6 +31,18 @@
     <div class="card-body">
         <form class="row g-3" action="{% url 'orders_list' %}" method="POST">
             {% csrf_token %}
+            <div class="col-md-12">
+                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                    <div class="btn-group me-2" role="group" aria-label="First group">
+                {% for ord_sts in ord_st_list %}
+                {% if ord_sts.2 != 0 %}
+                {% comment %} <span class="badge text-bg-secondary">{{ord_sts.1}} ({{ord_sts.2}})</span> {% endcomment %}
+                      <button type="button" class="btn btn-outline-primary">{{ord_sts.1}} ({{ord_sts.2}})</button>
+                {% endif %}
+                {% endfor %}
+                    </div>
+                </div>
+            </div>
             <div class="col-md-2">
                 <select class="form-control" aria-label="" name="ord_staus">
                     <option selected>Alterar Status</option>
@@ -52,13 +64,23 @@
                 <input type="text" class="form-control" placeholder="(e)SIM)" name="ord_sim_f">
             </div>
             <div class="col-md-2">
-                <select class="form-select" name="ord_st_f">
-                    <option value="" selected>Filtrar todos</option>
-                    {% for ord_s in ord_status %}
-                    <option value="{{ord_s.0}}">{{ord_s.1}} ({% with list=orders_l status=ord_s.0 %}{% status_filter list status %}{% endwith %})</option>
+                <select class="form-select" name="oper_f">
+                    <option value="" selected>Todas Operadoras</option>
+                    {% for op_s in oper_list %}
+                    <option value="{{op_s.0}}">{{op_s.1}}</option>
                     {% endfor %}
                 </select>
-            </div>
+            </div>  
+            <div class="col-md-2">
+                <select class="form-select" name="ord_st_f">
+                    <option value="" selected>Todos Status</option>
+                    {% for ord_st in ord_st_list %}
+                    {% if ord_st.2 != 0 %}
+                    <option value="{{ord_st.0}}">{{ord_st.1}} ({{ord_st.2}})</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>          
             <div class="col-md-1">
                 <button type="submit" class="btn btn-primary" name="up_filter">Filtrar</button>
             </div>

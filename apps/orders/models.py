@@ -52,7 +52,7 @@ class Orders(models.Model):
     days = models.IntegerField()
     calls = models.BooleanField(default=False)
     countries = models.BooleanField(default=False)
-    cell_mod = models.CharField(max_length=35, null=True, blank=True)
+    cell_mod = models.CharField(max_length=45, null=True, blank=True)
     cell_imei = models.CharField(max_length=35, null=True, blank=True)
     cell_eid = models.CharField(max_length=35, null=True, blank=True)
     ord_chip_nun = models.CharField(max_length=25, null=True, blank=True)

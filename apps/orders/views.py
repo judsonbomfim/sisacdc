@@ -11,7 +11,6 @@ from django.utils.text import slugify
 from apps.orders.models import Orders
 from apps.sims.models import Sims
 
-
 # Conect woocommerce api
 def conectApiStore():
     wcapi = API(
@@ -63,7 +62,7 @@ def orders_list(request):
     global orders_l
     orders_l = ''
     
-    orders_all = Orders.objects.all().order_by('id')
+    orders_all = Orders.objects.all().order_by('-id')
     
     orders_l = orders_all
     if request.method == 'POST':
@@ -71,13 +70,15 @@ def orders_list(request):
             name_f = request.POST['ord_name_f']
             order_f = request.POST['ord_order_f']
             sim_f = request.POST['ord_sim_f']
+            oper_f = request.POST['oper_f']
             status_F = request.POST['ord_st_f']
             
-            if sim_f:
-                orders_l = Orders.objects.all().order_by('id').filter(id_sim_id__sim__icontains=sim_f,client__icontains=name_f,item_id__icontains=order_f,order_status__icontains=status_F)
-            else:
-                orders_l = Orders.objects.all().order_by('id').filter(client__icontains=name_f,item_id__icontains=order_f,order_status__icontains=status_F)
-         
+            # if sim_f:
+            #     orders_l = Orders.objects.all().order_by('id').filter(id_sim__sim__icontains=sim_f,client__icontains=name_f,item_id__icontains=order_f,id_sim__operator__icontains=oper_f,order_status__icontains=status_F)
+            # else:
+            #     orders_l = Orders.objects.all().order_by('id').filter(client__icontains=name_f,item_id__icontains=order_f,id_sim__operator__icontains=oper_f,order_status__icontains=status_F)
+            orders_l = Orders.objects.all().order_by('-id').filter(id_sim__sim__icontains=sim_f,client__icontains=name_f,item_id__icontains=order_f,id_sim__operator__icontains=oper_f,order_status__icontains=status_F)
+
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
@@ -104,6 +105,12 @@ def orders_list(request):
         
     sims = Sims.objects.all()
     ord_status = Orders.order_status.field.choices
+    oper_list = Sims.operator.field.choices
+    
+    ord_st_list = []
+    for ord_s in ord_status:
+        ord = orders_all.filter(order_status=ord_s[0]).count()
+        ord_st_list.append((ord_s[0],ord_s[1],ord))
     
     paginator = Paginator(orders_l, 50)
     page = request.GET.get('page')
@@ -113,7 +120,8 @@ def orders_list(request):
         'orders_l': orders_all,
         'orders': orders,
         'sims': sims,
-        'ord_status': ord_status,
+        'ord_st_list': ord_st_list,
+        'oper_list': oper_list,
     }
     return render(request, 'painel/orders/index.html', context)
     
@@ -152,20 +160,16 @@ def ord_import(request):
         n_page = 1
         
         while n_page <= total_pages:
-            print(f'Per_Page {total_pages}')
             # Pedidos com status 'processing'
             ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page}).json()
                                     
             # Listar pedidos         
             for order in ord:
                 n_item = 1
-                print(f'Item Listar')
                 
                 # Listar itens do pedido
                 for item in order['line_items']:
-                    
-                    print(f'Item item')
-                    
+                                        
                     # Especificar produtos a serem listados
                     prod_sel = [50760, 8873, 8791, 8761]
                     if item['product_id'] not in prod_sel:
@@ -223,7 +227,7 @@ def ord_import(request):
                         elif condition_i == 'reuso-sim':
                             order_status_i = 'RS'
                         else:
-                            order_status_i = 'AS'                    
+                            order_status_i = 'PR'                    
                         
                         # Definir variáveis para salvar no banco de dados                            
                         order_add = Orders(                    
@@ -262,7 +266,7 @@ def ord_import(request):
                             'RT': 'retirada',
                             'MB': 'motoboy',
                             'RS': 'reuso',
-                            'AS': 'agd-envio',
+                            'PR': 'agd-envio',
                         }
                         status_ped = {
                             'status': status_def_sis[order_status_i]
@@ -332,12 +336,10 @@ def ord_edit(request,id):
             sim_put = Sims.objects.get(pk=order.id_sim.id)
             sim_put.sim_status = 'TC'
             sim_put.save()
-            print('Update SIM')
             # Delete SIM in Order       
             order_put = Orders.objects.get(pk=order.id)
             order_put.id_sim_id = ''
             order_put.save()
-            print('Delete SIM in Order')
         
         # Insert SIM in Order
         def insertSIM():
