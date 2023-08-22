@@ -227,7 +227,7 @@ def ord_import(request):
                         elif condition_i == 'reuso-sim':
                             order_status_i = 'RS'
                         else:
-                            order_status_i = 'PR'                    
+                            order_status_i = 'AS'                    
                         
                         # Definir variáveis para salvar no banco de dados                            
                         order_add = Orders(                    
@@ -266,7 +266,7 @@ def ord_import(request):
                             'RT': 'retirada',
                             'MB': 'motoboy',
                             'RS': 'reuso',
-                            'PR': 'agd-envio',
+                            'AS': 'agd-envio',
                         }
                         status_ped = {
                             'status': status_def_sis[order_status_i]
