@@ -22,63 +22,68 @@
         <br>
         <form action="{% url 'ord_edit' order.id %}" method="POST">
             {% csrf_token %}
-            <label class="form-label">Tipo de Chip</label>
-            <div class="form-group">
-                <input type="radio" class="btn-check" name="type_sim" id="type_sim1" value="sim" {% if order.id_sim.type_sim == 'sim' %}checked{% endif %}>
-                <label class="btn btn-outline-primary" for="type_sim1">SIM Físico</label>
-
-                <input type="radio" class="btn-check" name="type_sim" id="type_sim2" value="esim" {% if order.id_sim.type_sim == 'esim' %}checked{% endif %}>
-                <label class="btn btn-outline-primary" for="type_sim2">eSIM Virtual</label>                
+            <div class="row mb-4">
+                <div class="col-md-6 col-xl-3">
+                    <label class="form-label">Tipo de Chip</label>
+                    <div>
+                        <input type="radio" class="btn-check" name="type_sim" id="type_sim1" value="sim" {% if order.id_sim.type_sim == 'sim' %}checked{% endif %}>
+                        <label class="btn btn-outline-primary" for="type_sim1">SIM Físico</label>
+                        <input type="radio" class="btn-check" name="type_sim" id="type_sim2" value="esim" {% if order.id_sim.type_sim == 'esim' %}checked{% endif %}>
+                        <label class="btn btn-outline-primary" for="type_sim2">eSIM Virtual</label>                
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <label class="form-label">Tipo de Chip</label>
+                    <div>
+                        <input type="radio" class="btn-check" name="operator" id="operator1" value="TM" {% if order.id_sim.operator == 'TM' %}checked{% endif %}>
+                        <label class="btn btn-outline-primary" for="operator1">T-mobile</label>                    
+                        <input type="radio" class="btn-check" name="operator" id="operator2" value="CM" {% if order.id_sim.operator == 'CM' %}checked{% endif %}>
+                        <label class="btn btn-outline-primary" for="operator2">China Mobile</label>                    
+                        <input type="radio" class="btn-check" name="operator" id="operator3" value="TC" {% if order.id_sim.operator == 'TC' %}checked{% endif %}>
+                        <label class="btn btn-outline-primary" for="operator3">Telcom</label>
+                    </div>
+                </div>
             </div>
+            <label class="form-label" for="type_sim1">SIM/(e)SIM</label>
             <br>
-            <label class="form-label">Operadora / SIM</label>
-            <br>
-            <div class="input-group flex-nowrap">
-                <input type="radio" class="btn-check" name="operator" id="operator1" value="TM" {% if order.id_sim.operator == 'TM' %}checked{% endif %}>
-                <label class="btn btn-outline-primary" for="operator1">T-mobile</label>
-                
-                <input type="radio" class="btn-check" name="operator" id="operator2" value="CM" {% if order.id_sim.operator == 'CM' %}checked{% endif %}>
-                <label class="btn btn-outline-primary" for="operator2">China Mobile</label>
-                
-                <input type="radio" class="btn-check" name="operator" id="operator3" value="TC" {% if order.id_sim.operator == 'TC' %}checked{% endif %}>
-                <label class="btn btn-outline-primary" for="operator3">Telcom</label>                
-            </div>
-            <br>
-            <label class="form-label" for="type_sim1">(e)SIM</label>
-            <br>
-            <div class="input-group flex-nowrap">
-                <span class="input-group-text" id="sim"><i class="bi bi-sim"></i></span>
-                <input type="text" class="form-control" value="{{ order.id_sim.sim }}" disabled>
-                <span class="input-group-text ms-3" id="sim">Novo SIM</span>
-                <input type="text" class="form-control" name="sim" placeholder="SIM" aria-label="SIM">
-                <div class="form-text ms-3">Só preencha o campo ao lado se for alterar o SIM do pedido.</div>
+            <div class="col-md-6 col-xl-6">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text" id="sim"><i class="bi bi-sim"></i></span>
+                    <input type="text" class="form-control" value="{{ order.id_sim.sim }}" disabled>
+                    <span class="input-group-text ms-3" id="sim">Novo SIM</span>
+                    <input type="text" class="form-control" name="sim" placeholder="SIM" aria-label="SIM">
+                </div>
             </div>
             <br>
             <label class="form-label">Data de ativação</label>
             <br>
-            <div class="input-group flex-nowrap">
-                <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                <input type="type" class="form-control" value="{{ order.activation_date|date:'d/m/Y' }}" disabled>
-                <span class="input-group-text ms-3" id="activation_date">Nova data</span>
-                <input type="date" class="form-control" name="activation_date">
-                <div class="form-text ms-3">Só preencha o campo ao lado se for alterar a data do pedido.</div>
+            <div class="col-md-6 col-xl-6">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                    <input type="type" class="form-control" value="{{ order.activation_date|date:'d/m/Y' }}" disabled>
+                    <span class="input-group-text ms-3" id="activation_date">Nova data</span>
+                    <input type="date" class="form-control" name="activation_date">
+                </div>
             </div>
             <br>
             <label class="form-label">IMEI/EID</label>
             <br>
-            <div class="input-group flex-nowrap">
-                <span class="input-group-text" id="cell_imei"><i class="bi bi-phone"></i></span>
-                <input type="text" class="form-control" name="cell_imei" placeholder="IMEI" value="{% if order.cell_imei %}{{ order.cell_imei }}{% endif %}">
-                <span class="input-group-text" id="cell_eid"><i class="bi bi-phone"></i></span>
-                <input type="text" class="form-control" name="cell_eid" placeholder="EID" value="{% if order.cell_eid %}{{ order.cell_eid }}{% endif %}">
-                <div id="textSim" class="form-text ms-3">Só preencha o campo ao lado se for alterar a IMEI/EID do pedido.</div>
+            <div class="col-md-6 col-xl-6">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text" id="cell_imei"><i class="bi bi-phone"></i></span>
+                    <input type="text" class="form-control" name="cell_imei" placeholder="IMEI" value="{% if order.cell_imei %}{{ order.cell_imei }}{% endif %}">
+                    <span class="input-group-text" id="cell_eid"><i class="bi bi-phone"></i></span>
+                    <input type="text" class="form-control" name="cell_eid" placeholder="EID" value="{% if order.cell_eid %}{{ order.cell_eid }}{% endif %}">
+                </div>
             </div>
             <br>
             <label class="form-label">Rastreio</label>
             <br>
-            <div class="input-group flex-nowrap col-md-6 col-xl-3">
-                <span class="input-group-text" id="tracking"><i class="bi bi-truck"></i></span>
-                <input type="text" class="form-control" name="tracking" placeholder="Rastreio" value="{% if order.tracking %}{{ order.tracking }}{% endif %}">
+            <div class="col-md-6 col-xl-3">
+                <div class="input-group flex-nowrap">
+                    <span class="input-group-text" id="tracking"><i class="bi bi-truck"></i></span>
+                    <input type="text" class="form-control" name="tracking" placeholder="Rastreio" value="{% if order.tracking %}{{ order.tracking }}{% endif %}">
+                </div>
             </div>
             <br>
             <div class="col-md-6 col-xl-3">

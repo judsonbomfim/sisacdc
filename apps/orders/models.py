@@ -19,8 +19,9 @@ DATA = [
 ]
 
 ORDER_STATUS = [
-    ('AE', 'Agd. Envio'),
     ('AA', 'Agd. Ativação'),
+    ('AE', 'Agd. Envio'),
+    ('AG', 'Agência'),
     ('AS', 'Atribuir SIM'),
     ('AT', 'Ativado'),
     ('CC', 'Cancelado'),

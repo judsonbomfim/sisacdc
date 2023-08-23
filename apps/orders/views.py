@@ -227,6 +227,9 @@ def ord_import(request):
                         if 'RETIRADA' in shipping_i:
                             shipping_i = 'Retirada SP'
                             order_status_i = 'RT'
+                        elif 'Entrega na Agência' in shipping_i:
+                            shipping_i = 'Entr. Agência'
+                            order_status_i = 'AG'
                         elif 'Motoboy' in shipping_i:
                             order_status_i = 'MB'
                         elif condition_i == 'reuso-sim':
@@ -271,6 +274,7 @@ def ord_import(request):
                             'RT': 'retirada',
                             'MB': 'motoboy',
                             'RS': 'reuso',
+                            'AG': 'agencia',
                             'AS': 'agd-envio',
                         }
                         status_ped = {

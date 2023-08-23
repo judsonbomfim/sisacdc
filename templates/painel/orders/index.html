@@ -133,8 +133,8 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ order.get_product_display }} {{ order.get_data_day_display }}</td>
-                                <td>{% if order.countries == 0 %}-{% else %}Sim{% endif %}</td>
-                                <td>{% if order.calls == 0 %}-{% else %}Sim{% endif %}</td>
+                                <td>{% if order.countries == 0 %}-{% else %}<span class="badge text-bg-light">Sim</span>{% endif %}</td>
+                                <td>{% if order.calls == 0 %}-{% else %}<span class="badge text-bg-light">Voz</span>{% endif %}</td>
                                 <td>{{ order.days }}</td>
                                 <td>
                                     {% if order.cell_mod  %}

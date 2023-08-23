@@ -11,21 +11,24 @@ def sims_list(request):
     global sims_l
     sims_l = ''
     
-    sims_all = Sims.objects.all().order_by('id')
+    sims_all = Sims.objects.all().order_by('-id')
+    sims_l = sims_all
     
     if request.method == 'GET':
         sims_l = sims_all
     if request.method == 'POST':
         if 'up_filter' in request.POST:
             sim_f = request.POST['sim_f']
+            if sim_f != '': sims_l = sims_l.filter(sim__icontains=sim_f)
+            
             sim_type_f = request.POST['sim_type_f']
+            if sim_type_f != '': sims_l = sims_l.filter(type_sim__icontains=sim_type_f)
+            
             sim_status_f = request.POST['sim_status_f']
+            if sim_status_f != '': sims_l = sims_l.filter(sim_status__icontains=sim_status_f)
+            
             sim_oper_f = request.POST['sim_oper_f']
-            if sim_f:
-                sims_l = Sims.objects.all().order_by('id').filter(sim__icontains=sim_f,type_sim__icontains=sim_type_f,sim_status__icontains=sim_status_f,operator__icontains=sim_oper_f)
-            else:
-                sims_l = Sims.objects.all().order_by('id').filter(type_sim__startswith=sim_type_f,sim_status__icontains=sim_status_f,operator__icontains=sim_oper_f)
-
+            if sim_oper_f != '': sims_l = sims_l.filter(operator__icontains=sim_oper_f)
     
     sims_types = Sims.type_sim.field.choices
     sims_status = Sims.sim_status.field.choices
