@@ -63,22 +63,25 @@ def orders_list(request):
     orders_l = ''
     
     orders_all = Orders.objects.all().order_by('-id')
-    
     orders_l = orders_all
+    
     if request.method == 'POST':
         if 'up_filter' in request.POST:
             name_f = request.POST['ord_name_f']
+            if name_f != '': orders_l = orders_l.filter(client__icontains=name_f)
+                
             order_f = request.POST['ord_order_f']
-            sim_f = request.POST['ord_sim_f']
-            oper_f = request.POST['oper_f']
-            status_F = request.POST['ord_st_f']
+            if order_f != '': orders_l = orders_l.filter(item_id__icontains=order_f)
             
-            # if sim_f:
-            #     orders_l = Orders.objects.all().order_by('id').filter(id_sim__sim__icontains=sim_f,client__icontains=name_f,item_id__icontains=order_f,id_sim__operator__icontains=oper_f,order_status__icontains=status_F)
-            # else:
-            #     orders_l = Orders.objects.all().order_by('id').filter(client__icontains=name_f,item_id__icontains=order_f,id_sim__operator__icontains=oper_f,order_status__icontains=status_F)
-            orders_l = Orders.objects.all().order_by('-id').filter(id_sim__sim__icontains=sim_f,client__icontains=name_f,item_id__icontains=order_f,id_sim__operator__icontains=oper_f,order_status__icontains=status_F)
-
+            sim_f = request.POST['ord_sim_f']
+            if sim_f != '': orders_l = orders_l.filter(id_sim__sim__icontains=sim_f)
+            
+            oper_f = request.POST['oper_f']
+            if oper_f != '': orders_l = orders_l.filter(id_sim__operator__icontains=oper_f)
+            
+            status_F = request.POST['ord_st_f']
+            if status_F != '': orders_l = orders_l.filter(order_status__icontains=status_F)
+                        
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
@@ -107,11 +110,13 @@ def orders_list(request):
     ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
     
+    # Listar status dos pedidos
     ord_st_list = []
     for ord_s in ord_status:
         ord = orders_all.filter(order_status=ord_s[0]).count()
         ord_st_list.append((ord_s[0],ord_s[1],ord))
     
+    # Paginação
     paginator = Paginator(orders_l, 50)
     page = request.GET.get('page')
     orders = paginator.get_page(page)
