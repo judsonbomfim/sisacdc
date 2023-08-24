@@ -49,7 +49,7 @@ class Orders(models.Model):
     product = models.CharField(max_length=50, choices=PRODUCT)
     data_day = models.CharField(max_length=15, choices=DATA)
     qty = models.IntegerField()
-    coupon = models.CharField(max_length=15, default=None)
+    coupon = models.CharField(max_length=25, default=None)
     days = models.IntegerField()
     calls = models.BooleanField(default=False)
     countries = models.BooleanField(default=False)
