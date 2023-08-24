@@ -114,7 +114,7 @@
                                     </div>
                                 </td>
                                 <td>{{ order.item_id }}</td>
-                                <td>{{ order.client }}</td>
+                                <td>{{ order.client|truncatechars:30 }}</td>
                                 <td>
                                     <span
                                         data-bs-toggle="popover" data-bs-placement="top"
