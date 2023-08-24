@@ -313,10 +313,15 @@ def ord_edit(request,id):
             
         order = Orders.objects.get(pk=id)
         ord_status = Orders.order_status.field.choices
+        ord_product = Orders.product.field.choices
+        ord_data_day = Orders.data_day.field.choices
         
         context = {
             'order': order,
             'ord_status': ord_status,
+            'ord_product': ord_product,
+            'ord_data_day': ord_data_day,
+            'days': range(1, 31),
         }
         return render(request, 'painel/orders/edit.html', context)
         
@@ -330,6 +335,9 @@ def ord_edit(request,id):
         # id_sim = ''
         
         order = Orders.objects.get(pk=id)
+        days = request.POST.get('days')
+        product = request.POST.get('product')
+        data_day = request.POST.get('data_day')
         type_sim = request.POST.get('type_sim')
         operator = request.POST.get('operator')
         sim = request.POST.get('sim')
@@ -367,6 +375,7 @@ def ord_edit(request,id):
         if sim:
             if operator != None and type_sim != None:            
                 if order.id_sim:
+                    # Alterar status no sistema e no site
                     updateSIM()
                     
                 # Save SIMs
@@ -401,11 +410,15 @@ def ord_edit(request,id):
             activation_date = order.activation_date        
         
         order_put = Orders.objects.get(pk=id)
+        order_put.days = days
+        order_put.product = product
+        order_put.data_day = data_day
         order_put.activation_date = activation_date
         order_put.cell_imei = cell_imei
         order_put.cell_eid = cell_eid
         order_put.tracking = tracking
         order_put.order_status = ord_st
+
         order_put.save()
         
         # Alterar status
