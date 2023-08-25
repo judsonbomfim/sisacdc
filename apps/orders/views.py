@@ -215,7 +215,7 @@ def ord_import(request):
                             if i['key'] == 'Data de Ativação': activation_date_i = dateF(i['value'])
                             if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
                             if i['key'] == 'Número de pedido ou do chip': ord_chip_nun_i = i['value']
-                        if order['shipping_lines'][0] != '':
+                        if order['shipping_lines'][0]['method_title'] != '':
                             shipping_i = order['shipping_lines'][0]['method_title']
                         else: shipping_i = '-'
                         order_date_i = dateHour(order['date_created'])
