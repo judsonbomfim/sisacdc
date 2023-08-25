@@ -445,14 +445,14 @@ def ord_export_op(request):
         
         ord_op_f = request.POST.get('ord_op_f')
         
-        if ord_op_f == 'op_all':
-            orders_all = Orders.objects.all().order_by('id').filter(order_status='AA')
-        else:
-            orders_all = Orders.objects.all().order_by('id').filter(id_sim_id__operator__icontains=ord_op_f,order_status='AA')
+        orders_all = Orders.objects.all().order_by('id').filter(order_status='AA')
+        
+        if ord_op_f != 'op_all':
+            orders_all = orders_all.filter(id_sim_id__operator__icontains=ord_op_f)
             
         # Crie uma lista com os dados que você deseja exportar para o CSV
         data = [
-            ['Data Compra', 'Pedido', '(e)SIM', 'EID', 'IMEI','Plano', 'Dias', 'Data Aivação', 'Operadora']
+            ['Data Compra', 'Pedido', '(e)SIM', 'EID', 'IMEI','Plano', 'Dias', 'Data Aivação', 'Operadora', 'Voz', 'Países']
         ]
         
         ord_prod_list = {
@@ -475,7 +475,13 @@ def ord_export_op(request):
             else:
                 ord_op = '-'
                 ord_sim = '-'
-            data.append([ord_date,ord.item_id,ord_sim,ord.cell_eid,ord.cell_imei,ord_product,ord.days,ord_date_act,ord_op])
+            if ord.calls == True:
+                ord_calls = 'SIM'
+            else: ord_calls = ''
+            if ord.countries == True:
+                ord_countries = 'SIM'
+            else: ord_countries = ''
+            data.append([ord_date,ord.item_id,ord_sim,ord.cell_eid,ord.cell_imei,ord_product,ord.days,ord_date_act,ord_op,ord_calls,ord_countries])
 
         data_atual = date.today()
         
