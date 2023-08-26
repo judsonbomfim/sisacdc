@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 import os
 import csv
 from django.http import HttpResponse
@@ -8,7 +9,7 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from woocommerce import API
 from django.utils.text import slugify
-from apps.orders.models import Orders
+from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 
 # Conect woocommerce api
@@ -346,6 +347,7 @@ def ord_edit(request,id):
         cell_eid = request.POST.get('cell_eid')
         tracking = request.POST.get('tracking')
         ord_st = request.POST.get('ord_st_f')
+        ord_note = request.POST.get('ord_note')
         
         # Update SIM in Order and update SIM
         def updateSIM():
@@ -407,9 +409,18 @@ def ord_edit(request,id):
             
         # Update Order
         if activation_date == '':
-            activation_date = order.activation_date        
+            activation_date = order.activation_date
+            
+        # Save Note
+        add_sim = Notes( 
+            id_item = Orders.objects.get(pk=order.id),
+            id_user = User.objects.get(pk=request.user.id),
+            note = ord_note,
+        )
+        add_sim.save()
+          
         
-        order_put = Orders.objects.get(pk=id)
+        order_put = Orders.objects.get(pk=order.id)
         order_put.days = days
         order_put.product = product
         order_put.data_day = data_day
@@ -418,7 +429,6 @@ def ord_edit(request,id):
         order_put.cell_eid = cell_eid
         order_put.tracking = tracking
         order_put.order_status = ord_st
-
         order_put.save()
         
         # Alterar status

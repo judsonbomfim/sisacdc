@@ -65,7 +65,6 @@ class Orders(models.Model):
     id_sim = models.ForeignKey(Sims, on_delete=models.DO_NOTHING, null=True, blank=True)
     condition = models.CharField(max_length=15, choices=CONDITION, default='novo-sim')
     tracking = models.CharField(max_length=25, null=True, blank=True)
-    notes = models.IntegerField(null=True, blank=True, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
@@ -78,14 +77,14 @@ class Orders(models.Model):
     
 class Notes(models.Model):
     id = models.AutoField(primary_key=True)
-    id_pedido = models.ForeignKey(Orders, on_delete=models.DO_NOTHING, related_name='note')
-    id_user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    id_item = models.ForeignKey(Orders, on_delete=models.DO_NOTHING, related_name='order_notes', default=None)
+    id_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_notes')
     note = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'notes'
         verbose_name = 'Nota'
         verbose_name_plural = 'Notas'
-        ordering = ['id_pedido']
+        ordering = ['-id']
     def __str__(self):
-        return str(self.id_pedido)
+        return str(self.id_item)
