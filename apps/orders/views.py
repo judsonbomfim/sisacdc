@@ -142,13 +142,14 @@ def store_order_det(request,id):
     }
     return render(request, 'painel/orders/details.html', context)
 
-def orders_del_man(request):
-    orders_all = Orders.objects.all().filter(order_status='DS')
-    for ord in orders_all:
-        ord_del = Orders.objects.get(pk=ord.id)
-        ord_del.delete()
-    print('***Pedidos Deletados com sucesso!***')
-    return redirect('orders_list')
+# def orders_del_man(request):
+#     request = ''
+#     orders_all = Orders.objects.all().filter(order_status='DS')
+#     for ord in orders_all:
+#         ord_del = Orders.objects.get(pk=ord.id)
+#         ord_del.delete()
+#     print('***Pedidos Deletados com sucesso!***')
+#     return redirect('orders_list')
 
 # Update orders
 @login_required(login_url='/login/')
