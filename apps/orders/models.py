@@ -26,6 +26,7 @@ ORDER_STATUS = [
     ('AT', 'Ativado'),
     ('CC', 'Cancelado'),
     ('CN', 'Concluido'),
+    ('DS', 'Desativado'),
     ('MB', 'Motoboy'),
     ('PR', 'Processando'),
     ('RE', 'Reembolsar'),

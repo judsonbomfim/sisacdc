@@ -82,7 +82,7 @@ def orders_list(request):
             
             status_F = request.POST['ord_st_f']
             if status_F != '': orders_l = orders_l.filter(order_status__icontains=status_F)
-                        
+
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
@@ -123,7 +123,7 @@ def orders_list(request):
     orders = paginator.get_page(page)
 
     context = {
-        'orders_l': orders_all,
+        'orders_l': orders_l,
         'orders': orders,
         'sims': sims,
         'ord_st_list': ord_st_list,
@@ -406,6 +406,10 @@ def ord_edit(request,id):
                     insertSIM()
                 else:
                     msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
+        
+        # Liberar SIMs
+        if ord_st == 'CC' or ord_st == 'DS':
+            updateSIM
             
         # Update Order
         if activation_date == '':
@@ -431,10 +435,13 @@ def ord_edit(request,id):
         order_put.order_status = ord_st
         order_put.save()
         
+        
         # Alterar status
         # Status sis : Status Loja
         status_sis_site = st_sis_site()
         if ord_st in status_sis_site:
+            
+            
             status_ped = {
                 'status': status_sis_site[ord_st]
             }
