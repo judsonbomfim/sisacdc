@@ -184,15 +184,15 @@ def ord_import(request):
             for order in ord:
                 n_item = 1
                 
-                # id_ord = order["id"]
-                # print('ORDER ID----------------',id_ord)
-                # conf_ord = Orders.objects.get(order_id=id_ord)
-                # print('verificar----------------',conf_ord)
+                id_ord = order["id"]
+                print('ORDER ID----------------',id_ord)
+                
+                # Verificar pedido repetido
 
-                # # Verificar pedido repetido
-                # if order["id"] == Orders.objects.get(order_id=id_ord):
-                #     print('PASSOU----------------')
-                #     continue                                  
+                id_sis = Orders.objects.filter(order_id=id_ord)
+                if id_sis:
+                    continue
+                else: pass
                 
                 # Listar itens do pedido
                 for item in order['line_items']:
