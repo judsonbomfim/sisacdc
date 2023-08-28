@@ -189,7 +189,7 @@ def sims_ord(request):
             
             # Escolher operadora
             if product_i == 'chip-internacional-europa' and countries_i == False:
-                operator_i = 'TC'
+                operator_i = 'TM'
             elif product_i == 'chip-internacional-eua':
                 operator_i = 'TM'
             else: operator_i = 'CM'
