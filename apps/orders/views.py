@@ -165,6 +165,8 @@ def ord_import(request):
         total_pages = int(order_p.headers['X-WP-TotalPages'])
         n_page = 1
         
+        orders_all = Orders.objects.all()
+        
         while n_page <= total_pages:
             # Pedidos com status 'processing'
             ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page}).json()
@@ -180,7 +182,9 @@ def ord_import(request):
                     prod_sel = [50760, 8873, 8791, 8761]
                     if item['product_id'] not in prod_sel:
                         continue
-                                        
+                    if item['id'] == orders_all.filter(order_id=item['id']):
+                        continue  
+                                 
                     qtd = item['quantity']
                     q_i = 1 
                     
@@ -357,7 +361,7 @@ def ord_edit(request,id):
             sim_put.save()
             # Delete SIM in Order       
             order_put = Orders.objects.get(pk=order.id)
-            order_put.id_sim_id = ''
+            order_put.id_sim = ''
             order_put.save()
         
         # Insert SIM in Order
@@ -380,7 +384,7 @@ def ord_edit(request,id):
                     # Alterar status no sistema e no site
                     updateSIM()
                     
-                # Save SIMs
+                # Save SIMs - Insert Stock
                 add_sim = Sims( 
                     sim = sim,
                     type_sim = type_sim,
@@ -398,7 +402,7 @@ def ord_edit(request,id):
         else:
             if order.id_sim:
                 
-                if (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim) and (operator != None and type_sim != None):                
+                if (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim):                
                     updateSIM()                    
                     insertSIM()
             else:
@@ -408,8 +412,12 @@ def ord_edit(request,id):
                     msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         
         # Liberar SIMs
+        print('Liberar SIMs----------------',ord_st)
         if ord_st == 'CC' or ord_st == 'DS':
-            updateSIM
+            print('Selecionado----------------',ord_st)
+            if order.id_sim:
+                print('Inserir----------------',ord_st)                
+                updateSIM
             
         # Update Order
         if activation_date == '':
