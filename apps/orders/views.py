@@ -142,9 +142,11 @@ def store_order_det(request,id):
     }
     return render(request, 'painel/orders/details.html', context)
 
-def orders_del_man():
-    orders_del = Orders.objects.all().filter(order_status='DS')
-    orders_del.delete()
+def orders_del_man(request):
+    orders_all = Orders.objects.all().filter(order_status='DS')
+    for ord in orders_all:
+        ord_del = Orders.objects.get(pk=ord.id)
+        ord_del.delete()
     print('***Pedidos Deletados com sucesso!***')
     return redirect('orders_list')
 
