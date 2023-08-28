@@ -178,11 +178,21 @@ def ord_import(request):
         
         while n_page <= total_pages:
             # Pedidos com status 'processing'
-            ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page}).json()
-                                    
+            ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page}).json()                                   
+
             # Listar pedidos         
             for order in ord:
                 n_item = 1
+                
+                # id_ord = order["id"]
+                # print('ORDER ID----------------',id_ord)
+                # conf_ord = Orders.objects.get(order_id=id_ord)
+                # print('verificar----------------',conf_ord)
+
+                # # Verificar pedido repetido
+                # if order["id"] == Orders.objects.get(order_id=id_ord):
+                #     print('PASSOU----------------')
+                #     continue                                  
                 
                 # Listar itens do pedido
                 for item in order['line_items']:
@@ -191,8 +201,6 @@ def ord_import(request):
                     prod_sel = [50760, 8873, 8791, 8761]
                     if item['product_id'] not in prod_sel:
                         continue
-                    if item['id'] == orders_all.filter(order_id=item['id']):
-                        continue  
                                  
                     qtd = item['quantity']
                     q_i = 1 
