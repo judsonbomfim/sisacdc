@@ -34,12 +34,11 @@
             <div class="col-md-12">
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
                     <div class="btn-group me-2" role="group" aria-label="First group">
-                {% for ord_sts in ord_st_list %}
-                {% if ord_sts.2 != 0 %}
-                {% comment %} <span class="badge text-bg-secondary">{{ord_sts.1}} ({{ord_sts.2}})</span> {% endcomment %}
-                      <button type="button" class="btn btn-outline-primary">{{ord_sts.1}} ({{ord_sts.2}})</button>
-                {% endif %}
-                {% endfor %}
+                    {% for ord_sts in ord_st_list %}
+                    {% if ord_sts.2 != 0 %}
+                    <button type="button" class="btn btn-outline-primary">{{ord_sts.1}} ({{ord_sts.2}})</button>
+                    {% endif %}
+                    {% endfor %}
                     </div>
                 </div>
             </div>

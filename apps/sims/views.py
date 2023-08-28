@@ -29,6 +29,21 @@ def sims_list(request):
             
             sim_oper_f = request.POST['sim_oper_f']
             if sim_oper_f != '': sims_l = sims_l.filter(operator__icontains=sim_oper_f)
+            
+    if 'up_status' in request.POST:
+            sim_id = request.POST.getlist('sim_id')
+            sim_st = request.POST.get('sim_st')
+            print('sim_id------',sim_id)
+            print('sim_st------',sim_st)
+            if sim_id and sim_st:
+                for o_id in sim_id:
+                    sim = Sims.objects.get(pk=o_id)
+                    sim.sim_status = sim_st
+                    sim.save()
+                    
+                messages.success(request,f'SIM(s) atualizado(s) com sucesso!')
+            else:
+                messages.info(request,f'Você precisa marcar alguma opção')    
     
     sims_types = Sims.type_sim.field.choices
     sims_status = Sims.sim_status.field.choices
