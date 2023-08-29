@@ -33,8 +33,6 @@ def sims_list(request):
     if 'up_status' in request.POST:
             sim_id = request.POST.getlist('sim_id')
             sim_st = request.POST.get('sim_st')
-            print('sim_id------',sim_id)
-            print('sim_st------',sim_st)
             if sim_id and sim_st:
                 for o_id in sim_id:
                     sim = Sims.objects.get(pk=o_id)

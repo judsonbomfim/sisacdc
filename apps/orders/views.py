@@ -48,6 +48,7 @@ def dateDMA(dma):
 def st_sis_site():
     status_sis_site = {
         'AE': 'agd-envio',
+        'AA': 'agd-ativacao',        
         'CC': 'cancelled',
         'MB': 'motoboy',
         'RS': 'reuso',
@@ -92,6 +93,21 @@ def orders_list(request):
                     order.order_status = ord_s
                     order.save()
                     
+                    if ord_s == 'CC' or ord_s == 'DS':
+                        if order.id_sim:
+                            # Update SIM
+                            sim_put = Sims.objects.get(pk=order.id_sim.id)
+                            if order.id_sim.type_sim == 'esim':
+                                sim_put.sim_status = 'TC'
+                            else:
+                                sim_put.sim_status = 'DS'
+                            sim_put.sim_status = 'TC'
+                            sim_put.save()
+                            # Delete SIM in Order
+                            order_put = Orders.objects.get(pk=order.id)
+                            order_put.id_sim_id = ''
+                            order_put.save()
+                    
                     # Alterar status
                     # Status sis : Status Loja
                     status_sis_site = st_sis_site()
@@ -131,26 +147,6 @@ def orders_list(request):
     }
     return render(request, 'painel/orders/index.html', context)
     
-# Store order details
-@login_required(login_url='/login/')
-def store_order_det(request,id):
-    apiStore = conectApiStore()
-    ord = apiStore.get(f'orders/{id}').json()
-    
-    context = {
-        'ord': ord,
-    }
-    return render(request, 'painel/orders/details.html', context)
-
-# def orders_del_man(request):
-#     request = ''
-#     orders_all = Orders.objects.all().filter(order_status='DS')
-#     for ord in orders_all:
-#         ord_del = Orders.objects.get(pk=ord.id)
-#         ord_del.delete()
-#     print('***Pedidos Deletados com sucesso!***')
-#     return redirect('orders_list')
-
 # Update orders
 @login_required(login_url='/login/')
 def ord_import(request):
@@ -183,9 +179,7 @@ def ord_import(request):
             # Listar pedidos         
             for order in ord:
                 n_item = 1
-                
                 id_ord = order["id"]
-                print('ORDER ID----------------',id_ord)
                 
                 # Verificar pedido repetido
 
@@ -314,8 +308,7 @@ def ord_import(request):
                         
                         msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
                         
-            n_page += 1
-            
+            n_page += 1            
                             
     # Mensagem de sucesso
     if n_item_total == 0:
@@ -374,9 +367,12 @@ def ord_edit(request,id):
         def updateSIM():
             # Update SIM
             sim_put = Sims.objects.get(pk=order.id_sim.id)
-            sim_put.sim_status = 'TC'
+            if order.id_sim.type_sim == 'esim':
+                sim_put.sim_status = 'DS'
+            else:
+                sim_put.sim_status = 'TC'
             sim_put.save()
-            # Delete SIM in Order       
+            # Delete SIM in Order
             order_put = Orders.objects.get(pk=order.id)
             order_put.id_sim_id = ''
             order_put.save()
@@ -410,7 +406,7 @@ def ord_edit(request,id):
                 )
                 add_sim.save()
                 
-                # Update order                
+                # Update order
                 order_put = Orders.objects.get(pk=order.id)
                 order_put.id_sim_id = add_sim.id
                 order_put.save()  
@@ -429,25 +425,22 @@ def ord_edit(request,id):
                     msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         
         # Liberar SIMs
-        print('Liberar SIMs----------------',ord_st)
         if ord_st == 'CC' or ord_st == 'DS':
-            print('Selecionado----------------',ord_st)
             if order.id_sim:
-                print('Inserir----------------',ord_st)                
-                updateSIM
+                updateSIM()
             
         # Update Order
         if activation_date == '':
             activation_date = order.activation_date
-            
-        # Save Note
-        add_sim = Notes( 
-            id_item = Orders.objects.get(pk=order.id),
-            id_user = User.objects.get(pk=request.user.id),
-            note = ord_note,
-        )
-        add_sim.save()
-          
+         
+        # Save Notes
+        if ord_note:
+            add_sim = Notes( 
+                id_item = Orders.objects.get(pk=order.id),
+                id_user = User.objects.get(pk=request.user.id),
+                note = ord_note,
+            )
+            add_sim.save()
         
         order_put = Orders.objects.get(pk=order.id)
         order_put.days = days
@@ -460,18 +453,18 @@ def ord_edit(request,id):
         order_put.order_status = ord_st
         order_put.save()
         
-        
-        # Alterar status
-        # Status sis : Status Loja
-        status_sis_site = st_sis_site()
-        if ord_st in status_sis_site:
-            
-            
-            status_ped = {
-                'status': status_sis_site[ord_st]
-            }
-            apiStore = conectApiStore()                    
-            apiStore.put(f'orders/{order.order_id}', status_ped).json()
+        # Verificar se houve mudança de status
+        if ord_st != order.order_status:
+            # Alterar status
+            # Status sis : Status Loja
+            status_sis_site = st_sis_site()
+            if ord_st in status_sis_site:            
+                
+                status_ped = {
+                    'status': status_sis_site[ord_st]
+                }
+                apiStore = conectApiStore()                    
+                apiStore.put(f'orders/{order.order_id}', status_ped).json()
     
         for msg_e in msg_error:
             messages.error(request,msg_e)
