@@ -353,8 +353,8 @@ def ord_edit(request,id):
         msg_info = []
         global msg_error
         msg_error = []
-        # global id_sim
-        # id_sim = ''
+        global id_sim
+        id_sim = ''
         
         order = Orders.objects.get(pk=id)
         days = request.POST.get('days')
@@ -378,7 +378,7 @@ def ord_edit(request,id):
             sim_put.save()
             # Delete SIM in Order       
             order_put = Orders.objects.get(pk=order.id)
-            order_put.id_sim = ''
+            order_put.id_sim_id = ''
             order_put.save()
         
         # Insert SIM in Order
@@ -544,9 +544,6 @@ def ord_export_op(request):
     }
     
     return render(request, 'painel/orders/export_op.html', context)
-
-
-    
 
 # # def vendasSem(request):
 # apiStore = conectApiStore()
