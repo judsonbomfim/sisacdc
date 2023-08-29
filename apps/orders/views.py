@@ -545,6 +545,9 @@ def ord_export_op(request):
     
     return render(request, 'painel/orders/export_op.html', context)
 
+
+    
+
 # # def vendasSem(request):
 # apiStore = conectApiStore()
 # dateNow = datetime.datetime.now()  
