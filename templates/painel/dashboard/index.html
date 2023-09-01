@@ -1,0 +1,141 @@
+{% extends 'painel/shared/base.html' %}
+
+{% load static %}
+{% load date_day %}
+
+{% block title_page %}<i class="bi bi-speedometer2"></i> Dashboard{% endblock %}
+{% block js_custom %}<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 col-xl-3 mb-4">
+        <div class="card shadow border-start-info py-2">
+            <div class="card-body">
+                <div class="row align-items-center no-gutters">
+                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
+                    <div class="col me-2">
+                        <div class="text-info fw-bold text-xs mb-1">
+                            <h6 class="text-danger fw-bold m-0">Ativações</h6>
+                        </div>
+                        <div class="row g-0 align-items-center">
+                            <div class="col-auto col-xxl-9">
+                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">Ativações para hoje</span></div>
+                            </div>
+                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">0</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3 mb-4">
+        <div class="card shadow border-start-info py-2">
+            <div class="card-body">
+                <div class="row align-items-center no-gutters">
+                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
+                    <div class="col me-2">
+                        <div class="text-info fw-bold text-xs mb-1">
+                            <h6 class="text-primary fw-bold m-0">Estoque T-mobile</h6>
+                        </div>
+                        <div class="row g-0 align-items-center">
+                            <div class="col-auto col-xxl-3">
+                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
+                            </div>
+                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_tm }}</span></div>
+                            <div class="col-auto col-xxl-3">
+                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
+                            </div>
+                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tm }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3 mb-4">
+        <div class="card shadow border-start-info py-2">
+            <div class="card-body">
+                <div class="row align-items-center no-gutters">
+                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
+                    <div class="col me-2">
+                        <div class="text-info fw-bold text-xs mb-1">
+                            <h6 class="text-success fw-bold m-0">Estoque China Mobile</h6>
+                        </div>
+                        <div class="row g-0 align-items-center">
+                            <div class="col-auto col-xxl-3">
+                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
+                            </div>
+                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_cm }}</span></div>
+                            <div class="col-auto col-xxl-3">
+                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
+                            </div>
+                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_cm }}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3 mb-4">
+        <div class="card shadow border-start-info py-2">
+            <div class="card-body">
+                <div class="row align-items-center no-gutters">
+                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
+                    <div class="col me-2">
+                        <div class="text-info fw-bold text-xs mb-1">
+                            <h6 class="text-info fw-bold m-0">Estoque Telcom</h6>
+                        </div>
+                        <div class="row g-0 align-items-center">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-auto col-xxl-3">
+                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
+                                </div>
+                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_tc }}</span></div>
+                                <div class="col-auto col-xxl-3">
+                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
+                                </div>
+                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tc }}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% comment %} <div class="col-md-6 col-xl-6 mb-4">
+        <div class="card shadow border-start-info py-2">
+            <div class="card-body">
+                <canvas id="vendasSem" style="width:100%;max-width:100%"></canvas>
+            </div>
+        </div>
+    </div> {% endcomment %}
+</div>
+
+{% endblock %}
+
+{% block script_custom %}
+<script>
+    const xValues = [50,60,70,80,90,100,110,120,130,140,150];
+    const yValues = [7,8,8,9,4,9,10,11,14,14,15];
+    
+    new Chart("vendasSem", {
+      type: "line",
+      data: {
+        labels: xValues,
+        datasets: [{
+          fill: false,
+          lineTension: 0,
+          backgroundColor: "rgba(0,0,255,1.0)",
+          borderColor: "rgba(0,0,255,0.1)",
+          data: yValues
+        }]
+      },
+      options: {
+        legend: {display: false},
+        scales: {
+          yAxes: [{ticks: {min: 4, max:16}}],
+        }
+      }
+    });
+    </script>
+    {% endblock %}

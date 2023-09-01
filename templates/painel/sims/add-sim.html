@@ -1,0 +1,47 @@
+{% extends 'painel/shared/base.html' %}
+{% load static %}
+{% load date_day %}
+{% block title_page %}<i class="bi bi-sim"></i> SIMs{% endblock %}
+{% block content %}
+<div class="card shadow">
+    <div class="card-header py-3">
+        <p class="text-secondary m-0 fw-bold">Adicionar SIMS</p>
+    </div>
+    <div class="card-body">
+        <form action="{% url 'sims_add_sim' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label class="form-label">Tipo de Chip</label>
+            <div class="form-group">
+                <input type="radio" class="btn-check" name="type_sim" id="type_sim1" value="sim" autocomplete="off" checked>
+                <label class="btn btn-outline-primary" for="type_sim1">SIM Físico</label>
+                
+                <input type="radio" class="btn-check" name="type_sim" id="type_sim2" value="esim" autocomplete="off" disabled>
+                <label class="btn btn-outline-primary" for="type_sim2">eSIM Virtual</label>
+            </div>
+            <br>
+            <label class="form-label">Operadora</label>
+            <div class="form-group">
+
+                <input type="radio" class="btn-check" name="operator" id="operator1" value="TM" required>
+                <label class="btn btn-outline-primary" for="operator1">T-mobile</label>
+                
+                <input type="radio" class="btn-check" name="operator" id="operator2" value="CM" required>
+                <label class="btn btn-outline-primary" for="operator2">China Mobile</label>
+                
+                <input type="radio" class="btn-check" name="operator" id="operator3" value="TC"required>
+                <label class="btn btn-outline-primary" for="operator3">Telcom</label>
+            </div>
+            <br>
+            <div class="form-group">
+                <label for="formFile" class="form-label">Enviar arquivo CSV</label>
+                <input class="form-control" type="file" id="formFile" name="sim" required>
+            </div>
+            <br>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary mb-3">Cadastrar SIMs</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

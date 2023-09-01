@@ -1,0 +1,18 @@
+{% extends 'painel/shared/base.html' %}
+{% load static %}
+{% block title_page %}<i class="bi bi-shop"></i> Pedidos{% endblock %}
+{% block content %}
+<div class="card shadow">
+    <div class="card-header py-3">
+        <p class="text-secondary m-0 fw-bold">Update de pedidos</p>
+    </div>
+    <div class="card-body">
+        <form action="{% url 'ord_import' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary mb-3">Fazer update dos pedidos da loja</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
