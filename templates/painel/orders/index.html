@@ -91,6 +91,7 @@
                             <th>Pedido</th>
                             <th>Cliente</th>
                             <th>(e)SIM</th>
+                            <th>Op.</th>
                             <th>Produto</th>
                             <th>Países</th>
                             <th>Voz</th>
@@ -131,7 +132,8 @@
                                         </i></a>
                                     {% endif %}
                                 </td>
-                                <td>{{ order.id_sim.operator }} - {{ order.get_product_display }} {{ order.get_data_day_display }}</td>
+                                <td>{{ order.id_sim.operator }}</td>
+                                <td>{{ order.get_product_display }} {{ order.get_data_day_display }}</td>
                                 <td>{% if order.countries == 0 %}-{% else %}<span class="badge text-bg-light">Sim</span>{% endif %}</td>
                                 <td>{% if order.calls == 0 %}-{% else %}<span class="badge text-bg-light">Voz</span>{% endif %}</td>
                                 <td>{{ order.days }}</td>

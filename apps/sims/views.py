@@ -185,17 +185,16 @@ def sims_ord(request):
             countries_i = ord.countries
             type_sim_i = ord.type_sim
             
-            # Escolher operadora
-            # if product_i == 'chip-internacional-europa' and countries_i == False:
-            #     operator_i = 'TC'
-            # elif product_i == 'chip-internacional-eua':
+            # if product_i == 'chip-internacional-eua':
             #     operator_i = 'TM'
-            # else: operator_i = 'CM'
-            
-            if product_i == 'chip-internacional-eua':
+            # else: operator_i = 'CM'            
+
+            # Escolher operadora
+            if product_i == 'chip-internacional-europa' and countries_i == False:
+                operator_i = 'TC'
+            elif product_i == 'chip-internacional-eua':
                 operator_i = 'TM'
             else: operator_i = 'CM'            
-            
             
             # First SIM
             sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
