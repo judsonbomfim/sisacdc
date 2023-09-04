@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from apps.sims.models import Sims
 from apps.orders.models import Orders
+from apps.orders.views import ApiStore
 
 @login_required(login_url='/login/')
 def sims_list(request):
@@ -207,7 +208,7 @@ def sims_ord(request):
             # update order
             # Save SIMs           
             order_put = Orders.objects.get(pk=id_id_i)
-            order_put.order_status = 'ES'
+            order_put.order_status = 'AA'
             order_put.id_sim_id = sim_ds.id
             order_put.save()
                 
@@ -215,6 +216,12 @@ def sims_ord(request):
             sim_put = Sims.objects.get(pk=sim_ds.id)
             sim_put.sim_status = 'AT'
             sim_put.save()
+            
+            status_ped = {
+                            'status': 'agd-ativacao'
+                        }
+            apiStore = ApiStore.conectApiStore()       
+            apiStore.put(f'orders/{order_id_i}', status_ped).json()
             
             # mensagem
             msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')

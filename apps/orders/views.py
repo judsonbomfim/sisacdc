@@ -13,17 +13,18 @@ from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 
 # Conect woocommerce api
-def conectApiStore():
-    wcapi = API(
-        url = str(os.getenv('url_site')),
-        consumer_key = str(os.getenv('consumer_key')),
-        consumer_secret = str(os.getenv('consumer_secret')),
-        wp_api = True,
-        version = 'wc/v3',
-        query_string_auth = True,
-        timeout = 5000
-    )
-    return wcapi
+class ApiStore():
+    def conectApiStore():
+        wcapi = API(
+            url = str(os.getenv('url_site')),
+            consumer_key = str(os.getenv('consumer_key')),
+            consumer_secret = str(os.getenv('consumer_secret')),
+            wp_api = True,
+            version = 'wc/v3',
+            query_string_auth = True,
+            timeout = 5000
+        )
+        return wcapi
 # Date - 2023-05-16T18:40:27
 def dateHour(dh):
     date = dh[0:10]
@@ -45,19 +46,21 @@ def dateDMA(dma):
     data_dma = f'{dia}/{mes}/{ano}'
     return data_dma
 
-def st_sis_site():
-    status_sis_site = {
-        'AE': 'agd-envio',
-        'AA': 'agd-ativacao',        
-        'CC': 'cancelled',
-        'ES': 'em-separacao',
-        'MB': 'motoboy',
-        'RS': 'reuso',
-        'RT': 'retirada',
-        'RE': 'reembolsar',
-        'CN': 'completed',        
-    }
-    return status_sis_site
+class StatusSis():
+    def st_sis_site():
+        status_sis_site = {
+            'AE': 'agd-envio',
+            'AS': 'em-separacao',
+            'AA': 'agd-ativacao',        
+            'CC': 'cancelled',
+            'ES': 'em-separacao',
+            'MB': 'motoboy',
+            'RS': 'reuso',
+            'RT': 'retirada',
+            'RE': 'reembolsar',
+            'CN': 'completed',        
+        }
+        return status_sis_site
 
 # Order list
 @login_required(login_url='/login/')
@@ -111,13 +114,13 @@ def orders_list(request):
                     
                     # Alterar status
                     # Status sis : Status Loja
-                    status_sis_site = st_sis_site()
+                    status_sis_site = StatusSis.st_sis_site()
                     
                     if ord_s in status_sis_site:
                         status_ped = {
                             'status': status_sis_site[ord_s]
                         }
-                        apiStore = conectApiStore()                    
+                        apiStore = ApiStore.conectApiStore()                    
                         apiStore.put(f'orders/{order.order_id}', status_ped).json()
                     
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
@@ -156,7 +159,7 @@ def ord_import(request):
         return render(request, 'painel/orders/import.html')    
        
     if request.method == 'POST':
-        apiStore = conectApiStore()
+        apiStore = ApiStore.conectApiStore()
         
         global n_item_total
         n_item_total = 0
@@ -287,13 +290,7 @@ def ord_import(request):
                         
                         # Alterar status
                         # Status sis : Status Loja
-                        status_def_sis = {
-                            'RT': 'retirada',
-                            'MB': 'motoboy',
-                            'RS': 'reuso',
-                            'AG': 'agencia',
-                            'AS': 'agd-envio',
-                        }
+                        status_def_sis = StatusSis.st_sis_site()
                         status_ped = {
                             'status': status_def_sis[order_status_i]
                         }
@@ -458,13 +455,13 @@ def ord_edit(request,id):
         if ord_st != order.order_status:
             # Alterar status
             # Status sis : Status Loja
-            status_sis_site = st_sis_site()
+            status_sis_site = StatusSis.st_sis_site()
             if ord_st in status_sis_site:            
                 
                 status_ped = {
                     'status': status_sis_site[ord_st]
                 }
-                apiStore = conectApiStore()                    
+                apiStore = ApiStore.conectApiStore()                    
                 apiStore.put(f'orders/{order.order_id}', status_ped).json()
     
         for msg_e in msg_error:
