@@ -50,6 +50,7 @@ def st_sis_site():
         'AE': 'agd-envio',
         'AA': 'agd-ativacao',        
         'CC': 'cancelled',
+        'ES': 'em-separacao',
         'MB': 'motoboy',
         'RS': 'reuso',
         'RT': 'retirada',
