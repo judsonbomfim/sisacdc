@@ -217,11 +217,11 @@ def sims_ord(request):
             sim_put.sim_status = 'AT'
             sim_put.save()
             
-            status_ped = {
-                            'status': 'agd-ativacao'
-                        }
-            apiStore = ApiStore.conectApiStore()       
-            apiStore.put(f'orders/{order_id_i}', status_ped).json()
+            # status_ped = {
+            #                 'status': 'agd-ativacao'
+            #             }
+            # apiStore = ApiStore.conectApiStore()       
+            # apiStore.put(f'orders/{order_id_i}', status_ped).json()
             
             # mensagem
             msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
