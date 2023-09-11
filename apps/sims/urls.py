@@ -6,5 +6,5 @@ urlpatterns = [
     path('adicionar/sim/', sims_add_sim, name='sims_add_sim'),
     path('adicionar/esim/', sims_add_esim, name='sims_add_esim'),
     path('sims/pedidos', sims_ord, name='sims_ord'),
-    path('sims/estoque/exportar', exportSIMs, name='exportSIMs')
+    path('estoque/exportar', exportSIMs, name='exportSIMs')
 ]
