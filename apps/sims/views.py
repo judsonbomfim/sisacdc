@@ -1,5 +1,8 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render
+import csv
+from django.http import HttpResponse
+from datetime import date
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
@@ -239,3 +242,24 @@ def sims_ord(request):
         messages.success(request,'Todos os pedido(s) atualizados com sucesso')   
         
     return render(request, 'painel/sims/sim-order.html')
+
+def exportSIMs(request):
+    
+    sims_all = Sims.objects.all().order_by('id')
+    data = [
+        ['ID', 'SIM', 'Tipo', 'Operadora', 'Status']
+    ]
+    for sim in sims_all:
+        data.append([sim.id,sim.sim,sim.type_sim,sim.operator,sim.sim_status])
+    
+    data_atual = date.today()
+    # Crie um objeto CSVWriter para escrever os dados no formato CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="Estoque SIMs-{data_atual}.csv"'
+    writer = csv.writer(response)
+
+    # Escreva os dados no objeto CSVWriter
+    for row in data:
+        writer.writerow(row)
+
+    return response

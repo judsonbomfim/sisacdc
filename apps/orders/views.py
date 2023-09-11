@@ -388,8 +388,9 @@ def ord_edit(request,id):
             else:       
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
             
-        # Verificar se SIM já existe
+        # Se SIM preenchico
         if sim:
+            # Verificar se Operadora e Tipo de SIm estão marcados
             if operator != None and type_sim != None:            
                 if order.id_sim:
                     # Alterar status no sistema e no site
@@ -412,12 +413,11 @@ def ord_edit(request,id):
                 msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         else:
             if order.id_sim:
-                
-                if (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim):                
-                    updateSIM()                    
+                if (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim):
+                    updateSIM()
                     insertSIM()
             else:
-                if operator != None and type_sim != None:                 
+                if operator != None and type_sim != None:
                     insertSIM()
                 else:
                     msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
