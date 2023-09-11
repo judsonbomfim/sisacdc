@@ -113,7 +113,7 @@ def sims_add_sim(request):
                         messages.error(request,'Houve um erro ao gravar a lista. Verifique se o arquivo está no formato correto')
                         return render(request, 'painel/sims/add-sim.html')
                 
-                sims_all = Sims.objects.all().filter(sim=linha)
+                sims_all = Sims.objects.all().filter(sim=linha).filter(type_sim='sim')
                 if sims_all:
                     messages.info(request,f'O SIM {linha} já está cadastrado no sistema')
                     continue
@@ -155,6 +155,11 @@ def sims_add_esim(request):
                 fs = FileSystemStorage()
                 file = fs.save(sim_img.name, sim_img)
                 fileurl = fs.url(file)
+                
+                sims_all = Sims.objects.all().filter(sim=sim_i[0]).filter(type_sim='esim')
+                if sims_all:
+                    messages.info(request,f'O SIM {sim_i[0]} já está cadastrado no sistema')
+                    continue
                 # Save SIMs
                 add_sim = Sims(
                     sim = sim_i[0],
@@ -163,7 +168,6 @@ def sims_add_esim(request):
                     operator = operator
                 )
                 add_sim.save()
-
 
             messages.success(request,'Lista gravada com sucesso')
             return render(request, 'painel/sims/add-esim.html')
