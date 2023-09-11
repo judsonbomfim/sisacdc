@@ -364,11 +364,8 @@ def ord_edit(request,id):
         # Update SIM in Order and update SIM
         def updateSIM():
             # Update SIM
-            sim_put = Sims.objects.get(pk=order.id_sim.id)
-            if order.id_sim.type_sim == 'esim':
-                sim_put.sim_status = 'DS'
-            else:
-                sim_put.sim_status = 'TC'
+            sim_put = Sims.objects.get(pk=order.id_sim.id)            
+            sim_put.sim_status = 'TC'
             sim_put.save()
             # Delete SIM in Order
             order_put = Orders.objects.get(pk=order.id)
@@ -390,37 +387,40 @@ def ord_edit(request,id):
             
         # Se SIM preenchico
         if sim:
-            # Verificar se Operadora e Tipo de SIm estão marcados
+            # Verificar se Operadora e Tipo de SIM estão marcados
             if operator != None and type_sim != None:            
                 if order.id_sim:
                     # Alterar status no sistema e no site
                     updateSIM()
-                    
-                # Save SIMs - Insert Stock
-                add_sim = Sims( 
-                    sim = sim,
-                    type_sim = type_sim,
-                    operator = operator,
-                    sim_status = 'AT',
-                )
-                add_sim.save()
                 
-                # Update order
-                order_put = Orders.objects.get(pk=order.id)
-                order_put.id_sim_id = add_sim.id
-                order_put.save()  
+                sims_all = Sims.objects.all().filter(sim=sim)
+                if sims_all:
+                    messages.info(request,f'O SIM {sim} já está cadastrado no sistema')
+                else:
+                    # Save SIMs - Insert Stock
+                    add_sim = Sims( 
+                        sim = sim,
+                        type_sim = type_sim,
+                        operator = operator,
+                        sim_status = 'AT',
+                    )
+                    add_sim.save()
+                
+                    # Update order
+                    order_put = Orders.objects.get(pk=order.id)
+                    order_put.id_sim_id = add_sim.id
+                    order_put.save()  
             else:
                 msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         else:
+            # Troca de SIM
             if order.id_sim:
-                if (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim):
+                if (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim) or request.POST.get('upOper') != '':
                     updateSIM()
                     insertSIM()
             else:
                 if operator != None and type_sim != None:
                     insertSIM()
-                else:
-                    msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         
         # Liberar SIMs
         if ord_st == 'CC' or ord_st == 'DS':

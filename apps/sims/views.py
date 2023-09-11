@@ -112,7 +112,12 @@ def sims_add_sim(request):
                     else:
                         messages.error(request,'Houve um erro ao gravar a lista. Verifique se o arquivo está no formato correto')
                         return render(request, 'painel/sims/add-sim.html')
-                               
+                
+                sims_all = Sims.objects.all().filter(sim=linha)
+                if sims_all:
+                    messages.info(request,f'O SIM {linha} já está cadastrado no sistema')
+                    continue
+                  
                 # Save SIMs
                 add_sim = Sims(
                     sim = linha,
