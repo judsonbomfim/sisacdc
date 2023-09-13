@@ -395,7 +395,18 @@ def ord_edit(request,id):
                 
                 sims_all = Sims.objects.all().filter(sim=sim)
                 if sims_all:
-                    messages.info(request,f'O SIM {sim} já está cadastrado no sistema')
+                    if order.condition == 'reuso-sim':
+                        # Update order
+                        sim_id = sims_all[0].id
+                        print('SIM ID =======',sims_all[0].id)
+                        sims_put = Sims.objects.get(pk=sim_id)
+                        sims_put.sim_status = 'AT'
+                        sims_put.save()
+                        order_put = Orders.objects.get(pk=order.id)
+                        order_put.id_sim_id = sim_id
+                        order_put.save()  
+                    else:
+                        messages.info(request,f'O SIM {sim} já está cadastrado no sistema')
                 else:
                     # Save SIMs - Insert Stock
                     add_sim = Sims( 
