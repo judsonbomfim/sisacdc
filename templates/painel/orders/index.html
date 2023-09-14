@@ -70,7 +70,7 @@
                     {% endfor %}
                 </select>
             </div>  
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <select class="form-select" name="ord_st_f">
                     <option value="" selected>Todos Status</option>
                     {% for ord_st in ord_st_list %}
@@ -82,6 +82,9 @@
             </div>          
             <div class="col-md-1">
                 <button type="submit" class="btn btn-primary" name="up_filter">Filtrar</button>
+            </div>
+            <div class="col-md-1 p-2">
+                <a class="dropdown-item" href="{% url 'orders_list' %}"><i class="bi bi-arrow-clockwise"></i> Limpar</a>
             </div>
             <div id="dataTable" class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
                 <table id="dataTable" class="table table-bordered table-striped table-hover my-0">
@@ -191,7 +194,7 @@
                 <ul class="pagination">
                     {% if orders.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
+                        <a class="page-link" href="?page={{ orders.previous_page_number }}{{ url_filter }}" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
@@ -199,7 +202,7 @@
                     <li class="page-item"><a class="page-link" href="">{{ orders.number }} de {{ orders.paginator.num_pages }}</a></li>
                     {% if orders.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
+                        <a class="page-link" href="?page={{ orders.next_page_number }}{{ url_filter }}" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>

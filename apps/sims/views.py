@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.http import HttpResponse, QueryDict
+from django.urls import reverse
 import csv
-from django.http import HttpResponse
 from datetime import date
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -19,33 +20,52 @@ def sims_list(request):
     sims_l = sims_all
     
     if request.method == 'GET':
-        sims_l = sims_all
+        
+        sim_f = request.GET.get('sim')
+        sim_type_f = request.GET.get('sim_type')    
+        sim_status_f = request.GET.get('sim_status')
+        sim_oper_f = request.GET.get('sim_oper')
+    
     if request.method == 'POST':
-        if 'up_filter' in request.POST:
-            sim_f = request.POST['sim_f']
-            if sim_f != '': sims_l = sims_l.filter(sim__icontains=sim_f)
+        
+        sim_f = request.POST.get('sim_f')
+        sim_type_f = request.POST.get('sim_type_f')       
+        sim_status_f = request.POST.get('sim_status_f')
+        sim_oper_f = request.POST.get('sim_oper_f')
             
-            sim_type_f = request.POST['sim_type_f']
-            if sim_type_f != '': sims_l = sims_l.filter(type_sim__icontains=sim_type_f)
-            
-            sim_status_f = request.POST['sim_status_f']
-            if sim_status_f != '': sims_l = sims_l.filter(sim_status__icontains=sim_status_f)
-            
-            sim_oper_f = request.POST['sim_oper_f']
-            if sim_oper_f != '': sims_l = sims_l.filter(operator__icontains=sim_oper_f)
-            
-    if 'up_status' in request.POST:
-            sim_id = request.POST.getlist('sim_id')
-            sim_st = request.POST.get('sim_st')
-            if sim_id and sim_st:
-                for o_id in sim_id:
-                    sim = Sims.objects.get(pk=o_id)
-                    sim.sim_status = sim_st
-                    sim.save()
-                    
-                messages.success(request,f'SIM(s) atualizado(s) com sucesso!')
-            else:
-                messages.info(request,f'Você precisa marcar alguma opção')    
+        if 'up_status' in request.POST:
+                sim_id = request.POST.getlist('sim_id')
+                sim_st = request.POST.get('sim_st')
+                if sim_id and sim_st:
+                    for o_id in sim_id:
+                        sim = Sims.objects.get(pk=o_id)
+                        sim.sim_status = sim_st
+                        sim.save()
+                        
+                    messages.success(request,f'SIM(s) atualizado(s) com sucesso!')
+                else:
+                    messages.info(request,f'Você precisa marcar alguma opção')
+    
+    # FIlters
+    
+    url_filter = ''
+    
+    if sim_f:
+        sims_l = sims_l.filter(sim__icontains=sim_f)
+        url_filter += f"&sim={sim_f}"
+
+    if sim_type_f: 
+        sims_l = sims_l.filter(type_sim__icontains=sim_type_f)        
+        url_filter += f"&sim_type={sim_type_f}"
+    
+    if sim_status_f: 
+        sims_l = sims_l.filter(sim_status__icontains=sim_status_f)
+        url_filter += f"&sim_status={sim_status_f}"
+    
+    if sim_oper_f: 
+        sims_l = sims_l.filter(operator__icontains=sim_oper_f)
+        url_filter += f"&sim_oper={sim_oper_f}"
+        
     
     sims_types = Sims.type_sim.field.choices
     sims_status = Sims.sim_status.field.choices
@@ -63,7 +83,10 @@ def sims_list(request):
     sim_tc = sims_all.filter(sim_status='DS',operator='TC', type_sim='sim').count()
     esim_tc = sims_all.filter(sim_status='DS',operator='TC', type_sim='esim').count()
     
+    url = reverse('sims_index')
+    
     context= {
+        'url': url,
         'sims': sims,
         'sims_types': sims_types,
         'sims_status': sims_status,
@@ -74,8 +97,9 @@ def sims_list(request):
         'esim_cm': esim_cm,
         'sim_tc': sim_tc,
         'esim_tc': esim_tc,
-    }    
-    
+        'url_filter': url_filter,
+    }
+       
     return render(request, 'painel/sims/index.html', context)
 
 @login_required(login_url='/login/')

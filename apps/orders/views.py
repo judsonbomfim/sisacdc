@@ -71,22 +71,21 @@ def orders_list(request):
     orders_all = Orders.objects.all().order_by('-id')
     orders_l = orders_all
     
+    if request.method == 'GET':
+        
+        ord_name_f = request.GET.get('ord_name')
+        ord_order_f = request.GET.get('ord_order')    
+        ord_sim_f = request.GET.get('ord_sim')
+        oper_f = request.GET.get('oper')
+        ord_st_f = request.GET.get('ord_st')
+    
     if request.method == 'POST':
-        if 'up_filter' in request.POST:
-            name_f = request.POST['ord_name_f']
-            if name_f != '': orders_l = orders_l.filter(client__icontains=name_f)
-                
-            order_f = request.POST['ord_order_f']
-            if order_f != '': orders_l = orders_l.filter(item_id__icontains=order_f)
-            
-            sim_f = request.POST['ord_sim_f']
-            if sim_f != '': orders_l = orders_l.filter(id_sim__sim__icontains=sim_f)
-            
-            oper_f = request.POST['oper_f']
-            if oper_f != '': orders_l = orders_l.filter(id_sim__operator__icontains=oper_f)
-            
-            status_F = request.POST['ord_st_f']
-            if status_F != '': orders_l = orders_l.filter(order_status__icontains=status_F)
+        
+        ord_name_f = request.POST.get('ord_name_f')
+        ord_order_f = request.POST.get('ord_order_f')       
+        ord_sim_f = request.POST.get('ord_sim_f')
+        oper_f = request.POST.get('oper_f')
+        ord_st_f = request.POST.get('ord_st_f')
 
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
@@ -126,7 +125,31 @@ def orders_list(request):
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')        
-        
+    
+     # FIlters
+    
+    url_filter = ''
+
+    if ord_name_f:
+        orders_l = orders_l.filter(client__icontains=ord_name_f)
+        url_filter += f"&ord_name={ord_name_f}"
+
+    if ord_order_f: 
+        orders_l = orders_l.filter(item_id__icontains=ord_order_f)   
+        url_filter += f"&ord_order={ord_order_f}"
+
+    if ord_sim_f: 
+        orders_l = orders_l.filter(id_sim__sim__icontains=ord_sim_f)
+        url_filter += f"&ord_sim={ord_sim_f}"
+    
+    if oper_f: 
+        orders_l = orders_l.filter(id_sim__operator__icontains=oper_f)
+        url_filter += f"&oper={oper_f}"
+
+    if ord_st_f: 
+        orders_l = orders_l.filter(order_status__icontains=ord_st_f)
+        url_filter += f"&ord_st_f={ord_st_f}"
+
     sims = Sims.objects.all()
     ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
@@ -148,6 +171,7 @@ def orders_list(request):
         'sims': sims,
         'ord_st_list': ord_st_list,
         'oper_list': oper_list,
+        'url_filter': url_filter,
     }
     return render(request, 'painel/orders/index.html', context)
     
