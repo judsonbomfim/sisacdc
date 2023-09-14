@@ -148,7 +148,7 @@ def orders_list(request):
 
     if ord_st_f: 
         orders_l = orders_l.filter(order_status__icontains=ord_st_f)
-        url_filter += f"&ord_st_f={ord_st_f}"
+        url_filter += f"&ord_st={ord_st_f}"
 
     sims = Sims.objects.all()
     ord_status = Orders.order_status.field.choices
