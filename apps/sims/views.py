@@ -228,8 +228,8 @@ def sims_ord(request):
      
 
             # Escolher operadora
-            # if product_i == 'chip-internacional-europa' and countries_i == False:
-            if product_i == 'chip-internacional-europa' and countries_i == False and type_sim_i == 'esim':
+            # if product_i == 'chip-internacional-europa' and countries_i == False and type_sim_i == 'esim':
+            if product_i == 'chip-internacional-europa' and countries_i == False:
                 operator_i = 'TC'
             elif product_i == 'chip-internacional-eua':
                 operator_i = 'TM'
@@ -276,6 +276,7 @@ def sims_ord(request):
         
     return render(request, 'painel/sims/sim-order.html')
 
+@login_required(login_url='/login/')
 def exportSIMs(request):
     
     sims_all = Sims.objects.all().order_by('id')
