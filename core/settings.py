@@ -27,11 +27,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',
+    'rolepermissions',
     'apps.orders.apps.OrdersConfig',
     'apps.sims.apps.SimsConfig',
     'apps.dashboard.apps.DashboardConfig',
     'apps.users.apps.UsersConfig',
-    'storages',
 ]
 
 MIDDLEWARE = [
@@ -138,3 +139,6 @@ MESSAGE_TAGS = {
     constants.INFO: 'info',
     constants.WARNING: 'warning',
 }
+
+ROLEPERMISSIONS_MODULE = 'core.roles'
+KEYCLOAK_PERMISSIONS_METHOD = 'role'    

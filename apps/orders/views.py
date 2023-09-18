@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from rolepermissions.decorators import has_permission_decorator, has_role_decorator
 import os
 import csv
 from django.http import HttpResponse
@@ -64,6 +65,7 @@ class StatusSis():
 
 # Order list
 @login_required(login_url='/login/')
+@has_permission_decorator('view_orders')
 def orders_list(request):
     global orders_l
     orders_l = ''
@@ -164,7 +166,7 @@ def orders_list(request):
     paginator = Paginator(orders_l, 50)
     page = request.GET.get('page')
     orders = paginator.get_page(page)
-
+    
     context = {
         'orders_l': orders_l,
         'orders': orders,
@@ -177,6 +179,7 @@ def orders_list(request):
     
 # Update orders
 @login_required(login_url='/login/')
+@has_permission_decorator('import_orders')
 def ord_import(request):
     if request.method == 'GET':
 
@@ -345,6 +348,7 @@ def ord_import(request):
 
 # Order Edit
 @login_required(login_url='/login/')
+@has_permission_decorator('edit_orders')
 def ord_edit(request,id):
     if request.method == 'GET':
             
@@ -507,6 +511,7 @@ def ord_edit(request,id):
         return redirect('orders_list')
 
 @login_required(login_url='/login/')
+@has_permission_decorator('export_orders')
 def ord_export_op(request):
     
     if request.method == 'POST':

@@ -1,5 +1,6 @@
 {% extends 'painel/shared/base.html' %}
 {% load static %}
+{% load permission_tags %}
 {% load date_day %}
 {% load status_count %}
 {% block title_page %}<i class="bi bi-shop"></i> Pedidos{% endblock %}
@@ -172,6 +173,7 @@
                                 </td>
                                 <td>{{ order.get_order_status_display }}</td>
                                 <td>
+                                    {% if request.user|can:'view_sims' %}
                                     <a href="{% url 'ord_edit' order.id %}">
                                         <i class="bi-pencil-square me-2 text-info" data-bs-toggle="tooltip"
                                         data-bs-placement="top"
@@ -179,6 +181,7 @@
                                         data-bs-title="Editar">
                                         </i></a>
                                     </a>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

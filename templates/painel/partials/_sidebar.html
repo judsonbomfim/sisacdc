@@ -1,4 +1,5 @@
 {% load static %}
+{% load permission_tags %}
 {% url 'orders_list' as orders_list %}
 {% url 'ord_update' as ord_update %}
 {% url 'sims_index' as sims_index %}
@@ -22,27 +23,45 @@
                             <i class="bi bi-speedometer2"></i><span class="mx-2">Dashboard</span>
                         </a>
                     </li>
+                    {% if request.user|can:'view_orders' %}
                     <li class="nav-item">
                         <a class="dropdown-toggle nav-link" aria-expanded="{% if '/pedidos/' in request.path %}true{% else %}false{% endif %}" data-bs-toggle="dropdown" href="#">
                             <i class="bi bi-sim"></i><span class="mx-2">Pedidoss</span>
                         </a>
                         <div class="dropdown-menu {% if '/pedidos/' in request.path %}show{% endif %}" style="background: rgb(33,80,111);border-style: none;border-radius: 0; {% if '/pedidos/' in request.path %}data-bs-popper='static'{% endif %}">
+                            {% if request.user|can:'view_orders' %}
                             <a class="dropdown-item link-light {% if request.path == orders_list %}active{% endif %}" href="{% url 'orders_list' %}"><i class="bi bi-sim"></i> Pedidos</a>
+                            {% endif %}
+                            {% if request.user|can:'import_orders' %}
                             <a class="dropdown-item link-light {% if request.path == ord_import %}active{% endif %}" href="{% url 'ord_import' %}"><i class="bi bi-sim"></i> Importar Pedidos</a>
+                            {% endif %}
+                            {% if request.user|can:'export_orders' %}
                             <a class="dropdown-item link-light {% if request.path == ord_export_op %}active{% endif %}" href="{% url 'ord_export_op' %}"><i class="bi bi-sim"></i> Exportar Ativação</a>
+                            {% endif %}
                         </div>
-                    </li>                                     
+                    </li>
+                    {% endif %}
+                    {% if request.user|can:'view_sims' %}
                     <li class="nav-item dropdown {% if '/sims/' in request.path %}show{% endif %}">
                         <a class="dropdown-toggle nav-link" aria-expanded="{% if '/sims/' in request.path %}true{% else %}false{% endif %}" data-bs-toggle="dropdown" href="#">
                             <i class="bi bi-sim"></i><span class="mx-2">Estoque de SIMs</span>
                         </a>
                         <div class="dropdown-menu {% if '/sims/' in request.path %}show{% endif %}" style="background: rgb(33,80,111);border-style: none;border-radius: 0; {% if '/sims/' in request.path %}data-bs-popper='static'{% endif %}">
+                            {% if request.user|can:'view_sims' %}
                             <a class="dropdown-item link-light {% if request.path == sims_index %}active{% endif %}" href="{% url 'sims_index' %}"><i class="bi bi-sim"></i> Estoque</a>
+                            {% endif %}
+                            {% if request.user|can:'add_sims' %}
                             <a class="dropdown-item link-light {% if request.path == sims_add_sim %}active{% endif %}" href="{% url 'sims_add_sim' %}"><i class="bi bi-sim"></i> Adicionar SIMs</a>
+                            {% endif %}
+                            {% if request.user|can:'add_esims' %}
                             <a class="dropdown-item link-light {% if request.path == sims_add_esim %}active{% endif %}" href="{% url 'sims_add_esim' %}"><i class="bi bi-sim"></i> Adicionar eSIMs</a>
+                            {% endif %}
+                            {% if request.user|can:'add_ord_sims' %}
                             <a class="dropdown-item link-light {% if request.path == sims_ord %}active{% endif %}" href="{% url 'sims_ord' %}"><i class="bi bi-sim"></i> Add a Pedidos</a>
+                            {% endif %}
                         </div>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </nav>
