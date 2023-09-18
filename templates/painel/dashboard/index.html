@@ -1,4 +1,5 @@
 {% extends 'painel/shared/base.html' %}
+{% load permission_tags %}
 
 {% load static %}
 {% load date_day %}
@@ -8,6 +9,7 @@
 
 {% block content %}
 <div class="row">
+    {% if request.user|can:'edit_orders' %}
     <div class="col-md-6 col-xl-3 mb-4">
         <div class="card shadow border-start-info py-2">
             <div class="card-body">
@@ -102,6 +104,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     {% comment %} <div class="col-md-6 col-xl-6 mb-4">
         <div class="card shadow border-start-info py-2">
             <div class="card-body">

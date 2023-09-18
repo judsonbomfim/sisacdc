@@ -32,6 +32,7 @@
     <div class="card-body">
         <form class="row g-3" action="{% url 'orders_list' %}" method="POST">
             {% csrf_token %}
+            {% if request.user|can:'edit_sims' %}
             <div class="col-md-12">
                 <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
                     <div class="btn-group me-2" role="group" aria-label="First group">
@@ -43,6 +44,8 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
+            {% if request.user|can:'edit_orders' %}
             <div class="col-md-2">
                 <select class="form-select" name="ord_staus">
                     <option value="" selected>Alterar Status</option>
@@ -54,6 +57,7 @@
             <div class="col-md-1">
                 <button type="submit" class="btn btn-primary" name="up_status">Alterar</button>
             </div>
+            {% endif %}
             <div class="col-md-2">
                 <input type="text" class="form-control" placeholder="Nome" name="ord_name_f">
             </div>
@@ -173,7 +177,7 @@
                                 </td>
                                 <td>{{ order.get_order_status_display }}</td>
                                 <td>
-                                    {% if request.user|can:'view_sims' %}
+                                    {% if request.user|can:'edit_orders' %}
                                     <a href="{% url 'ord_edit' order.id %}">
                                         <i class="bi-pencil-square me-2 text-info" data-bs-toggle="tooltip"
                                         data-bs-placement="top"

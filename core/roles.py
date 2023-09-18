@@ -3,7 +3,6 @@ from rolepermissions.roles import AbstractUserRole
 class Atendente(AbstractUserRole):
     available_permissions = {
         'view_orders': True,
-        'view_sims': True,
     }
 class Gerente(AbstractUserRole):
     available_permissions = {
