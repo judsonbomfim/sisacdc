@@ -109,7 +109,9 @@
                             <th>Ativação</th>
                             <th>Término</th>
                             <th>Status</th>
+                            {% if request.user|can:'edit_orders' %}
                             <th>Ações</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
@@ -176,8 +178,8 @@
                                     {% endwith %}
                                 </td>
                                 <td>{{ order.get_order_status_display }}</td>
+                                {% if request.user|can:'edit_orders' %}
                                 <td>
-                                    {% if request.user|can:'edit_orders' %}
                                     <a href="{% url 'ord_edit' order.id %}">
                                         <i class="bi-pencil-square me-2 text-info" data-bs-toggle="tooltip"
                                         data-bs-placement="top"
@@ -185,8 +187,8 @@
                                         data-bs-title="Editar">
                                         </i></a>
                                     </a>
-                                    {% endif %}
                                 </td>
+                                {% endif %}
                             </tr>
                             {% endfor %}
                         {% else %}
