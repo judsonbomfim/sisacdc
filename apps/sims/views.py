@@ -300,7 +300,7 @@ def exportSIMs(request):
 
 login_required(login_url='/login/')
 def delSIMs(request):
-    sims_all = Sims.objects.all().filter(sim_status='CC').sim_status(type_sim='TC')
+    sims_all = Sims.objects.all().filter(sim_status='CC').filter(sim_status='TC')
     for sim in sims_all:
         sim.delete()
     return HttpResponse('SIMs deletados com sucesso')
