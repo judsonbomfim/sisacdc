@@ -297,3 +297,10 @@ def exportSIMs(request):
         writer.writerow(row)
 
     return response
+
+login_required(login_url='/login/')
+def delSIMs(request):
+    sims_all = Sims.objects.all().filter(sim_status='CC').sim_status(type_sim='TC')
+    for sim in sims_all:
+        sim.delete()
+    return HttpResponse('SIMs deletados com sucesso')
