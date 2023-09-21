@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from rolepermissions.decorators import has_permission_decorator, has_role_decorator
 from django.shortcuts import render
 from django.http import HttpResponse, QueryDict
 from django.urls import reverse
@@ -300,7 +301,17 @@ def exportSIMs(request):
 
 login_required(login_url='/login/')
 def delSIMs(request):
-    sims_all = Sims.objects.all().filter(sim_status='CC').sim_status(type_sim='TC')
-    for sim in sims_all:
+    sims_cc = Sims.objects.filter(sim_status='CC')
+    sims_tc = Sims.objects.filter(sim_status='TC')
+    print('sims_cc=====',sims_cc)
+    print('sims_tc=====',sims_tc)
+    
+    for sim in sims_cc:
+        print('deletado=====',sim.sim)
         sim.delete()
+    
+    for sim in sims_tc:
+        print('deletado=====',sim.sim)
+        sim.delete()
+    
     return HttpResponse('SIMs deletados com sucesso')
