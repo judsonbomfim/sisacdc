@@ -388,6 +388,7 @@ def ord_edit(request,id):
         tracking = request.POST.get('tracking')
         ord_st = request.POST.get('ord_st_f')
         ord_note = request.POST.get('ord_note')
+        up_oper = request.POST.get('upOper')
         
         # Update SIM in Order and update SIM
         def updateSIM():
@@ -454,7 +455,7 @@ def ord_edit(request,id):
         else:
             # Troca de SIM
             if order.id_sim:
-                if (order.id_sim.operator != operator or order.id_sim.type_sim != type_sim) or request.POST.get('upOper') != '':
+                if order.id_sim.operator != operator or order.id_sim.type_sim != type_sim or up_oper != None:
                     updateSIM()
                     insertSIM()
             else:
