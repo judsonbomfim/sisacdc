@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
-from rolepermissions.decorators import has_permission_decorator, has_role_decorator
+from rolepermissions.decorators import has_permission_decorator
 from django.shortcuts import render
-from django.http import HttpResponse, QueryDict
+from django.http import HttpResponse
 from django.urls import reverse
 import csv
 from datetime import date
@@ -301,17 +301,19 @@ def exportSIMs(request):
 
 login_required(login_url='/login/')
 def delSIMs(request):
+    orders = Orders.objects.all()
+    
     sims_cc = Sims.objects.filter(sim_status='CC')
     sims_tc = Sims.objects.filter(sim_status='TC')
-    print('sims_cc=====',sims_cc)
-    print('sims_tc=====',sims_tc)
     
     for sim in sims_cc:
-        print('deletado=====',sim.sim)
+        if orders.filter(id_sim=sim.id):
+            continue
         sim.delete()
     
     for sim in sims_tc:
-        print('deletado=====',sim.sim)
+        if orders.filter(id_sim=sim.id):
+            continue
         sim.delete()
     
     return HttpResponse('SIMs deletados com sucesso')
