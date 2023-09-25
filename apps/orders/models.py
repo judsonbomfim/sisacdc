@@ -27,6 +27,7 @@ ORDER_STATUS = [
     ('CC', 'Cancelado'),
     ('CN', 'Concluido'),
     ('ES', 'Em Separação'),
+    ('EE', 'Enviar eSIM'),
     ('MB', 'Motoboy'),
     ('PR', 'Processando'),
     ('RE', 'Reembolsar'),

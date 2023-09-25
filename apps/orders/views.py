@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from rolepermissions.decorators import has_permission_decorator, has_role_decorator
+from rolepermissions.decorators import has_permission_decorator
 import os
 import csv
 from django.http import HttpResponse
@@ -427,7 +427,6 @@ def ord_edit(request,id):
                     if order.condition == 'reuso-sim':
                         # Update order
                         sim_id = sims_all[0].id
-                        print('SIM ID =======',sims_all[0].id)
                         sims_put = Sims.objects.get(pk=sim_id)
                         sims_put.sim_status = 'AT'
                         sims_put.save()
@@ -520,6 +519,7 @@ def ord_export_op(request):
         ord_op_f = request.POST.get('ord_op_f')
         
         orders_all = Orders.objects.all().order_by('id').filter(order_status='AA')
+        print('================',orders_all)
         
         if ord_op_f != 'op_all':
             orders_all = orders_all.filter(id_sim_id__operator__icontains=ord_op_f)
@@ -576,6 +576,12 @@ def ord_export_op(request):
     }
     
     return render(request, 'painel/orders/export_op.html', context)
+
+def send_esim(request):
+    if request.method == 'GET':
+
+        return render(request, 'painel/orders/send_esim.html')    
+
 
 # # def vendasSem(request):
 # apiStore = conectApiStore()

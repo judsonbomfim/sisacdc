@@ -11,6 +11,7 @@ urlpatterns = [
     path('pedidos/', include('apps.orders.urls')),
     path('sims/', include('apps.sims.urls')),
     path('', include('apps.users.urls')),
+    path('email/', include('apps.send_email.urls')),
 ]
 
 if settings.DEBUG:

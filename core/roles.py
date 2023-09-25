@@ -15,4 +15,5 @@ class Gerente(AbstractUserRole):
         'add_esims': True,
         'edit_sims': True,
         'add_ord_sims': True,
+        'send_esims': True,
     }

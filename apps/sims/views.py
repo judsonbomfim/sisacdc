@@ -247,7 +247,10 @@ def sims_ord(request):
             # update order
             # Save SIMs           
             order_put = Orders.objects.get(pk=id_id_i)
-            order_put.order_status = 'ES'
+            if sim_ds.id.type_sim == 'esim':
+                order_put.order_status = 'EE'
+            else:
+                order_put.order_status = 'ES'
             order_put.id_sim_id = sim_ds.id
             order_put.save()
                 

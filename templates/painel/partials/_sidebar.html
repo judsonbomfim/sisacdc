@@ -38,6 +38,9 @@
                             {% if request.user|can:'export_orders' %}
                             <a class="dropdown-item link-light {% if request.path == ord_export_op %}active{% endif %}" href="{% url 'ord_export_op' %}"><i class="bi bi-sim"></i> Exportar Ativação</a>
                             {% endif %}
+                            {% if request.user|can:'send_esims' %}
+                            <a class="dropdown-item link-light {% if request.path == esims %}active{% endif %}" href="{% url 'send_esims' %}"><i class="bi bi-sim"></i> Enviar eSIMs</a>
+                            {% endif %}
                         </div>
                     </li>
                     {% endif %}
