@@ -49,7 +49,7 @@ def send_email(request):
         
         # Up Status
         order_put = Orders.objects.get(pk=order.id)
-        order_put.order_status = 'CN'
+        order_put.order_status = 'AA'
         order_put.save()
         
         print(f'Email enviado para {name} - {email}')

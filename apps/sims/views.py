@@ -245,15 +245,16 @@ def sims_ord(request):
                 continue
             
             # update order
-            # Save SIMs           
+            # Save SIMs
+            if sim_ds.type_sim == 'esim': 
+                status_ord = 'EE'
+            else: status_ord = ord.order_status
+            
             order_put = Orders.objects.get(pk=id_id_i)
-            if sim_ds.id.type_sim == 'esim':
-                order_put.order_status = 'EE'
-            else:
-                order_put.order_status = 'ES'
-            order_put.id_sim_id = sim_ds.id
+            order_put.id_sim_id = sim_ds.id            
+            order_put.order_status = status_ord
             order_put.save()
-                
+            
             # update sim
             sim_put = Sims.objects.get(pk=sim_ds.id)
             sim_put.sim_status = 'AT'
