@@ -69,7 +69,7 @@ def send_email(request, id=None):
         add_sim = Notes( 
             id_item = Orders.objects.get(pk=order.id),
             id_user = User.objects.get(pk=request.user.id),
-            note = f'eSIM para o e-mail do cliente',
+            note = f'eSIM enviado para o e-mail do cliente',
             type_note = 'S',
         )
         add_sim.save()
