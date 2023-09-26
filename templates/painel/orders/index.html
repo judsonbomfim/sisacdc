@@ -181,12 +181,19 @@
                                 {% if request.user|can:'edit_orders' %}
                                 <td>
                                     <a href="{% url 'ord_edit' order.id %}">
-                                        <i class="bi-pencil-square me-2 text-info" data-bs-toggle="tooltip"
+                                        <i class="bi bi-pencil-square pe-1 text-info" 
+                                        data-bs-toggle="tooltip"
                                         data-bs-placement="top"
                                         data-bs-custom-class="custom-tooltip"
-                                        data-bs-title="Editar">
-                                        </i></a>
-                                    </a>
+                                        data-bs-title="Editar"></i></a>
+                                    {% if order.id_sim.type_sim == 'esim' %}
+                                    <a href="{% url 'resend_email' order.id %}">
+                                        <i class="bi bi-envelope-at pe-1 text-primary" 
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        data-bs-custom-class="custom-tooltip"
+                                        data-bs-title="Reenviar e-amil"></i></a>
+                                    {% endif %}
                                 </td>
                                 {% endif %}
                             </tr>

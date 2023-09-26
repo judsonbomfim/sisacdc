@@ -8,8 +8,12 @@ from django.contrib import messages
 from apps.orders.models import Orders
 from apps.orders.views import ApiStore, StatusSis
 
-def send_email(request):
-    orders_all = Orders.objects.filter(order_status='EE')
+def send_email(request, id=None):
+    if id:
+        orders_all = Orders.objects.filter(pk=id)
+    else:
+        orders_all = Orders.objects.filter(order_status='EE')
+        
     url_site = 'https://painel.acasadochip.com'
     url_img = f'{url_site}/static/email/'
     
@@ -52,17 +56,21 @@ def send_email(request):
         email.attach_alternative(html_content, "text/html")
         email.send()
         
-        # Up Status
-        order_put = Orders.objects.get(pk=order.id)
-        order_put.order_status = 'AA'
-        order_put.save()
-        
-        apiStore = ApiStore.conectApiStore()                    
-        apiStore.put(f'orders/{order.order_id}', {'status': 'agd-ativacao'}).json()
+        if not id:
+            # Up Status
+            order_put = Orders.objects.get(pk=order.id)
+            order_put.order_status = 'AA'
+            order_put.save()
+            
+            apiStore = ApiStore.conectApiStore()                    
+            apiStore.put(f'orders/{order.order_id}', {'status': 'agd-ativacao'}).json()
 
         print(f'Email enviado para {name} - {client_email} - {order.order_id}')
     
         # return HttpResponse('Email enviado com sucesso!')
-        messages.success(request,f'E-mails enviados com sucesso!')
-        
-    return redirect('send_esims')
+        messages.success(request,f'E-mail(s) enviado(s) com sucesso!')
+    
+    if id:
+        return redirect('orders_list')
+    else:
+        return redirect('send_esims')

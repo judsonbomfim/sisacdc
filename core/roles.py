@@ -3,6 +3,7 @@ from rolepermissions.roles import AbstractUserRole
 class Atendente(AbstractUserRole):
     available_permissions = {
         'view_orders': True,
+        'send_esims_but': True,
     }
 class Gerente(AbstractUserRole):
     available_permissions = {
@@ -16,4 +17,5 @@ class Gerente(AbstractUserRole):
         'edit_sims': True,
         'add_ord_sims': True,
         'send_esims': True,
+        'send_esims_but': True,
     }
