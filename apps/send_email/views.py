@@ -6,15 +6,20 @@ from django.utils.html import strip_tags
 from django.conf import settings
 from django.contrib import messages
 from apps.orders.models import Orders
+from apps.orders.views import ApiStore, StatusSis
 
 def send_email(request):
     orders_all = Orders.objects.filter(order_status='EE')
     url_site = 'https://painel.acasadochip.com'
     url_img = f'{url_site}/static/email/'
+    
+    if not orders_all:
+        messages.info(request,f'Não há pedidos para enviar eSIMs!')
+        return redirect('send_esims')
       
     for order in orders_all:
         name = order.client
-        email = order.email
+        client_email = order.email
         order_id = order.item_id
         qrcode = order.id_sim.link
         
@@ -42,7 +47,7 @@ def send_email(request):
             #from email
             settings.DEFAULT_FROM_EMAIL,
             #to
-            [email],
+            [client_email],
         )
         email.attach_alternative(html_content, "text/html")
         email.send()
@@ -52,8 +57,12 @@ def send_email(request):
         order_put.order_status = 'AA'
         order_put.save()
         
-        print(f'Email enviado para {name} - {email}')
+        apiStore = ApiStore.conectApiStore()                    
+        apiStore.put(f'orders/{order.order_id}', {'status': 'agd-ativacao'}).json()
+
+        print(f'Email enviado para {name} - {client_email} - {order.order_id}')
     
         # return HttpResponse('Email enviado com sucesso!')
         messages.success(request,f'E-mails enviados com sucesso!')
+        
     return redirect('send_esims')

@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from apps.sims.models import Sims
 from apps.orders.models import Orders
-from apps.orders.views import ApiStore
+from apps.orders.views import ApiStore, StatusSis
 
 @login_required(login_url='/login/')
 def sims_list(request):
@@ -248,7 +248,7 @@ def sims_ord(request):
             # Save SIMs
             if sim_ds.type_sim == 'esim': 
                 status_ord = 'EE'
-            else: status_ord = ord.order_status
+            else: status_ord = 'ES'
             
             order_put = Orders.objects.get(pk=id_id_i)
             order_put.id_sim_id = sim_ds.id            
@@ -258,15 +258,18 @@ def sims_ord(request):
             # update sim
             sim_put = Sims.objects.get(pk=sim_ds.id)
             sim_put.sim_status = 'AT'
-            sim_put.save()
+            sim_put.save()           
             
-            # status_ped = {
-            #                 'status': 'agd-ativacao'
-            #             }
-            # apiStore = ApiStore.conectApiStore()       
-            # apiStore.put(f'orders/{order_id_i}', status_ped).json()
+            status_sis_site = StatusSis.st_sis_site()
+                    
+            if status_ord in status_sis_site:
+                status_ped = {
+                    'status': status_sis_site[status_ord]
+                }
+                apiStore = ApiStore.conectApiStore()                    
+                apiStore.put(f'orders/{order_id_i}', status_ped).json()
             
-            # mensagem
+            
             msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
             
             n_item_total += 1 
