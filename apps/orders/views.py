@@ -22,7 +22,6 @@ class ApiStore():
             consumer_secret = str(os.getenv('consumer_secret')),
             wp_api = True,
             version = 'wc/v3',
-            query_string_auth = True,
             timeout = 5000
         )
         return wcapi
@@ -329,11 +328,11 @@ def ord_import(request):
                         try:
                             register
                         except:
-                            msg_error.append(f'Pedido {order_id_i} atualizados com sucesso')
+                            msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
                             
                         # Save Notes
                         add_sim = Notes( 
-                            id_item = Orders.objects.get(pk=item.id),
+                            id_item = Orders.objects.get(pk=order_add.id),
                             id_user = User.objects.get(pk=request.user.id),
                             note = f'Pedido importado para o sistema',
                             type_note = 'S',
@@ -343,13 +342,14 @@ def ord_import(request):
                         # Alterar status
                         # Status sis : Status Loja
                         status_def_sis = StatusSis.st_sis_site()
-                        status_ped = {
-                            'status': status_def_sis[order_status_i]
-                        }
-                        try:                                  
-                            apiStore.put(f'orders/{order_id_i}', status_ped).json()
-                        except:
-                            msg_error.append(f'{order_id_i} - Falha ao atualizar status na loja!')
+                        if order_status_i in status_def_sis:
+                            status_ped = {
+                                'status': status_def_sis[order_status_i]
+                            }
+                            try:                                  
+                                apiStore.put(f'orders/{order_id_i}', status_ped).json()
+                            except:
+                                msg_error.append(f'{order_id_i} - Falha ao atualizar status na loja!')
                         
                         # Definir variáveis
                         q_i += 1 
@@ -414,7 +414,6 @@ def ord_edit(request,id):
         cell_eid = request.POST.get('cell_eid')
         tracking = request.POST.get('tracking')
         ord_st = request.POST.get('ord_st_f')
-        print('================',ord_st)
         ord_note = request.POST.get('ord_note')
         up_oper = request.POST.get('upOper')
         
