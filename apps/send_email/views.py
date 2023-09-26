@@ -1,12 +1,12 @@
 from django.shortcuts import redirect
-from django.http import HttpResponse
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from django.contrib import messages
-from apps.orders.models import Orders
-from apps.orders.views import ApiStore, StatusSis
+from django.contrib.auth.models import User
+from apps.orders.models import Orders, Notes
+from apps.orders.views import ApiStore
 
 def send_email(request, id=None):
     if id:
@@ -64,8 +64,15 @@ def send_email(request, id=None):
             
             apiStore = ApiStore.conectApiStore()                    
             apiStore.put(f'orders/{order.order_id}', {'status': 'agd-ativacao'}).json()
-
-        print(f'Email enviado para {name} - {client_email} - {order.order_id}')
+        
+        # Save Notes
+        add_sim = Notes( 
+            id_item = Orders.objects.get(pk=order.id),
+            id_user = User.objects.get(pk=request.user.id),
+            note = f'eSIM para o e-mail do cliente',
+            type_note = 'S',
+        )
+        add_sim.save()
     
         # return HttpResponse('Email enviado com sucesso!')
         messages.success(request,f'E-mail(s) enviado(s) com sucesso!')

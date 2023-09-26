@@ -95,6 +95,7 @@ def orders_list(request):
             if ord_id and ord_s:
                 for o_id in ord_id:
                     order = Orders.objects.get(pk=o_id)
+                    order_st = order.order_status
                     order.order_status = ord_s
                     order.save()
                     
@@ -112,6 +113,21 @@ def orders_list(request):
                             order_put = Orders.objects.get(pk=order.id)
                             order_put.id_sim_id = ''
                             order_put.save()
+                    
+                    # Save Notes
+                    def addNote(t_note):
+                        add_sim = Notes( 
+                            id_item = Orders.objects.get(pk=order.id),
+                            id_user = User.objects.get(pk=request.user.id),
+                            note = t_note,
+                            type_note = 'S',
+                        )
+                        add_sim.save()
+                    
+                    ord_status = Orders.order_status.field.choices
+                    for st in ord_status:
+                        if order_st == st[0] :    
+                            addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}')
                     
                     # Alterar status
                     # Status sis : Status Loja
@@ -313,7 +329,16 @@ def ord_import(request):
                         try:
                             register
                         except:
-                            msg_error.append(f'Pedido {order_id_i} atualizados com sucesso')                            
+                            msg_error.append(f'Pedido {order_id_i} atualizados com sucesso')
+                            
+                        # Save Notes
+                        add_sim = Notes( 
+                            id_item = Orders.objects.get(pk=item.id),
+                            id_user = User.objects.get(pk=request.user.id),
+                            note = f'Pedido importado para o sistema',
+                            type_note = 'S',
+                        )
+                        add_sim.save()                       
                         
                         # Alterar status
                         # Status sis : Status Loja
@@ -374,6 +399,8 @@ def ord_edit(request,id):
         msg_error = []
         global id_sim
         id_sim = ''
+        global ord_st
+        ord_st = ''
         
         order = Orders.objects.get(pk=id)
         days = request.POST.get('days')
@@ -387,6 +414,7 @@ def ord_edit(request,id):
         cell_eid = request.POST.get('cell_eid')
         tracking = request.POST.get('tracking')
         ord_st = request.POST.get('ord_st_f')
+        print('================',ord_st)
         ord_note = request.POST.get('ord_note')
         up_oper = request.POST.get('upOper')
         
@@ -402,7 +430,7 @@ def ord_edit(request,id):
             order_put.save()
         
         # Insert SIM in Order
-        def insertSIM():
+        def insertSIM(ord_st=None):
             sim_up = Sims.objects.filter(sim_status='DS', type_sim=type_sim, operator=operator).first()
             if sim_up:
                 sim_put = Sims.objects.get(pk=sim_up.id)
@@ -441,7 +469,8 @@ def ord_edit(request,id):
                         sims_put.save()
                         order_put = Orders.objects.get(pk=order.id)
                         order_put.id_sim_id = sim_id
-                        order_put.save()  
+                        order_put.save()
+                        up_plan = True # verificação para nota
                     else:
                         messages.info(request,f'O SIM {sim} já está cadastrado no sistema')
                 else:
@@ -457,7 +486,8 @@ def ord_edit(request,id):
                     # Update order
                     order_put = Orders.objects.get(pk=order.id)
                     order_put.id_sim_id = add_sim.id
-                    order_put.save()  
+                    order_put.save()
+                    up_plan = True # verificação para nota
             else:
                 msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         else:
@@ -466,10 +496,12 @@ def ord_edit(request,id):
                 if order.id_sim.operator != operator or order.id_sim.type_sim != type_sim or up_oper != None:
                     updateSIM()
                     insertSIM()
+                    up_plan = True # verificação para nota                
             else:
                 if operator != None and type_sim != None:
-                    insertSIM()
-        
+                    insertSIM(ord_st)
+                    up_plan = True # verificação para nota
+                    
         # Liberar SIMs
         if ord_st == 'CC' or ord_st == 'DS':
             if order.id_sim:
@@ -478,16 +510,7 @@ def ord_edit(request,id):
         # Update Order
         if activation_date == '':
             activation_date = order.activation_date
-         
-        # Save Notes
-        if ord_note:
-            add_sim = Notes( 
-                id_item = Orders.objects.get(pk=order.id),
-                id_user = User.objects.get(pk=request.user.id),
-                note = ord_note,
-            )
-            add_sim.save()
-        
+                
         order_put = Orders.objects.get(pk=order.id)
         order_put.days = days
         order_put.product = product
@@ -499,7 +522,30 @@ def ord_edit(request,id):
         order_put.order_status = ord_st
         order_put.save()
         
-        # Verificar se houve mudança de status
+        # Notes
+        def addNote(t_note):
+            add_sim = Notes( 
+                id_item = Orders.objects.get(pk=order.id),
+                id_user = User.objects.get(pk=request.user.id),
+                note = t_note,
+                type_note = 'P',
+            )
+            add_sim.save()
+        # Save Notes
+        if ord_note:
+            addNote(ord_note)
+        # Date Notes
+        if activation_date != order.activation_date:
+            addNote(f'Alteração de {dateDMA(str(order.activation_date))} para {dateDMA(str(activation_date))}')
+        # SIM Notes
+        if sim:
+            addNote(f'Alteração de {order.id_sim.sim} para {sim}')
+        # Plan Notes
+        try:
+            if up_plan:
+                addNote(f'Plano alterado')
+        except: pass
+        # Status Notes
         if ord_st != order.order_status:
             # Alterar status
             # Status sis : Status Loja
@@ -511,6 +557,11 @@ def ord_edit(request,id):
                 }
                 apiStore = ApiStore.conectApiStore()                    
                 apiStore.put(f'orders/{order.order_id}', status_ped).json()
+            # Salvar notas    
+            ord_status = Orders.order_status.field.choices
+            for st in ord_status:
+                if ord_st == st[0] :    
+                    addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}')
     
         for msg_e in msg_error:
             messages.error(request,msg_e)

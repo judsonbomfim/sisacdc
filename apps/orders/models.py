@@ -76,12 +76,18 @@ class Orders(models.Model):
         ordering = ['order_id']
     def __str__(self):
         return str(self.order_id)
-    
+
+TYPE_NOTE = [
+    ('S', 'Sistema'),
+    ('P', 'Privada'),
+]
+
 class Notes(models.Model):
     id = models.AutoField(primary_key=True)
     id_item = models.ForeignKey(Orders, on_delete=models.DO_NOTHING, related_name='order_notes', default=None)
-    id_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_notes')
+    id_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_notes', default=None, null=True, blank=True)
     note = models.TextField()
+    type_note = models.CharField(max_length=1, choices=TYPE_NOTE, default='S')
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'notes'

@@ -152,13 +152,13 @@
             </div>
             <div class="card-body">
                 {% for note in order.order_notes.all %}
-                <div class="card border-left-secondary">
+                <div class="card border-left-secondary" style="background-color: {% if note.type_note == 'S' %}#f4ebeb{% else %}#F3F3F3{% endif %};">
                     <div class="card-body">
                         {{ note.note }}
                     </div>
                 </div>
                 <div class="mb-2">
-                    <span class="fw-light fst-italic">{{ note.id_user.first_name }} {{ note.id_user.last_name }} - {{ note.created_at|date:"d/m/Y H:i" }}h</span>
+                    <span class="fw-light fst-italic">{{ note.created_at|date:"d/m/Y H:i" }}h - <strong>{{ note.id_user.first_name }} {{ note.id_user.last_name }}</strong></span>
                 </div>
                 {% empty %}
                 <div class="mb-2">
