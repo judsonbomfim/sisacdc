@@ -406,10 +406,19 @@ def ord_edit(request,id):
             sim_up = Sims.objects.filter(sim_status='DS', type_sim=type_sim, operator=operator).first()
             if sim_up:
                 sim_put = Sims.objects.get(pk=sim_up.id)
+                if order.id_sim:
+                    # Update SIM
+                    updateSIM()
                 sim_put.sim_status = 'AT'
                 sim_put.save()
+                
+                if type_sim == 'esim': 
+                    status_ord = 'EE'
+                else: status_ord = order.order_status
+                
                 order_put = Orders.objects.get(pk=order.id)
                 order_put.id_sim_id = sim_put.id
+                order_put.order_status = status_ord
                 order_put.save()
             else:       
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
