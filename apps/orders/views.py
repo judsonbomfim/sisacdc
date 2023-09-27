@@ -403,6 +403,8 @@ def ord_edit(request,id):
         ord_st = ''
         
         order = Orders.objects.get(pk=id)
+        try: order_sim = order.id_sim.sim
+        except: order_sim = ''
         days = request.POST.get('days')
         product = request.POST.get('product')
         data_day = request.POST.get('data_day')
@@ -538,7 +540,7 @@ def ord_edit(request,id):
             addNote(f'Alteração de {dateDMA(str(order.activation_date))} para {dateDMA(str(activation_date))}')
         # SIM Notes
         if sim:
-            addNote(f'Alteração de {order.id_sim.sim} para {sim}')
+            addNote(f'Alteração de {order_sim} para {sim}')
         # Plan Notes
         try:
             if up_plan:
