@@ -524,12 +524,12 @@ def ord_edit(request,id):
         order_put.save()
         
         # Notes
-        def addNote(t_note):
+        def addNote(t_note, type_note):
             add_sim = Notes( 
                 id_item = Orders.objects.get(pk=order.id),
                 id_user = User.objects.get(pk=request.user.id),
                 note = t_note,
-                type_note = 'P',
+                type_note = type_note,
             )
             add_sim.save()
         # Save Notes
@@ -537,14 +537,14 @@ def ord_edit(request,id):
             addNote(ord_note)
         # Date Notes
         if activation_date != order.activation_date:
-            addNote(f'Alteração de {dateDMA(str(order.activation_date))} para {dateDMA(str(activation_date))}')
+            addNote(f'Alteração de {dateDMA(str(order.activation_date))} para {dateDMA(str(activation_date))}','P')
         # SIM Notes
         if sim:
-            addNote(f'Alteração de {order_sim} para {sim}')
+            addNote(f'Alteração de {order_sim} para {sim}','S')
         # Plan Notes
         try:
             if up_plan:
-                addNote(f'Plano alterado')
+                addNote(f'Plano alterado','S')
         except: pass
         # Status Notes
         if ord_st != order.order_status:
@@ -562,7 +562,7 @@ def ord_edit(request,id):
             ord_status = Orders.order_status.field.choices
             for st in ord_status:
                 if ord_st == st[0] :    
-                    addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}')
+                    addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}','S')
     
         for msg_e in msg_error:
             messages.error(request,msg_e)
