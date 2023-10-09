@@ -72,7 +72,7 @@ def updateEsimStore(order_id):
         try:
             link_sim = esims_o.id_sim.link              
             esims_list = esims_list + f"<img src='{url_painel}{link_sim}' style='width: 300px; margin:40px;'>"
-            update_store_l = {
+            update_store = {
                 "meta_data":[
                     {
                         "key": "campo_esims",
@@ -81,7 +81,7 @@ def updateEsimStore(order_id):
                 ]
             }
         except:
-            update_store_l = {
+            update_store = {
                 "meta_data":[
                     {
                         "key": "campo_esims",
@@ -89,6 +89,7 @@ def updateEsimStore(order_id):
                     },
                 ]
             }
+    return update_store
 
 # Order list
 @login_required(login_url='/login/')
@@ -439,8 +440,7 @@ def ord_edit(request,id):
         id_sim = ''
         global ord_st
         ord_st = ''
-        global update_store_l
-        update_store_l = {}
+        global update_store
         
         order = Orders.objects.get(pk=id)
         order_id = order.order_id
@@ -611,7 +611,6 @@ def ord_edit(request,id):
                     
         # Enviar eSIM para site
         update_store = updateEsimStore(order_id)
-        update_store = update_store
         
         apiStore.put(f'orders/{order.order_id}', update_store).json()
         
