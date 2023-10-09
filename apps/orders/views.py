@@ -457,7 +457,7 @@ def ord_edit(request,id):
         ord_note = request.POST.get('ord_note')
         up_oper = request.POST.get('upOper')
         update_store = {}
-        update_status = {}
+        update_store = {}
         
         # Update SIM in Order and update SIM
         def updateSIM():
