@@ -89,7 +89,6 @@ def updateEsimStore(order_id):
                     },
                 ]
             }
-    return update_store_l
 
 # Order list
 @login_required(login_url='/login/')
