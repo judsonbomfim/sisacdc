@@ -147,8 +147,8 @@ def orders_list(request):
                             order_put.save()
                             
                         # Enviar eSIM para site
-                        update_store_l = updateEsimStore(order_id)
-                        update_store = update_store_l
+                        update_store = updateEsimStore(order_id)
+                        update_store = update_store
                         apiStore.put(f'orders/{order.order_id}', update_store).json()                   
                         
                     # Save Notes
@@ -609,8 +609,8 @@ def ord_edit(request,id):
                     addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}','S')
                     
         # Enviar eSIM para site
-        update_store_l = updateEsimStore(order_id)
-        update_store = update_store_l
+        update_store = updateEsimStore(order_id)
+        update_store = update_store
         
         apiStore.put(f'orders/{order.order_id}', update_store).json()
         
