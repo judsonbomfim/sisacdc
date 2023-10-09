@@ -111,12 +111,14 @@ def orders_list(request):
     
     if request.method == 'POST':
         
+        global update_store_l
+        update_store_l = {}
+        
         ord_name_f = request.POST.get('ord_name_f')
         ord_order_f = request.POST.get('ord_order_f')       
         ord_sim_f = request.POST.get('ord_sim_f')
         oper_f = request.POST.get('oper_f')
         ord_st_f = request.POST.get('ord_st_f')
-        update_store = {}
 
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
@@ -438,6 +440,8 @@ def ord_edit(request,id):
         id_sim = ''
         global ord_st
         ord_st = ''
+        global update_store_l
+        update_store_l = {}
         
         order = Orders.objects.get(pk=id)
         order_id = order.order_id
@@ -456,8 +460,6 @@ def ord_edit(request,id):
         ord_st = request.POST.get('ord_st_f')
         ord_note = request.POST.get('ord_note')
         up_oper = request.POST.get('upOper')
-        update_store = {}
-        update_store_l = {}
         
         # Update SIM in Order and update SIM
         def updateSIM():
