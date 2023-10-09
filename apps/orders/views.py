@@ -89,7 +89,6 @@ def updateEsimStore(order_id):
                     },
                 ]
             }
-    print('update_store===xxx=================',update_store_l)
     return update_store_l
 
 # Order list
@@ -631,7 +630,6 @@ def ord_export_op(request):
         ord_op_f = request.POST.get('ord_op_f')
         
         orders_all = Orders.objects.all().order_by('id').filter(order_status='AA')
-        print('================',orders_all)
         
         if ord_op_f != 'op_all':
             orders_all = orders_all.filter(id_sim_id__operator__icontains=ord_op_f)
