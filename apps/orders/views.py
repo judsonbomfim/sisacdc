@@ -12,6 +12,8 @@ from woocommerce import API
 from django.utils.text import slugify
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
+# import cv2
+# import pytesseract
 
 # Conect woocommerce api
 class ApiStore():
@@ -62,6 +64,34 @@ class StatusSis():
         }
         return status_sis_site
 
+def updateEsimStore(order_id):
+    url_painel = str(os.getenv('URL_PAINEL'))
+    esims_order = Orders.objects.filter(order_id=order_id).filter(type_sim='esim')
+    esims_list = ''
+    for esims_o in esims_order:
+        try:
+            link_sim = esims_o.id_sim.link              
+            esims_list = esims_list + f"<img src='{url_painel}{link_sim}' style='width: 300px; margin:40px;'>"
+            update_store_l = {
+                "meta_data":[
+                    {
+                        "key": "campo_esims",
+                        "value": esims_list
+                    },
+                ]
+            }
+        except:
+            update_store_l = {
+                "meta_data":[
+                    {
+                        "key": "campo_esims",
+                        "value": ''
+                    },
+                ]
+            }
+    print('update_store===xxx=================',update_store_l)
+    return update_store_l
+
 # Order list
 @login_required(login_url='/login/')
 @has_permission_decorator('view_orders')
@@ -87,6 +117,7 @@ def orders_list(request):
         ord_sim_f = request.POST.get('ord_sim_f')
         oper_f = request.POST.get('oper_f')
         ord_st_f = request.POST.get('ord_st_f')
+        update_store = {}
 
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
@@ -94,9 +125,12 @@ def orders_list(request):
             if ord_id and ord_s:
                 for o_id in ord_id:
                     order = Orders.objects.get(pk=o_id)
+                    order_id = order.order_id
                     order_st = order.order_status
                     order.order_status = ord_s
                     order.save()
+                    
+                    apiStore = ApiStore.conectApiStore()
                     
                     if ord_s == 'CC' or ord_s == 'DS':
                         if order.id_sim:
@@ -112,7 +146,12 @@ def orders_list(request):
                             order_put = Orders.objects.get(pk=order.id)
                             order_put.id_sim_id = ''
                             order_put.save()
-                    
+                            
+                        # Enviar eSIM para site
+                        update_store_l = updateEsimStore(order_id)
+                        update_store = update_store_l
+                        apiStore.put(f'orders/{order.order_id}', update_store).json()                   
+                        
                     # Save Notes
                     def addNote(t_note):
                         add_sim = Notes( 
@@ -133,11 +172,10 @@ def orders_list(request):
                     status_sis_site = StatusSis.st_sis_site()
                     
                     if ord_s in status_sis_site:
-                        status_ped = {
+                        update_store = {
                             'status': status_sis_site[ord_s]
                         }
-                        apiStore = ApiStore.conectApiStore()                    
-                        apiStore.put(f'orders/{order.order_id}', status_ped).json()
+                        apiStore.put(f'orders/{order.order_id}', update_store).json()
                     
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
@@ -403,6 +441,7 @@ def ord_edit(request,id):
         ord_st = ''
         
         order = Orders.objects.get(pk=id)
+        order_id = order.order_id
         try: order_sim = order.id_sim.sim
         except: order_sim = ''
         days = request.POST.get('days')
@@ -418,6 +457,8 @@ def ord_edit(request,id):
         ord_st = request.POST.get('ord_st_f')
         ord_note = request.POST.get('ord_note')
         up_oper = request.POST.get('upOper')
+        update_store = {}
+        update_status = {}
         
         # Update SIM in Order and update SIM
         def updateSIM():
@@ -546,6 +587,10 @@ def ord_edit(request,id):
             if up_plan:
                 addNote(f'Plano alterado','S')
         except: pass
+        
+        # Conect Store
+        apiStore = ApiStore.conectApiStore() 
+            
         # Status Notes
         if ord_st != order.order_status:
             # Alterar status
@@ -553,17 +598,23 @@ def ord_edit(request,id):
             status_sis_site = StatusSis.st_sis_site()
             if ord_st in status_sis_site:            
                 
-                status_ped = {
+                update_store = {
                     'status': status_sis_site[ord_st]
                 }
-                apiStore = ApiStore.conectApiStore()                    
-                apiStore.put(f'orders/{order.order_id}', status_ped).json()
+            apiStore.put(f'orders/{order.order_id}', update_store).json()
+            
             # Salvar notas    
             ord_status = Orders.order_status.field.choices
             for st in ord_status:
                 if ord_st == st[0] :    
                     addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}','S')
-    
+                    
+        # Enviar eSIM para site
+        update_store_l = updateEsimStore(order_id)
+        update_store = update_store_l
+        
+        apiStore.put(f'orders/{order.order_id}', update_store).json()
+        
         for msg_e in msg_error:
             messages.error(request,msg_e)
         for msg_o in msg_info:
@@ -643,6 +694,38 @@ def send_esim(request):
 
         return render(request, 'painel/orders/send_esim.html')    
 
+# def textImg(request):
+#     # Carrega a imagem em escala de cinza
+#     img = cv2.imread('static/imei2.jpg', cv2.IMREAD_GRAYSCALE)
+#     # Extrai o texto da imagem
+#     texto = pytesseract.image_to_string(img)
+#     textos = texto.split()
+#     txt = []
+#     for t in textos:
+#         txt.append(f'{t}<br>')
+    
+#     return HttpResponse(txt)
+
+# def esimExpSis(request):
+    
+        
+#     apiStore = ApiStore.conectApiStore()
+#     # Get the order
+#     order_id = 54085
+    
+#     # Add the meta data
+#     meta_data_list = {
+#         "meta_data":[
+#             {
+#                 "key": "campo_esims",
+#                 "value": "<img src='https://painel.acasadochip.com/media/8932042000002302486.jpeg' style='width: 300px; margin:40px;'><img src='https://painel.acasadochip.com/media/8932042000002302486.jpeg' style='width: 300px; margin:40px;'>"
+#             },
+#         ]
+#     }
+
+#     # Update the order
+#     apiStore.put(f"orders/{order_id}", meta_data_list).json()    
+#     return HttpResponse('eSIM enviado!')
 
 # # def vendasSem(request):
 # apiStore = conectApiStore()

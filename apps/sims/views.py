@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse
 import csv
+import os
 from datetime import date
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -222,6 +223,7 @@ def sims_ord(request):
             product_i = ord.product
             countries_i = ord.countries
             type_sim_i = ord.type_sim
+            update_store = {}
             
             # if product_i == 'chip-internacional-eua':
             #     operator_i = 'TM'
@@ -246,7 +248,7 @@ def sims_ord(request):
             
             # update order
             # Save SIMs
-            if sim_ds.type_sim == 'esim': 
+            if sim_ds.type_sim == 'esim':
                 status_ord = 'EE'
             else: status_ord = 'ES'
             
@@ -263,12 +265,38 @@ def sims_ord(request):
             status_sis_site = StatusSis.st_sis_site()
                     
             if status_ord in status_sis_site:
-                status_ped = {
+                update_store = {
                     'status': status_sis_site[status_ord]
                 }
-                apiStore = ApiStore.conectApiStore()                    
-                apiStore.put(f'orders/{order_id_i}', status_ped).json()
-            
+            # Enviar eSIM para site
+            if sim_put.type_sim == 'esim':
+                url_painel = str(os.getenv('URL_PAINEL'))
+                esims_order = Orders.objects.filter(order_id=order_id_i).filter(type_sim='esim')
+                esims_list = ''
+                for esims_o in esims_order:
+                    try:
+                        link_sim = esims_o.id_sim.link              
+                        esims_list = esims_list + f"<img src='{url_painel}{link_sim}' style='width: 300px; margin:40px;'>"
+                        update_store = {
+                            "meta_data":[
+                                {
+                                    "key": "campo_esims",
+                                    "value": esims_list
+                                },
+                            ]
+                        }
+                    except:
+                        update_store = {
+                            "meta_data":[
+                                {
+                                    "key": "campo_esims",
+                                    "value": ''
+                                },
+                            ]
+                        }
+                
+            apiStore = ApiStore.conectApiStore()                    
+            apiStore.put(f'orders/{order_id_i}', update_store).json()
             
             msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
             
