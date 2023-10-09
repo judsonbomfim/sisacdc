@@ -89,6 +89,7 @@ def updateEsimStore(order_id):
                     },
                 ]
             }
+    return update_store_l
 
 # Order list
 @login_required(login_url='/login/')
@@ -456,7 +457,7 @@ def ord_edit(request,id):
         ord_note = request.POST.get('ord_note')
         up_oper = request.POST.get('upOper')
         update_store = {}
-        update_store = {}
+        update_store_l = {}
         
         # Update SIM in Order and update SIM
         def updateSIM():
