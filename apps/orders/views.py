@@ -441,6 +441,7 @@ def ord_edit(request,id):
         global ord_st
         ord_st = ''
         global update_store
+        update_store = {}
         
         order = Orders.objects.get(pk=id)
         order_id = order.order_id
