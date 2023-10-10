@@ -575,7 +575,7 @@ def ord_edit(request,id):
             add_sim.save()
         # Save Notes
         if ord_note:
-            addNote(ord_note)
+            addNote(ord_note, 'P')
         # Date Notes
         if activation_date != order.activation_date:
             addNote(f'Alteração de {dateDMA(str(order.activation_date))} para {dateDMA(str(activation_date))}','P')
@@ -607,7 +607,7 @@ def ord_edit(request,id):
             ord_status = Orders.order_status.field.choices
             for st in ord_status:
                 if ord_st == st[0] :    
-                    addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}','S')
+                    addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}','S')
                     
         # Enviar eSIM para site
         update_store = updateEsimStore(order_id)
