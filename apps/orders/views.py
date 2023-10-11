@@ -78,7 +78,7 @@ def updateEsimStore(order_id):
                     {
                         "key": "campo_esims",
                         "value": esims_list
-                    },
+                    }
                 ]
             }
         except:
@@ -86,8 +86,8 @@ def updateEsimStore(order_id):
                 "meta_data": [
                     {
                         "key": "campo_esims",
-                        "value": ''
-                    },
+                        "value": ""
+                    }
                 ]
             }
     return update_store_l
@@ -486,6 +486,7 @@ def ord_edit(request,id):
                 if type_sim == 'esim': 
                     ord_st = 'EE'
                 else: ord_st = ord_st
+                print('ord_st =====================',ord_st)
                 
                 order_put = Orders.objects.get(pk=order.id)
                 order_put.id_sim_id = sim_put.id
@@ -538,7 +539,7 @@ def ord_edit(request,id):
             if order.id_sim:
                 if order.id_sim.operator != operator or order.id_sim.type_sim != type_sim or up_oper != None:
                     updateSIM()
-                    insertSIM()
+                    insertSIM(ord_st)
                     up_plan = True # verificação para nota                
             else:
                 if operator != None and type_sim != None:
@@ -612,8 +613,8 @@ def ord_edit(request,id):
         
         if type_sim == 'esim':     
             # Enviar eSIM para site
-            update_store = updateEsimStore(order.order_id)
-            apiStore.put(f'orders/{order.order_id}', update_store).json()
+            update_store = updateEsimStore(order_id)
+            apiStore.put(f'orders/{order_id}', update_store).json()
         
         for msg_e in msg_error:
             messages.error(request,msg_e)
