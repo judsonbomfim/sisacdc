@@ -65,6 +65,7 @@ class StatusSis():
         return status_sis_site
 
 def updateEsimStore(order_id):
+    
     url_painel = str(os.getenv('URL_PAINEL'))
     esims_order = Orders.objects.filter(order_id=order_id).filter(type_sim='esim')
     esims_list = ''
@@ -72,8 +73,8 @@ def updateEsimStore(order_id):
         try:
             link_sim = esims_o.id_sim.link              
             esims_list = esims_list + f"<img src='{url_painel}{link_sim}' style='width: 300px; margin:40px;'>"
-            update_store = {
-                "meta_data":[
+            update_store_l = {
+                "meta_data": [
                     {
                         "key": "campo_esims",
                         "value": esims_list
@@ -81,15 +82,15 @@ def updateEsimStore(order_id):
                 ]
             }
         except:
-            update_store = {
-                "meta_data":[
+            update_store_l = {
+                "meta_data": [
                     {
                         "key": "campo_esims",
                         "value": ''
                     },
                 ]
             }
-    return update_store
+    return update_store_l
 
 # Order list
 @login_required(login_url='/login/')
@@ -110,9 +111,6 @@ def orders_list(request):
         ord_st_f = request.GET.get('ord_st')
     
     if request.method == 'POST':
-        
-        global update_store_l
-        update_store_l = {}
         
         ord_name_f = request.POST.get('ord_name_f')
         ord_order_f = request.POST.get('ord_order_f')       
@@ -148,10 +146,12 @@ def orders_list(request):
                             order_put.id_sim_id = ''
                             order_put.save()
                             
-                        # Enviar eSIM para site
-                        update_store = updateEsimStore(order_id)
-                        update_store = update_store
-                        apiStore.put(f'orders/{order.order_id}', update_store).json()                   
+                            if order.id_sim.type_sim == 'esim':    
+                                # Enviar eSIM para site
+                                update_store = updateEsimStore(order_id)
+                                print('order_id',order_id)
+                                print('update_store',update_store)
+                                apiStore.put(f'orders/{order.order_id}', update_store).json()                   
                         
                     # Save Notes
                     def addNote(t_note):
@@ -582,11 +582,11 @@ def ord_edit(request,id):
             addNote(f'Alteração de {dateDMA(str(order.activation_date))} para {dateDMA(str(activation_date))}','P')
         # SIM Notes
         if sim:
-            addNote(f'Alteração de {order_sim} para {sim}','S')
+            addNote(f'Alteração de {order_sim} para {sim}','P')
         # Plan Notes
         try:
             if up_plan:
-                addNote(f'Plano alterado','S')
+                addNote(f'Plano alterado','P')
         except: pass
         
         # Conect Store
@@ -607,13 +607,13 @@ def ord_edit(request,id):
             # Salvar notas    
             ord_status = Orders.order_status.field.choices
             for st in ord_status:
-                if ord_st == st[0] :    
-                    addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}','S')
-                    
-        # Enviar eSIM para site
-        update_store = updateEsimStore(order_id)
+                if ord_st == st[0] :
+                    addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}','P')
         
-        apiStore.put(f'orders/{order.order_id}', update_store).json()
+        if type_sim == 'esim':     
+            # Enviar eSIM para site
+            update_store = updateEsimStore(order.order_id)
+            apiStore.put(f'orders/{order.order_id}', update_store).json()
         
         for msg_e in msg_error:
             messages.error(request,msg_e)
