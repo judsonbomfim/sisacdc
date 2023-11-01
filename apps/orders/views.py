@@ -308,7 +308,7 @@ def ord_import(request):
                             if 'Visitará' in i['key']:
                                 if i['display_value'] == 'Sim': countries_i = True 
                                 else: countries_i = False
-                            if i['key'] == 'Data de Ativação': activation_date_i = dateF(i['value'])
+                            if i['key'] == 'Data de Ativação': activation_date_i = i['value']
                             cell_mod_i = '-'
                             if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
                             if i['key'] == 'Número de pedido ou do chip': ord_chip_nun_i = i['value']
