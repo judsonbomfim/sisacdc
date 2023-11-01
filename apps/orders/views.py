@@ -306,7 +306,7 @@ def ord_import(request):
                                 if i['value'] == 'sem-ligacoes': calls_i = False
                                 else: calls_i = True
                             if 'Visitará' in i['key']:
-                                if i['value'] == 'Não': countries_i = False 
+                                if i['display_value'] == 'Não': countries_i = False 
                                 else: countries_i = True
                             if i['key'] == 'Data de Ativação': activation_date_i = dateF(i['value'])
                             if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
@@ -492,10 +492,8 @@ def ord_edit(request,id):
             
         # Se SIM preenchico
         if sim:
-            print('SIM =====================')
             # Verificar se Operadora e Tipo de SIM estão marcados
             if type_sim =='esim':
-                print('É um SIM =====================')
                 msg_error.append(f'Não é possível adicionar um eSIM desta forma')
             elif operator != None and type_sim != None:
                 if order.id_sim:
@@ -616,7 +614,6 @@ def ord_edit(request,id):
                     addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}','P')
         
         if type_sim == 'esim' or esim_v == True:
-            print('eSIM =====================')
             # Enviar eSIM para site
             updateEsimStore(order_id) 
         
