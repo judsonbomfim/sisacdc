@@ -9,17 +9,34 @@ from apps.orders.models import Orders, Notes
 
 class SendEmail():
     
-    def mailAction(id):
-        orders_all = Orders.objects.filter(pk=id)
+    @staticmethod
+    def mailAction(**kwargs):
+        
+        if kwargs.get('request'): request = kwargs.get('request')
+        else: request = None
+        if kwargs.get('id'): id = kwargs.get('id')
+        else: id = None
+        if kwargs.get('id_user'): id_user = kwargs.get('id_user')    
+        else: id_user = None        
+            
+        if id == None:
+            orders_all = Orders.objects.filter(pk=id)
+        else:
+            orders_all = Orders.objects.filter(order_status='EE')
             
         url_site = 'https://painel.acasadochip.com'
         url_img = f'{url_site}/static/email/'
         
-        if not orders_all:
-            messages.info(f'Não há pedidos para enviar eSIMs!')
-            return redirect('send_esims')
+        if not orders_all:           
+            if id == None:
+                messages.info(request, f'Não há pedidos para enviar eSIMs!')
+                return redirect('send_esims')
+            else:
+                messages.info(request, f'Não há pedidos para enviar eSIMs!')
+                return redirect('orders_list')            
         
         for order in orders_all:
+            id = order.id
             name = order.client
             client_email = order.email
             order_id = order.item_id
@@ -62,11 +79,23 @@ class SendEmail():
             )
             email.attach_alternative(html_content, "text/html")
             email.send()
+            
+            if id_user:               
+                # Add note
+                add_sim = Notes( 
+                    id_item = Orders.objects.get(pk=id),
+                    id_user = id_user,
+                    note = 'E-mail enviado com sucesso!',
+                    type_note = 'S',
+                )
+                add_sim.save()
+                print('==================== Adicionado Nota ====================')
+                
+        if request:
+            messages.success(request,f'E-mail enviado com sucesso!!')
     
     def send_email(request,id):
-        print(id,'============list========================')
-
-        SendEmail.mailAction(id)      
+        SendEmail.mailAction(id=id)      
         messages.success(request,f'E-mail enviado com sucesso!!')
         add_sim = Notes( 
             id_item = Orders.objects.get(pk=id),
@@ -78,4 +107,9 @@ class SendEmail():
         return redirect('orders_list')
 
     def send_email_all(id):
-        SendEmail.mailAction(id)
+        SendEmail.mailAction(id=id)
+        
+    def send_email_esims(request):
+        id_user = User.objects.get(pk=request.user.id)
+        SendEmail.mailAction(request=request,id_user=id_user)
+        return redirect('send_esims')

@@ -7,10 +7,11 @@
         <p class="text-secondary m-0 fw-bold">Update de pedidos</p>
     </div>
     <div class="card-body">
-        <form action="{% url 'send_email' %}" method="POST" enctype="multipart/form-data">
+        <form action="{% url 'send_email_esims' %}" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
                 <button type="submit" class="btn btn-primary mb-3" name='send_email_esims'>Enviar eSIMs por e-mail</button>
+                <div class="form-text ms-3"><br>OBS: Para envio dos e-mails de eSIMs os pedidos precisam estar com o status <b>Enviar eSIM</b>.</div>
             </div>
         </form>
     </div>

@@ -175,7 +175,7 @@ def orders_list(request):
                         apiStore.put(f'orders/{order.order_id}', update_store).json()
                     
                     # Enviar email
-                    if ord_s == 'CN':
+                    if ord_s == 'CN' and order.id_sim.type_sim == 'sim':
                         enviar = SendEmail.send_email_all(order.id)
                         enviar
                         
@@ -623,8 +623,9 @@ def ord_edit(request,id):
                     addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}')
             
             # Enviar email
-            if ord_st == 'CN':
-                enviar = SendEmail.send_email_all(order.id)
+            if ord_st == 'CN' and order.id_sim.type_sim == 'sim':
+                id_user = User.objects.get(pk=request.user.id)
+                enviar = SendEmail.mailAction(id=order.id,id_user=id_user)
                 enviar
                 
                 addNote(f'E-mail enviado com sucesso!')
@@ -707,9 +708,8 @@ def ord_export_op(request):
     
     return render(request, 'painel/orders/export_op.html', context)
 
-def send_esim(request):
+def send_esims(request):
     if request.method == 'GET':
-
         return render(request, 'painel/orders/send_esim.html')    
 
 # def textImg(request):
