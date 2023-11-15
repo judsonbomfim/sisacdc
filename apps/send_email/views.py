@@ -69,13 +69,13 @@ class SendEmail():
         SendEmail.mailAction(id)      
         messages.success(request,f'E-mail enviado com sucesso!!')
         add_sim = Notes( 
-        id_item = Orders.objects.get(pk=id),
-        id_user = User.objects.get(pk=request.user.id),
-        note = 'E-mail enviado com sucesso!',
-        type_note = 'S',
+            id_item = Orders.objects.get(pk=id),
+            id_user = User.objects.get(pk=request.user.id),
+            note = 'E-mail enviado com sucesso!',
+            type_note = 'S',
         )
+        add_sim.save()
         return redirect('orders_list')
 
     def send_email_all(id):
-        print(id,'============all=======================')
         SendEmail.mailAction(id)
