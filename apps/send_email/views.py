@@ -20,9 +20,9 @@ class SendEmail():
         else: id_user = None        
             
         if id == None:
-            orders_all = Orders.objects.filter(pk=id)
-        else:
             orders_all = Orders.objects.filter(order_status='EE')
+        else:
+            orders_all = Orders.objects.filter(pk=id)
             
         url_site = 'https://painel.acasadochip.com'
         url_img = f'{url_site}/static/email/'
@@ -89,7 +89,6 @@ class SendEmail():
                     type_note = 'S',
                 )
                 add_sim.save()
-                print('==================== Adicionado Nota ====================')
                 
         if request:
             messages.success(request,f'E-mail enviado com sucesso!!')
