@@ -12,6 +12,7 @@ from woocommerce import API
 from django.utils.text import slugify
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
+from apps.send_email.views import SendEmail
 # import cv2
 # import pytesseract
 
@@ -161,7 +162,7 @@ def orders_list(request):
                     ord_status = Orders.order_status.field.choices
                     for st in ord_status:
                         if order_st == st[0] :    
-                            addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}')
+                            addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
                     
                     # Alterar status
                     # Status sis : Status Loja
@@ -172,6 +173,14 @@ def orders_list(request):
                             'status': status_sis_site[ord_s]
                         }
                         apiStore.put(f'orders/{order.order_id}', update_store).json()
+                    
+                    # Enviar email
+                    if ord_s == 'CN':
+                        enviar = SendEmail.send_email_all(order.id)
+                        enviar
+                        
+                        addNote(f'E-mail enviado com sucesso!')
+                        messages.success(request,'E-mail enviado com sucesso!')
                     
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
@@ -569,27 +578,27 @@ def ord_edit(request,id):
         order_put.save()
         
         # Notes
-        def addNote(t_note, type_note):
+        def addNote(t_note):
             add_sim = Notes( 
                 id_item = Orders.objects.get(pk=order.id),
                 id_user = User.objects.get(pk=request.user.id),
                 note = t_note,
-                type_note = type_note,
+                type_note = 'S',
             )
             add_sim.save()
         # Save Notes
         if ord_note:
-            addNote(ord_note, 'P')
+            addNote(ord_note)
         # Date Notes
         if activation_date != order.activation_date:
-            addNote(f'Alteração de {dateDMA(str(order.activation_date))} para {dateDMA(str(activation_date))}','P')
+            addNote(f'Alteração de {dateDMA(str(order.activation_date))} para {dateDMA(str(activation_date))}')
         # SIM Notes
         if sim:
-            addNote(f'Alteração de {order_sim} para {sim}','P')
+            addNote(f'Alteração de {order_sim} para {sim}')
         # Plan Notes
         try:
             if up_plan:
-                addNote(f'Plano alterado','P')
+                addNote(f'Plano alterado')
         except: pass
         
         # Conect Store
@@ -611,7 +620,15 @@ def ord_edit(request,id):
             ord_status = Orders.order_status.field.choices
             for st in ord_status:
                 if ord_st == st[0] :
-                    addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}','P')
+                    addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}')
+            
+            # Enviar email
+            if ord_st == 'CN':
+                enviar = SendEmail.send_email_all(order.id)
+                enviar
+                
+                addNote(f'E-mail enviado com sucesso!')
+                messages.success(request,'E-mail enviado com sucesso!')
         
         if type_sim == 'esim' or esim_v == True:
             # Enviar eSIM para site
