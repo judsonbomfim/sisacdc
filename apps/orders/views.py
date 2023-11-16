@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.utils.text import slugify
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
-from apps.send_email.views import SendEmail
+from apps.send_email.classes import SendEmail
 from .classes import ApiStore, StatusSis
 
 # import cv2
@@ -149,8 +149,7 @@ def orders_list(request):
                     
                     # Enviar email
                     if ord_s == 'CN' and order.id_sim.type_sim == 'sim':
-                        enviar = SendEmail.send_email_all(order.id)
-                        enviar
+                        SendEmail.mailAction(order.id)
                         
                         addNote(f'E-mail enviado com sucesso!')
                         messages.success(request,'E-mail enviado com sucesso!')
@@ -598,8 +597,7 @@ def ord_edit(request,id):
             # Enviar email
             if ord_st == 'CN' and type_sim == 'sim':
                 id_user = User.objects.get(pk=request.user.id)
-                enviar = SendEmail.mailAction(id=order.id,id_user=id_user)
-                enviar
+                SendEmail.mailAction(id=order.id,id_user=id_user)
                 
                 addNote(f'E-mail enviado com sucesso!')
                 messages.success(request,'E-mail enviado com sucesso!')

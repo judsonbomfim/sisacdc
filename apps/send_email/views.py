@@ -15,9 +15,6 @@ def send_email(request,id):
     )
     add_sim.save()
     return redirect('orders_list')
-
-def send_email_all(id):
-    SendEmail.mailAction(id=id)
     
 def send_email_esims(request):
     id_user = User.objects.get(pk=request.user.id)
