@@ -8,26 +8,15 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
-from woocommerce import API
 from django.utils.text import slugify
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.views import SendEmail
+from .classes import ApiStore, StatusSis
+
 # import cv2
 # import pytesseract
 
-# Conect woocommerce api
-class ApiStore():
-    def conectApiStore():
-        wcapi = API(
-            url = str(os.getenv('url_site')),
-            consumer_key = str(os.getenv('consumer_key')),
-            consumer_secret = str(os.getenv('consumer_secret')),
-            wp_api = True,
-            version = 'wc/v3',
-            timeout = 5000
-        )
-        return wcapi
 # Date - 2023-05-16T18:40:27
 def dateHour(dh):
     date = dh[0:10]
@@ -48,22 +37,6 @@ def dateDMA(dma):
     dia = dma[8:10]
     data_dma = f'{dia}/{mes}/{ano}'
     return data_dma
-
-class StatusSis():
-    def st_sis_site():
-        status_sis_site = {
-            'AE': 'agd-envio',
-            'AS': 'em-separacao',
-            'AA': 'agd-ativacao',        
-            'CC': 'cancelled',
-            'ES': 'em-separacao',
-            'MB': 'motoboy',
-            'RS': 'reuso',
-            'RT': 'retirada',
-            'RE': 'reembolsar',
-            'CN': 'completed',        
-        }
-        return status_sis_site
 
 def updateEsimStore(order_id):    
     url_painel = str(os.getenv('URL_PAINEL'))
@@ -623,7 +596,7 @@ def ord_edit(request,id):
                     addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}')
             
             # Enviar email
-            if ord_st == 'CN' and order.id_sim.type_sim == 'sim':
+            if ord_st == 'CN' and type_sim == 'sim':
                 id_user = User.objects.get(pk=request.user.id)
                 enviar = SendEmail.mailAction(id=order.id,id_user=id_user)
                 enviar
