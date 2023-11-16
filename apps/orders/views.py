@@ -93,12 +93,16 @@ def orders_list(request):
             ord_s = request.POST.get('ord_staus')
             if ord_id and ord_s:
                 for o_id in ord_id:
+                    
                     order = Orders.objects.get(pk=o_id)
-                    order_id = order.order_id
-                    order_st = order.order_status
                     order.order_status = ord_s
                     order.save()
                     
+                    order_id = order.order_id
+                    order_st = order.order_status
+                    order_plan = order.get_product_display()
+                    try: type_sim = order.id_sim.type_sim
+                    except: type_sim = 'esim'
                     apiStore = ApiStore.conectApiStore()
                     
                     if ord_s == 'CC' or ord_s == 'DS':
@@ -148,8 +152,8 @@ def orders_list(request):
                         apiStore.put(f'orders/{order.order_id}', update_store).json()
                     
                     # Enviar email
-                    if ord_s == 'CN' and order.id_sim.type_sim == 'sim':
-                        SendEmail.mailAction(order.id)
+                    if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
+                        SendEmail.mailAction(id=order.id)
                         
                         addNote(f'E-mail enviado com sucesso!')
                         messages.success(request,'E-mail enviado com sucesso!')
