@@ -52,8 +52,8 @@
                             </tr>
                             <tr>
                               <td align="center" style="padding:0;margin:0;font-size:0px">
-                                {% if type_sim == 'sim' %}
-                                  <img class="adapt-img" src="{{ url_img }}sim.png" alt style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="260" />
+                                {% if type_sim == 'sim' or product_plan == 'USA' %}
+                                  <img class="adapt-img" src="{{ url_img }}acdc-sim.png" alt style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="260" />
                                 {% else %}
                                   <img class="adapt-img" src="{{ url_site }}{{ qrcode }}" alt style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="260" />
                                 {% endif %}

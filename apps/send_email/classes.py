@@ -40,12 +40,14 @@ class SendEmail():
             name = order.client
             client_email = order.email
             order_id = order.item_id
-            qrcode = order.id_sim.link
+            try: qrcode = order.id_sim.link
+            except: qrcode = None
             activation_date = order.activation_date
             product = f'{order.get_product_display()} {order.get_data_day_display()}'
             days = order.days     
             product_plan = order.get_product_display()
-            type_sim = order.id_sim.type_sim
+            try: type_sim = order.id_sim.type_sim
+            except: type_sim = 'esim'            
             countries = order.countries
             
             context = {
