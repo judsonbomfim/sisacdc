@@ -12,7 +12,7 @@ PRODUCT = [
 ]
 
 DATA = [
-    ('500mb-dia', '500GB'),
+    ('500mb-dia', '500MB'),
     ('1gb', '1GB'),
     ('2gb', '2GB'),
     ('ilimitado', 'Ilimitado')
