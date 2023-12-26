@@ -8,6 +8,8 @@
 {% endblock %}
 
 {% block content %}
+{% if request.user|can:'edit_orders' %}
+
 <!-- Estoque de SIMs -->
 {% include 'painel/partials/_sims_stock.html' %}
 <!-- Fim Estoque de SIMs -->
@@ -236,6 +238,7 @@
 <!-- Fim Vendas -->
 {{ year_dates }}
 
+{% endif %}
 {% endblock %}
 
 {% block script_custom %}
