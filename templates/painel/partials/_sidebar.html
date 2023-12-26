@@ -12,6 +12,7 @@
                         <span class="menu-text">Dashboard</span>
                     </a>
                 </li>
+                {% if request.user|can:'view_orders' %}
                 <li class="has-child open">
                     <a>
                         <i class="nav-icon bi bi-shop"></i>
@@ -19,17 +20,29 @@
                         <span class="toggle-icon"></span>
                     </a>
                     <ul>
+                        {% if request.user|can:'view_orders' %}
                         <li class="{% urL_active request '/pedidos/listar/' %}">
                             <a href="{% url 'orders_list' %}">Listar Pedidos</a>
                         </li>
+                        {% endif %}
+                        {% if request.user|can:'import_orders' %}
                         <li class="{% urL_active request '/pedidos/importar/' %}">
                             <a href="{% url 'ord_import' %}">Importar Pedidos</a>
                         </li>
+                        {% endif %}
+                        {% if request.user|can:'export_orders' %}
                         <li class="{% urL_active request '/pedidos/exportar/' %}">
                             <a href="{% url 'ord_export_op' %}">Exportar para Ativação</a>
                         </li>
+                        {% endif %}
+                        {% if request.user|can:'send_esims' %}
+                        <li class="{% urL_active request '/enviar/esims/' %}">
+                            <a href="{% url 'send_esims' %}">Enviar eSIMs</a>
+                        </li>
+                        {% endif %}
                     </ul>
                 </li>
+                {% endif %}
                 <li class="has-child open">
                     <a>
                         <i class="nav-icon bi bi-sim"></i>

@@ -1,19 +1,16 @@
-{% extends 'painel/shared/base.html' %}
+{% extends 'painel/partials/_content_default.html' %}
 {% load static %}
-{% block title_page %}<i class="bi bi-shop"></i> Pedidos{% endblock %}
-{% block content %}
-<div class="card shadow">
-    <div class="card-header py-3">
-        <p class="text-secondary m-0 fw-bold">Update de pedidos</p>
-    </div>
-    <div class="card-body">
-        <form action="{% url 'send_email_esims' %}" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary mb-3" name='send_email_esims'>Enviar eSIMs por e-mail</button>
-                <div class="form-text ms-3"><br>OBS: Para envio dos e-mails de eSIMs os pedidos precisam estar com o status <b>Enviar eSIM</b>.</div>
-            </div>
-        </form>
-    </div>
-</div>
+{% block title_page %}<i class="bi bi-shop" style="font-size: 1.2em;"></i> Pedidos{% endblock %}
+{% block title_content %}Enviar eSIMs{% endblock %}
+
+{% block content_def %}
+    <form action="{% url 'send_email_esims' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary">
+            <span class="flex items-center">
+                <i class="bi bi-send"></i> <span>Enviar eSIMs por e-mail</span>
+            </span>
+        </button>
+    </form>
+    <br>OBS: Para envio dos e-mails de eSIMs os pedidos precisam estar com o status <b>Enviar eSIM</b>.    
 {% endblock %}
