@@ -3,7 +3,7 @@ from rolepermissions.decorators import has_permission_decorator
 import os
 import csv
 from django.http import HttpResponse
-from datetime import date
+from datetime import date, datetime, timedelta
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -60,7 +60,6 @@ def updateEsimStore(order_id):
     # Conect Store
     apiStore = ApiStore.conectApiStore()
     apiStore.put(f'orders/{order_id}', update_store).json() 
-    
 
 # Order list
 @login_required(login_url='/login/')
@@ -231,11 +230,15 @@ def ord_import(request):
         
         # Definir números de páginas
         per_page = 100
-        order_p = apiStore.get('orders', params={'status': 'processing', 'per_page': per_page})
+        date_now = datetime.now()
+        start_date = date_now - timedelta(days=7)
+        end_date = date_now
+        order_p = apiStore.get('orders', params={'after': start_date, 'before': end_date, 'status': 'processing', 'per_page': per_page})        
+        
         total_pages = int(order_p.headers['X-WP-TotalPages'])
         n_page = 1
         
-        orders_all = Orders.objects.all()
+        # orders_all = Orders.objects.all()
         
         while n_page <= total_pages:
             # Pedidos com status 'processing'
@@ -281,6 +284,7 @@ def ord_import(request):
                         # Definir valor padrão para variáveis
                         ord_chip_nun_i = '-'
                         countries_i = False
+                        cell_mod_i = False
                         # Percorrer itens do pedido
                         for i in item['meta_data']:
                             if i['key'] == 'pa_tipo-de-sim': type_sim_i = i['value']
@@ -621,6 +625,11 @@ def ord_edit(request,id):
 @has_permission_decorator('export_orders')
 def ord_export_op(request):
     
+    sims_op = Sims.operator.field.choices
+    context= {
+        'sims_op': sims_op,
+    }  
+    
     if request.method == 'POST':
         
         ord_op_f = request.POST.get('ord_op_f')
@@ -674,12 +683,8 @@ def ord_export_op(request):
         for row in data:
             writer.writerow(row)
 
-        return response
-            
-    sims_op = Sims.operator.field.choices
-    context= {
-        'sims_op': sims_op,
-    }
+        messages.success(request, 'Arquivo CSV baixado com sucesso!')
+        return response 
     
     return render(request, 'painel/orders/export_op.html', context)
 

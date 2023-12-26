@@ -1,5 +1,10 @@
+{% if messages %}
 <script>
-    const toastContant = document.querySelector('.toast');
-    const toast = new bootstrap.Toast(toastContant);
-    toast.show();
+    // Alerts
+    window.setTimeout(function() {
+        $(".alert").fadeTo(500, 0).slideUp(500, function(){
+            $(this).remove(); 
+        });
+      }, 5000);    
 </script>
+{% endif %}

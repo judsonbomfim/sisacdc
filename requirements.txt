@@ -47,3 +47,4 @@ tzdata==2023.3
 urllib3==1.26.16
 wcwidth==0.2.6
 WooCommerce==3.0.0
+pandas==2.1.4

@@ -1,172 +1,144 @@
-{% extends 'painel/shared/base.html' %}
+{% extends 'painel/partials/_content_default.html' %}
+{% load permission_tags %}
 {% load static %}
 {% load date_day %}
 {% block title_page %}<i class="bi bi-sim"></i> SIMs{% endblock %}
+{% block title_content %}Estoque SIMs{% endblock %}
 {%block js_custom %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 {% endblock %}
-{% block content %}
 
+{% block content_top %}
+<!-- Conteúdo do topo -->
+<!-- {% include 'painel/partials/_sims_stock.html' %} -->
+{% endblock %}
+
+{% block content_def %}
+<!-- Conteúdo do Principal -->
 <div class="row">
-    <div class="col-md-6 col-xl-4 mb-4">
-        <div class="card shadow border-start-info py-2">
-            <div class="card-body">
-                <div class="row align-items-center no-gutters">
-                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
-                    <div class="col me-2">
-                        <div class="text-info fw-bold text-xs mb-1">
-                            <h6 class="text-primary fw-bold m-0">Estoque T-mobile</h6>
-                        </div>
-                        <div class="row g-0 align-items-center">
-                            <div class="col-auto col-xxl-3">
-                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
-                            </div>
-                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_tm }}</span></div>
-                            <div class="col-auto col-xxl-3">
-                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
-                            </div>
-                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tm }}</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-xl-4 mb-4">
-        <div class="card shadow border-start-info py-2">
-            <div class="card-body">
-                <div class="row align-items-center no-gutters">
-                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
-                    <div class="col me-2">
-                        <div class="text-info fw-bold text-xs mb-1">
-                            <h6 class="text-success fw-bold m-0">Estoque China Mobile</h6>
-                        </div>
-                        <div class="row g-0 align-items-center">
-                            <div class="col-auto col-xxl-3">
-                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
-                            </div>
-                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_cm }}</span></div>
-                            <div class="col-auto col-xxl-3">
-                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
-                            </div>
-                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_cm }}</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-xl-4 mb-4">
-        <div class="card shadow border-start-info py-2">
-            <div class="card-body">
-                <div class="row align-items-center no-gutters">
-                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
-                    <div class="col me-2">
-                        <div class="text-info fw-bold text-xs mb-1">
-                            <h6 class="text-info fw-bold m-0">Estoque Telcom</h6>
-                        </div>
-                        <div class="row g-0 align-items-center">
-                            <div class="row g-0 align-items-center">
-                                <div class="col-auto col-xxl-3">
-                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
-                                </div>
-                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_tc }}</span></div>
-                                <div class="col-auto col-xxl-3">
-                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
-                                </div>
-                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tc }}</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="card shadow">
-    <div class="card-header py-3">
-        <p class="text-secondary m-0 fw-bold">Estoque SIMS</p>
-    </div>
-    <div class="card-body">
-        <form class="row g-3" action="" method="POST">
-            {% csrf_token %}
-            <div class="col-md-1">
-                <select class="form-select" name="sim_st">
+    <form class="row g-3" action="" method="POST">
+        {% csrf_token %}
+        <div class="col-md-1">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="sim_st">
                     <option value="" selected>Alterar Status</option>
                     {% for sim_st in sims_status %}
                     <option value="{{sim_st.0}}">{{sim_st.1}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-1">
-                <button type="submit" class="btn btn-primary" name="up_status">Alterar</button>
-            </div>
-            <div class="col-md-2">
-                <input type="text" class="form-control" placeholder="(e)SIM)" name="sim_f">
-            </div>
-            <div class="col-md-2">
-                <select class="form-select" name="sim_type_f">
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary"
+                name="up_status">Alterar</button>
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control form-control-lg" placeholder="(e)SIM)" name="sim_f">
+        </div>
+        <div class="col-md-2">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="sim_type_f">
                     <option value="" selected>Filtrar Tipo - Todos</option>
                     {% for sim_t in sims_types %}
                     <option value="{{sim_t.0}}">{{sim_t.1}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
-                <select class="form-select" name="sim_status_f">
+        </div>
+        <div class="col-md-2">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="sim_status_f">
                     <option value="" selected>Filtrar Status - Todos</option>
                     {% for sim_s in sims_status %}
                     <option value="{{sim_s.0}}">{{sim_s.1}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
-                <select class="form-select" name="sim_oper_f">
+        </div>
+        <div class="col-md-2">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="sim_oper_f">
                     <option value="" selected>Filtrar Operadora - Todos</option>
                     {% for sim_o in sims_oper %}
                     <option value="{{sim_o.0}}">{{sim_o.1}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-1">
-                <button type="submit" class="btn btn-primary" name="up_filter">Filtrar</button>
-            </div>
-            <div class="col-md-1 p-2">
-                <a class="dropdown-item" href="{% url 'sims_index' %}"><i class="bi bi-arrow-clockwise"></i> Limpar</a>
-            </div>
-        <div id="dataTable" class="table-responsive table mt-2" role="grid" aria-describedby="dataTable_info">
-            <table id="dataTable" class="table table-striped table-hover my-0">
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary"
+                name="up_filter">Filtrar</button>
+        </div>
+        <div class="col-md-1 p-2">
+            <a class="btn-default btn-rounded" href="{% url 'sims_index' %}">
+                <i class="bi bi-arrow-clockwise"></i>Limpar
+            </a>
+        </div>
+        <div class="table">
+            <table class="table mb-0 table-hover table-responsive">
                 <thead>
-                    <tr>
+                    <tr class="userDatatable-header">
                         <th><input class="form-check-input" type="checkbox" id="checkAll"></th>
-                        <th>ID</th>
-                        <th>SIM</th>
-                        <th>Link</th>
-                        <th>Tipo Sim</th>
-                        <th>Operadora</th>
-                        <th>Status</th>
+                        <th class="userDatatable-title">ID</th>
+                        <th class="userDatatable-title">SIM</th>
+                        <th class="userDatatable-title">Link</th>
+                        <th class="userDatatable-title">Tipo Sim</th>
+                        <th class="userDatatable-title">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% if sims %}
-                        {% for sim in sims %}
-                        <tr>
-                            <td>
-                                <input class="checkItem form-check-input" type="checkbox" value="{{sim.id}}" name="sim_id">
-                            </td>
-                            <td>{{ sim.id }}</td>
-                            <td>{{ sim.sim }}</td>
-                            <td>{% if sim.type_sim == 'esim' %}<a href="{{ sim.link }}" target="_blank">{{ sim.sim }}{% else %}-{% endif %}</a></td>
-                            <td>{{ sim.type_sim }}</td>
-                            <td>{{ sim.get_operator_display }}</td>
-                            <td>{{ sim.get_sim_status_display }}</td>
-                        </tr>
-                        {% endfor %}
+                    {% for sim in sims %}
+                    <tr class="table-tr">
+                        <td>
+                            <div class="userDatatable-content">
+                                <input class="checkItem form-check-input" type="checkbox" value="{{sim.id}}"
+                                    name="sim_id">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ sim.id }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ sim.sim }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {% if sim.type_sim == 'esim' %}
+                                <a href="{{ sim.link }}" target="_blank">{{ sim.sim }}
+                                    {% else %}-{% endif %}
+                                </a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ sim.type_sim }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ sim.get_operator_display }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ sim.get_sim_status_display }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
                     {% else %}
-                        <tr>
-                            <td colspan="14">Nenhum (e)SIM encontrado.</td>
-                        </tr>
+                    <tr>
+                        <td>
+                            <div class="userDatatable-content">
+                                Nenhum (e)SIM encontrado.
+                            </div>
+                        </td>
+                    </tr>
                     {% endif %}
                 </tbody>
             </table>
@@ -174,25 +146,28 @@
                 <ul class="pagination">
                     {% if sims.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ sims.previous_page_number }}{{ url_filter }}" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
+                        <a class="page-link" href="?page={{ sims.previous_page_number }}{{ url_filter }}"
+                            aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
                     {% endif %}
-                  <li class="page-item"><a class="page-link" href="">{{ sims.number }} de {{ sims.paginator.num_pages }}</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="">{{ sims.number }} de {{ sims.paginator.num_pages }}</a>
+                    </li>
                     {% if sims.has_next %}
                     <li class="page-item">
                         <a class="page-link" href="?page={{ sims.next_page_number }}{{ url_filter }}" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
+                            <span aria-hidden="true">&raquo;</span>
                         </a>
-                      </li>
+                    </li>
                     {% endif %}
                 </ul>
-              </nav>
+            </nav>
         </div>
-        </form>
-    </div>
+    </form>
 </div>
+
 
 {% endblock %}
 {% block script_custom %}
@@ -200,7 +175,7 @@
     $(document).ready(function () {
         // Ação do botão "Marcar Todos"
         $('#checkAll').on('change', function () {
-        $('.checkItem').prop('checked', this.checked);
+            $('.checkItem').prop('checked', this.checked);
         });
     });
 </script>

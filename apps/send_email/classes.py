@@ -8,7 +8,6 @@ from django.contrib import messages
 from apps.orders.classes import ApiStore
 
 class SendEmail():
-    
     @staticmethod
     def mailAction(**kwargs):
         
@@ -17,7 +16,7 @@ class SendEmail():
         if kwargs.get('id'): id = kwargs.get('id')
         else: id = None
         if kwargs.get('id_user'): id_user = kwargs.get('id_user')    
-        else: id_user = None        
+        else: id_user = None
             
         if id == None:
             orders_all = Orders.objects.filter(order_status='EE')

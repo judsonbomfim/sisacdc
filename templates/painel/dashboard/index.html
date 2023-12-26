@@ -1,144 +1,248 @@
 {% extends 'painel/shared/base.html' %}
 {% load permission_tags %}
-
 {% load static %}
 {% load date_day %}
 
 {% block title_page %}<i class="bi bi-speedometer2"></i> Dashboard{% endblock %}
-{% block js_custom %}<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>{% endblock %}
+{% block js_custom %}
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    {% if request.user|can:'edit_orders' %}
-    <div class="col-md-6 col-xl-3 mb-4">
-        <div class="card shadow border-start-info py-2">
-            <div class="card-body">
-                <div class="row align-items-center no-gutters">
-                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
-                    <div class="col me-2">
-                        <div class="text-info fw-bold text-xs mb-1">
-                            <h6 class="text-danger fw-bold m-0">Ativações</h6>
-                        </div>
-                        <div class="row g-0 align-items-center">
-                            <div class="col-auto col-xxl-9">
-                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">Ativações para hoje</span></div>
-                            </div>
-                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">0</span></div>
-                        </div>
+<!-- Estoque de SIMs -->
+{% include 'painel/partials/_sims_stock.html' %}
+<!-- Fim Estoque de SIMs -->
+
+<!-- Vendas -->
+<div class="container-fluid">
+    <div class="row pt-5">
+        <div class="col-xxl-6 mb-25">
+            <div class="card shadow-sm revenueChartTwo border-1">
+                <div class="card-header border-0">
+                    <h6>Pedidos</h6>
+                    <div class="card-extra">
+                        <ul class="card-tab-links nav-tabs nav" role="tablist">
+                            <li>
+                                <a class="active" href="#total_sales-week" data-bs-toggle="tab"
+                                    id="total_sales-week-tab" role="tab" aria-selected="false">Semana</a>
+                            </li>
+                            <li>
+                                <a href="#total_sales-month" data-bs-toggle="tab" id="total_sales-month-tab" role="tab"
+                                    aria-selected="false">Mês</a>
+                            </li>
+                            <li>
+                                <a href="#total_sales-year" data-bs-toggle="tab" id="total_sales-year-tab" role="tab"
+                                    aria-selected="false">Ano</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-xl-3 mb-4">
-        <div class="card shadow border-start-info py-2">
-            <div class="card-body">
-                <div class="row align-items-center no-gutters">
-                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
-                    <div class="col me-2">
-                        <div class="text-info fw-bold text-xs mb-1">
-                            <h6 class="text-primary fw-bold m-0">Estoque T-mobile</h6>
-                        </div>
-                        <div class="row g-0 align-items-center">
-                            <div class="col-auto col-xxl-3">
-                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
+                <!-- ends: .card-header -->
+                <div class="card-body pt-0 px-20">
+                    <div class="tab-content">
+                        <div class="tab-pane fade active show" id="total_sales-week" role="tabpanel"
+                            aria-labelledby="total_sales-week-tab">
+                            <div class="cashflow-display cashflow-display2 d-flex">
                             </div>
-                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_tm }}</span></div>
-                            <div class="col-auto col-xxl-3">
-                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
-                            </div>
-                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tm }}</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-xl-3 mb-4">
-        <div class="card shadow border-start-info py-2">
-            <div class="card-body">
-                <div class="row align-items-center no-gutters">
-                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
-                    <div class="col me-2">
-                        <div class="text-info fw-bold text-xs mb-1">
-                            <h6 class="text-success fw-bold m-0">Estoque China Mobile</h6>
-                        </div>
-                        <div class="row g-0 align-items-center">
-                            <div class="col-auto col-xxl-3">
-                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
-                            </div>
-                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_cm }}</span></div>
-                            <div class="col-auto col-xxl-3">
-                                <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
-                            </div>
-                            <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_cm }}</span></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6 col-xl-3 mb-4">
-        <div class="card shadow border-start-info py-2">
-            <div class="card-body">
-                <div class="row align-items-center no-gutters">
-                    <div class="col-auto"><i class="fas fa-sim-card fa-2x text-gray-300"></i></div>
-                    <div class="col me-2">
-                        <div class="text-info fw-bold text-xs mb-1">
-                            <h6 class="text-info fw-bold m-0">Estoque Telcom</h6>
-                        </div>
-                        <div class="row g-0 align-items-center">
-                            <div class="row g-0 align-items-center">
-                                <div class="col-auto col-xxl-3">
-                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">SIM</span></div>
+                            <!-- ends: .performance-stats -->
+                            <div class="wp-chart">
+                                <div class="parentContainer">
+                                    <div>
+                                        <div id="ttSalesWeek"></div>
+                                    </div>
                                 </div>
-                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ sim_tc }}</span></div>
-                                <div class="col-auto col-xxl-3">
-                                    <div class="text-dark h5 mb-0 me-3"><span style="font-size: 14px;">eSIM</span></div>
-                                </div>
-                                <div class="col-xxl-3"><span style="font-size: 20px;font-weight: bold;">{{ esim_tc }}</span></div>
                             </div>
+                            <!-- ends: .performance-stats -->
+                        </div>
+                        <div class="tab-pane fade" id="total_sales-month" role="tabpanel"
+                            aria-labelledby="total_sales-month-tab">
+                            <div class="cashflow-display cashflow-display2 d-flex">
+                            </div>
+                            <!-- ends: .performance-stats -->
+                            <div class="wp-chart">
+                                <div class="parentContainer">
+                                    <div>
+                                        <div id="ttSalesMonth"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ends: .performance-stats -->
+                        </div>
+                        <div class="tab-pane fade" id="total_sales-year" role="tabpanel"
+                            aria-labelledby="total_sales-year-tab">
+                            <div class="cashflow-display cashflow-display2 d-flex">
+                            </div>
+                            <!-- ends: .performance-stats -->
+                            <div class="wp-chart">
+                                <div class="parentContainer">
+                                    <div>
+                                        <div id="ttSalesYear"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ends: .performance-stats -->
                         </div>
                     </div>
                 </div>
+                <!-- ends: .card-body -->
             </div>
+            <!-- ends: .card-body -->
+        </div>
+        <div class="col-xxl-6 mb-25">
+            <div class="card shadow-sm revenueChartTwo border-1">
+                <div class="card-header border-0">
+                    <h6>SIMs / eSIms</h6>
+                    <div class="card-extra">
+                        <ul class="card-tab-links nav-tabs nav" role="tablist">
+                            <li>
+                                <a class="active" href="#total_sims-week" data-bs-toggle="tab" id="total_sims-week-tab"
+                                    role="tab" aria-selected="false">Semana</a>
+                            </li>
+                            <li>
+                                <a href="#total_sims-month" data-bs-toggle="tab" id="total_sims-month-tab" role="tab"
+                                    aria-selected="false">Mês</a>
+                            </li>
+                            <li>
+                                <a href="#total_sims-year" data-bs-toggle="tab" id="total_sims-year-tab" role="tab"
+                                    aria-selected="false">Ano</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- ends: .card-header -->
+                <div class="card-body pt-0 px-20">
+                    <div class="tab-content">
+                        <div class="tab-pane fade active show" id="total_sims-week" role="tabpanel"
+                            aria-labelledby="total_sims-week-tab">
+                            <div class="cashflow-display cashflow-display2 d-flex">
+                            </div>
+                            <!-- ends: .performance-stats -->
+                            <div class="wp-chart">
+                                <div class="parentContainer">
+                                    <div>
+                                        <div id="ttSimsWeek"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ends: .performance-stats -->
+                        </div>
+                        <div class="tab-pane fade" id="total_sims-month" role="tabpanel"
+                            aria-labelledby="total_sims-month-tab">
+                            <div class="cashflow-display cashflow-display2 d-flex">
+                            </div>
+                            <!-- ends: .performance-stats -->
+                            <div class="wp-chart">
+                                <div class="parentContainer">
+                                    <div>
+                                        <div id="ttSimsMonth"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ends: .performance-stats -->
+                        </div>
+                        <div class="tab-pane fade" id="total_sims-year" role="tabpanel"
+                            aria-labelledby="total_sims-year-tab">
+                            <div class="cashflow-display cashflow-display2 d-flex">
+                            </div>
+                            <!-- ends: .performance-stats -->
+                            <div class="wp-chart">
+                                <div class="parentContainer">
+                                    <div>
+                                        <div id="ttSimsYear"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ends: .performance-stats -->
+                        </div>
+                    </div>
+                </div>
+                <!-- ends: .card-body -->
+            </div>
+            <!-- ends: .card-body -->
+        </div>
+        <div class="col-xxl-6 mb-25">
+            <div class="card shadow-sm revenueChartTwo border-1">
+                <div class="card-header border-0">
+                    <h6>Operadora</h6>
+                    <div class="card-extra">
+                        <ul class="card-tab-links nav-tabs nav" role="tablist">
+                            <li>
+                                <a class="active" href="#total_oper-week" data-bs-toggle="tab" id="total_oper-week-tab"
+                                    role="tab" aria-selected="false">Semana</a>
+                            </li>
+                            <li>
+                                <a href="#total_oper-month" data-bs-toggle="tab" id="total_oper-month-tab" role="tab"
+                                    aria-selected="false">Mês</a>
+                            </li>
+                            <li>
+                                <a href="#total_oper-year" data-bs-toggle="tab" id="total_oper-year-tab" role="tab"
+                                    aria-selected="false">Ano</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- ends: .card-header -->
+                <div class="card-body pt-0 px-20">
+                    <div class="tab-content">
+                        <div class="tab-pane fade active show" id="total_oper-week" role="tabpanel"
+                            aria-labelledby="total_oper-week-tab">
+                            <div class="cashflow-display cashflow-display2 d-flex">
+                            </div>
+                            <!-- ends: .performance-stats -->
+                            <div class="wp-chart">
+                                <div class="parentContainer">
+                                    <div>
+                                        <div id="ttOperWeek"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ends: .performance-stats -->
+                        </div>
+                        <div class="tab-pane fade" id="total_oper-month" role="tabpanel"
+                            aria-labelledby="total_oper-month-tab">
+                            <div class="cashflow-display cashflow-display2 d-flex">
+                            </div>
+                            <!-- ends: .performance-stats -->
+                            <div class="wp-chart">
+                                <div class="parentContainer">
+                                    <div>
+                                        <div id="ttOperhMonth"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ends: .performance-stats -->
+                        </div>
+                        <div class="tab-pane fade" id="total_oper-year" role="tabpanel"
+                            aria-labelledby="total_oper-year-tab">
+                            <div class="cashflow-display cashflow-display2 d-flex">
+                            </div>
+                            <!-- ends: .performance-stats -->
+                            <div class="wp-chart">
+                                <div class="parentContainer">
+                                    <div>
+                                        <div id="ttOperhYear"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ends: .performance-stats -->
+                        </div>
+                    </div>
+                </div>
+                <!-- ends: .card-body -->
+            </div>
+            <!-- ends: .card-body -->
         </div>
     </div>
-    {% endif %}
-    {% comment %} <div class="col-md-6 col-xl-6 mb-4">
-        <div class="card shadow border-start-info py-2">
-            <div class="card-body">
-                <canvas id="vendasSem" style="width:100%;max-width:100%"></canvas>
-            </div>
-        </div>
-    </div> {% endcomment %}
 </div>
+<!-- Fim Vendas -->
+{{ year_dates }}
 
 {% endblock %}
 
 {% block script_custom %}
-<script>
-    const xValues = [50,60,70,80,90,100,110,120,130,140,150];
-    const yValues = [7,8,8,9,4,9,10,11,14,14,15];
-    
-    new Chart("vendasSem", {
-      type: "line",
-      data: {
-        labels: xValues,
-        datasets: [{
-          fill: false,
-          lineTension: 0,
-          backgroundColor: "rgba(0,0,255,1.0)",
-          borderColor: "rgba(0,0,255,0.1)",
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {display: false},
-        scales: {
-          yAxes: [{ticks: {min: 4, max:16}}],
-        }
-      }
-    });
-    </script>
-    {% endblock %}
+<!-- Charts Sales -->
+{% include 'painel/partials/dashboard/scripts/charts_activations.html' %}
+{% include 'painel/partials/dashboard/scripts/charts_sales.html' %}
+{% include 'painel/partials/dashboard/scripts/charts_sims.html' %}
+{% include 'painel/partials/dashboard/scripts/charts_operators.html' %}
+{% include 'painel/partials/_messages_script.html' %}
+{% endblock %}

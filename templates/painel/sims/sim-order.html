@@ -1,21 +1,19 @@
-{% extends 'painel/shared/base.html' %}
+{% extends 'painel/partials/_content_default.html' %}
 {% load static %}
 {% block title_page %}<i class="bi bi-sim"></i> SIMs{% endblock %}
-{% block content %}
-<div class="card shadow">
-    <div class="card-header py-3">
-        <p class="text-secondary m-0 fw-bold">Adicionar SIM aos pedidos</p>
-    </div>
-    <div class="card-body">
-        <form action="{% url 'sims_ord' %}" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary mb-3">Adicionar (e)SIM aos pedidos</button>
-            </div>
-        </form>
-        {% for ord in orders %}
-            {{ord}}
-        {% endfor %}
-    </div>
-</div>
+{% block title_content %}Adicionar SIM aos Pedidos{% endblock %}
+
+{% block content_def %}
+    <p>Clique no botão abaixo para atribuir um SIM ou eSIM aos pedidos.
+    <form action="{% url 'sims_ord' %}" method="POST">
+        {% csrf_token %}
+        </p>
+        <div class="dm-select-list">
+            <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary">
+                <span class="flex items-center">
+                    <i class="bi bi-sim-fill"></i> <span>Adicionar (e)SIM aos Pedidos</span>
+                </span>
+            </button>
+        </div>
+    </form>
 {% endblock %}

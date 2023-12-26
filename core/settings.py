@@ -69,6 +69,14 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
+
 DATABASES = {
     "default": {
         "ENGINE": str(os.getenv('DB_ENGINE')),
@@ -79,7 +87,6 @@ DATABASES = {
         "PORT": str(os.getenv('DB_PORT')),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -108,7 +115,7 @@ TIME_ZONE = 'America/Sao_Paulo'
 DATE_INPUT_FORMATS = ('%d-%m-%Y')
 USE_I18N = True
 USE_L10N = True
-USE_TZ = True
+USE_TZ = False
 
 DATA_UPLOAD_MAX_NUMBER_FILES = 1000
 
