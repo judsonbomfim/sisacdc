@@ -8,7 +8,7 @@ import pandas as pd
 import locale
 
 # Definir o locale para português
-locale.setlocale(locale.LC_TIME, 'pt_BR.utf8')
+# locale.setlocale(locale.LC_TIME, 'pt_BR.utf8')
 
 
 # Create your views here.
