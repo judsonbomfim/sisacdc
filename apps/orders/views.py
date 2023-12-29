@@ -13,9 +13,10 @@ from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.classes import SendEmail
 from .classes import ApiStore, StatusSis
+import pandas as pd
 
-# import cv2
-# import pytesseract
+#Date today
+today = datetime.now()
 
 # Date - 2023-05-16T18:40:27
 def dateHour(dh):
@@ -691,6 +692,163 @@ def ord_export_op(request):
 def send_esims(request):
     if request.method == 'GET':
         return render(request, 'painel/orders/send_esim.html')    
+
+def orders_activations(request):
+    global orders_l
+    orders_l = ''
+    url_filter = ''
+    
+    orders_all = Orders.objects.filter(id_sim_id__isnull=False).filter(activation_date__gte=today).order_by('activation_date')
+    orders_df = pd.DataFrame(list(orders_all.values()))
+    orders_df['return_date'] = orders_df['activation_date'] + pd.to_timedelta(orders_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
+    
+    orders_l = orders_all
+    
+    if request.method == 'GET':
+        
+        activGoing_f = request.GET.get('activGoing_f')
+        activReturn_f = request.GET.get('activReturn_f') 
+        oper_f = request.GET.get('oper')
+        ord_st_f = request.GET.get('ord_st')
+
+    if request.method == 'POST':
+        
+        activGoing_f = request.POST.get('activGoing_f')
+        activReturn_f = request.POST.get('activReturn_f') 
+        oper_f = request.POST.get('oper_f')
+        ord_st_f = request.POST.get('ord_st_f')
+
+
+        if 'up_status' in request.POST:
+            ord_id = request.POST.getlist('ord_id')
+            ord_s = request.POST.get('ord_staus')
+            if ord_id and ord_s:
+                for o_id in ord_id:
+                    
+                    order = Orders.objects.get(pk=o_id)
+                    order.order_status = ord_s
+                    order.save()
+                    
+                    order_id = order.order_id
+                    order_st = order.order_status
+                    order_plan = order.get_product_display()
+                    try: type_sim = order.id_sim.type_sim
+                    except: type_sim = 'esim'
+                    apiStore = ApiStore.conectApiStore()
+                    
+                    if ord_s == 'CC' or ord_s == 'DS':
+                        if order.id_sim:
+                            # Update SIM
+                            sim_put = Sims.objects.get(pk=order.id_sim.id)
+                            if order.id_sim.type_sim == 'esim':
+                                sim_put.sim_status = 'TC'
+                                esim_v = True
+                            else:
+                                sim_put.sim_status = 'DS'
+                            sim_put.sim_status = 'TC'
+                            sim_put.save()
+                                
+                            # Delete SIM in Order
+                            order_put = Orders.objects.get(pk=order.id)
+                            order_put.id_sim_id = ''
+                            order_put.save()
+                            
+                            # Deletar eSIM para site                            
+                            if esim_v == True:    
+                                updateEsimStore(order_id)
+                        
+                    # Save Notes
+                    def addNote(t_note):
+                        add_sim = Notes( 
+                            id_item = Orders.objects.get(pk=order.id),
+                            id_user = User.objects.get(pk=request.user.id),
+                            note = t_note,
+                            type_note = 'S',
+                        )
+                        add_sim.save()
+                    
+                    ord_status = Orders.order_status.field.choices
+                    for st in ord_status:
+                        if order_st == st[0] :    
+                            addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
+                    
+                    # Alterar status
+                    # Status sis : Status Loja
+                    status_sis_site = StatusSis.st_sis_site()
+                    
+                    if ord_s in status_sis_site:
+                        update_store = {
+                            'status': status_sis_site[ord_s]
+                        }
+                        apiStore.put(f'orders/{order.order_id}', update_store).json()
+                    
+                    # Enviar email
+                    if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
+                        SendEmail.mailAction(id=order.id)
+                        
+                        addNote(f'E-mail enviado com sucesso!')
+                        messages.success(request,'E-mail enviado com sucesso!')
+                    
+                messages.success(request,f'Pedido(s) atualizado com sucesso!')
+            else:
+                messages.info(request,f'Você precisa marcar alguma opção')        
+    
+        # End up_status / POST
+    
+    if activGoing_f:
+        activGoing = [item.strip() for item in activGoing_f.split('-')]
+        activGoing_1 = dateF(activGoing[0])
+        print('>>>>>>>>> >>>>>>>>> activGoing_1')
+        print(activGoing_1)
+        try: activGoing_2 = dateF(activGoing[1])
+        except: activGoing_2 = dateF(activGoing[0])
+        orders_l = orders_l.filter(activation_date__gte=activGoing_1, activation_date__lte=activGoing_2)
+        url_filter += f"&oper={oper_f}"
+
+    if activReturn_f:
+        activReturn = [item.strip() for item in activReturn_f.split('-')]
+        activReturn_1 = dateF(activReturn[0])
+        try: activReturn_2 = dateF(activReturn[1])
+        except: activReturn_2 = dateF(activReturn[0])
+        orders_l = orders_l.filter(activation_date__gte=activReturn_1, activation_date__lte=activReturn_2)
+        url_filter += f"&oper={oper_f}"
+    
+    if oper_f: 
+        orders_l = orders_l.filter(id_sim__operator__icontains=oper_f)
+        url_filter += f"&oper={oper_f}"
+
+    if ord_st_f: 
+        orders_l = orders_l.filter(order_status__icontains=ord_st_f)
+        url_filter += f"&ord_st={ord_st_f}"
+    
+    
+
+    sims = Sims.objects.all()
+    ord_status = Orders.order_status.field.choices
+    oper_list = Sims.operator.field.choices
+
+    # Listar status dos pedidos
+    ord_st_list = []
+    for ord_s in ord_status:
+        ord = orders_all.filter(order_status=ord_s[0]).count()
+        ord_st_list.append((ord_s[0],ord_s[1],ord))
+    
+    # Paginação
+    paginator = Paginator(orders_l, 50)
+    page = request.GET.get('page')
+    orders = paginator.get_page(page)
+    
+    context = {
+        'orders_l': orders_l,
+        'orders': orders,
+        'sims': sims,
+        'ord_st_list': ord_st_list,
+        'oper_list': oper_list,
+        'url_filter': url_filter,
+    }
+    return render(request, 'painel/orders/activations.html', context)
+    
+
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza
