@@ -698,6 +698,9 @@ def orders_activations(request):
     orders_l = ''
     url_filter = ''
     
+    fields_df = ['item_id','client', 'id_sim__sim', 'id_sim__type_sim', 'id_sim__operator']
+    rename_df = {'id_sim__sim': 'sim', 'id_sim__type_sim': 'type_sim', 'id_sim__operator': 'operator'}
+    
     orders_all = Orders.objects.filter(id_sim_id__isnull=False).filter(activation_date__gte=today).order_by('activation_date')
     orders_df = pd.DataFrame(list(orders_all.values()))
     orders_df['return_date'] = orders_df['activation_date'] + pd.to_timedelta(orders_df['days'], unit='d') - pd.to_timedelta(1, unit='d')

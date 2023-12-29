@@ -85,7 +85,7 @@
     </div>
     <div class="col-md-1 p-2">
         <div class="application-task d-flex align-items-center">
-            <a class="btn-default btn-rounded" href="{% url 'orders_list' %}">
+            <a class="btn-default btn-rounded" href="{% url 'orders_activations' %}">
                 <i class="bi bi-arrow-clockwise"></i>Limpar
             </a>
         </div>
@@ -107,9 +107,6 @@
                     <th class="userDatatable-title text-center">Ativação</th>
                     <th class="userDatatable-title text-center">Término</th>
                     <th class="userDatatable-title text-center">Status</th>
-                    <th class="userDatatable-title">
-                        {% if request.user|can:'edit_orders' %}Ações{% endif %}
-                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -184,22 +181,6 @@
                     </td>
                     <td class="text-center">
                         <div class="userDatatable-content">{{ order.get_order_status_display }}</div>
-                    </td>
-                    <td>
-                        <div class="userDatatable-content">
-                            {% if request.user|can:'edit_orders' %}
-                            <a href="{% url 'ord_edit' order.id %}">
-                                <i class="bi bi-pencil-square pe-1 text-info" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                                    data-bs-title="Editar"></i></a>
-                            {% if order.order_status == 'CN' %}
-                            <a href="{% url 'send_email' order.id %}">
-                                <i class="bi bi-envelope-at pe-1 text-primary" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                                    data-bs-title="Reenviar e-amil"></i></a>
-                            {% endif %}
-                            {% endif %}
-                        </div>
                     </td>
                 </tr>
                 {% endfor %}

@@ -30,16 +30,20 @@
                             <a href="{% url 'ord_import' %}">Importar Pedidos</a>
                         </li>
                         {% endif %}
-                        {% if request.user|can:'export_orders' %}
-                        <li class="{% urL_active request '/pedidos/exportar/' %}">
-                            <a href="{% url 'ord_export_op' %}">Exportar para Ativação</a>
-                        </li>
-                        {% endif %}
                         {% if request.user|can:'send_esims' %}
                         <li class="{% urL_active request '/enviar/esims/' %}">
                             <a href="{% url 'send_esims' %}">Enviar eSIMs</a>
                         </li>
                         {% endif %}
+                        <li class="{% urL_active request '/pedidos/ativacoes/' %}">
+                            <a href="{% url 'orders_activations' %}">Listar Ativações</a>
+                        </li>
+                        {% if request.user|can:'export_orders' %}
+                        <li class="{% urL_active request '/pedidos/exportar/' %}">
+                            <a href="{% url 'ord_export_op' %}">Exportar para Ativação</a>
+                        </li>
+                        {% endif %}
+
                     </ul>
                 </li>
                 {% endif %}
