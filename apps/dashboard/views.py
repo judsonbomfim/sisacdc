@@ -35,7 +35,7 @@ def index(request):
     # Queries
     simsAll = Sims.objects.all()
     # Use range queries for each date range
-    ordersWeek = Orders.objects.filter(order_date__range=(dateWeek, dateDay))
+    ordersWeek = Orders.objects.filter(order_date__range=(dateMonth, dateDay))
     ordersMonth = Orders.objects.filter(order_date__range=(dateMonth, dateDay))
     ordersYear = Orders.objects.filter(order_date__range=(dateYear, dateDay))     
     
@@ -103,6 +103,7 @@ def index(request):
     yearSimsValuesS = json.dumps(yearSimsReport['esim'].tolist())
     yearSimsValuesE = json.dumps(yearSimsReport['sim'].tolist())
     yearSimsDates = json.dumps([month.strftime('%Y-%m') for month in yearSimsReport.index])    
+    
     
     # OPERATOR
     # --- Week
