@@ -12,6 +12,24 @@ from django.core.files.storage import FileSystemStorage
 from apps.sims.models import Sims
 from apps.orders.models import Orders
 from apps.orders.views import ApiStore, StatusSis
+import boto3
+from django.conf import settings
+from django.core.files.storage import default_storage
+
+# Script Upload S3
+def get_s3_client():
+    return boto3.client(
+        's3', 
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID, 
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+    )
+
+def upload_file_to_s3(file):
+    s3 = get_s3_client()
+    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+    file_path = f"{settings.MEDIA_LOCATION}/{file.name}"
+    s3.upload_fileobj(file, bucket_name, file_path)
+    return default_storage.url(file_path)
 
 @login_required(login_url='/login/')
 def sims_list(request):
@@ -174,32 +192,32 @@ def sims_add_esim(request):
             messages.error(request,'Preencha todos os campos')
             return render(request, 'painel/sims/add-esim.html')
                            
-        try:
-            for sim_img in esims:
-                sim_i = sim_img.name.split('.')
-                # Save image
-                fs = FileSystemStorage()
-                file = fs.save(sim_img.name, sim_img)
-                fileurl = fs.url(file)
-                
-                sims_all = Sims.objects.all().filter(sim=sim_i[0]).filter(type_sim='esim')
-                if sims_all:
-                    messages.info(request,f'O SIM {sim_i[0]} já está cadastrado no sistema')
-                    continue
-                # Save SIMs
-                add_sim = Sims(
-                    sim = sim_i[0],
-                    link = fileurl,
-                    type_sim = type_sim,
-                    operator = operator
-                )
-                add_sim.save()
+        
+        for sim_img in esims:
+            sim_i = sim_img.name.split('.')
+            # # Save image
+            # fs = FileSystemStorage()
+            # file = fs.save(sim_img.name, sim_img)
+            # fileurl = fs.url(file)
+            
+            fileurl = upload_file_to_s3(sim_img)
+            
+            sims_all = Sims.objects.all().filter(sim=sim_i[0]).filter(type_sim='esim')
+            if sims_all:
+                messages.info(request,f'O SIM {sim_i[0]} já está cadastrado no sistema')
+                continue
+            # Save SIMs
+            add_sim = Sims(
+                sim = sim_i[0],
+                link = fileurl,
+                type_sim = type_sim,
+                operator = operator
+            )
+            add_sim.save()
 
-            messages.success(request,'Lista gravada com sucesso')
-            return render(request, 'painel/sims/add-esim.html')
-        except:
-            messages.error(request,'Houve um erro ao gravar os eSIMs')
-            return render(request, 'painel/sims/add-esim.html')
+        messages.success(request,'Lista gravada com sucesso')
+        return render(request, 'painel/sims/add-esim.html')
+   
 
 @login_required(login_url='/login/')
 def sims_ord(request):
