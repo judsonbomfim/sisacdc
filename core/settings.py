@@ -17,8 +17,8 @@ SECRET_KEY = str(os.getenv('SECRET_KEY'))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1', 'painel.acasadochip.com', 'sistema.acasadochip.com', 'd1b86h392tdauu.cloudfront.net', '107.23.212.94']
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1/', 'https://painel.acasadochip.com', 'https://sistema.acasadochip.com', 'https://d1b86h392tdauu.cloudfront.net', 'https://107.23.212.94']
 
 # Application definition
 
