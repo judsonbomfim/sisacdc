@@ -70,6 +70,8 @@ def orders_list(request):
     global orders_l
     orders_l = ''
     
+    url_cdn = str(os.getenv('URL_CDN'))
+    
     orders_all = Orders.objects.all().order_by('-id')
     orders_l = orders_all
     
@@ -203,6 +205,7 @@ def orders_list(request):
     orders = paginator.get_page(page)
     
     context = {
+        'url_cdn': url_cdn,
         'orders_l': orders_l,
         'orders': orders,
         'sims': sims,

@@ -183,3 +183,7 @@ EMAIL_HOST_PASSWORD = str(os.getenv('EMAIL_HOST_PASSWORD'))
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = str(os.getenv('DEFAULT_FROM_EMAIL'))
+
+
+URL_PAINEL = str(os.getenv('URL_PAINEL'))
+URL_CDN = str(os.getenv('URL_CDN'))
