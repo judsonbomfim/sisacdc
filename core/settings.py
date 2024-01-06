@@ -25,7 +25,6 @@ CSRF_TRUSTED_ORIGINS = [
     h.strip() for h in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
     if h.strip()
 ]
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -189,4 +188,3 @@ EMAIL_HOST_PASSWORD = str(os.getenv('EMAIL_HOST_PASSWORD'))
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = str(os.getenv('DEFAULT_FROM_EMAIL'))
-
