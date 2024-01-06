@@ -5,10 +5,6 @@ from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
 load_dotenv()
 
-# System Information
-# SIS_VERSION = str(os.getenv('SIS_VERSION'))
-SIS_VERSION = '2.5.3'
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -71,7 +67,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'core.context_processors.sis_version',
             ],
         },
     },
