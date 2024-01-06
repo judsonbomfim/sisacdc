@@ -25,12 +25,12 @@ def index(request):
     activationTomorrow = activationOrders.count()    
     activList = pd.DataFrame(activationOrders.values('id_sim__operator')).rename(columns={'id_sim__operator': 'operator'})
     activList = activList.groupby(['operator']).size().reset_index(name='countActiv')    
-    # countActivTM = activList[activList['operator'] == 'TM']['countActiv'].values[0]
-    # countActivCM = activList[activList['operator'] == 'CM']['countActiv'].values[0]
-    # countActivTC = activList[activList['operator'] == 'TC']['countActiv'].values[0]
-    countActivTM = 0
-    countActivCM = 0
-    countActivTC = 0
+    try: countActivTM = activList[activList['operator'] == 'TM']['countActiv'].values[0]
+    except: countActivTM = 0
+    try: countActivCM = activList[activList['operator'] == 'CM']['countActiv'].values[0]
+    except: countActivCM = 0
+    try: countActivTC = activList[activList['operator'] == 'TC']['countActiv'].values[0]
+    except: countActivTC = 0
     
     # Queries
     simsAll = Sims.objects.all()

@@ -714,7 +714,10 @@ def orders_activations(request):
     data_choice_dict = dict(Orders.data_day.field.choices)
     status_choice_dict = dict(Orders.order_status.field.choices)
     
-    orders_all = Orders.objects.filter(id_sim_id__isnull=False).filter(activation_date__gte=today).order_by('activation_date')
+    today = datetime.now()
+    days45 = today - timedelta(days=45)
+    
+    orders_all = Orders.objects.filter(id_sim_id__isnull=False).filter(activation_date__gte=days45).order_by('activation_date')
     
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
     orders_df['product'] = orders_df['product'].map(product_choice_dict)
@@ -866,8 +869,10 @@ def orders_activations(request):
         ord = len(orders_l[orders_l['order_status'] == ord_s[0]])
         ord_st_list.append((ord_s[0],ord_s[1],ord))
         
-
-    activList = orders_l.groupby(['id_sim__operator']).size().reset_index(name='countActiv')    
+    # Listar ativações
+    today = datetime.now().date()
+    activList = orders_l[orders_l['activation_date'].dt.date >= today]    
+    activList = activList.groupby(['id_sim__operator']).size().reset_index(name='countActiv')    
     countActivAll = countActivAll = activList['countActiv'].sum()
     try: countActivTM = activList[activList['id_sim__operator'] == 'TM']['countActiv'].values[0]
     except: countActivTM = 0
