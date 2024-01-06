@@ -18,6 +18,7 @@ SECRET_KEY = str(os.getenv('SECRET_KEY'))
 DEBUG = True
 
 ALLOWED_HOSTS = ['painel.acasadochip.com', 'localhost']
+CSRF_TRUSTED_ORIGINS = ['painel.acasadochip.com', 'localhost']
 
 # Application definition
 
