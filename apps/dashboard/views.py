@@ -35,7 +35,7 @@ def index(request):
     # Queries
     simsAll = Sims.objects.all()
     # Use range queries for each date range
-    ordersWeek = Orders.objects.filter(order_date__range=(dateMonth, dateDay))
+    ordersWeek = Orders.objects.filter(order_date__range=(dateWeek, dateDay))
     ordersMonth = Orders.objects.filter(order_date__range=(dateMonth, dateDay))
     ordersYear = Orders.objects.filter(order_date__range=(dateYear, dateDay))     
     
