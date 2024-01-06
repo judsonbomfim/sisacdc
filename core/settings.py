@@ -5,6 +5,9 @@ from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
 load_dotenv()
 
+# System Information
+SIS_VERSION = str(os.getenv('SIS_VERSION'))
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -17,8 +20,8 @@ SECRET_KEY = str(os.getenv('SECRET_KEY'))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'painel.acasadochip.com', 'sistema.acasadochip.com', 'd1b86h392tdauu.cloudfront.net', '107.23.212.94']
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1/', 'https://painel.acasadochip.com', 'https://sistema.acasadochip.com', 'https://d1b86h392tdauu.cloudfront.net', 'https://107.23.212.94']
+ALLOWED_HOSTS = (os.getenv('ALLOWED_HOSTS').split(','))
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS').split(',')
 
 # Application definition
 
@@ -61,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.sis_version',
             ],
         },
     },
@@ -183,3 +187,4 @@ EMAIL_HOST_PASSWORD = str(os.getenv('EMAIL_HOST_PASSWORD'))
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = str(os.getenv('DEFAULT_FROM_EMAIL'))
+
