@@ -6,6 +6,7 @@ from django.conf import settings
 from apps.orders.models import Orders, Notes
 from django.contrib import messages
 from apps.orders.classes import ApiStore
+import os
 
 class SendEmail():
     @staticmethod
