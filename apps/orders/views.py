@@ -863,6 +863,12 @@ def orders_activations(request):
     for ord_s in ord_status:
         ord = len(orders_l[orders_l['order_status'] == ord_s[0]])
         ord_st_list.append((ord_s[0],ord_s[1],ord))
+        print(ord_s[0])
+        print(ord_s[1])
+        print(ord)
+        print('---')
+    
+    print(ord_st_list)
         
     # Listar ativações
     today = datetime.now().date()
