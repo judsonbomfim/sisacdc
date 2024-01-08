@@ -699,7 +699,7 @@ def send_esims(request):
 
 def orders_activations(request):
     global orders_l
-    orders_l = None
+    orders_l = []
     url_filter = ''
     activGoing_f = None
     activGoing_1 = None
@@ -718,9 +718,9 @@ def orders_activations(request):
     status_choice_dict = dict(Orders.order_status.field.choices)
     
     today = datetime.now()
-    days45 = today - timedelta(days=45)
+    days60 = today - timedelta(days=60)
     
-    orders_all = Orders.objects.filter(id_sim_id__isnull=False).filter(activation_date__gte=days45).order_by('activation_date')
+    orders_all = Orders.objects.filter(activation_date__gte=days60).order_by('activation_date')
     
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
     orders_df['product'] = orders_df['product'].map(product_choice_dict)
@@ -729,7 +729,6 @@ def orders_activations(request):
     orders_df['return_date'] = orders_df['activation_date'] + pd.to_timedelta(orders_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
     
     orders_l = orders_df
-
     
     if request.method == 'GET':
         
@@ -743,21 +742,40 @@ def orders_activations(request):
     if request.method == 'POST':
 
         if request.POST.get('activGoing_f'): activGoing_f = request.POST.get('activGoing_f')
-        if request.POST.get('activReturn_f') : activReturn_f = request.POST.get('activReturn_f') 
+        if request.POST.get('activReturn_f') : activReturn_f = request.POST.get('activReturn_f')
         if request.POST.get('oper_f'): oper_f = request.POST.get('oper_f')
         if request.POST.get('ord_st_f'): ord_st_f = request.POST.get('ord_st_f')
         
         if activGoing_f is not None:
             activGoing = [item.strip() for item in activGoing_f.split('-')]
             activGoing_1 = dateF(activGoing[0])
-            try: activGoing_2 = dateF(activGoing[1])
-            except: pass
+            try: 
+                activGoing_2 = dateF(activGoing[1])
+                orders_l = orders_l[(orders_l['activation_date'] >= activGoing_1) & (orders_l['activation_date'] <= activGoing_2)]
+                url_filter += f"&activGoing_1={activGoing_1}&activGoing_2={activGoing_2}"
+            except:
+                orders_l = orders_l[(orders_l['activation_date'] == activGoing_1)]
+                url_filter += f"&activGoing_1={activGoing_1}"  
+                
         
         if activReturn_f is not None:
             activReturn = [item.strip() for item in activReturn_f.split('-')]
             activReturn_1 = dateF(activReturn[0])
-            try: activReturn_2 = dateF(activReturn[1])
-            except: pass
+            try: 
+                activReturn_2 = dateF(activReturn[1])
+                orders_l = orders_l[(orders_l['return_date'] >= activReturn_1) & (orders_l['return_date'] <= activReturn_2)]
+                url_filter += f"&activReturn_1={activReturn_1}&activReturn_2={activReturn_2}"
+            except:
+                orders_l = orders_l[(orders_l['return_date'] == activReturn_1)]
+                url_filter += f"&activReturn_1={activReturn_1}"
+            
+            if oper_f is not None:
+                orders_l = orders_l[(orders_l['id_sim__operator'] == oper_f)]
+                url_filter += f"&oper={oper_f}"
+
+            if ord_st_f is not None:
+                orders_l = orders_l[(orders_l['order_status'] == ord_st_f)]
+                url_filter += f"&ord_st={ord_st_f}"
 
 
         if 'up_status' in request.POST:
@@ -835,32 +853,6 @@ def orders_activations(request):
                 messages.info(request,f'Você precisa marcar alguma opção')        
     
         # End up_status / POST
-    
-    # FIlters ========================
-    if activGoing_1 is not None:
-        if activGoing_2 is not None:
-            orders_l = orders_l[(orders_l['activation_date'] >= activGoing_1) & (orders_l['activation_date'] <= activGoing_2)]
-            url_filter += f"&activGoing_1={activGoing_1}&activGoing_2={activGoing_2}"
-        else:
-            orders_l = orders_l[(orders_l['activation_date'] == activGoing_1)]
-            url_filter += f"&activGoing_1={activGoing_1}"        
-
-    if activReturn_1 is not None:
-        if activReturn_2 is not None:
-            orders_l = orders_l[(orders_l['return_date'] >= activReturn_1) & (orders_l['return_date'] <= activReturn_2)]
-            url_filter += f"&activReturn_1={activReturn_1}&activReturn_2={activReturn_2}"
-        else:
-            orders_l = orders_l[(orders_l['return_date'] == activReturn_1)]
-            url_filter += f"&activReturn_1={activReturn_1}"         
-            
-    if oper_f is not None:
-        orders_l = orders_l[(orders_l['id_sim__operator'] == oper_f)]
-        url_filter += f"&oper={oper_f}"
-
-    if ord_st_f is not None:
-        orders_l = orders_l[(orders_l['order_status'] == ord_st_f)]
-        url_filter += f"&ord_st={ord_st_f}" 
-    
 
     sims = Sims.objects.all()
     ord_status = Orders.order_status.field.choices
@@ -874,8 +866,8 @@ def orders_activations(request):
         
     # Listar ativações
     today = datetime.now().date()
-    activList = orders_l[orders_l['activation_date'].dt.date >= today]    
-    activList = activList.groupby(['id_sim__operator']).size().reset_index(name='countActiv')    
+    activList = orders_l[orders_l['activation_date'].dt.date > today]
+    activList = activList.groupby(['id_sim__operator']).size().reset_index(name='countActiv')
     countActivAll = countActivAll = activList['countActiv'].sum()
     try: countActivTM = activList[activList['id_sim__operator'] == 'TM']['countActiv'].values[0]
     except: countActivTM = 0
