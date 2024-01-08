@@ -5,6 +5,9 @@
 .nav-author__options{
     background-color: #092940 !important;
 }
+.menu-author{
+    text-align: right !important;
+}
 
 /* Tabela */
 .userDatatable-header{

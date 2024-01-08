@@ -28,21 +28,21 @@
 
 {% block content_def %}
 
+{% if request.user|can:'edit_sims' %}
+<div class="col-md-12">
+
+    <div class="dm-button-list d-flex flex-wrap">
+        {% for ord_sts in ord_st_list %}
+        {% if ord_sts.2 != 0 %}
+        <button class="btn btn-default btn-squared color-primary btn-outline-primary m-1">{{ord_sts.1}}
+            ({{ord_sts.2}})</button>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 <form class="row g-3" action="{% url 'orders_list' %}" method="POST">
     {% csrf_token %}
-    {% if request.user|can:'edit_sims' %}
-    <div class="col-md-12">
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-            <div class="btn-group me-2" role="group" aria-label="First group">
-                {% for ord_sts in ord_st_list %}
-                {% if ord_sts.2 != 0 %}
-                <button type="button" class="btn btn-xs btn-outline-light">{{ord_sts.1}} ({{ord_sts.2}})</button>
-                {% endif %}
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% endif %}
     {% if request.user|can:'edit_orders' %}
     <div class="col-md-1">
         <div class="dm-select">

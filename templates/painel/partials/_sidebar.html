@@ -17,7 +17,7 @@
                     <a>
                         <i class="nav-icon bi bi-shop"></i>
                         <span class="menu-text">Pedidos</span>
-                        <span class="toggle-icon"></span>
+                        <i class="toggle-icon bi bi-plus-circle text-light"></i>
                     </a>
                     <ul>
                         {% if request.user|can:'view_orders' %}
@@ -51,7 +51,7 @@
                     <a>
                         <i class="nav-icon bi bi-sim"></i>
                         <span class="menu-text">SIMs</span>
-                        <span class="toggle-icon"></span>
+                        <i class="toggle-icon bi bi-plus-circle text-light"></i>
                     </a>
                     <ul>
                         <li class="{% urL_active request '/sims/listar/' %}">

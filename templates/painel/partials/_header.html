@@ -1,7 +1,7 @@
 {% load static %}
 {% load date_day %}
 
-<div class="mobile-author-actions"></div>
+<div class="mobile-author-actions bg-primary"></div>
 <header class="header-top layout-dark bg-primary">
     <nav class="navbar">
         <div class="navbar-left">
@@ -11,20 +11,21 @@
                     <img class="light" src="{% static 'painel/theme/img/logo-painel.png' %}" alt="logo">
                 </a>
                 <a href="#" class="sidebar-toggle">
-                    <img class="svg" src="{% static 'painel/theme/hexadash/img/svg/align-center-alt.svg' %}" alt="img">
+                    <i class="bi bi-list"></i>
+
                 </a>
             </div>
         </div>
         <!-- ends: navbar-left -->
-        <div class="navbar-right layout-light">
-            <ul class="navbar-right__menu content-center">
+        <div class="navbar-right layout-light w-100">
+            <ul class="navbar-right__menu d-flex justify-content-end">
                 <li class="nav-author">
                     <div class="dropdown-custom">
                         <a href="javascript:;" class="nav-item-toggle">
                             <span class="avatar avatar-light avatar-md avatar-circle  ">
-                                <img src="{% static 'painel/theme/hexadash/img/svg/user.svg' %}" alt="user" class="svg avatar-icon">
+                                <i class="bi bi-person text-light"></i>
                             </span>
-                            <span class="nav-item__title">{{ user.first_name }} {{ user.last_name }}<i class="las la-angle-down nav-item__arrow"></i></span>
+                            <span class="nav-item__title">{{ user.first_name }} {{ user.last_name }} <i class="bi bi-caret-down-fill ps-2"></i></span>
                         </a>
                         <div class="dropdown-parent-wrapper">
                             <div class="dropdown-wrapper">
@@ -41,9 +42,10 @@
                 <!-- ends: .nav-author -->
             </ul>
             <!-- ends: .navbar-right__menu -->
-            <div class="navbar-right__mobileAction d-md-none">
-                <a href="#" class="btn-author-action">
+            <div class="navbar-right__mobileAction d-md-none bg-primary w-100">
+                <a href="#" class="btn-author-action d-flex justify-content-end">
                     <i class="bi bi-three-dots-vertical text-light"></i>
+                </a>
             </div>
         </div>
         <!-- ends: .navbar-right -->
