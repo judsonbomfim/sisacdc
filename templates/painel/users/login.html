@@ -17,17 +17,25 @@
   <link rel="stylesheet" href="{% static 'painel/theme/bootstrap/css/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'painel/theme/bootstrap/css/login.css' %}">
 
+  <style>
+    .bg-body {
+      background-color: #12364e !important;
+      background-image: url('{% static 'painel/theme/img/bg-sistema-login.jpg' %}') !important;
+      background-align: center !important;
+    }
+ </style>
+
 </head>
 
-<body class="d-flex align-items-center py-4 bg-body-tertiary">
+<body class="d-flex align-items-center py-4 bg-body">
 
-  <main class="form-signin w-100 m-auto">
+  <main class="form-signin w-100 m-auto bg-light bg-opacity-10">
     {% include 'painel/partials/_messages.html' %}
     <form action="{% url 'login' %}" method="POST">
       {% csrf_token %}
       <div class="text-center mb-4">
         <img class="mb-4" src="{% static 'painel/theme/img/logo-painel.png' %}" style="width: 250px">
-        <h1 class="h3 mb-3 fw-normal">Login do Sistema</h1>
+        <h1 class="h5 mb-3 fw-normal text-white">Login do Sistema</h1>
       </div>
       <div class="form-floating pb-2">
         <input type="text" class="form-control" id="floatingInput" placeholder="" name="name_form">
@@ -39,7 +47,7 @@
       </div>
       <button class="btn btn-primary w-100 py-2" type="submit">Logar</button>
       <div class="text-center my-3">
-        <p class="mt-5 mb-3 text-body-secondary">Copyright ©2023 A Casa do Chip<br>By Criativa Digital</p>
+        <p class="mt-5 mb-3 text-body-secondary text-white">Copyright ©2023 A Casa do Chip<br>By Criativa Digital</p>
       </div>
     </form>
   </main>
