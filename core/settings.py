@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import boto3
 from django.contrib.messages import constants as messages
+from datetime import timedelta
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -187,3 +188,15 @@ DEFAULT_FROM_EMAIL = str(os.getenv('DEFAULT_FROM_EMAIL'))
 
 URL_PAINEL = str(os.getenv('URL_PAINEL'))
 URL_CDN = str(os.getenv('URL_CDN'))
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+CELERY_BEAT_SCHEDULE = {
+    'run-my-task-every-5-minutes': {
+        'task': 'apps.orders.tasks.mytask',
+        'schedule': timedelta(seconds=3),
+    },
+}
