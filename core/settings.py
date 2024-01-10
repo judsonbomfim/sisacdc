@@ -18,8 +18,15 @@ SECRET_KEY = str(os.getenv('SECRET_KEY'))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'painel.acasadochip.com', 'd1b86h392tdauu.cloudfront.net']
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1/', 'https://painel.acasadochip.com', 'https://d1b86h392tdauu.cloudfront.net']
+ALLOWED_HOSTS = [
+    h.strip() for h in os.getenv('ALLOWED_HOSTS', '').split(',')
+    if h.strip()
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    a.strip() for a in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if a.strip()
+]
 
 # Application definition
 
@@ -81,13 +88,13 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 
 DATABASES = {
-    "default": {
-        "ENGINE": str(os.getenv('DB_ENGINE')),
-        "NAME": str(os.getenv('DB_NAME')),
-        "USER": str(os.getenv('DB_USER')),
-        "PASSWORD": str(os.getenv('DB_PASSWORD')),
-        "HOST": str(os.getenv('DB_HOST')),
-        "PORT": str(os.getenv('DB_PORT')),
+    'default': {
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
@@ -178,7 +185,7 @@ KEYCLOAK_PERMISSIONS_METHOD = 'role'
 # E-mail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = str(os.getenv('EMAIL_HOST'))
-EMAIL_PORT = int(os.getenv('EMAIL_PORT'))
+EMAIL_PORT = 587
 EMAIL_HOST_USER = str(os.getenv('EMAIL_HOST_USER'))
 EMAIL_HOST_PASSWORD = str(os.getenv('EMAIL_HOST_PASSWORD'))
 EMAIL_USE_TLS = True
@@ -194,11 +201,22 @@ CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
+#Redis
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://redis:6379/1",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         }
+#     }
+# }
+
 CELERY_BEAT_SCHEDULE = {
-    # 'run-my-task-every-5-minutes': {
-    #     'task': 'apps.orders.tasks.mytask',
-    #     'schedule': timedelta(seconds=3),
-    # },
+    'run-my-task-every-5-minutes': {
+        'task': 'apps.orders.tasks.mytask',
+        'schedule': timedelta(seconds=300),
+    },
     # 'order_import': {
     #     'task': 'apps.orders.tasks.order_import',
     #     'schedule': timedelta(seconds=30),

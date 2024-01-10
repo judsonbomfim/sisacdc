@@ -186,7 +186,7 @@ def ord_import(request):
         # Orderm Import
         # order_import.delay()
         
-        task = order_import.delay()
+        task = order_import()
 
         # Espera a tarefa terminar e obtém o resultado
         result = AsyncResult(task.id).get()

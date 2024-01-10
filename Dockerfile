@@ -7,11 +7,14 @@ COPY requirements.txt .
 
 RUN apt-get update && apt-get install -y nano && \
     pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install -r requirements.txt && \
+    adduser --disabled-password --no-create-home duser
 
 COPY . .
 
-COPY entrypoint.sh .
-RUN chmod +x /djangoapp/entrypoint.sh
+COPY entrypoint.sh ./scripts/entrypoint.sh
+RUN chmod +x /djangoapp/scripts/entrypoint.sh
+
+USER duser
 
 EXPOSE 8000
