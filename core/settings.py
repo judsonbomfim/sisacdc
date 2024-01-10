@@ -201,21 +201,10 @@ CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
-#Redis
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://redis:6379/1",
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#         }
-#     }
-# }
-
 CELERY_BEAT_SCHEDULE = {
     'run-my-task-every-5-minutes': {
         'task': 'apps.orders.tasks.mytask',
-        'schedule': timedelta(seconds=300),
+        'schedule': timedelta(seconds=10),
     },
     # 'order_import': {
     #     'task': 'apps.orders.tasks.order_import',
