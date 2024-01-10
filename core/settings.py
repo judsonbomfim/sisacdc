@@ -202,12 +202,12 @@ CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 CELERY_BEAT_SCHEDULE = {
-    'run-my-task-every-5-minutes': {
-        'task': 'apps.orders.tasks.mytask',
-        'schedule': timedelta(seconds=10),
-    },
-    # 'order_import': {
-    #     'task': 'apps.orders.tasks.order_import',
-    #     'schedule': timedelta(seconds=30),
+    # 'run-my-task-every-5-minutes': {
+    #     'task': 'apps.orders.tasks.mytask',
+    #     'schedule': timedelta(seconds=60),
     # },
+    'order_import': {
+        'task': 'apps.orders.tasks.order_import',
+        'schedule': timedelta(seconds=30),
+    },
 }
