@@ -12,10 +12,10 @@ RUN apt-get update && apt-get install -y nano && \
 
 COPY . .
 
-RUN chown -R duser:duser /djangoapp
-
 COPY entrypoint.sh ./scripts/entrypoint.sh
-RUN chmod +x /djangoapp/scripts/entrypoint.sh
+
+RUN chmod +x /djangoapp/scripts/entrypoint.sh && \
+    chown -R duser:duser /djangoapp
 
 USER duser
 
