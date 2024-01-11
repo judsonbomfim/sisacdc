@@ -1,4 +1,4 @@
-from celery import shared_task
+from celery import shared_task, Celery
 from django.utils.text import slugify
 from datetime import datetime, timedelta
 from django.contrib import messages
@@ -7,13 +7,11 @@ from rolepermissions.decorators import has_permission_decorator
 from .classes import ApiStore, StatusSis, DateFormats
 from apps.orders.models import Orders, Notes
 
-
 @shared_task
 def mytask():
     print('>>>>>>>>>>>>>>>>>>>>>>> Hello World')
 
-@login_required(login_url='/login/')
-@has_permission_decorator('import_orders')
+
 @shared_task
 def order_import():
     # Importar pedidos

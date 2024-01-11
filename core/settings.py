@@ -208,6 +208,6 @@ CELERY_BEAT_SCHEDULE = {
     # },
     'order_import': {
         'task': 'apps.orders.tasks.order_import',
-        'schedule': timedelta(seconds=15),
+        'schedule': timedelta(seconds=10),
     },
 }

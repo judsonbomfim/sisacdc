@@ -183,17 +183,12 @@ def ord_import(request):
        
     if request.method == 'POST':
         
-        # Orderm Import
-        # order_import.delay()
-        
-        task = order_import()
-
-        # Espera a tarefa terminar e obtém o resultado
-        result = AsyncResult(task.id).get()
+        # Orderm Import       
+        order_import.delay()
 
         # Agora você pode usar o resultado para qualquer coisa que quiser
         # Por exemplo, você pode adicioná-lo a uma mensagem de sucesso
-        messages.success(request, f'Processando pedidos... Resultado: {result}')        
+        messages.success(request, f'Processando pedidos... Aguarde alguns minutos e atualize a página')        
 
         return render(request, 'painel/orders/import.html')
 
