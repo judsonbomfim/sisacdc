@@ -1,4 +1,4 @@
-from celery import shared_task, Celery
+from celery import shared_task
 from django.utils.text import slugify
 from datetime import datetime, timedelta
 from django.contrib import messages
@@ -6,6 +6,12 @@ from django.contrib.auth.decorators import login_required
 from rolepermissions.decorators import has_permission_decorator
 from .classes import ApiStore, StatusSis, DateFormats
 from apps.orders.models import Orders, Notes
+import getpass
+from celery import chain
+import time
+from apps.sims.tasks import sims_in_orders
+from apps.send_email.tasks import send_esims
+
 
 @shared_task
 def mytask():
@@ -148,7 +154,11 @@ def order_import():
                         register
                     except:
                         msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
-                        
+                    
+                    id_user = None
+                    if getpass.getuser():
+                        id_user = getpass.getuser()
+                    
                     # Save Notes
                     add_sim = Notes( 
                         id_item = Orders.objects.get(pk=order_add.id),
@@ -185,3 +195,11 @@ def order_import():
     else:
         print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
+@shared_task
+def orders_auto():
+    
+    order_import.delay()
+    time.sleep(20)
+    sims_in_orders.delay()
+    time.sleep(20)
+    send_esims.delay()

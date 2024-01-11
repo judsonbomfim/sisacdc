@@ -8,8 +8,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
-from celery.result import AsyncResult
-from django.utils.text import slugify
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.classes import SendEmail
@@ -185,12 +183,9 @@ def ord_import(request):
         
         # Orderm Import       
         order_import.delay()
+        messages.success(request, f'Processando pedidos... Aguarde alguns minutos e atualize a página de pedidos')        
 
-        # Agora você pode usar o resultado para qualquer coisa que quiser
-        # Por exemplo, você pode adicioná-lo a uma mensagem de sucesso
-        messages.success(request, f'Processando pedidos... Aguarde alguns minutos e atualize a página')        
-
-        return render(request, 'painel/orders/import.html')
+    return render(request, 'painel/orders/import.html')
 
 # Order Edit
 @login_required(login_url='/login/')
@@ -236,6 +231,7 @@ def ord_edit(request,id):
         operator = request.POST.get('operator')
         sim = request.POST.get('sim')
         activation_date = request.POST.get('activation_date')
+        email = request.POST.get('email')
         cell_imei = request.POST.get('cell_imei')
         cell_eid = request.POST.get('cell_eid')
         tracking = request.POST.get('tracking')
@@ -343,12 +339,15 @@ def ord_edit(request,id):
         # Update Order
         if activation_date == '':
             activation_date = order.activation_date
+        if email == '':
+            activation_date = order.email
                 
         order_put = Orders.objects.get(pk=order.id)
         order_put.days = days
         order_put.product = product
         order_put.data_day = data_day
         order_put.activation_date = activation_date
+        order_put.email = email
         order_put.cell_imei = cell_imei
         order_put.cell_eid = cell_eid
         order_put.tracking = tracking
