@@ -112,7 +112,7 @@ def orders_list(request):
                     
                     # Enviar email
                     if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
-                        send_email_sims.delay(id=id)
+                        send_email_sims.delay(id=order_id)
                         
                         addNote(f'E-mail enviado com sucesso!')
                         messages.success(request,'E-mail enviado com sucesso!')
