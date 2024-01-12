@@ -12,12 +12,6 @@ import time
 from apps.sims.tasks import sims_in_orders
 from apps.send_email.tasks import send_esims
 
-
-@shared_task
-def mytask():
-    print('>>>>>>>>>>>>>>>>>>>>>>> Hello World')
-
-
 @shared_task
 def order_import():
     # Importar pedidos
