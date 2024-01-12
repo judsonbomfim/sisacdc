@@ -21,3 +21,4 @@ RUN chmod +x /djangoapp/scripts/entrypoint.sh && \
 USER duser
 
 EXPOSE 8000
+
