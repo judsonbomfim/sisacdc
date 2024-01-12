@@ -8,7 +8,6 @@ COPY requirements.txt .
 RUN apt-get update && apt-get install -y nano && \
     pip install --upgrade pip && \
     pip install -r requirements.txt && \
-    echo 'vm.overcommit_memory = 1' && sudo tee -a /etc/sysctl.conf && sudo sysctl -p && \
     adduser --disabled-password --no-create-home duser
 
 COPY . .
@@ -21,4 +20,3 @@ RUN chmod +x /djangoapp/scripts/entrypoint.sh && \
 USER duser
 
 EXPOSE 8000
-
