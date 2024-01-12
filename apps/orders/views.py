@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
-from apps.send_email.classes import SendEmail
+from apps.send_email.tasks import send_email_sims
 from .classes import ApiStore, StatusSis, DateFormats
 from .tasks import order_import
 import pandas as pd
@@ -112,7 +112,7 @@ def orders_list(request):
                     
                     # Enviar email
                     if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
-                        SendEmail.mailAction(id=order.id)
+                        send_email_sims.delay(id=id)
                         
                         addNote(f'E-mail enviado com sucesso!')
                         messages.success(request,'E-mail enviado com sucesso!')
@@ -401,8 +401,7 @@ def ord_edit(request,id):
             
             # Enviar email
             if ord_st == 'CN' and type_sim == 'sim':
-                id_user = User.objects.get(pk=request.user.id)
-                SendEmail.mailAction(id=order.id,id_user=id_user)
+                send_email_sims(id=order.id)
                 
                 addNote(f'E-mail enviado com sucesso!')
                 messages.success(request,'E-mail enviado com sucesso!')
@@ -636,7 +635,7 @@ def orders_activations(request):
                     
                     # Enviar email
                     if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
-                        SendEmail.mailAction(id=order.id)
+                        send_email_sims.delay(id=id)
                         
                         addNote(f'E-mail enviado com sucesso!')
                         messages.success(request,'E-mail enviado com sucesso!')

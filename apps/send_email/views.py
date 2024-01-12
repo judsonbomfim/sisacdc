@@ -3,10 +3,10 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .classes import SendEmail
 from apps.orders.models import Orders, Notes
-from apps.send_email.tasks import send_esims
+from apps.send_email.tasks import send_email_sims
     
 def send_email(request,id):
-    send_esims.delay(id=id)      
+    send_email_sims.delay(id=id)    
     messages.success(request,f'E-mail enviado com sucesso!!')
     add_sim = Notes( 
         id_item = Orders.objects.get(pk=id),
@@ -18,5 +18,5 @@ def send_email(request,id):
     return redirect('orders_list')
     
 def send_email_esims():
-    send_esims.delay(id=None)
+    send_email_sims.delay(id=None)
     return redirect('send_esims')

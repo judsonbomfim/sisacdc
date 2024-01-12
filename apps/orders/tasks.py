@@ -10,7 +10,7 @@ import getpass
 from celery import chain
 import time
 from apps.sims.tasks import sims_in_orders
-from apps.send_email.tasks import send_esims
+from apps.send_email.tasks import send_email_sims
 
 @shared_task
 def order_import():
@@ -196,4 +196,4 @@ def orders_auto():
     time.sleep(20)
     sims_in_orders.delay()
     time.sleep(20)
-    send_esims.delay()
+    send_email_sims.delay()

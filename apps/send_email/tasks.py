@@ -10,7 +10,7 @@ from apps.orders.classes import ApiStore
 import os
 
 @shared_task
-def send_esims(id=None):
+def send_email_sims(id=None):
     
     orders_all = None
     if id == None:
