@@ -340,7 +340,7 @@ def ord_edit(request,id):
         if activation_date == '':
             activation_date = order.activation_date
         if email == '':
-            activation_date = order.email
+            email = order.email
                 
         order_put = Orders.objects.get(pk=order.id)
         order_put.days = days
