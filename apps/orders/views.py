@@ -8,60 +8,16 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
-from django.utils.text import slugify
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.classes import SendEmail
-from .classes import ApiStore, StatusSis
+from .classes import ApiStore, StatusSis, DateFormats
+from .tasks import order_import
 import pandas as pd
 import json
 
 #Date today
 today = datetime.now()
-
-# Date - 2023-05-16T18:40:27
-def dateHour(dh):
-    date = dh[0:10]
-    hour = dh[11:19]
-    date_hour = f'{date} {hour}'
-    return date_hour
-# Date - 17/06/2023
-def dateF(d):
-    dia = d[0:2]
-    mes = d[3:5]
-    ano = d[6:10]
-    dataForm = f'{ano}-{mes}-{dia}'
-    return dataForm
-# Date - 2023-05-17 00:56:18+00:00 > 00/00/00
-def dateDMA(dma):
-    ano = dma[2:4]
-    mes = dma[5:7]
-    dia = dma[8:10]
-    data_dma = f'{dia}/{mes}/{ano}'
-    return data_dma
-
-def updateEsimStore(order_id):    
-    url_painel = str(os.getenv('URL_PAINEL'))
-    esims_order = Orders.objects.filter(order_id=order_id).filter(id_sim__link__isnull=False)
-    esims_list = ''
-    update_store = {"meta_data":[{"key": "campo_esims","value": ''}]}
-    if esims_order:
-        for esims_o in esims_order:
-            link_sim = esims_o.id_sim.link              
-            esims_list = esims_list + f"<img src='{url_painel}{link_sim}' style='width: 300px; margin:40px;'>"
-            update_store = {
-                "meta_data": [
-                    {
-                        "key": "campo_esims",
-                        "value": esims_list
-                    }
-                ]
-            }
-    else:
-        pass
-    # Conect Store
-    apiStore = ApiStore.conectApiStore()
-    apiStore.put(f'orders/{order_id}', update_store).json() 
 
 # Order list
 @login_required(login_url='/login/')
@@ -127,7 +83,7 @@ def orders_list(request):
                             
                             # Deletar eSIM para site                            
                             if esim_v == True:    
-                                updateEsimStore(order_id)
+                                ApiStore.updateEsimStore(order_id)
                         
                     # Save Notes
                     def addNote(t_note):
@@ -224,179 +180,11 @@ def ord_import(request):
         return render(request, 'painel/orders/import.html')    
        
     if request.method == 'POST':
-        apiStore = ApiStore.conectApiStore()
         
-        global n_item_total
-        n_item_total = 0
-        global msg_info
-        msg_info = []
-        global msg_error
-        msg_error = []
-        
-        # Definir números de páginas
-        per_page = 100
-        date_now = datetime.now()
-        start_date = date_now - timedelta(days=7)
-        end_date = date_now
-        order_p = apiStore.get('orders', params={'after': start_date, 'before': end_date, 'status': 'processing', 'per_page': per_page})        
-        
-        total_pages = int(order_p.headers['X-WP-TotalPages'])
-        n_page = 1
-        
-        # orders_all = Orders.objects.all()
-        
-        while n_page <= total_pages:
-            # Pedidos com status 'processing'
-            ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page}).json()                                   
+        # Orderm Import       
+        order_import.delay()
+        messages.success(request, f'Processando pedidos... Aguarde alguns minutos e atualize a página de pedidos')        
 
-            # Listar pedidos         
-            for order in ord:
-                n_item = 1
-                id_ord = order["id"]
-                
-                # Verificar pedido repetido
-
-                id_sis = Orders.objects.filter(order_id=id_ord)
-                if id_sis:
-                    continue
-                else: pass
-                
-                # Listar itens do pedido
-                for item in order['line_items']:
-                                        
-                    # Especificar produtos a serem listados
-                    prod_sel = [50760, 8873, 8791, 8761]
-                    if item['product_id'] not in prod_sel:
-                        continue
-                                 
-                    qtd = item['quantity']
-                    q_i = 1 
-                    
-                    while q_i <= qtd:
-                        order_id_i = order['id']
-                        item_id_i = f'{order_id_i}-{n_item}'
-                        client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
-                        email_i = order['billing']['email']
-                        if "Global" in item['name']:
-                            product_i = 'chip-internacional-global'
-                        else:
-                            product_i = slugify(item['name'])
-                        
-                        qty_i = 1
-                        if order['coupon_lines']:
-                            coupon_i = order['coupon_lines'][0]['code']
-                        else: coupon_i = '-'
-                        # Definir valor padrão para variáveis
-                        ord_chip_nun_i = '-'
-                        countries_i = False
-                        cell_mod_i = False
-                        # Percorrer itens do pedido
-                        for i in item['meta_data']:
-                            if i['key'] == 'pa_tipo-de-sim': type_sim_i = i['value']
-                            if i['key'] == 'pa_condicao-do-chip': condition_i = i['value']
-                            if i['key'] == 'pa_dados-diarios': data_day_i = i['value']
-                            if i['key'] == 'pa_dias': days_i = i['value']
-                            if i['key'] == 'pa_plano-de-voz': 
-                                if i['value'] == 'sem-ligacoes': calls_i = False
-                                else: calls_i = True
-                            if 'Visitará' in i['key']:
-                                if i['display_value'] == 'Sim': countries_i = True 
-                                else: countries_i = False
-                            if i['key'] == 'Data de Ativação': activation_date_i = i['value']
-                            if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
-                            if i['key'] == 'Número de pedido ou do chip': ord_chip_nun_i = i['value']
-                        shipping_i = order['shipping_lines'][0]['method_title']
-                        order_date_i = dateHour(order['date_created'])
-                        # notes_i = 0
-                        
-                        # Definir status do pedido
-                        # 'RT', 'Retirada'
-                        # 'MB', 'Motoboy'
-                        # 'RS', 'Reuso'
-                        # 'AS', 'Atribuir SIM'
-                        if 'RETIRADA' in shipping_i:
-                            shipping_i = 'Retirada SP'
-                            order_status_i = 'RT'
-                        elif 'Entrega na Agência' in shipping_i:
-                            shipping_i = 'Entr. Agência'
-                            order_status_i = 'AG'
-                        elif 'Motoboy' in shipping_i:
-                            order_status_i = 'MB'
-                        elif condition_i == 'reuso-sim':
-                            order_status_i = 'RS'
-                        else:
-                            order_status_i = 'AS'                    
-                        
-                        # Definir variáveis para salvar no banco de dados                            
-                        order_add = Orders(                    
-                            order_id = order_id_i,
-                            item_id = item_id_i,
-                            client = client_i,
-                            email = email_i,
-                            product = product_i,
-                            data_day = data_day_i,
-                            qty = qty_i,
-                            coupon = coupon_i,
-                            condition = condition_i,
-                            days = days_i,
-                            calls = calls_i,
-                            countries = countries_i,
-                            cell_mod = cell_mod_i,
-                            ord_chip_nun = ord_chip_nun_i,
-                            shipping = shipping_i,
-                            order_date = order_date_i,
-                            activation_date = activation_date_i,
-                            order_status = order_status_i,
-                            type_sim = type_sim_i,
-                            # notes = notes_i
-                        )
-                        
-                        # Salvar itens no banco de dados
-                        register = order_add.save()
-                        try:
-                            register
-                        except:
-                            msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
-                            
-                        # Save Notes
-                        add_sim = Notes( 
-                            id_item = Orders.objects.get(pk=order_add.id),
-                            id_user = User.objects.get(pk=request.user.id),
-                            note = f'Pedido importado para o sistema',
-                            type_note = 'S',
-                        )
-                        add_sim.save()                       
-                        
-                        # Alterar status
-                        # Status sis : Status Loja
-                        status_def_sis = StatusSis.st_sis_site()
-                        if order_status_i in status_def_sis:
-                            status_ped = {
-                                'status': status_def_sis[order_status_i]
-                            }
-                            try:                                  
-                                apiStore.put(f'orders/{order_id_i}', status_ped).json()
-                            except:
-                                msg_error.append(f'{order_id_i} - Falha ao atualizar status na loja!')
-                        
-                        # Definir variáveis
-                        q_i += 1 
-                        n_item += 1
-                        n_item_total += 1
-                        
-                        msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
-                        
-            n_page += 1            
-                            
-    # Mensagem de sucesso
-    if n_item_total == 0:
-        messages.info(request,'Não há pedido(s) para atualizar!')
-    else:
-        for msg_e in msg_error:
-            messages.error(request,msg_e)
-        for msg_o in msg_info:
-            messages.info(request,msg_o)
-        messages.success(request,'Todos os pedido(s) atualizados com sucesso')
     return render(request, 'painel/orders/import.html')
 
 # Order Edit
@@ -443,6 +231,7 @@ def ord_edit(request,id):
         operator = request.POST.get('operator')
         sim = request.POST.get('sim')
         activation_date = request.POST.get('activation_date')
+        email = request.POST.get('email')
         cell_imei = request.POST.get('cell_imei')
         cell_eid = request.POST.get('cell_eid')
         tracking = request.POST.get('tracking')
@@ -550,12 +339,15 @@ def ord_edit(request,id):
         # Update Order
         if activation_date == '':
             activation_date = order.activation_date
+        if email == '':
+            activation_date = order.email
                 
         order_put = Orders.objects.get(pk=order.id)
         order_put.days = days
         order_put.product = product
         order_put.data_day = data_day
         order_put.activation_date = activation_date
+        order_put.email = email
         order_put.cell_imei = cell_imei
         order_put.cell_eid = cell_eid
         order_put.tracking = tracking
@@ -576,7 +368,7 @@ def ord_edit(request,id):
             addNote(ord_note)
         # Date Notes
         if activation_date != order.activation_date:
-            addNote(f'Alteração de {dateDMA(str(order.activation_date))} para {dateDMA(str(activation_date))}')
+            addNote(f'Alteração de {DateFormats.dateDMA(str(order.activation_date))} para {DateFormats.dateDMA(str(activation_date))}')
         # SIM Notes
         if sim:
             addNote(f'Alteração de {order_sim} para {sim}')
@@ -617,7 +409,7 @@ def ord_edit(request,id):
         
         if type_sim == 'esim' or esim_v == True:
             # Enviar eSIM para site
-            updateEsimStore(order_id) 
+            ApiStore.updateEsimStore(order_id) 
         
         for msg_e in msg_error:
             messages.error(request,msg_e)
@@ -657,12 +449,12 @@ def ord_export_op(request):
         }
         
         for ord in orders_all:
-            ord_date = dateDMA(str(ord.order_date))
+            ord_date = DateFormats.dateDMA(str(ord.order_date))
             if ord.data_day != 'ilimitado': 
                 ord_data = ord.get_data_day_display()
             else: ord_data = ''
             ord_product = f'{ord_prod_list[ord.product]} {ord_data}'
-            ord_date_act = dateDMA(str(ord.activation_date))
+            ord_date_act = DateFormats.dateDMA(str(ord.activation_date))
             if ord.id_sim:
                 ord_op = ord.id_sim.get_operator_display()
                 ord_sim = ord.id_sim.sim
@@ -748,9 +540,9 @@ def orders_activations(request):
         
         if activGoing_f is not None:
             activGoing = [item.strip() for item in activGoing_f.split('-')]
-            activGoing_1 = dateF(activGoing[0])
+            activGoing_1 = DateFormats.dateF(activGoing[0])
             try: 
-                activGoing_2 = dateF(activGoing[1])
+                activGoing_2 = DateFormats.dateF(activGoing[1])
                 orders_l = orders_l[(orders_l['activation_date'] >= activGoing_1) & (orders_l['activation_date'] <= activGoing_2)]
                 url_filter += f"&activGoing_1={activGoing_1}&activGoing_2={activGoing_2}"
             except:
@@ -760,9 +552,9 @@ def orders_activations(request):
         
         if activReturn_f is not None:
             activReturn = [item.strip() for item in activReturn_f.split('-')]
-            activReturn_1 = dateF(activReturn[0])
+            activReturn_1 = DateFormats.dateF(activReturn[0])
             try: 
-                activReturn_2 = dateF(activReturn[1])
+                activReturn_2 = DateFormats.dateF(activReturn[1])
                 orders_l = orders_l[(orders_l['return_date'] >= activReturn_1) & (orders_l['return_date'] <= activReturn_2)]
                 url_filter += f"&activReturn_1={activReturn_1}&activReturn_2={activReturn_2}"
             except:
@@ -814,7 +606,7 @@ def orders_activations(request):
                             
                             # Deletar eSIM para site                            
                             if esim_v == True:    
-                                updateEsimStore(order_id)
+                                ApiStore.updateEsimStore(order_id)
                         
                     # Save Notes
                     def addNote(t_note):
