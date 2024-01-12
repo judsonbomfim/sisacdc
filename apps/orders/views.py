@@ -561,13 +561,14 @@ def orders_activations(request):
                 orders_l = orders_l[(orders_l['return_date'] == activReturn_1)]
                 url_filter += f"&activReturn_1={activReturn_1}"
             
-            if oper_f is not None:
-                orders_l = orders_l[(orders_l['id_sim__operator'] == oper_f)]
-                url_filter += f"&oper={oper_f}"
+        if oper_f is not None:
+            orders_l = orders_l[(orders_l['id_sim__operator'] == oper_f)]
+            url_filter += f"&oper={oper_f}"
+            
 
-            if ord_st_f is not None:
-                orders_l = orders_l[(orders_l['order_status'] == ord_st_f)]
-                url_filter += f"&ord_st={ord_st_f}"
+        if ord_st_f is not None:
+            orders_l = orders_l[(orders_l['order_status'] == ord_st_f)]
+            url_filter += f"&ord_st={ord_st_f}"
 
 
         if 'up_status' in request.POST:
