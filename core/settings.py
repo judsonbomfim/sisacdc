@@ -202,12 +202,8 @@ CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 CELERY_BEAT_SCHEDULE = {
-    'task__run-my-task': {
-        'task': 'apps.orders.tasks.mytask',
-        'schedule': timedelta(seconds=20),
-    },
     'task__orders_auto': {
         'task': 'apps.orders.tasks.orders_auto',
-        'schedule': timedelta(seconds=40),
+        'schedule': timedelta(seconds=300),
     },
 }
