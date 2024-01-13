@@ -18,5 +18,5 @@ def send_email(request,id):
     return redirect('orders_list')
     
 def send_email_esims():
-    send_email_sims.delay(id=None)
+    send_email_sims.delay()
     return redirect('send_esims')
