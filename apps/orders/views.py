@@ -486,7 +486,12 @@ def ord_export_op(request):
 
 def send_esims(request):
     if request.method == 'GET':
-        return render(request, 'painel/orders/send_esim.html')    
+        return render(request, 'painel/orders/send_esim.html')
+    if request.method == 'POST':
+        # Orderm Import       
+        send_email_sims.delay()
+        messages.success(request, 'Processando emails... Aguarde alguns minutos e atualize a página de pedidos')
+        return redirect('send_esims')
 
 def orders_activations(request):
     global orders_l

@@ -19,4 +19,4 @@ def send_email(request,id):
     
 def send_email_esims():
     send_email_sims.delay()
-    return redirect('send_esims')
+    # return redirect('send_esims')
