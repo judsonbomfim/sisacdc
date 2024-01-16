@@ -93,6 +93,4 @@ def send_email_sims(id=None):
             type_note = 'S',
         )
         add_note.save()
-        
-    if id != None:
-        messages.success(f'E-mail enviado com sucesso!!')
+    
