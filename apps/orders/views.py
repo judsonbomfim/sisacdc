@@ -401,7 +401,7 @@ def ord_edit(request,id):
             
             # Enviar email
             if ord_st == 'CN' and type_sim == 'sim':
-                send_email_sims(id=order.id)
+                send_email_sims(id=order_id)
                 
                 addNote(f'E-mail enviado com sucesso!')
                 messages.success(request,'E-mail enviado com sucesso!')
@@ -635,7 +635,7 @@ def orders_activations(request):
                     
                     # Enviar email
                     if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
-                        send_email_sims.delay(id=id)
+                        send_email_sims.delay(id=order.id)
                         
                         addNote(f'E-mail enviado com sucesso!')
                         messages.success(request,'E-mail enviado com sucesso!')

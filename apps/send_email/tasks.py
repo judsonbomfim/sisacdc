@@ -83,7 +83,8 @@ def send_email_sims(id=None):
         update_store = {
             'status': 'AA'
         }
-        apiStore.put(f'orders/{order.order_id}', update_store).json()
+        apiStore.put(f'orders/{order_id}', update_store).json()        
+        
         # Add note
         add_note = Notes( 
             id_item = order,
