@@ -6,7 +6,7 @@ from django.utils.html import strip_tags
 from django.conf import settings
 from apps.orders.models import Orders, Notes
 from django.contrib import messages
-from apps.orders.classes import ApiStore
+from apps.orders.classes import ApiStore, StatusSis
 import os
 
 @shared_task
@@ -79,9 +79,10 @@ def send_email_sims(id=None):
         order.order_status = 'AA'
         order.save()
         # Update Store
-        apiStore = ApiStore.conectApiStore()      
+        apiStore = ApiStore.conectApiStore()
+        status_def_sis = StatusSis.st_sis_site()            
         update_store = {
-            'status': 'agd-ativacao'
+            'status': status_def_sis['AA']
         }
         apiStore.put(f'orders/{order_id}', update_store).json()        
         
