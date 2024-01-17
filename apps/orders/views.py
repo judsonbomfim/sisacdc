@@ -591,6 +591,7 @@ def orders_activations(request):
                     try: type_sim = order.id_sim.type_sim
                     except: type_sim = 'esim'
                     apiStore = ApiStore.conectApiStore()
+                    esim_v = None
                     
                     if ord_s == 'CC' or ord_s == 'DS':
                         if order.id_sim:
