@@ -44,16 +44,17 @@ class StatusSis():
     @staticmethod
     def st_sis_site():
         status_sis_site = {
+            'AA': 'agd-ativacao',
             'AE': 'agd-envio',
+            'AG': 'agencia',
             'AS': 'em-separacao',
-            'AA': 'agd-ativacao',        
             'CC': 'cancelled',
+            'CN': 'completed',        
             'ES': 'em-separacao',
             'MB': 'motoboy',
+            'RE': 'reembolsar',
             'RS': 'reuso',
             'RT': 'retirada',
-            'RE': 'reembolsar',
-            'CN': 'completed',        
         }
         return status_sis_site
 
