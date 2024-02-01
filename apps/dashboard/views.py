@@ -126,8 +126,7 @@ def index(request):
     monthOperDates = json.dumps(monthOperDates)
     monthOperValuesTM = json.dumps(monthOperTM['countOperMonth'].tolist())
     monthOperValuesCM = json.dumps(monthOperCM['countOperMonth'].tolist())
-    monthOperValuesTC = json.dumps(monthOperTC['countOperMonth'].tolist())
-    
+    monthOperValuesTC = json.dumps(monthOperTC['countOperMonth'].tolist())    
     # --- Year
     yearOperReport = yearDf.groupby(['month','operator']).size().reset_index(name='countSimsYear')
     yearOperReport = yearOperReport.pivot_table(index='month', columns='operator', values='countSimsYear', fill_value=0)
