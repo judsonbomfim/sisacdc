@@ -43,9 +43,10 @@ def sims_in_orders():
         
         # update order
         # Save SIMs
-        if sim_ds.type_sim == 'esim':
-            status_ord = 'EE'
-        else: status_ord = 'ES'
+        # if sim_ds.type_sim == 'esim':
+        #     status_ord = 'EE'
+        # else: status_ord = 'ES'
+        status_ord = 'EE'
         
         order_put = Orders.objects.get(pk=id_id_i)
         order_put.id_sim_id = sim_ds.id            
