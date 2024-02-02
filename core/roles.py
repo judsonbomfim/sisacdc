@@ -10,7 +10,6 @@ class Gerente(AbstractUserRole):
         'view_orders': True,
         'edit_orders': True,
         'import_orders': True,
-        'export_orders': True,
         'view_sims': True,
         'add_sims': True,
         'add_esims': True,
@@ -18,4 +17,6 @@ class Gerente(AbstractUserRole):
         'add_ord_sims': True,
         'send_esims': True,
         'send_esims_but': True,
+        'list_activations': True,
+        'export_activations': True,
     }

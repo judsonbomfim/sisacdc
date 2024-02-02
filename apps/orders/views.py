@@ -419,12 +419,56 @@ def ord_edit(request,id):
 
 @login_required(login_url='/login/')
 @has_permission_decorator('export_orders')
+def ord_export_act(request):
+    
+    list_status = dict(Orders.order_status.field.choices)
+    list_oper = dict(Sims.operator.field.choices)
+    print(list_oper)
+    
+    orders_all = request.session.get('orders_act')
+    data = [
+        ['Pedido', 'Cliente', '(e)SIM', 'Operadora', 'Produto', 'Países', 'Voz', 'Dias', 'Data Aivação', 'Data Término', 'Status']
+    ]
+    
+    for ord in orders_all:
+        print(ord['id_sim__operator'])
+        ord_operator = list_oper[ord['id_sim__operator']]
+        if ord['data_day'] != 'Ilimitado': 
+            ord_data = ord['data_day']
+        else: ord_data = ''
+        ord_product = f"{ord['product']} {ord_data}"
+        ord_date_start = DateFormats.dateDMA(str(ord['activation_date']))
+        ord_date_end = DateFormats.dateDMA(str(ord['return_date']))
+        if ord['calls'] == True:
+            ord_calls = 'SIM'
+        else: ord_calls = ''
+        if ord['countries'] == True:
+            ord_countries = 'SIM'
+        else: ord_countries = ''
+        ord_status = list_status[ord['order_status']]
+        
+        data.append([ord['item_id'],ord['client'],ord['id_sim__sim'],ord_operator,ord_product,ord_countries,ord_calls,ord['days'],ord_date_start,ord_date_end,ord_status])
+        
+    data_atual = date.today()
+    
+    # Crie um objeto CSVWriter para escrever os dados no formato CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="Ativacoes-{data_atual}.csv"'
+    writer = csv.writer(response)
+    
+    # Escreva os dados no objeto CSVWriter
+    for row in data:
+        writer.writerow(row)
+    return response 
+
+@login_required(login_url='/login/')
+@has_permission_decorator('export_orders')
 def ord_export_op(request):
     
     sims_op = Sims.operator.field.choices
     context= {
         'sims_op': sims_op,
-    }  
+    } 
     
     if request.method == 'POST':
         
@@ -655,6 +699,9 @@ def orders_activations(request):
     sims = Sims.objects.all()
     ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
+    
+    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> oper_list')
+    print(ord_status)
 
     # Listar status dos pedidos
     ord_st_list = []
@@ -674,14 +721,21 @@ def orders_activations(request):
     try: countActivTC = activList[activList['id_sim__operator'] == 'TC']['countActiv'].values[0]
     except: countActivTC = 0
     
+    
+    # Save in session
+    orders_act = orders_l.copy()
+    orders_act['activation_date'] = orders_act['activation_date'].astype(str)
+    orders_act['return_date'] = orders_act['return_date'].astype(str)
+    orders_act = orders_act.to_dict(orient='records')
+    request.session['orders_act'] = orders_act
     # List
     orders_l = orders_l.to_dict('records')
+  
     
     # Paginação
     paginator = Paginator(orders_l, 100)
     page = request.GET.get('page', 1)
     orders = paginator.get_page(page)
-
     
     context = {
         'orders_l': orders_l,
@@ -738,6 +792,4 @@ def orders_activations(request):
 # dateNow = datetime.datetime.now()  
 
 # dateSem = datetime.datetime.now() - datetime.timedelta(days=7)
-# print(dateSem)
-# print(dateNow)
 # vendasDaSemana = apiStore.get('reports/sales', params={'date_min': dateSem, 'date_max': dateNow})
