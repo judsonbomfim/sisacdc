@@ -35,18 +35,32 @@
                             <a href="{% url 'send_esims' %}">Enviar eSIMs</a>
                         </li>
                         {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                {% if request.user|can:'list_activations' %}
+                <li class="has-child open">
+                    <a>
+                        <i class="nav-icon bi bi-sim-fill"></i>
+                        <span class="menu-text">Ativações</span>
+                        <i class="toggle-icon bi bi-plus-circle text-light"></i>
+                    </a>
+                    <ul>
+                        {% if request.user|can:'list_activations' %}
                         <li class="{% urL_active request '/pedidos/ativacoes/' %}">
                             <a href="{% url 'orders_activations' %}">Listar Ativações</a>
                         </li>
-                        {% if request.user|can:'export_orders' %}
+                        {% endif %}
+                        {% if request.user|can:'export_activations' %}
                         <li class="{% urL_active request '/pedidos/exportar/' %}">
                             <a href="{% url 'ord_export_op' %}">Exportar para Ativação</a>
                         </li>
                         {% endif %}
-
                     </ul>
                 </li>
                 {% endif %}
+
                 <li class="has-child open">
                     <a>
                         <i class="nav-icon bi bi-sim"></i>

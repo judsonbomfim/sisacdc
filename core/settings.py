@@ -28,6 +28,8 @@ CSRF_TRUSTED_ORIGINS = [
     if a.strip()
 ]
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 # Application definition
 
 INSTALLED_APPS = [
