@@ -23,9 +23,9 @@ def send_email_sims(id=None):
     
     if orders_all == None:           
         if id == None:
-            messages.info(f'Não há pedidos para enviar eSIMs!')
+            messages.info(f'Não há pedidos para enviar e-mail!')
         else:
-            messages.info(f'Não há pedidos para enviar eSIMs!')
+            messages.info(f'Não há pedidos para enviar e-mail!')
     
     for order in orders_all:
         id = order.id
