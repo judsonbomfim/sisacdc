@@ -47,11 +47,9 @@
                         <i class="toggle-icon bi bi-plus-circle text-light"></i>
                     </a>
                     <ul>
-                        {% if request.user|can:'list_activations' %}
                         <li class="{% urL_active request '/pedidos/ativacoes/' %}">
                             <a href="{% url 'orders_activations' %}">Listar Ativações</a>
                         </li>
-                        {% endif %}
                         {% if request.user|can:'export_activations' %}
                         <li class="{% urL_active request '/pedidos/exportar/' %}">
                             <a href="{% url 'ord_export_op' %}">Exportar para Ativação</a>
@@ -61,6 +59,7 @@
                 </li>
                 {% endif %}
 
+                {% if request.user|can:'view_sims' %}
                 <li class="has-child open">
                     <a>
                         <i class="nav-icon bi bi-sim"></i>
@@ -82,7 +81,7 @@
                         </li>
                     </ul>
                 </li>
-
+                {% endif %}
             </ul>
         </div>
     </div>
