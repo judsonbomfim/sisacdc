@@ -464,7 +464,7 @@ def ord_export_act(request):
     return response 
 
 @login_required(login_url='/login/')
-@has_permission_decorator('export_activation')
+@has_permission_decorator('export_activations')
 def ord_export_op(request):
     
     sims_op = Sims.operator.field.choices
@@ -541,7 +541,7 @@ def send_esims(request):
         return redirect('send_esims')
 
 @login_required(login_url='/login/')
-@has_permission_decorator('list_activation')
+@has_permission_decorator('list_activations')
 def orders_activations(request):
     global orders_l
     orders_l = []
