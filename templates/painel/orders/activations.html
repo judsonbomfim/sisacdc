@@ -229,7 +229,7 @@
                         <div class="userDatatable-content">
                             {{ order.id_sim__sim }}
 
-                            {% if order.id_sim__link %}
+                            {% if order.id_sim__type_sim == 'esim' %}
                             <a href="{{ order.id_sim__link }}" target="_blank">
                                 <i class="bi bi-box-arrow-in-up-right text-info" data-bs-toggle="tooltip"
                                     data-bs-placement="top" data-bs-custom-class="custom-tooltip"
