@@ -425,7 +425,6 @@ def ord_export_act(request):
     
     list_status = dict(Orders.order_status.field.choices)
     list_oper = dict(Sims.operator.field.choices)
-    print(list_oper)
     
     orders_all = request.session.get('orders_act')
     data = [
@@ -433,7 +432,6 @@ def ord_export_act(request):
     ]
     
     for ord in orders_all:
-        print(ord['id_sim__operator'])
         ord_operator = list_oper[ord['id_sim__operator']]
         if ord['data_day'] != 'Ilimitado': 
             ord_data = ord['data_day']
@@ -704,9 +702,6 @@ def orders_activations(request):
     sims = Sims.objects.all()
     ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
-    
-    print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> oper_list')
-    print(ord_status)
 
     # Listar status dos pedidos
     ord_st_list = []
@@ -757,7 +752,6 @@ def orders_activations(request):
     }
     return render(request, 'painel/orders/activations.html', context)
     
-
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza
