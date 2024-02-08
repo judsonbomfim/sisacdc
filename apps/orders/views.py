@@ -160,6 +160,8 @@ def orders_list(request):
     page = request.GET.get('page')
     orders = paginator.get_page(page)
     
+    from rolepermissions.permissions import available_perm_status
+    
     context = {
         'url_cdn': url_cdn,
         'orders_l': orders_l,
@@ -462,7 +464,7 @@ def ord_export_act(request):
     return response 
 
 @login_required(login_url='/login/')
-@has_permission_decorator('export_orders')
+@has_permission_decorator('export_activations')
 def ord_export_op(request):
     
     sims_op = Sims.operator.field.choices
@@ -528,6 +530,7 @@ def ord_export_op(request):
     
     return render(request, 'painel/orders/export_op.html', context)
 
+@login_required(login_url='/login/')
 def send_esims(request):
     if request.method == 'GET':
         return render(request, 'painel/orders/send_esim.html')
@@ -537,6 +540,8 @@ def send_esims(request):
         messages.success(request, 'Processando emails... Aguarde alguns minutos e atualize a página de pedidos')
         return redirect('send_esims')
 
+@login_required(login_url='/login/')
+@has_permission_decorator('list_activations')
 def orders_activations(request):
     global orders_l
     orders_l = []
