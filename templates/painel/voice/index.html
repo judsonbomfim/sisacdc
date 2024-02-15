@@ -1,0 +1,196 @@
+{% extends 'painel/partials/_content_default.html' %}
+{% load permission_tags %}
+{% load static %}
+{% load date_day %}
+{% block title_page %}<i class="bi bi-telephone"></i> Chamadas da Voz{% endblock %}
+{% block title_content %}Lista de Chamadas de Voz{% endblock %}
+{%block js_custom %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+{% endblock %}
+
+{% block content_top %}
+<!-- Conteúdo do topo -->
+<!-- {% include 'painel/partials/_sims_stock.html' %} -->
+{% endblock %}
+
+{% block content_def %}
+<!-- Conteúdo do Principal -->
+<div class="row">
+    <form class="row g-3" action="" method="POST">
+        {% csrf_token %}
+        <div class="col-md-1">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="voice_st">
+                    <option value="" selected>Alterar Status</option>
+                    {% for voice_st in sims_status %}
+                    <option value="{{voice_st.0}}">{{voice_st.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary"
+                name="up_status">Alterar</button>
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control form-control-lg" placeholder="(e)SIM)" name="voice_f">
+        </div>
+        <div class="col-md-2">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="voice_type_f">
+                    <option value="" selected>Filtrar Tipo - Todos</option>
+                    {% for voice_t in sims_types %}
+                    <option value="{{voice_t.0}}">{{voice_t.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="voice_status_f">
+                    <option value="" selected>Filtrar Status - Todos</option>
+                    {% for voice_s in sims_status %}
+                    <option value="{{voice_s.0}}">{{voice_s.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="voice_oper_f">
+                    <option value="" selected>Filtrar Operadora - Todos</option>
+                    {% for voice_o in sims_oper %}
+                    <option value="{{voice_o.0}}">{{voice_o.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary"
+                name="up_filter">Filtrar</button>
+        </div>
+        <div class="col-md-1 p-2">
+            <a class="btn-default btn-rounded" href="{% url 'sims_index' %}">
+                <i class="bi bi-arrow-clockwise"></i>Limpar
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table mb-0 table-hover table-responsive">
+                <thead>
+                    <tr class="userDatatable-header">
+                        <th><input class="form-check-input" type="checkbox" id="checkAll"></th>
+                        <th class="userDatatable-title">Pedido</th>
+                        <th class="userDatatable-title">Nome</th>
+                        <th class="userDatatable-title">Número</th>
+                        <th class="userDatatable-title">Login</th>
+                        <th class="userDatatable-title">Senha</th>
+                        <th class="userDatatable-title">Dias</th>
+                        <th class="userDatatable-title">Ida</th>
+                        <th class="userDatatable-title">Volta</th>
+                        <th class="userDatatable-title">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if sims %}
+                    {% for sim in sims %}
+                    <tr class="table-tr">
+                        <td>
+                            <div class="userDatatable-content">
+                                <input class="checkItem form-check-input" type="checkbox" value="{{sim.id}}"
+                                    name="voice_id">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ voice.id_item__id }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ voice.sim }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {% if sim.type_sim == 'esim' %}
+                                <a href="{{ url_cdn }}{{ voice.link }}" target="_blank">{{ voice.sim }}
+                                    {% else %}-{% endif %}
+                                </a>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ voice.type_sim }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ voice.id }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ voice.id }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ voice.id }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ voice.get_voice_status_display }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td>
+                            <div class="userDatatable-content">
+                                Nenhum (e)SIM encontrado.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            <nav aria-label="navigation">
+                <ul class="pagination">
+                    {% if sims.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ sims.previous_page_number }}{{ url_filter }}"
+                            aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item">
+                        <a class="page-link" href="">{{ sims.number }} de {{ sims.paginator.num_pages }}</a>
+                    </li>
+                    {% if sims.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ sims.next_page_number }}{{ url_filter }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </form>
+</div>
+
+
+{% endblock %}
+{% block script_custom %}
+<script>
+    $(document).ready(function () {
+        // Ação do botão "Marcar Todos"
+        $('#checkAll').on('change', function () {
+            $('.checkItem').prop('checked', this.checked);
+        });
+    });
+</script>
+{% endblock %}

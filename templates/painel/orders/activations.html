@@ -115,7 +115,7 @@
 
 {% block content_def %}
 
-<form action="{% url 'orders_activations' %}" method="POST">
+    <form action="{% url 'orders_activations' %}" method="POST">
     {% csrf_token %}
     {% if request.user|can:'edit_orders' %}
         
@@ -177,7 +177,6 @@
             <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary"
                 name="up_filter">Filtrar</button>
         </div>           
-    </form>
         <div class="col-md-1 p-2">
             <div class="application-task d-flex align-items-center">
                 <a class="btn-default btn-rounded pe-3" href="{% url 'orders_activations' %}">
@@ -188,7 +187,8 @@
                 </a>
             </div>
         </div>    
-</div><!--End Row-->
+    </div><!--End Row-->
+    </form>
 
 
     <div class="table-responsive">
