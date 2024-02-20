@@ -19,8 +19,9 @@ VOICE_STATUS = [
 
 class VoiceNumbers(models.Model):
     id = models.AutoField(primary_key=True)
-    number = models.IntegerField(max_length=15)
+    number = models.IntegerField()
     login = models.CharField(max_length=15, null=True, blank=True)
+    extension = models.IntegerField()
     password = models.CharField(max_length=15, null=True, blank=True)
     status = models.CharField(max_length=15, choices=NUNBER_STATUS)
     created_at = models.DateTimeField(auto_now_add=True)
