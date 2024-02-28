@@ -49,8 +49,16 @@ def orders_list(request):
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
-            id_user = request.user.id    
-            if ord_id and ord_s:                
+            id_user = request.user.id            
+                        
+            print('----------------------------------ord_id')
+            print(ord_id)
+            print(ord_s)
+            print(id_user)
+            
+            if ord_id and ord_s:
+                print('----------------------------------TAREFA')
+             
                 orders_up_status.delay(ord_id, ord_s,id_user)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
@@ -489,7 +497,7 @@ def orders_activations(request):
     ord_st_f = None
 
         
-    fields_df = ['item_id','client', 'id_sim__sim', 'id_sim__link', 'id_sim__type_sim', 'id_sim__operator', 'product', 'data_day', 'calls', 'countries', 'days', 'activation_date', 'order_status']
+    fields_df = ['id', 'item_id','client', 'id_sim__sim', 'id_sim__link', 'id_sim__type_sim', 'id_sim__operator', 'product', 'data_day', 'calls', 'countries', 'days', 'activation_date', 'order_status']
 
     product_choice_dict = dict(Orders.product.field.choices)
     data_choice_dict = dict(Orders.data_day.field.choices)
@@ -498,7 +506,7 @@ def orders_activations(request):
     today = datetime.now()
     days60 = today - timedelta(days=60)
     
-    orders_all = Orders.objects.filter(activation_date__gte=days60,id_sim__isnull=False).order_by('activation_date')
+    orders_all = Orders.objects.filter(activation_date__gte=days60,id_sim__isnull=False).order_by('activation_date').order_by('item_id')
     
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
     orders_df['product'] = orders_df['product'].map(product_choice_dict)
@@ -560,8 +568,16 @@ def orders_activations(request):
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
-            id_user = request.user.id    
-            if ord_id and ord_s:                
+            id_user = request.user.id
+            
+            print('----------------------------------ord_id')
+            print(ord_id)
+            print(ord_s)
+            print(id_user)
+            
+            if ord_id and ord_s:
+                print('----------------------------------TAREFA')
+                          
                 orders_up_status.delay(ord_id, ord_s,id_user)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
