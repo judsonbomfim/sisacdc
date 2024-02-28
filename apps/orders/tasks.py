@@ -229,7 +229,8 @@ def orders_up_status(ord_id, ord_s, id_user):
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
                 if order.id_sim.type_sim == 'esim':
                     sim_put.sim_status = 'TC'
-                    esim_v = True
+                    # Deletar eSIM para site                            
+                    ApiStore.updateEsimStore(order_id)
                 else:
                     sim_put.sim_status = 'DS'
                 sim_put.sim_status = 'TC'
@@ -240,9 +241,7 @@ def orders_up_status(ord_id, ord_s, id_user):
                 order_put.id_sim_id = ''
                 order_put.save()
                 
-                # Deletar eSIM para site                            
-                if esim_v == True:    
-                    ApiStore.updateEsimStore(order_id)
+
             
         # Save Notes
         def addNote(t_note):
