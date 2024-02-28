@@ -1,13 +1,12 @@
+from django.contrib.auth.models import User
 from celery import shared_task
 from django.utils.text import slugify
 from datetime import datetime, timedelta
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from rolepermissions.decorators import has_permission_decorator
 from .classes import ApiStore, StatusSis, DateFormats
 from apps.orders.models import Orders, Notes
+from apps.sims.models import Sims
 import getpass
-from celery import chain
 import time
 from apps.sims.tasks import sims_in_orders
 from apps.send_email.tasks import send_email_sims
@@ -197,3 +196,83 @@ def orders_auto():
     sims_in_orders.delay()
     time.sleep(20)
     send_email_sims.delay()
+
+@shared_task
+def orders_up_status(ord_id, ord_s, id_user):
+    
+    print('-----------------ord_id, ord_s, id_user')
+    print(ord_id, ord_s, id_user)
+
+    for o_id in ord_id:
+        
+        print('-----------------o_id')
+        print(o_id)
+        
+        ord_id = ord_id
+        ord_s = ord_s
+        user = User.objects.get(pk=id_user)
+        
+        order = Orders.objects.get(pk=o_id)
+        order.order_status = ord_s
+        order.save()
+        
+        order_id = order.order_id
+        order_st = order.order_status
+        order_plan = order.get_product_display()
+        try: type_sim = order.id_sim.type_sim
+        except: type_sim = 'esim'
+        apiStore = ApiStore.conectApiStore()
+        
+        if ord_s == 'CC' or ord_s == 'DS':
+            if order.id_sim:
+                # Update SIM
+                sim_put = Sims.objects.get(pk=order.id_sim.id)
+                if order.id_sim.type_sim == 'esim':
+                    sim_put.sim_status = 'TC'
+                    esim_v = True
+                else:
+                    sim_put.sim_status = 'DS'
+                sim_put.sim_status = 'TC'
+                sim_put.save()
+                    
+                # Delete SIM in Order
+                order_put = Orders.objects.get(pk=order.id)
+                order_put.id_sim_id = ''
+                order_put.save()
+                
+                # Deletar eSIM para site                            
+                if esim_v == True:    
+                    ApiStore.updateEsimStore(order_id)
+            
+        # Save Notes
+        def addNote(t_note):
+            add_sim = Notes( 
+                id_item = Orders.objects.get(pk=order.id),
+                id_user = user,
+                note = t_note,
+                type_note = 'S',
+            )
+            add_sim.save()
+        
+        ord_status = Orders.order_status.field.choices
+        for st in ord_status:
+            if order_st == st[0] :    
+                addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
+        
+        # Alterar status
+        # Status sis : Status Loja
+        status_sis_site = StatusSis.st_sis_site()
+        
+        if ord_s in status_sis_site:
+            update_store = {
+                'status': status_sis_site[ord_s]
+            }
+            apiStore.put(f'orders/{order.order_id}', update_store).json()
+        
+        # Enviar email
+        if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
+            send_email_sims.delay(id=order_id)
+            
+            addNote(f'E-mail enviado com sucesso!')
+            messages.success('E-mail enviado com sucesso!')
+        
