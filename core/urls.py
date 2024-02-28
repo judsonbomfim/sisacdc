@@ -12,6 +12,7 @@ urlpatterns = [
     path('sims/', include('apps.sims.urls')),
     path('', include('apps.users.urls')),
     path('email/', include('apps.send_email.urls')),
+    path('voz/', include('apps.voice_calls.urls')),
 ]
 
 if settings.DEBUG:

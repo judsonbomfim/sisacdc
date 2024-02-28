@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'apps.dashboard.apps.DashboardConfig',
     'apps.users.apps.UsersConfig',
     'apps.send_email.apps.SendEmailConfig',
+    'apps.voice_calls.apps.VoiceCallsConfig',
 ]
 
 MIDDLEWARE = [

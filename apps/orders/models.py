@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from apps.sims.models import Sims
 
-# make choice
-
 PRODUCT = [
     ('chip-internacional-eua', 'USA'),
     ('chip-internacional-eua-e-canada', 'USA/CANADA'),
