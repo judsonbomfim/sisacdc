@@ -560,77 +560,13 @@ def orders_activations(request):
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
-            if ord_id and ord_s:
-                for o_id in ord_id:
-                    
-                    order = Orders.objects.get(pk=o_id)
-                    order.order_status = ord_s
-                    order.save()
-                    
-                    order_id = order.order_id
-                    order_st = order.order_status
-                    order_plan = order.get_product_display()
-                    try: type_sim = order.id_sim.type_sim
-                    except: type_sim = 'esim'
-                    apiStore = ApiStore.conectApiStore()
-                    esim_v = None
-                    
-                    if ord_s == 'CC' or ord_s == 'DS':
-                        if order.id_sim:
-                            # Update SIM
-                            sim_put = Sims.objects.get(pk=order.id_sim.id)
-                            if order.id_sim.type_sim == 'esim':
-                                sim_put.sim_status = 'TC'
-                                esim_v = True
-                            else:
-                                sim_put.sim_status = 'DS'
-                            sim_put.sim_status = 'TC'
-                            sim_put.save()
-                                
-                            # Delete SIM in Order
-                            order_put = Orders.objects.get(pk=order.id)
-                            order_put.id_sim_id = ''
-                            order_put.save()
-                            
-                            # Deletar eSIM para site                            
-                            if esim_v == True:    
-                                ApiStore.updateEsimStore(order_id)
-                        
-                    # Save Notes
-                    def addNote(t_note):
-                        add_sim = Notes( 
-                            id_item = Orders.objects.get(pk=order.id),
-                            id_user = User.objects.get(pk=request.user.id),
-                            note = t_note,
-                            type_note = 'S',
-                        )
-                        add_sim.save()
-                    
-                    ord_status = Orders.order_status.field.choices
-                    for st in ord_status:
-                        if order_st == st[0] :    
-                            addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
-                    
-                    # Alterar status
-                    # Status sis : Status Loja
-                    status_sis_site = StatusSis.st_sis_site()
-                    
-                    if ord_s in status_sis_site:
-                        update_store = {
-                            'status': status_sis_site[ord_s]
-                        }
-                        apiStore.put(f'orders/{order.order_id}', update_store).json()
-                    
-                    # Enviar email
-                    if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
-                        send_email_sims.delay(id=order.id)
-                        
-                        addNote(f'E-mail enviado com sucesso!')
-                        messages.success(request,'E-mail enviado com sucesso!')
-                    
+            id_user = request.user.id    
+            if ord_id and ord_s:                
+                orders_up_status.delay(ord_id, ord_s,id_user)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
-                messages.info(request,f'Você precisa marcar alguma opção')        
+                messages.info(request,f'Você precisa marcar alguma opção')     
+               
     
         # End up_status / POST
 
