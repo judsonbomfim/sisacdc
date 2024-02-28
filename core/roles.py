@@ -18,5 +18,7 @@ class Gerente(AbstractUserRole):
         'send_esims': True,
         'send_esims_but': True,
         'list_activations': True,
-        'export_activations': True,
+        'view_voice': True,
+        'edit_voice': True,
+        'import_voice': True,
     }

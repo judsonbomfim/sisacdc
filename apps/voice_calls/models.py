@@ -19,9 +19,9 @@ VOICE_STATUS = [
 
 class VoiceNumbers(models.Model):
     id = models.AutoField(primary_key=True)
-    number = models.IntegerField()
     login = models.CharField(max_length=15, null=True, blank=True)
     extension = models.IntegerField()
+    number = models.IntegerField()
     password = models.CharField(max_length=15, null=True, blank=True)
     status = models.CharField(max_length=15, choices=NUNBER_STATUS)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -34,7 +34,7 @@ class VoiceNumbers(models.Model):
         ordering = ['id']
     def __str__(self):
         return self.number
-    
+
 class VoiceCalls(models.Model):
     id = models.AutoField(primary_key=True)
     id_item = models.ForeignKey(Orders, on_delete=models.DO_NOTHING, null=True, blank=True)
