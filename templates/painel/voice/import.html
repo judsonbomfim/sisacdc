@@ -1,0 +1,24 @@
+{% extends 'painel/partials/_content_default.html' %}
+{% load static %}
+{% load date_day %}
+{% block title_page %}<i class="bi bi-telephone"></i> Chamadas da Voz{% endblock %}
+{% block title_content %}Adicionar Linhas{% endblock %}
+
+{% block content_def %}
+<form action="{% url 'voice_import' %}" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="formFile" class="form-label">Enviar arquivo CSV</label>
+        <input class="form-control" type="file" id="formFile" name="voice" required>
+    </div>
+    <div class="form-group mt-5">
+        <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary">
+            <span class="flex items-center">
+                <i class="bi bi-sim"></i> <span>Inserir Linhas</span>
+            </span>
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}
