@@ -82,6 +82,23 @@
                     </ul>
                 </li>
                 {% endif %}
+                {% if request.user|can:'view_voice' %}
+                <li class="has-child open">
+                    <a>
+                        <i class="nav-icon bi bi-telephone"></i>
+                        <span class="menu-text">Chamadas de Voz</span>
+                        <i class="toggle-icon bi bi-plus-circle text-light"></i>
+                    </a>
+                    <ul>
+                        <li class="{% urL_active request '/voz/listar/' %}">
+                            <a href="{% url 'voice_index' %}">Listar Voz</a>
+                        </li>
+                        <li class="{% urL_active request '/voz/importar/' %}">
+                            <a href="{% url 'voice_import' %}">Adicionar Linhas</a>
+                        </li>
+                    </ul>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>

@@ -115,7 +115,7 @@
 
 {% block content_def %}
 
-<form action="{% url 'orders_activations' %}" method="POST">
+    <form action="{% url 'orders_activations' %}" method="POST">
     {% csrf_token %}
     {% if request.user|can:'edit_orders' %}
         
@@ -187,7 +187,8 @@
                 </a>
             </div>
         </div>    
-</div><!--End Row-->
+    </div><!--End Row-->
+    </form>
 
 
     <div class="table-responsive">
