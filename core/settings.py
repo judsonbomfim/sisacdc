@@ -199,11 +199,8 @@ DEFAULT_FROM_EMAIL = str(os.getenv('DEFAULT_FROM_EMAIL'))
 URL_PAINEL = str(os.getenv('URL_PAINEL'))
 URL_CDN = str(os.getenv('URL_CDN'))
 
-# CELERY_BROKER_URL = 'redis://redis:6379/0'
-# CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-
-CELERY_BROKER_URL = str(os.getenv('CELERY_BROKER_URL'))
-CELERY_RESULT_BACKEND = str(os.getenv('CELERY_RESULT_BACKEND'))
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
@@ -212,4 +209,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.orders.tasks.orders_auto',
         'schedule': timedelta(seconds=300),
     },
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
 }
