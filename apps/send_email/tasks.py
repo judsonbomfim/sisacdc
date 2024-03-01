@@ -5,7 +5,6 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from apps.orders.models import Orders, Notes
-from django.contrib import messages
 from apps.orders.classes import ApiStore, StatusSis
 import os
 
@@ -20,18 +19,14 @@ def send_email_sims(id=None):
         
     url_site = str(os.getenv('URL_CDN'))
     url_img = f'{url_site}/email/'
-    
-    if orders_all == None:           
-        if id == None:
-            messages.info(f'Não há pedidos para enviar e-mail!')
-        else:
-            messages.info(f'Não há pedidos para enviar e-mail!')
+
     
     for order in orders_all:
         id = order.id
         name = order.client
         client_email = order.email
         order_id = order.item_id
+        order_st = order.order_status
         try: qrcode = order.id_sim.link
         except: qrcode = None
         activation_date = order.activation_date
@@ -74,17 +69,18 @@ def send_email_sims(id=None):
         email.attach_alternative(html_content, "text/html")
         email.send()
         
-        # Update Order
-        order = Orders.objects.get(pk=id)
-        order.order_status = 'AA'
-        order.save()
-        # Update Store
-        apiStore = ApiStore.conectApiStore()
-        status_def_sis = StatusSis.st_sis_site()            
-        update_store = {
-            'status': status_def_sis['AA']
-        }
-        apiStore.put(f'orders/{order.order_id}', update_store).json()        
+        if order_st != 'CN':
+            # Update Order
+            order = Orders.objects.get(pk=id)
+            order.order_status = 'AA'
+            order.save()
+            # Update Store
+            apiStore = ApiStore.conectApiStore()
+            status_def_sis = StatusSis.st_sis_site()            
+            update_store = {
+                'status': status_def_sis['AA']
+            }
+            apiStore.put(f'orders/{order.order_id}', update_store).json()        
         
         # Add note
         add_note = Notes( 
