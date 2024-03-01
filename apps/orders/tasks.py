@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from celery import shared_task
 from django.utils.text import slugify
 from datetime import datetime, timedelta
-from django.contrib import messages
 from .classes import ApiStore, StatusSis, DateFormats
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
@@ -270,8 +269,4 @@ def orders_up_status(ord_id, ord_s, id_user):
         
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
-            send_email_sims.delay(id=order_id)
-            
-            addNote(f'E-mail enviado com sucesso!')
-            messages.success('E-mail enviado com sucesso!')
-        
+            send_email_sims.delay(id=order.id)        
