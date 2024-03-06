@@ -27,15 +27,13 @@ def voice_index(request):
         voice_status_f = request.POST.get('voice_status_f')
         
         if 'up_status' in request.POST:
-            vox_id = request.POST.getlist('vox_id')
-            vox_s = request.POST.get('vox_staus')
-
-            print('----------------------------------vox_id')
+            voice_id = request.POST.getlist('voice_id')
+            voice_st = request.POST.get('voice_st')
             
-            if vox_id and vox_s:
+            if voice_id and voice_st:
                 print('----------------------------------TAREFA')
 
-                voices_up_status.delay(vox_id, vox_s)
+                voices_up_status.delay(voice_id, voice_st)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')     
@@ -75,13 +73,10 @@ def voice_index(request):
     # from rolepermissions.permissions import available_perm_status
     
     context = {
-        # 'url_cdn': url_cdn,
         'voices': voices,
-        # 'orders': orders,
         'vox_status': vox_status,
         'vox_st_list': vox_st_list,
-        # 'oper_list': oper_list,
-        # 'url_filter': url_filter,
+        'url_filter': url_filter,
     }
     return render(request, 'painel/voice/index.html', context)
 
@@ -156,6 +151,7 @@ def mumber_list(request):
         'numbers': numbers,
         'num_status': num_status,
         'num_st_list': num_st_list,
+        'url_filter': url_filter,
     }
     return render(request, 'painel/voice/numbers.html', context)
 
