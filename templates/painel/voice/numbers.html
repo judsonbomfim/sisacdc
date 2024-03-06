@@ -34,7 +34,7 @@
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="number_st">
                     <option value="" selected>Alterar Status</option>
-                    {% for number_st in number_status %}
+                    {% for number_st in num_status %}
                     <option value="{{number_st.0}}">{{number_st.1}}</option>
                     {% endfor %}
                 </select>
@@ -57,7 +57,7 @@
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="number_status_f">
                     <option value="" selected>Filtrar Status - Todos</option>
-                    {% for number_st in number_status %}
+                    {% for number_st in num_status %}
                     <option value="{{number_st.0}}">{{number_st.1}}</option>
                     {% endfor %}
                 </select>

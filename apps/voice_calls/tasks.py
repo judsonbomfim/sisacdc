@@ -4,20 +4,20 @@ from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 
 
 @shared_task
-def voices_up_status(vox_id, vox_s, id_user):
+def voices_up_status(vox_id, vox_st):
     
     for v_id in vox_id:
         
-        vox_s = vox_s
+        vox_st = vox_st
 
         # Save status System
         number = VoiceCalls.objects.get(pk=v_id)
-        number.number_status = number_st
+        number.number_status = vox_st
         number.save()
 
 
 @shared_task
-def number_up_status(number_id, number_st, id_user):
+def number_up_status(number_id, number_st):
 
     for num_id in number_id:
         
