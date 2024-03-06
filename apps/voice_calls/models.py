@@ -23,7 +23,7 @@ class VoiceNumbers(models.Model):
     extension = models.IntegerField()
     number = models.IntegerField()
     password = models.CharField(max_length=15, null=True, blank=True)
-    status = models.CharField(max_length=15, choices=NUNBER_STATUS)
+    number_status = models.CharField(max_length=15, choices=NUNBER_STATUS)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
@@ -39,7 +39,7 @@ class VoiceCalls(models.Model):
     id = models.AutoField(primary_key=True)
     id_item = models.ForeignKey(Orders, on_delete=models.DO_NOTHING, null=True, blank=True)
     id_voice = models.ForeignKey(VoiceNumbers, on_delete=models.DO_NOTHING, null=True, blank=True)
-    status = models.CharField(max_length=15, choices=VOICE_STATUS)
+    call_status = models.CharField(max_length=15, choices=VOICE_STATUS)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:

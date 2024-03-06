@@ -2,8 +2,8 @@
 {% load permission_tags %}
 {% load static %}
 {% load date_day %}
-{% block title_page %}<i class="bi bi-sim"></i> SIMs{% endblock %}
-{% block title_content %}Estoque SIMs{% endblock %}
+{% block title_page %}<i class="bi bi-telephone"></i> Números da Voz{% endblock %}
+{% block title_content %}Lista de Números de Voz{% endblock %}
 {%block js_custom %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 {% endblock %}
@@ -20,10 +20,10 @@
         {% csrf_token %}
         <div class="col-md-1">
             <div class="dm-select">
-                <select class="form-control form-control-lg ps-3 pe-5" name="sim_st">
+                <select class="form-control form-control-lg ps-3 pe-5" name="number_st">
                     <option value="" selected>Alterar Status</option>
-                    {% for sim_st in sims_status %}
-                    <option value="{{sim_st.0}}">{{sim_st.1}}</option>
+                    {% for number_st in number_status %}
+                    <option value="{{number_st.0}}">{{number_st.1}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -33,34 +33,20 @@
                 name="up_status">Alterar</button>
         </div>
         <div class="col-md-2">
-            <input type="text" class="form-control form-control-lg" placeholder="(e)SIM)" name="sim_f">
+            <input type="text" class="form-control form-control-lg" placeholder="Login" name="login_f">
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control form-control-lg" placeholder="Ramal" name="extension_f">
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control form-control-lg" placeholder="Número" name="number_f">
         </div>
         <div class="col-md-2">
             <div class="dm-select">
-                <select class="form-control form-control-lg ps-3 pe-5" name="sim_type_f">
-                    <option value="" selected>Filtrar Tipo - Todos</option>
-                    {% for sim_t in sims_types %}
-                    <option value="{{sim_t.0}}">{{sim_t.1}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="dm-select">
-                <select class="form-control form-control-lg ps-3 pe-5" name="sim_status_f">
+                <select class="form-control form-control-lg ps-3 pe-5" name="number_status_f">
                     <option value="" selected>Filtrar Status - Todos</option>
-                    {% for sim_s in sims_status %}
-                    <option value="{{sim_s.0}}">{{sim_s.1}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="dm-select">
-                <select class="form-control form-control-lg ps-3 pe-5" name="sim_oper_f">
-                    <option value="" selected>Filtrar Operadora - Todos</option>
-                    {% for sim_o in sims_oper %}
-                    <option value="{{sim_o.0}}">{{sim_o.1}}</option>
+                    {% for number_st in number_status %}
+                    <option value="{{number_st.0}}">{{mumber_st.1}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -70,7 +56,7 @@
                 name="up_filter">Filtrar</button>
         </div>
         <div class="col-md-1 p-2">
-            <a class="btn-default btn-rounded" href="{% url 'sims_index' %}">
+            <a class="btn-default btn-rounded" href="{% url 'mumber_list' %}">
                 <i class="bi bi-arrow-clockwise"></i>Limpar
             </a>
         </div>
@@ -79,55 +65,56 @@
                 <thead>
                     <tr class="userDatatable-header">
                         <th><input class="form-check-input" type="checkbox" id="checkAll"></th>
-                        <th class="userDatatable-title">SIM</th>
-                        <th class="userDatatable-title">Link</th>
-                        <th class="userDatatable-title">Tipo Sim</th>
-                        <th class="userDatatable-title">Operadora</th>
+                        <th class="userDatatable-title">Login</th>
+                        <th class="userDatatable-title">Ramal</th>
+                        <th class="userDatatable-title">Número</th>
+                        <th class="userDatatable-title">Senha</th>
                         <th class="userDatatable-title">Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% if sims %}
-                    {% for sim in sims %}
+                    {% if numbers %}
+                    {% for num in numbers %}
                     <tr class="table-tr">
                         <td>
                             <div class="userDatatable-content">
-                                <input class="checkItem form-check-input" type="checkbox" value="{{sim.id}}"
-                                    name="sim_id">
+                                <input class="checkItem form-check-input" type="checkbox" value="{{num.id}}"
+                                    name="number_id">
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ sim.sim }}
+                                {{ num.login }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {% if sim.type_sim == 'esim' %}
-                                <a href="{{ url_cdn }}{{ sim.link }}" target="_blank">{{ sim.sim }}
-                                    {% else %}-{% endif %}
-                                </a>
+                                {{ num.extension }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ sim.type_sim }}
+                                {{ num.number }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ sim.get_operator_display }}
+                                {% if num.password %}
+                                    {{ num.password }}
+                                {% else %}
+                                    ---
+                                {% endif %}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ sim.get_sim_status_display }}
+                                {{ num.get_number_status_display }}
                             </div>
                         </td>
                     </tr>
                     {% endfor %}
                     {% else %}
-                    <tr>
+                    <tr class="table-tr">
                         <td>
                             <div class="userDatatable-content">
                                 Nenhum (e)SIM encontrado.
@@ -139,20 +126,20 @@
             </table>
             <nav aria-label="navigation">
                 <ul class="pagination">
-                    {% if sims.has_previous %}
+                    {% if numbers.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ sims.previous_page_number }}{{ url_filter }}"
+                        <a class="page-link" href="?page={{ numbers.previous_page_number }}{{ url_filter }}"
                             aria-label="Previous">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
                     {% endif %}
                     <li class="page-item">
-                        <a class="page-link" href="">{{ sims.number }} de {{ sims.paginator.num_pages }}</a>
+                        <a class="page-link" href="">{{ numbers.number }} de {{ numbers.paginator.num_pages }}</a>
                     </li>
-                    {% if sims.has_next %}
+                    {% if numbers.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ sims.next_page_number }}{{ url_filter }}" aria-label="Next">
+                        <a class="page-link" href="?page={{ numbers.next_page_number }}{{ url_filter }}" aria-label="Next">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>

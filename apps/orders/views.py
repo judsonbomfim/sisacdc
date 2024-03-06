@@ -28,6 +28,7 @@ def orders_list(request):
     url_cdn = str(os.getenv('URL_CDN'))
     
     orders_all = Orders.objects.all().order_by('-id')
+    sims = Sims.objects.all().order_by('-id')
     orders_l = orders_all
     
     if request.method == 'GET':
@@ -52,9 +53,6 @@ def orders_list(request):
             id_user = request.user.id            
                         
             print('----------------------------------ord_id')
-            print(ord_id)
-            print(ord_s)
-            print(id_user)
             
             if ord_id and ord_s:
                 print('----------------------------------TAREFA')
@@ -88,7 +86,6 @@ def orders_list(request):
         orders_l = orders_l.filter(order_status__icontains=ord_st_f)
         url_filter += f"&ord_st={ord_st_f}"
 
-    sims = Sims.objects.all()
     ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
     
@@ -572,11 +569,8 @@ def orders_activations(request):
             
             print('----------------------------------ord_id')
             print(ord_id)
-            print(ord_s)
-            print(id_user)
             
             if ord_id and ord_s:
-                print('----------------------------------TAREFA')
                           
                 orders_up_status.delay(ord_id, ord_s,id_user)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')

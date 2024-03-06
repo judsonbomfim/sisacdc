@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from .classes import ApiStore, StatusSis, DateFormats
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
+from apps.voice_calls.models import VoiceCalls
 import getpass
 import time
 from apps.sims.tasks import sims_in_orders
@@ -158,7 +159,16 @@ def order_import():
                         note = f'Pedido importado para o sistema',
                         type_note = 'S',
                     )
-                    add_sim.save()                       
+                    add_sim.save()
+                    
+                    # Insert Voice Calls
+                    if countries_i == True:
+                        
+                        add_voice = VoiceCalls(
+                            id_item = Orders.objects.get(pk=order_add.id),
+                            status = 'PR'
+                        )
+                        add_voice.save()
                     
                     # Alterar status
                     # Status sis : Status Loja
@@ -208,19 +218,19 @@ def orders_up_status(ord_id, ord_s, id_user):
         print(o_id)
         
         ord_id = ord_id
-        ord_s = ord_s
-        user = User.objects.get(pk=id_user)
-        
-        order = Orders.objects.get(pk=o_id)
-        order.order_status = ord_s
-        order.save()
-        
+        ord_s = ord_s        
         order_id = order.order_id
         order_st = order.order_status
         order_plan = order.get_product_display()
         try: type_sim = order.id_sim.type_sim
         except: type_sim = 'esim'
         apiStore = ApiStore.conectApiStore()
+        user = User.objects.get(pk=id_user)
+
+        # Save status System
+        order = Orders.objects.get(pk=o_id)
+        order.order_status = ord_s
+        order.save()
         
         if ord_s == 'CC' or ord_s == 'DS':
             if order.id_sim:
@@ -238,10 +248,17 @@ def orders_up_status(ord_id, ord_s, id_user):
                 # Delete SIM in Order
                 order_put = Orders.objects.get(pk=order.id)
                 order_put.id_sim_id = ''
-                order_put.save()
-                
+                order_put.save()              
 
-            
+        # Status sis : Status Loja
+        status_sis_site = StatusSis.st_sis_site()
+        
+        if ord_s in status_sis_site:
+            update_store = {
+                'status': status_sis_site[ord_s]
+            }
+            apiStore.put(f'orders/{order.order_id}', update_store).json()
+        
         # Save Notes
         def addNote(t_note):
             add_sim = Notes( 
@@ -254,19 +271,9 @@ def orders_up_status(ord_id, ord_s, id_user):
         
         ord_status = Orders.order_status.field.choices
         for st in ord_status:
-            if order_st == st[0] :    
+            if order_st == st[0] :
                 addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
-        
-        # Alterar status
-        # Status sis : Status Loja
-        status_sis_site = StatusSis.st_sis_site()
-        
-        if ord_s in status_sis_site:
-            update_store = {
-                'status': status_sis_site[ord_s]
-            }
-            apiStore.put(f'orders/{order.order_id}', update_store).json()
         
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
-            send_email_sims.delay(id=order.id)        
+            send_email_sims.delay(id=order.id)

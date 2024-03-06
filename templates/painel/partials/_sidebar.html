@@ -93,9 +93,16 @@
                         <li class="{% urL_active request '/voz/listar/' %}">
                             <a href="{% url 'voice_index' %}">Listar Voz</a>
                         </li>
+                        {% if request.user|can:'list_number' %}
+                        <li class="{% urL_active request '/voz/listar/numeros/' %}">
+                            <a href="{% url 'mumber_list' %}">Listar Linhas</a>
+                        </li>
+                        {% endif %}
+                        {% if request.user|can:'import_voice' %}
                         <li class="{% urL_active request '/voz/importar/' %}">
                             <a href="{% url 'voice_import' %}">Adicionar Linhas</a>
                         </li>
+                        {% endif %}
                     </ul>
                 </li>
                 {% endif %}
