@@ -36,14 +36,13 @@ def voice_index(request):
         if 'up_status' in request.POST:
             vox_id = request.POST.getlist('vox_id')
             vox_s = request.POST.get('vox_staus')
-            id_user = request.user.id            
                         
             print('----------------------------------vox_id')
             
             if vox_id and vox_s:
                 print('----------------------------------TAREFA')
              
-                voices_up_status.delay(vox_id, vox_s,id_user)
+                voices_up_status.delay(vox_id, vox_s)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')     
@@ -102,11 +101,6 @@ def voice_index(request):
 
 def mumber_list(request):
 
-    voices_l = ''
-    
-    url_cdn = str(os.getenv('URL_CDN'))
-    
-    # voices_all = VoiceCalls.objects.all().order_by('-id')
     numbers_all = VoiceNumbers.objects.all().order_by('-id')
     numbers_l = numbers_all
     
@@ -163,15 +157,16 @@ def mumber_list(request):
     # sims = Sims.objects.all()
     number_status = VoiceNumbers.number_status.field.choices
     
-    print(number_status)
-    # oper_list = Sims.operator.field.choices
-
     # Listar status dos pedidos
-    # vox_st_list = []
-    # for vox_s in vox_status:
-    #     ord = voices_all.filter(order_status=vox_s[0]).count()
-    #     vox_st_list.append((vox_s[0],vox_s[1],ord))
+    num_status = VoiceNumbers.number_status.field.choices
+    num_st_list = []
+    for num_s in num_status:
+        num = numbers_all.filter(number_status=num_s[0]).count()
+        num_st_list.append((num_s[0],num_s[1],num))
 
+    print('num_st_list')
+    print(num_st_list)
+    
     # Pagination
     paginator = Paginator(numbers_l, 50)
     page = request.GET.get('page')
@@ -180,13 +175,9 @@ def mumber_list(request):
     # from rolepermissions.permissions import available_perm_status
     
     context = {
-        # 'url_cdn': url_cdn,
-        # 'numbers_l': numbers_l,
-        # 'orders': orders,
         'numbers': numbers,
         'number_status': number_status,
-        # 'oper_list': oper_list,
-        # 'url_filter': url_filter,
+        'num_st_list': num_st_list,
     }
     return render(request, 'painel/voice/numbers.html', context)
 

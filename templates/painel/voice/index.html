@@ -15,6 +15,18 @@
 
 {% block content_def %}
 <!-- Conteúdo do Principal -->
+{% comment %} {% if request.user|can:'edit_sims' %} {% endcomment %}
+<div class="col-md-12">
+    <div class="dm-button-list d-flex flex-wrap">
+        {% for num_st in num_st_list %}
+            {% if num_st.2 != 0 %}
+            <button class="btn btn-default btn-squared color-primary btn-outline-primary m-1">{{num_st.1}}
+                ({{num_st.2}})</button>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% comment %} {% endif %} {% endcomment %}
 <div class="row">
     <form class="row g-3" action="" method="POST">
         {% csrf_token %}
