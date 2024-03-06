@@ -3,131 +3,104 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.core.paginator import Paginator
 from apps.voice_calls.models import VoiceNumbers, VoiceCalls
-from apps.voice_calls.tasks import number_up_status
+from apps.voice_calls.tasks import number_up_status, voices_up_status
 from apps.orders.models import Orders
 
 
 def voice_index(request):
-    
-    global voices_l
-    voices_l = ''
-    
-    url_cdn = str(os.getenv('URL_CDN'))
     
     voices_all = VoiceCalls.objects.all()
     voices_l = voices_all
     
     if request.method == 'GET':
         
-        vox_name_f = request.GET.get('vox_name')
-        vox_order_f = request.GET.get('vox_order')    
-        vox_sim_f = request.GET.get('vox_sim')
-        oper_f = request.GET.get('oper')
-        vox_st_f = request.GET.get('vox_st')
-    
+        voice_item_f = request.GET.get('voice_item_f')
+        voice_name_f = request.GET.get('voice_name_f')    
+        voice_login_f = request.GET.get('voice_login_f')
+        voice_status_f = request.GET.get('voice_status_f')
+
     if request.method == 'POST':
         
-        vox_name_f = request.POST.get('vox_name_f')
-        vox_order_f = request.POST.get('vox_order_f')       
-        vox_sim_f = request.POST.get('vox_sim_f')
-        oper_f = request.POST.get('oper_f')
-        vox_st_f = request.POST.get('vox_st_f')
-
+        voice_item_f = request.POST.get('voice_item_f')
+        voice_name_f = request.POST.get('voice_name_f')    
+        voice_login_f = request.POST.get('voice_login_f')
+        voice_status_f = request.POST.get('voice_status_f')
+        
         if 'up_status' in request.POST:
-            vox_id = request.POST.getlist('vox_id')
-            vox_s = request.POST.get('vox_staus')
-            id_user = request.user.id            
-                        
-            print('----------------------------------vox_id')
+            voice_id = request.POST.getlist('voice_id')
+            voice_st = request.POST.get('voice_st')
             
-            if vox_id and vox_s:
+            if voice_id and voice_st:
                 print('----------------------------------TAREFA')
-             
-                voices_up_status.delay(vox_id, vox_s,id_user)
+
+                voices_up_status.delay(voice_id, voice_st)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')     
-    
+
      # FIlters
     
     url_filter = ''
 
-    if vox_name_f:
-        voices_l = voices_l.filter(client__icontains=vox_name_f)
-        url_filter += f"&vox_name={vox_name_f}"
+    if voice_item_f:
+        voices_l = voices_l.filter(id_item__order_id__icontains=voice_item_f)
+        url_filter += f"&vox_name={voice_item_f}"
 
-    if vox_order_f: 
-        voices_l = voices_l.filter(item_id__icontains=vox_order_f)   
-        url_filter += f"&vox_order={vox_order_f}"
+    if voice_name_f: 
+        voices_l = voices_l.filter(id_item__client__icontains=voice_name_f)   
+        url_filter += f"&vox_order={voice_name_f}"
 
-    if vox_sim_f: 
-        voices_l = voices_l.filter(id_sim__sim__icontains=vox_sim_f)
-        url_filter += f"&vox_sim={vox_sim_f}"
-    
-    if oper_f: 
-        voices_l = voices_l.filter(id_sim__operator__icontains=oper_f)
-        url_filter += f"&oper={oper_f}"
+    if voice_login_f: 
+        voices_l = voices_l.filter(id_number__login__icontains=voice_login_f)
+        url_filter += f"&vox_sim={voice_login_f}"
 
-    if vox_st_f: 
-        voices_l = voices_l.filter(order_status__icontains=vox_st_f)
-        url_filter += f"&vox_st={vox_st_f}"
-
-    # sims = Sims.objects.all()
-    # vox_status = Orders.order_status.field.choices
-    # oper_list = Sims.operator.field.choices
+    if voice_status_f: 
+        voices_l = voices_l.filter(call_status__icontains=voice_status_f)
+        url_filter += f"&vox_st={voice_status_f}"
     
     # Listar status dos pedidos
-    # vox_st_list = []
-    # for vox_s in vox_status:
-    #     ord = voices_all.filter(order_status=vox_s[0]).count()
-    #     vox_st_list.append((vox_s[0],vox_s[1],ord))
+    vox_status = VoiceCalls.call_status.field.choices
+    vox_st_list = []
+    for vox_s in vox_status:
+        vox = voices_all.filter(call_status=vox_s[0]).count()
+        vox_st_list.append((vox_s[0],vox_s[1],vox))
     
     # Paginação
-    # paginator = Paginator(voices_l, 50)
-    # page = request.GET.get('page')
-    # orders = paginator.get_page(page)
+    paginator = Paginator(voices_l, 50)
+    page = request.GET.get('page')
+    voices = paginator.get_page(page)
     
     # from rolepermissions.permissions import available_perm_status
     
     context = {
-        # 'url_cdn': url_cdn,
-        # 'voices_l': voices_l,
-        # 'orders': orders,
-        # 'sims': sims,
-        # 'vox_st_list': vox_st_list,
-        # 'oper_list': oper_list,
-        # 'url_filter': url_filter,
+        'voices': voices,
+        'vox_status': vox_status,
+        'vox_st_list': vox_st_list,
+        'url_filter': url_filter,
     }
     return render(request, 'painel/voice/index.html', context)
 
+
 def mumber_list(request):
 
-    voices_l = ''
-    
-    url_cdn = str(os.getenv('URL_CDN'))
-    
-    # voices_all = VoiceCalls.objects.all().order_by('-id')
     numbers_all = VoiceNumbers.objects.all().order_by('-id')
     numbers_l = numbers_all
     
     if request.method == 'GET':
         
-        login_f = request.GET.get('login_f')
-        extension_f = request.GET.get('extension_f')    
-        number_f = request.GET.get('number_f')
-        number_status_f = request.GET.get('number_status_f')
+        voice_item_f = request.GET.get('voice_item_f')
+        voice_name_f = request.GET.get('voice_name_f')    
+        voice_login_f = request.GET.get('voice_login_f')
     
     if request.method == 'POST':
         
-        login_f = request.POST.get('login_f')
-        extension_f = request.POST.get('extension_f')       
-        number_f = request.POST.get('number_f')
-        number_status_f = request.POST.get('number_status_f')
+        voice_item_f = request.POST.get('voice_item_f')
+        voice_name_f = request.POST.get('voice_name_f')    
+        voice_login_f = request.POST.get('voice_login_f')
 
         if 'up_status' in request.POST:
             number_id = request.POST.getlist('number_id')
             number_st = request.POST.get('number_st')
-            id_user = request.user.id         
                         
             print('----------------------------------number_id - INICIO')
             print(number_id)
@@ -135,7 +108,7 @@ def mumber_list(request):
             if number_id and number_st:
                 print('----------------------------------TAREFA')
              
-                number_up_status.delay(number_id, number_st, id_user)
+                number_up_status.delay(number_id, number_st)
                 messages.success(request,f'Números(s) sendo alterado(s)...')
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')     
@@ -144,34 +117,29 @@ def mumber_list(request):
     
     url_filter = ''
 
-    if login_f:
-        numbers_l = numbers_l.filter(login__icontains=login_f)
-        url_filter += f"&vox_name={login_f}"
+    if voice_item_f:
+        numbers_l = numbers_l.filter(voice__icontains=voice_item_f)
+        url_filter += f"&vox_name={voice_item_f}"
 
-    if extension_f: 
-        numbers_l = numbers_l.filter(extension__icontains=extension_f)   
-        url_filter += f"&vox_order={extension_f}"
+    if voice_name_f: 
+        numbers_l = numbers_l.filter(id_item__client__icontains=voice_name_f)   
+        url_filter += f"&vox_order={voice_name_f}"
 
-    if number_f: 
-        numbers_l = numbers_l.filter(number__icontains=number_f)
-        url_filter += f"&vox_sim={number_f}"
+    if voice_login_f: 
+        numbers_l = numbers_l.filter(login__icontains=voice_login_f)
+        url_filter += f"&vox_sim={voice_login_f}"
+
+   
+    # List status
+    num_status = VoiceNumbers.number_status.field.choices
+    num_st_list = []
+    for num_s in num_status:
+        num = numbers_all.filter(number_status=num_s[0]).count()
+        num_st_list.append((num_s[0],num_s[1],num))
+
+    print('num_st_list')
+    print(num_st_list)
     
-    if number_status_f: 
-        numbers_l = numbers_l.filter(number_status__icontains=number_status_f)
-        url_filter += f"&oper={number_status_f}"
-
-    # sims = Sims.objects.all()
-    number_status = VoiceNumbers.number_status.field.choices
-    
-    print(number_status)
-    # oper_list = Sims.operator.field.choices
-
-    # Listar status dos pedidos
-    # vox_st_list = []
-    # for vox_s in vox_status:
-    #     ord = voices_all.filter(order_status=vox_s[0]).count()
-    #     vox_st_list.append((vox_s[0],vox_s[1],ord))
-
     # Pagination
     paginator = Paginator(numbers_l, 50)
     page = request.GET.get('page')
@@ -180,15 +148,13 @@ def mumber_list(request):
     # from rolepermissions.permissions import available_perm_status
     
     context = {
-        # 'url_cdn': url_cdn,
-        # 'numbers_l': numbers_l,
-        # 'orders': orders,
         'numbers': numbers,
-        'number_status': number_status,
-        # 'oper_list': oper_list,
-        # 'url_filter': url_filter,
+        'num_status': num_status,
+        'num_st_list': num_st_list,
+        'url_filter': url_filter,
     }
     return render(request, 'painel/voice/numbers.html', context)
+
 
 def voice_edit(request):
     

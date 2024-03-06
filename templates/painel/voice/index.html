@@ -15,15 +15,28 @@
 
 {% block content_def %}
 <!-- Conteúdo do Principal -->
+{% comment %} {% if request.user|can:'edit_sims' %} {% endcomment %}
+<div class="col-md-12">
+    <div class="dm-button-list d-flex flex-wrap">
+        {% for vox_st in vox_st_list %}
+            {% if vox_st.2 != 0 %}
+            <button class="btn btn-default btn-squared color-primary btn-outline-primary m-1">{{vox_st.1}}
+                ({{vox_st.2}})</button>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% comment %} {% endif %} {% endcomment %}
 <div class="row">
+
     <form class="row g-3" action="" method="POST">
         {% csrf_token %}
         <div class="col-md-1">
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="voice_st">
                     <option value="" selected>Alterar Status</option>
-                    {% for voice_st in sims_status %}
-                    <option value="{{voice_st.0}}">{{voice_st.1}}</option>
+                    {% for vox_st in vox_status %}
+                    <option value="{{vox_st.0}}">{{vox_st.1}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -33,34 +46,20 @@
                 name="up_status">Alterar</button>
         </div>
         <div class="col-md-2">
-            <input type="text" class="form-control form-control-lg" placeholder="(e)SIM)" name="voice_f">
+            <input type="text" class="form-control form-control-lg" placeholder="Pedido" name="voice_item_f">
         </div>
         <div class="col-md-2">
-            <div class="dm-select">
-                <select class="form-control form-control-lg ps-3 pe-5" name="voice_type_f">
-                    <option value="" selected>Filtrar Tipo - Todos</option>
-                    {% for voice_t in sims_types %}
-                    <option value="{{voice_t.0}}">{{voice_t.1}}</option>
-                    {% endfor %}
-                </select>
-            </div>
+            <input type="text" class="form-control form-control-lg" placeholder="Nome" name="voice_name_f">
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control form-control-lg" placeholder="login" name="voice_login_f">
         </div>
         <div class="col-md-2">
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="voice_status_f">
                     <option value="" selected>Filtrar Status - Todos</option>
-                    {% for voice_s in sims_status %}
-                    <option value="{{voice_s.0}}">{{voice_s.1}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="dm-select">
-                <select class="form-control form-control-lg ps-3 pe-5" name="voice_oper_f">
-                    <option value="" selected>Filtrar Operadora - Todos</option>
-                    {% for voice_o in sims_oper %}
-                    <option value="{{voice_o.0}}">{{voice_o.1}}</option>
+                    {% for voice_st in vox_status %}
+                    <option value="{{voice_st.0}}">{{voice_st.1}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -70,7 +69,7 @@
                 name="up_filter">Filtrar</button>
         </div>
         <div class="col-md-1 p-2">
-            <a class="btn-default btn-rounded" href="{% url 'sims_index' %}">
+            <a class="btn-default btn-rounded" href="{% url 'voice_index' %}">
                 <i class="bi bi-arrow-clockwise"></i>Limpar
             </a>
         </div>
@@ -91,56 +90,68 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if sims %}
-                    {% for sim in sims %}
+                    {% if voices %}
+                    {% for voice in voices %}
                     <tr class="table-tr">
                         <td>
+                            {% comment %} ID {% endcomment %}
                             <div class="userDatatable-content">
-                                <input class="checkItem form-check-input" type="checkbox" value="{{sim.id}}"
+                                <input class="checkItem form-check-input" type="checkbox" value="{{voice.id}}"
                                     name="voice_id">
                             </div>
                         </td>
                         <td>
+                            {% comment %} Pedido {% endcomment %}
                             <div class="userDatatable-content">
-                                {{ voice.id_item__id }}
+                                {{ voice.id_item.order_id }}
                             </div>
                         </td>
                         <td>
+                            {% comment %} Nome {% endcomment %}
                             <div class="userDatatable-content">
-                                {{ voice.sim }}
+                                {{ voice.id_item.client }}
                             </div>
                         </td>
                         <td>
+                            {% comment %} Número {% endcomment %}
                             <div class="userDatatable-content">
-                                {% if sim.type_sim == 'esim' %}
-                                <a href="{{ url_cdn }}{{ voice.link }}" target="_blank">{{ voice.sim }}
-                                    {% else %}-{% endif %}
-                                </a>
+                                {{ voice.id_number.number }}
                             </div>
                         </td>
                         <td>
+                            {% comment %} Login {% endcomment %}
                             <div class="userDatatable-content">
-                                {{ voice.type_sim }}
+                                {{ voice.id_number.login }}
                             </div>
                         </td>
                         <td>
+                            {% comment %} Senha {% endcomment %}
+                            <div class="userDatatable-content">
+                                {{ voice.id_number.password }}
+                            </div>
+                        </td>
+                        <td>
+                            {% comment %} Dias {% endcomment %}
+                            <div class="userDatatable-content">
+                                {{ voice.id_item.days }}
+                            </div>
+                        </td>
+                        <td>
+                            {% comment %} Ida {% endcomment %}
+                            <div class="userDatatable-content">
+                                {{ voice.id_item.activation_date|date:"d/m/Y" }}
+                            </div>
+                        </td>
+                        <td>
+                            {% comment %} Volta {% endcomment %}
                             <div class="userDatatable-content">
                                 {{ voice.id }}
                             </div>
                         </td>
                         <td>
+                            {% comment %} Status {% endcomment %}
                             <div class="userDatatable-content">
-                                {{ voice.id }}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="userDatatable-content">
-                                {{ voice.id }}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="userDatatable-content">
-                                {{ voice.get_voice_status_display }}
+                                {{ voice.get_call_status_display }}
                             </div>
                         </td>
                     </tr>
@@ -149,7 +160,7 @@
                     <tr>
                         <td>
                             <div class="userDatatable-content">
-                                Nenhum (e)SIM encontrado.
+                                Nenhuma chamada de voz encontrado.
                             </div>
                         </td>
                     </tr>

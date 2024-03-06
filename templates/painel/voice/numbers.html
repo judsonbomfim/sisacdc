@@ -15,6 +15,18 @@
 
 {% block content_def %}
 <!-- Conteúdo do Principal -->
+{% comment %} {% if request.user|can:'edit_sims' %} {% endcomment %}
+<div class="col-md-12">
+    <div class="dm-button-list d-flex flex-wrap">
+        {% for num_st in num_st_list %}
+            {% if num_st.2 != 0 %}
+            <button class="btn btn-default btn-squared color-primary btn-outline-primary m-1">{{num_st.1}}
+                ({{num_st.2}})</button>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% comment %} {% endif %} {% endcomment %}
 <div class="row">
     <form class="row g-3" action="" method="POST">
         {% csrf_token %}
@@ -22,7 +34,7 @@
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="number_st">
                     <option value="" selected>Alterar Status</option>
-                    {% for number_st in number_status %}
+                    {% for number_st in num_status %}
                     <option value="{{number_st.0}}">{{number_st.1}}</option>
                     {% endfor %}
                 </select>
@@ -45,8 +57,8 @@
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="number_status_f">
                     <option value="" selected>Filtrar Status - Todos</option>
-                    {% for number_st in number_status %}
-                    <option value="{{number_st.0}}">{{mumber_st.1}}</option>
+                    {% for number_st in num_status %}
+                    <option value="{{number_st.0}}">{{number_st.1}}</option>
                     {% endfor %}
                 </select>
             </div>
