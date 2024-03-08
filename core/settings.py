@@ -137,18 +137,9 @@ DATA_UPLOAD_MAX_NUMBER_FILES = 1000
 # Expirar sessão em 10h
 SESSION_COOKIE_AGE = 36000
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-# STATIC_URL = 'static/'
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'core/static')
-# ]
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-# # Media
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# MEDIA_URL = "/media/"
+URL_PAINEL = str(os.getenv('URL_PAINEL'))
+URL_CDN = str(os.getenv('URL_CDN'))
 
 
 AWS_ACCESS_KEY_ID = str(os.getenv('AWS_ACCESS_KEY_ID'))
@@ -197,9 +188,6 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = str(os.getenv('DEFAULT_FROM_EMAIL'))
 
-
-URL_PAINEL = str(os.getenv('URL_PAINEL'))
-URL_CDN = str(os.getenv('URL_CDN'))
 
 CELERY_BROKER_URL = str(os.getenv('CELERY_BROKER_URL'))
 CELERY_RESULT_BACKEND = str(os.getenv('CELERY_RESULT_BACKEND'))

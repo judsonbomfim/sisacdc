@@ -23,6 +23,7 @@ class VoiceNumbers(models.Model):
     extension = models.IntegerField()
     number = models.IntegerField()
     password = models.CharField(max_length=15, null=True, blank=True)
+    number_qrcode = models.CharField(max_length=45, null=True, blank=True)
     number_status = models.CharField(max_length=15, choices=NUNBER_STATUS)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

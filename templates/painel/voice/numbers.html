@@ -81,6 +81,7 @@
                         <th class="userDatatable-title">Ramal</th>
                         <th class="userDatatable-title">Número</th>
                         <th class="userDatatable-title">Senha</th>
+                        <th class="userDatatable-title">QrCode</th>
                         <th class="userDatatable-title">Status</th>
                     </tr>
                 </thead>
@@ -111,11 +112,12 @@
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {% if num.password %}
-                                    {{ num.password }}
-                                {% else %}
-                                    ---
-                                {% endif %}
+                                {{ num.password|default:"---" }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ num.number_qrcode|default:"---" }}
                             </div>
                         </td>
                         <td>

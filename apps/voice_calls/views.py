@@ -31,8 +31,6 @@ def voice_index(request):
             voice_st = request.POST.get('voice_st')
             
             if voice_id and voice_st:
-                print('----------------------------------TAREFA')
-
                 voices_up_status.delay(voice_id, voice_st)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
@@ -101,13 +99,8 @@ def mumber_list(request):
         if 'up_status' in request.POST:
             number_id = request.POST.getlist('number_id')
             number_st = request.POST.get('number_st')
-                        
-            print('----------------------------------number_id - INICIO')
-            print(number_id)
             
-            if number_id and number_st:
-                print('----------------------------------TAREFA')
-             
+            if number_id and number_st:            
                 number_up_status.delay(number_id, number_st)
                 messages.success(request,f'Números(s) sendo alterado(s)...')
             else:
