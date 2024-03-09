@@ -5,11 +5,12 @@ from datetime import datetime, timedelta
 from .classes import ApiStore, StatusSis, DateFormats
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
-from apps.voice_calls.models import VoiceCalls
+from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 import getpass
 import time
 from apps.sims.tasks import sims_in_orders
 from apps.send_email.tasks import send_email_sims
+from apps.voice_calls.tasks import update_password
 
 @shared_task
 def order_import():
@@ -165,10 +166,19 @@ def order_import():
                     if countries_i == True:
                         
                         add_voice = VoiceCalls(
-                            id_item = Orders.objects.get(pk=order_add.id),
+                            id_item = order_add.id,
                             status = 'PR'
                         )
                         add_voice.save()
+                    
+                    # Save Notes
+                    add_sim = Notes( 
+                        id_item = Orders.objects.get(pk=order_add.id),
+                        id_user = None,
+                        note = f'Chamada de Voz Criada',
+                        type_note = 'S',
+                    )
+                    add_sim.save()
                     
                     # Alterar status
                     # Status sis : Status Loja
@@ -212,23 +222,25 @@ def orders_up_status(ord_id, ord_s, id_user):
     print('-----------------ord_id, ord_s, id_user')
     print(ord_id, ord_s, id_user)
 
+    ord_id = ord_id
+    ord_s = ord_s
+    
     for o_id in ord_id:
         
         print('-----------------o_id')
         print(o_id)
         
-        ord_id = ord_id
-        ord_s = ord_s        
-        order_id = order.order_id
+        order = Orders.objects.get(pk=o_id)
+        user = User.objects.get(pk=id_user)
+        
+        order_id = order.id
         order_st = order.order_status
         order_plan = order.get_product_display()
         try: type_sim = order.id_sim.type_sim
         except: type_sim = 'esim'
         apiStore = ApiStore.conectApiStore()
-        user = User.objects.get(pk=id_user)
 
         # Save status System
-        order = Orders.objects.get(pk=o_id)
         order.order_status = ord_s
         order.save()
         
@@ -246,9 +258,18 @@ def orders_up_status(ord_id, ord_s, id_user):
                 sim_put.save()
                     
                 # Delete SIM in Order
-                order_put = Orders.objects.get(pk=order.id)
+                order_put = Orders.objects.get(pk=order_id)
                 order_put.id_sim_id = ''
-                order_put.save()              
+                order_put.save()
+                
+                if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
+                    voice_d = VoiceCalls.objects.get(id_item=order_id)
+                    num_s = VoiceNumbers.objects.get(id=voice_d.id_number)
+                    
+                    num_s.number_status = 'DS'
+                    num_s.save()                  
+                    
+                    voice_d.delete()
 
         # Status sis : Status Loja
         status_sis_site = StatusSis.st_sis_site()

@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from celery import shared_task
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
+from apps.send_email.tasks import send_emails_voice
 
 
 @shared_task
@@ -20,14 +21,25 @@ def voices_up_status(voice_id, voice_st):
         voice.call_status = voice_st
         voice.save()
         
-        print('----------------------------------Task voices_up_status')
+        print('----------------------------------voice_st')
+        print(voice_st)
+        
+        
+        if voice_st == 'CC' or voice_st == 'DS':
+            print('----------------------------------Status Inicio')            
+            num = VoiceNumbers.objects.get(pk=voice.id_number.id)
+            num.number_status = 'DS'
+            num.save()
+            print('----------------------------------Status Number')
+            
+            
+        
+        print('----------------------------------Task voices_up_status ALT')
 
 
 @shared_task
 def number_up_status(number_id, number_st):
     
-    update_password.delay([200])
-
     for num_id in number_id:
        
         number_id = number_id
@@ -87,3 +99,25 @@ def update_password(number_id):
         # Save S3
         s3 = boto3.client('s3')
         s3.upload_fileobj(buffer, bucket, filename)
+        
+        
+@shared_task
+def number_in_voice():
+    # Select Voice Calls
+    voice_s = VoiceCalls.objects.filter(number_status='PR')
+    
+    # Insert Number
+    for vox in voice_s:
+        id_vox = vox.id
+        number_s = VoiceNumbers.objects.all().order_by('id').filter(number_status='DS').first()
+        voice_put = VoiceCalls.objects.get(pk=id_vox)
+        # Change Status Voice
+        voice_put.call_status = 'EE'
+        voice_put.id_number = number_s.id
+        voice_put.save()
+        # Change Status Number
+        number_s.number_status = 'AT'
+        number_s.save()
+        update_password.delay(number_s.id)
+        #send email
+        send_emails_voice.delay(id_vox)       

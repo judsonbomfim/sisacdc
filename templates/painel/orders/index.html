@@ -152,11 +152,13 @@
                             -
                             {% endif %}
 
-                            {% if order.id_sim.type_sim == 'esim' %} <a href="{{ url_cdn }}{{ order.id_sim.link }}" target="_blank">
-                                <i class="bi bi-box-arrow-in-up-right text-info" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                                    data-bs-title="Ver QRCode">
-                                </i></a>
+                            {% if order.id_sim.type_sim == 'esim' %} 
+                                <a href="{{ url_cdn }}{{ order.id_sim.link }}" target="_blank">
+                                    <i class="bi bi-qr-code text-info" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                        data-bs-title="Ver QRCode">
+                                    </i>
+                                </a>
                             {% endif %}
                         </div>
                     </td>

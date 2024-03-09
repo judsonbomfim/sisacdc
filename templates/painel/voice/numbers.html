@@ -117,7 +117,17 @@
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ num.number_qrcode|default:"---" }}
+                                {% comment %} {{ num.number_qrcode|default:"---" }} {% endcomment %}
+                                {% if num.number_qrcode %}                                    
+                                <a href="{{ url_cdn }}/{{ num.number_qrcode }}" target="_blank">
+                                    <i class="bi bi-qr-code text-info" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                        data-bs-title="Ver QRCode">
+                                    </i>
+                                </a>
+                                {% else %}
+                                ---
+                                {% endif %}
                             </div>
                         </td>
                         <td>
