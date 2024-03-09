@@ -83,6 +83,7 @@
                         <th class="userDatatable-title">Número</th>
                         <th class="userDatatable-title">Login</th>
                         <th class="userDatatable-title">Senha</th>
+                        <th class="userDatatable-title">QR Code</th>
                         <th class="userDatatable-title">Dias</th>
                         <th class="userDatatable-title">Ida</th>
                         <th class="userDatatable-title">Volta</th>
@@ -94,62 +95,66 @@
                     {% for voice in voices %}
                     <tr class="table-tr">
                         <td>
-                            {% comment %} ID {% endcomment %}
                             <div class="userDatatable-content">
                                 <input class="checkItem form-check-input" type="checkbox" value="{{voice.id}}"
                                     name="voice_id">
                             </div>
                         </td>
                         <td>
-                            {% comment %} Pedido {% endcomment %}
                             <div class="userDatatable-content">
-                                {{ voice.id_item.order_id }}
+                                {{ voice.id_item.item_id }}
                             </div>
                         </td>
                         <td>
-                            {% comment %} Nome {% endcomment %}
                             <div class="userDatatable-content">
                                 {{ voice.id_item.client }}
                             </div>
                         </td>
                         <td>
-                            {% comment %} Número {% endcomment %}
                             <div class="userDatatable-content">
                                 {{ voice.id_number.number }}
                             </div>
                         </td>
                         <td>
-                            {% comment %} Login {% endcomment %}
                             <div class="userDatatable-content">
                                 {{ voice.id_number.login }}
                             </div>
                         </td>
                         <td>
-                            {% comment %} Senha {% endcomment %}
                             <div class="userDatatable-content">
                                 {{ voice.id_number.password }}
                             </div>
                         </td>
                         <td>
-                            {% comment %} Dias {% endcomment %}
+                            <div class="userDatatable-content">
+                                {% if voice.id_number.number_qrcode %}                                    
+                                    <a href="{{ url_cdn }}/{{ voice.id_number.number_qrcode }}" target="_blank">
+                                        <i class="bi bi-qr-code text-info" data-bs-toggle="tooltip"
+                                            data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                            data-bs-title="Ver QRCode">
+                                        </i>
+                                    </a>
+                                {% else %}
+                                ---
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
                             <div class="userDatatable-content">
                                 {{ voice.id_item.days }}
                             </div>
                         </td>
                         <td>
-                            {% comment %} Ida {% endcomment %}
                             <div class="userDatatable-content">
                                 {{ voice.id_item.activation_date|date:"d/m/Y" }}
                             </div>
                         </td>
                         <td>
-                            {% comment %} Volta {% endcomment %}
                             <div class="userDatatable-content">
                                 {{ voice.id }}
                             </div>
                         </td>
                         <td>
-                            {% comment %} Status {% endcomment %}
                             <div class="userDatatable-content">
                                 {{ voice.get_call_status_display }}
                             </div>

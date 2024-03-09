@@ -2,6 +2,7 @@ import os
 from django.shortcuts import render
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.conf import settings
 from apps.voice_calls.models import VoiceNumbers, VoiceCalls
 from apps.voice_calls.tasks import number_up_status, voices_up_status
 from apps.orders.models import Orders
@@ -11,7 +12,7 @@ def voice_index(request):
     
     voices_all = VoiceCalls.objects.all()
     voices_l = voices_all
-    
+    url_cdn = settings.URL_CDN
     if request.method == 'GET':
         
         voice_item_f = request.GET.get('voice_item_f')
@@ -74,15 +75,16 @@ def voice_index(request):
         'voices': voices,
         'vox_status': vox_status,
         'vox_st_list': vox_st_list,
+        'url_cdn': url_cdn,
         'url_filter': url_filter,
     }
     return render(request, 'painel/voice/index.html', context)
-
 
 def mumber_list(request):
 
     numbers_all = VoiceNumbers.objects.all().order_by('-id')
     numbers_l = numbers_all
+    url_cdn = settings.URL_CDN
     
     if request.method == 'GET':
         
@@ -145,6 +147,7 @@ def mumber_list(request):
         'num_status': num_status,
         'num_st_list': num_st_list,
         'url_filter': url_filter,
+        'url_cdn': url_cdn,
     }
     return render(request, 'painel/voice/numbers.html', context)
 

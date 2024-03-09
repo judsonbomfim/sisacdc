@@ -8,6 +8,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.conf import settings
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
@@ -24,25 +25,25 @@ today = datetime.now()
 def orders_list(request):
     global orders_l
     orders_l = ''
-    
-    url_cdn = str(os.getenv('URL_CDN'))
-    
+
+    url_cdn = settings.URL_CDN
+
     orders_all = Orders.objects.all().order_by('-id')
     sims = Sims.objects.all().order_by('-id')
     orders_l = orders_all
-    
+
     if request.method == 'GET':
-        
+
         ord_name_f = request.GET.get('ord_name')
-        ord_order_f = request.GET.get('ord_order')    
+        ord_order_f = request.GET.get('ord_order')
         ord_sim_f = request.GET.get('ord_sim')
         oper_f = request.GET.get('oper')
         ord_st_f = request.GET.get('ord_st')
-    
+
     if request.method == 'POST':
-        
+
         ord_name_f = request.POST.get('ord_name_f')
-        ord_order_f = request.POST.get('ord_order_f')       
+        ord_order_f = request.POST.get('ord_order_f')  
         ord_sim_f = request.POST.get('ord_sim_f')
         oper_f = request.POST.get('oper_f')
         ord_st_f = request.POST.get('ord_st_f')
@@ -50,20 +51,20 @@ def orders_list(request):
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
-            id_user = request.user.id            
-                        
+            id_user = request.user.id
+
             print('----------------------------------ord_id')
-            
+
             if ord_id and ord_s:
                 print('----------------------------------TAREFA')
-             
+
                 orders_up_status.delay(ord_id, ord_s,id_user)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')     
-    
+
      # FIlters
-    
+
     url_filter = ''
 
     if ord_name_f:
@@ -77,7 +78,7 @@ def orders_list(request):
     if ord_sim_f: 
         orders_l = orders_l.filter(id_sim__sim__icontains=ord_sim_f)
         url_filter += f"&ord_sim={ord_sim_f}"
-    
+
     if oper_f: 
         orders_l = orders_l.filter(id_sim__operator__icontains=oper_f)
         url_filter += f"&oper={oper_f}"
@@ -88,20 +89,20 @@ def orders_list(request):
 
     ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
-    
+
     # Listar status dos pedidos
     ord_st_list = []
     for ord_s in ord_status:
         ord = orders_all.filter(order_status=ord_s[0]).count()
         ord_st_list.append((ord_s[0],ord_s[1],ord))
-    
+
     # Paginação
     paginator = Paginator(orders_l, 50)
     page = request.GET.get('page')
     orders = paginator.get_page(page)
-    
+
     from rolepermissions.permissions import available_perm_status
-    
+
     context = {
         'url_cdn': url_cdn,
         'orders_l': orders_l,
@@ -112,7 +113,7 @@ def orders_list(request):
         'url_filter': url_filter,
     }
     return render(request, 'painel/orders/index.html', context)
-    
+
 # Update orders
 @login_required(login_url='/login/')
 @has_permission_decorator('import_orders')
@@ -120,9 +121,9 @@ def ord_import(request):
     if request.method == 'GET':
 
         return render(request, 'painel/orders/import.html')    
-       
+
     if request.method == 'POST':
-        
+
         # Orderm Import       
         order_import.delay()
         messages.success(request, f'Processando pedidos... Aguarde alguns minutos e atualize a página de pedidos')        

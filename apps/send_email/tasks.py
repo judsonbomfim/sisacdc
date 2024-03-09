@@ -6,6 +6,7 @@ from django.utils.html import strip_tags
 from django.conf import settings
 from apps.orders.models import Orders, Notes
 from apps.orders.classes import ApiStore, StatusSis
+from apps.voice_calls.models import VoiceCalls
 import os
 
 @shared_task
@@ -17,7 +18,7 @@ def send_email_sims(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
         
-    url_site = str(os.getenv('URL_CDN'))
+    url_site = settings.URL_CDN
     url_img = f'{url_site}/email/'
 
     
@@ -85,6 +86,73 @@ def send_email_sims(id=None):
         # Add note
         add_note = Notes( 
             id_item = order,
+            id_user = None,
+            note = 'E-mail enviado com sucesso!',
+            type_note = 'S',
+        )
+        add_note.save()
+
+
+def send_emails_voice(id=None):
+    
+    voice_all = None
+    if id == None:
+        voice_all = VoiceCalls.objects.filter(order_status='EE')
+    else:
+        voice_all = VoiceCalls.objects.filter(pk=id)
+    
+    url_site = settings.URL_CDN
+    url_img = f'{url_site}/email/'
+    
+    for voice in voice_all:
+        id_voice = voice.id
+        order_id = voice.id_item.item_id
+        order_st = voice.id_item.order_status
+        name = voice.id_item.client
+        email = voice.id_item.email
+        try: qrcode = voice.id_number.number_qrcode
+        except: qrcode = None
+        activation_date = voice.id_item.activation_date
+        product = 'Chamada de Voz'
+        days = voice.id_item.days
+        
+        context = {
+            'id_voice': id_voice,
+            'order_id': order_id,
+            'name': name,
+            'email': email,
+            'qrcode': qrcode,
+            'activation_date': activation_date,
+            'product': product,
+            'days': days,     
+        }
+        
+        # Send e-mail
+        html_content = render_to_string('painel/emails/send_email_voice.html', context)
+        text_content = strip_tags(html_content)
+        subject = f"Informações para ativação de sua Chamada de Voz - #{order_id}"
+        email = EmailMultiAlternatives(
+            #subject
+            subject,
+            #content
+            text_content,
+            #from email
+            settings.DEFAULT_FROM_EMAIL,
+            #to
+            [email],
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send()
+        
+        if order_st != 'CN':
+            # Update Voice
+            voice_s = VoiceCalls.objects.get(pk=id_voice)
+            voice_s.call_status = 'AA'
+            voice_s.save()
+        
+        # Add note
+        add_note = Notes( 
+            id_item = order_id,
             id_user = None,
             note = 'E-mail enviado com sucesso!',
             type_note = 'S',

@@ -139,7 +139,7 @@ SESSION_COOKIE_AGE = 36000
 
 
 URL_PAINEL = str(os.getenv('URL_PAINEL'))
-URL_CDN = str(os.getenv('URL_CDN'))
+URL_CDN = 'http://'+str(os.getenv('URL_CDN'))
 
 
 AWS_ACCESS_KEY_ID = str(os.getenv('AWS_ACCESS_KEY_ID'))
