@@ -1,11 +1,14 @@
 {% extends 'painel/partials/_content_default.html' %}
 {% load permission_tags %}
 {% load static %}
-{% load date_day %}
+{% load my_tags %}
 {% block title_page %}<i class="bi bi-telephone"></i> Chamadas da Voz{% endblock %}
 {% block title_content %}Lista de Chamadas de Voz{% endblock %}
+{% block css_custom %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@iconscout/unicons@4.0.8/css/line.min.css">
+{% endblock %}
 {%block js_custom %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 {% endblock %}
 
 {% block content_top %}
@@ -29,7 +32,7 @@
 {% comment %} {% endif %} {% endcomment %}
 <div class="row">
 
-    <form class="row g-3" action="" method="POST">
+    <form class="row g-3" action="{% url 'voice_index' %}" method="POST">
         {% csrf_token %}
         <div class="col-md-1">
             <div class="dm-select">
@@ -45,14 +48,31 @@
             <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary"
                 name="up_status">Alterar</button>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-1">
             <input type="text" class="form-control form-control-lg" placeholder="Pedido" name="voice_item_f">
         </div>
-        <div class="col-md-2">
-            <input type="text" class="form-control form-control-lg" placeholder="Nome" name="voice_name_f">
+        <div class="col-md-1">
+            <input type="text" class="form-control form-control-lg" placeholder="Número" name="voice_number_f">
         </div>
         <div class="col-md-2">
-            <input type="text" class="form-control form-control-lg" placeholder="login" name="voice_login_f">
+            <div class="dm-date-picker">
+                <div class="form-group mb-0 form-group-calender">
+                   <div class="position-relative">
+                      <input type="text" class="form-control form-control-lg" id="datepicker"name="voice_going_f" placeholder="Ida">
+                      <a href="#"><img class="svg" src="{% static 'painel/theme/hexadash/img/svg/calendar.svg' %}" alt="calendar"></a>
+                   </div>
+                </div>
+             </div>
+        </div>
+        <div class="col-md-2">
+            <div class="dm-date-picker">
+                <div class="form-group mb-0 form-group-calender">
+                   <div class="position-relative">
+                      <input type="text" class="form-control form-control-lg" id="datepicker2" name="voice_return_f"   placeholder="Volta">
+                      <a href="#"><img class="svg" src="{% static 'painel/theme/hexadash/img/svg/calendar.svg' %}" alt="calendar"></a>
+                   </div>
+                </div>
+             </div>
         </div>
         <div class="col-md-2">
             <div class="dm-select">
@@ -88,6 +108,7 @@
                         <th class="userDatatable-title">Ida</th>
                         <th class="userDatatable-title">Volta</th>
                         <th class="userDatatable-title">Status</th>
+                        <th class="userDatatable-title">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -122,7 +143,7 @@
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.id_number.password }}
+                                {{ voice.id_number.password|default:"" }}
                             </div>
                         </td>
                         <td>
@@ -135,7 +156,6 @@
                                         </i>
                                     </a>
                                 {% else %}
-                                ---
                                 {% endif %}
                             </div>
                         </td>
@@ -151,12 +171,23 @@
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.id }}
+                                {% if voice.id_tem %}
+                                {% with a=voice.id_item.activation_date b=voice.id_item.days %}
+                                {% dateaddday a b %}
+                                {% endwith %}
+                                {% else %}
+                                {% endif %}
+
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
                                 {{ voice.get_call_status_display }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                EE
                             </div>
                         </td>
                     </tr>

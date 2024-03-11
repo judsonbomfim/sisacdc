@@ -7,12 +7,12 @@ from apps.voice_calls.models import VoiceNumbers, VoiceCalls
 from apps.voice_calls.tasks import number_up_status, voices_up_status
 from apps.orders.models import Orders
 
-
 def voice_index(request):
     
     voices_all = VoiceCalls.objects.all()
     voices_l = voices_all
     url_cdn = settings.URL_CDN
+    
     if request.method == 'GET':
         
         voice_item_f = request.GET.get('voice_item_f')
@@ -80,6 +80,7 @@ def voice_index(request):
     }
     return render(request, 'painel/voice/index.html', context)
 
+
 def mumber_list(request):
 
     numbers_all = VoiceNumbers.objects.all().order_by('-id')
@@ -88,15 +89,23 @@ def mumber_list(request):
     
     if request.method == 'GET':
         
-        voice_item_f = request.GET.get('voice_item_f')
-        voice_name_f = request.GET.get('voice_name_f')    
-        voice_login_f = request.GET.get('voice_login_f')
+        number_login_f = request.GET.get('number_login_f')
+        number_extension_f = request.GET.get('number_extension_f')    
+        number_number_f = request.GET.get('number_number_f')
     
     if request.method == 'POST':
         
-        voice_item_f = request.POST.get('voice_item_f')
-        voice_name_f = request.POST.get('voice_name_f')    
-        voice_login_f = request.POST.get('voice_login_f')
+        number_login_f = request.POST.get('number_login_f')
+        number_extension_f = request.POST.get('number_extension_f')    
+        number_number_f = request.POST.get('number_number_f')
+        
+        print('number_login_f')
+        print(number_login_f)
+        print('number_extension_f')
+        print(number_extension_f)
+        print('number_number_f')
+        print(number_number_f)
+        
 
         if 'up_status' in request.POST:
             number_id = request.POST.getlist('number_id')
@@ -112,17 +121,17 @@ def mumber_list(request):
     
     url_filter = ''
 
-    if voice_item_f:
-        numbers_l = numbers_l.filter(voice__icontains=voice_item_f)
-        url_filter += f"&vox_name={voice_item_f}"
+    if number_login_f:
+        numbers_l = numbers_l.filter(login__icontains=number_login_f)
+        url_filter += f"&number_login_f={number_login_f}"
 
-    if voice_name_f: 
-        numbers_l = numbers_l.filter(id_item__client__icontains=voice_name_f)   
-        url_filter += f"&vox_order={voice_name_f}"
+    if number_extension_f: 
+        numbers_l = numbers_l.filter(extension__icontains=number_extension_f)   
+        url_filter += f"&number_extension_f={number_extension_f}"
 
-    if voice_login_f: 
-        numbers_l = numbers_l.filter(login__icontains=voice_login_f)
-        url_filter += f"&vox_sim={voice_login_f}"
+    if number_number_f: 
+        numbers_l = numbers_l.filter(number__icontains=number_number_f)
+        url_filter += f"&number_number_f={number_number_f}"
 
    
     # List status
