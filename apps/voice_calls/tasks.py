@@ -19,23 +19,16 @@ def voices_up_status(voice_id, voice_st):
         # Save status System
         voice = VoiceCalls.objects.get(pk=v_id)
         voice.call_status = voice_st
-        voice.save()
+        voice.save()        
         
-        print('----------------------------------voice_st')
-        print(voice_st)
-        
-        
-        if voice_st == 'CC' or voice_st == 'DS':
-            print('----------------------------------Status Inicio')            
+        if (voice_st == 'CC' or voice_st == 'DS') and voice.id_number != None:
+
             num = VoiceNumbers.objects.get(pk=voice.id_number.id)
             num.number_status = 'DS'
             num.save()
-            print('----------------------------------Status Number')
             
-            
-        
-        print('----------------------------------Task voices_up_status ALT')
-
+            voice.id_number = None
+            voice.save()
 
 @shared_task
 def number_up_status(number_id, number_st):

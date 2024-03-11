@@ -28,7 +28,7 @@
 </div>
 {% comment %} {% endif %} {% endcomment %}
 <div class="row">
-    <form class="row g-3" action="" method="POST">
+    <form class="row g-3" action="{% url 'mumber_list' %}" method="POST">
         {% csrf_token %}
         <div class="col-md-1">
             <div class="dm-select">
@@ -45,13 +45,13 @@
                 name="up_status">Alterar</button>
         </div>
         <div class="col-md-2">
-            <input type="text" class="form-control form-control-lg" placeholder="Login" name="login_f">
+            <input type="text" class="form-control form-control-lg" placeholder="Login" name="number_login_f">
         </div>
         <div class="col-md-2">
-            <input type="text" class="form-control form-control-lg" placeholder="Ramal" name="extension_f">
+            <input type="text" class="form-control form-control-lg" placeholder="Ramal" name="number_extension_f">
         </div>
         <div class="col-md-2">
-            <input type="text" class="form-control form-control-lg" placeholder="Número" name="number_f">
+            <input type="text" class="form-control form-control-lg" placeholder="Número" name="number_number_f">
         </div>
         <div class="col-md-2">
             <div class="dm-select">
