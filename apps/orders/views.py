@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from rolepermissions.decorators import has_permission_decorator
-import os
 import csv
 from django.http import HttpResponse
 from datetime import date, datetime, timedelta

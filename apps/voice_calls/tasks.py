@@ -56,11 +56,11 @@ def update_password(number_id):
         bucket = settings.AWS_STORAGE_BUCKET_NAME
         
         pref = 'Casa'
-        pw = ''.join(random.choice('0123456789') for i in range(7))
+        pw = ''.join(random.choice('0123456789') for i in range(6))
         arc_name = ''.join(random.choice(string.ascii_letters) for i in range(6))
         number_pw = pref + pw
         
-        data = f'csc:6_1302:{number_pw}@PABX'
+        data = f'csc:{number.login}:{number_pw}@PABX'
         filename = f'qrcode/qrcode-{number.extension}-{number.number}--{arc_name}.png'
         
         # QRCODE

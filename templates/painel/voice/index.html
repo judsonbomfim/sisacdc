@@ -55,10 +55,10 @@
             <input type="text" class="form-control form-control-lg" placeholder="Número" name="voice_number_f">
         </div>
         <div class="col-md-2">
-            <div class="dm-date-picker">
+             <div class="dm-date-picker">
                 <div class="form-group mb-0 form-group-calender">
                    <div class="position-relative">
-                      <input type="text" class="form-control form-control-lg" id="datepicker"name="voice_going_f" placeholder="Ida">
+                      <input type="text" class="form-control form-control-lg" id="voice_going_f" name="voice_going_f" placeholder="Ida" autocomplete="off">
                       <a href="#"><img class="svg" src="{% static 'painel/theme/hexadash/img/svg/calendar.svg' %}" alt="calendar"></a>
                    </div>
                 </div>
@@ -68,7 +68,7 @@
             <div class="dm-date-picker">
                 <div class="form-group mb-0 form-group-calender">
                    <div class="position-relative">
-                      <input type="text" class="form-control form-control-lg" id="datepicker2" name="voice_return_f"   placeholder="Volta">
+                      <input type="text" class="form-control form-control-lg" id="voice_return_f" name="voice_return_f" placeholder="Volta" autocomplete="off">
                       <a href="#"><img class="svg" src="{% static 'painel/theme/hexadash/img/svg/calendar.svg' %}" alt="calendar"></a>
                    </div>
                 </div>
@@ -79,7 +79,7 @@
                 <select class="form-control form-control-lg ps-3 pe-5" name="voice_status_f">
                     <option value="" selected>Filtrar Status - Todos</option>
                     {% for voice_st in vox_status %}
-                    <option value="{{voice_st.0}}">{{voice_st.1}}</option>
+                    <option value="{{voice_st.1}}">{{voice_st.1}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -123,33 +123,33 @@
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.id_item.item_id }}
+                                {{ voice.order_id }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.id_item.client }}
+                                {{ voice.client }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.id_number.number }}
+                                {{ voice.num_number }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.id_number.login }}
+                                {{ voice.num_login }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.id_number.password|default:"" }}
+                                {{ voice.num_password|default:"" }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {% if voice.id_number.number_qrcode %}                                    
-                                    <a href="{{ url_cdn }}/{{ voice.id_number.number_qrcode }}" target="_blank">
+                                {% if voice.num_qrcode %}                                    
+                                    <a href="{{ url_cdn }}/{{ voice.num_qrcode }}" target="_blank">
                                         <i class="bi bi-qr-code text-info" data-bs-toggle="tooltip"
                                             data-bs-placement="top" data-bs-custom-class="custom-tooltip"
                                             data-bs-title="Ver QRCode">
@@ -161,40 +161,47 @@
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.id_item.days }}
+                                {{ voice.days }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.id_item.activation_date|date:"d/m/Y" }}
+                                {{ voice.activation_date|date:"d/m/Y" }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {% if voice.id_tem %}
-                                {% with a=voice.id_item.activation_date b=voice.id_item.days %}
-                                {% dateaddday a b %}
-                                {% endwith %}
-                                {% else %}
+                                {{ voice.return_date|date:"d/m/Y" }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ voice.call_status}}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {% if request.user|can:'edit_voices' %}
+                                    {% if voice.num_number != None %}
+                                    <a href="{% url 'up_password' voice.number_id %}">
+                                        <i class="bi bi-key pe-1 text-info" data-bs-toggle="tooltip"
+                                            data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                            data-bs-title="Redefinir senha"></i>
+                                        </a>
+                                    <a href="">
+                                        <i class="bi bi-envelope-at pe-1 text-primary" data-bs-toggle="tooltip"
+                                            data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                            data-bs-title="Enviar e-amil"></i>
+                                        </a>
+                                    {% endif %}
                                 {% endif %}
-
-                            </div>
-                        </td>
-                        <td>
-                            <div class="userDatatable-content">
-                                {{ voice.get_call_status_display }}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="userDatatable-content">
-                                EE
                             </div>
                         </td>
                     </tr>
                     {% endfor %}
                     {% else %}
-                    <tr>
-                        <td>
+                    <tr class="table-tr">
+                        <td colspan="12">
                             <div class="userDatatable-content">
                                 Nenhuma chamada de voz encontrado.
                             </div>
@@ -205,20 +212,20 @@
             </table>
             <nav aria-label="navigation">
                 <ul class="pagination">
-                    {% if sims.has_previous %}
+                    {% if voices.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ sims.previous_page_number }}{{ url_filter }}"
+                        <a class="page-link" href="?page={{ voices.previous_page_number }}{{ url_filter }}"
                             aria-label="Previous">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
                     {% endif %}
                     <li class="page-item">
-                        <a class="page-link" href="">{{ sims.number }} de {{ sims.paginator.num_pages }}</a>
+                        <a class="page-link" href="">{{ voices.number }} de {{ voices.paginator.num_pages }}</a>
                     </li>
-                    {% if sims.has_next %}
+                    {% if voices.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ sims.next_page_number }}{{ url_filter }}" aria-label="Next">
+                        <a class="page-link" href="?page={{ voices.next_page_number }}{{ url_filter }}" aria-label="Next">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>
@@ -233,11 +240,22 @@
 {% endblock %}
 {% block script_custom %}
 <script>
-    $(document).ready(function () {
-        // Ação do botão "Marcar Todos"
-        $('#checkAll').on('change', function () {
-            $('.checkItem').prop('checked', this.checked);
+    (function ($) {
+        $(document).ready(function () {
+            // Ação do botão "Marcar Todos"
+            $('#checkAll').on('change', function () {
+                $('.checkItem').prop('checked', this.checked);
+            });
+
+            // Datepicker format
+            $("#voice_going_f").datepicker({
+                dateFormat: "dd/mm/yy",
+            });
+            $('#voice_return_f').datepicker({
+                dateFormat: "dd/mm/yy",
+                language: 'pt-BR'
+            });
         });
-    });
+    })(jQuery);
 </script>
 {% endblock %}

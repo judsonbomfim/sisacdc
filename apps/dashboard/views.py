@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from apps.sims.models import Sims
@@ -190,3 +191,8 @@ def index(request):
     }
     
     return render(request, 'painel/dashboard/index.html', context)
+
+def clear_cache(request):
+    from django.core.cache import cache
+    cache.clear()
+    return HttpResponse("Cache cleared")
