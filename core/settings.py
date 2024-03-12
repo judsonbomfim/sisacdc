@@ -125,12 +125,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
-DATE_INPUT_FORMATS = ('%d-%m-%Y')
+DATE_INPUT_FORMATS = ('%d/%m/%Y',)
 USE_I18N = True
 USE_L10N = True
 USE_TZ = False
 
-DATE_FORMAT = 'd/m/Y'
+DATE_FORMAT = '%d/%m/%Y'
 
 DATA_UPLOAD_MAX_NUMBER_FILES = 1000
 
