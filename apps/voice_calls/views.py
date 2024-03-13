@@ -75,7 +75,7 @@ def voice_index(request):
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')     
 
-     # FIlters
+    # FIlters
     
     url_filter = ''
     voices_l = voices_df

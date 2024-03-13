@@ -188,10 +188,10 @@
                                             data-bs-placement="top" data-bs-custom-class="custom-tooltip"
                                             data-bs-title="Redefinir senha"></i>
                                         </a>
-                                    <a href="">
+                                    <a href="{% url 'send_email_voices' voice.id %}">
                                         <i class="bi bi-envelope-at pe-1 text-primary" data-bs-toggle="tooltip"
                                             data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                                            data-bs-title="Enviar e-amil"></i>
+                                            data-bs-title="Enviar e-amil"></i> {{voice.id}}
                                         </a>
                                     {% endif %}
                                 {% endif %}
