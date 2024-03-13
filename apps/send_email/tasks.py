@@ -7,7 +7,7 @@ from django.conf import settings
 from apps.orders.models import Orders, Notes
 from apps.orders.classes import ApiStore, StatusSis
 from apps.voice_calls.models import VoiceCalls
-import os
+from apps.voice_calls.classes import NumberFormatter
 
 @shared_task
 def send_email_sims(id=None):
@@ -92,8 +92,8 @@ def send_email_sims(id=None):
         )
         add_note.save()
 
-
-def send_emails_voice(id=None):
+@shared_task
+def send_email_voice(id=None):
     
     voice_all = None
     if id == None:
@@ -106,6 +106,7 @@ def send_emails_voice(id=None):
     
     for voice in voice_all:
         id_voice = voice.id
+        order_id_id = voice.id_item.id
         order_id = voice.id_item.item_id
         order_st = voice.id_item.order_status
         name = voice.id_item.client
@@ -113,10 +114,13 @@ def send_emails_voice(id=None):
         try: qrcode = voice.id_number.number_qrcode
         except: qrcode = None
         activation_date = voice.id_item.activation_date
-        product = 'Chamada de Voz'
+        product = 'Ativação do Plano Chamada de Voz'
+        number = NumberFormatter.format(voice.id_number.number)
         days = voice.id_item.days
         
         context = {
+            'url_site': url_site,
+            'url_img': url_img,
             'id_voice': id_voice,
             'order_id': order_id,
             'name': name,
@@ -124,13 +128,14 @@ def send_emails_voice(id=None):
             'qrcode': qrcode,
             'activation_date': activation_date,
             'product': product,
+            'number': number,
             'days': days,     
         }
         
         # Send e-mail
         html_content = render_to_string('painel/emails/send_email_voice.html', context)
         text_content = strip_tags(html_content)
-        subject = f"Informações para ativação de sua Chamada de Voz - #{order_id}"
+        subject = f"Chamada de Voz - #{order_id}"
         email = EmailMultiAlternatives(
             #subject
             subject,
@@ -150,11 +155,11 @@ def send_emails_voice(id=None):
             voice_s.call_status = 'AA'
             voice_s.save()
         
-        # Add note
-        add_note = Notes( 
-            id_item = order_id,
-            id_user = None,
-            note = 'E-mail enviado com sucesso!',
-            type_note = 'S',
-        )
-        add_note.save()
+        # # Add note
+        # add_note = Notes( 
+        #     id_item = order_id_id,
+        #     id_user = None,
+        #     note = 'E-mail de Chamada de Voz enviado com sucesso!',
+        #     type_note = 'S',
+        # )
+        # add_note.save()

@@ -7,7 +7,6 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from celery import shared_task
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
-from apps.send_email.tasks import send_emails_voice
 
 
 @shared_task
