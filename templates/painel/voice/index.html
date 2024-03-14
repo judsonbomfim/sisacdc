@@ -133,12 +133,12 @@
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.num_number }}
+                                {{ voice.num_number|default:"" }}
                             </div>
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ voice.num_login }}
+                                {{ voice.num_login|default:"" }}
                             </div>
                         </td>
                         <td>
@@ -150,12 +150,11 @@
                             <div class="userDatatable-content">
                                 {% if voice.num_qrcode %}                                    
                                     <a href="{{ url_cdn }}/{{ voice.num_qrcode }}" target="_blank">
-                                        <i class="bi bi-qr-code text-info" data-bs-toggle="tooltip"
+                                        <i class="bi bi-qr-code text-primary ps-2" data-bs-toggle="tooltip"
                                             data-bs-placement="top" data-bs-custom-class="custom-tooltip"
                                             data-bs-title="Ver QRCode">
                                         </i>
                                     </a>
-                                {% else %}
                                 {% endif %}
                             </div>
                         </td>
@@ -182,18 +181,20 @@
                         <td>
                             <div class="userDatatable-content">
                                 {% if request.user|can:'edit_voices' %}
-                                    {% if voice.num_number != None %}
-                                    <a href="{% url 'up_password' voice.number_id %}">
-                                        <i class="bi bi-key pe-1 text-info" data-bs-toggle="tooltip"
-                                            data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                                            data-bs-title="Redefinir senha"></i>
-                                        </a>
-                                    <a href="{% url 'send_email_voices' voice.id %}">
-                                        <i class="bi bi-envelope-at pe-1 text-primary" data-bs-toggle="tooltip"
-                                            data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                                            data-bs-title="Enviar e-amil"></i> {{voice.id}}
-                                        </a>
-                                    {% endif %}
+                                {% if voice.number_id != 0 %}
+                                <a href="{% url 'up_password' voice.number_id %}">
+                                    <i class="bi bi-key pe-1 text-info" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                        data-bs-title="Redefinir senha"></i>
+                                    </a>
+                                <a href="{% url 'send_email_voices' voice.id %}">
+                                    <i class="bi bi-envelope-at pe-1 text-primary" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                        data-bs-title="Enviar e-amil"></i>
+                                    </a>
+                                {% else %}
+                                ---
+                                {% endif %}
                                 {% endif %}
                             </div>
                         </td>

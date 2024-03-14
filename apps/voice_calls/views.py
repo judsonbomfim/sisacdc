@@ -47,7 +47,8 @@ def voice_index(request):
     voices_df['activation_date'] = pd.to_datetime(voices_df['activation_date'])
     voices_df['return_date'] = voices_df['activation_date'] + pd.to_timedelta(voices_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
     voices_df['call_status'] = voices_df['call_status'].map(vox_status_dict)
-    
+    voices_df['num_number'] = voices_df['num_number'].fillna(0).astype(int)
+    voices_df['number_id'] = voices_df['number_id'].fillna(0).astype(int)
     
     if request.method == 'GET':
         
@@ -139,8 +140,16 @@ def voice_edit(request):
 
 @login_required(login_url='/login/')
 def voice_import(request):
+    
     if request.method == "GET":
-        return render(request, 'painel/voice/import.html')
+        
+        url_cdn = settings.URL_CDN
+        
+        context = {
+            'url_cdn': url_cdn,
+        }
+        
+        return render(request, 'painel/voice/import.html', context)
  
     if request.method == 'POST':
         try:
@@ -148,7 +157,7 @@ def voice_import(request):
         except: voice = ''
         ext_name = str(voice)
         ext = ext_name[-3:]
-        
+
         # Validations File
         if ext != 'csv':
             messages.error(request,'O arquivo está incorreto. Verifique por favor!')
@@ -156,7 +165,7 @@ def voice_import(request):
         if voice == '':
             messages.error(request,'Campo obrigatório!')
             return render(request, 'painel/voice/import.html')
-        
+
         # Validation field empty
         if voice != '':
             arquivo = voice.read().decode("utf-8")
@@ -190,13 +199,12 @@ def voice_import(request):
                 if voice_all:
                     messages.info(request,f'O SIM {line} >>> já está cadastrado no sistema <<<')
                     continue
-                    
+                
                 # Save Number
                 add_voice = VoiceNumbers(
                     login = f_login,
                     extension = f_extension,
                     number = f_number,
-                    number_status = 'DS'
                 )
                 add_voice.save()
                 
@@ -209,6 +217,9 @@ def voice_import(request):
 
 @login_required(login_url='/login/')
 def mumber_list(request):
+    
+    global numbers_l
+    numbers_l = None
 
     numbers_all = VoiceNumbers.objects.all().order_by('-id')
     numbers_l = numbers_all
@@ -219,20 +230,16 @@ def mumber_list(request):
         number_login_f = request.GET.get('number_login_f')
         number_extension_f = request.GET.get('number_extension_f')    
         number_number_f = request.GET.get('number_number_f')
+        number_status_f = request.GET.get('number_status_f')
     
     if request.method == 'POST':
         
         number_login_f = request.POST.get('number_login_f')
         number_extension_f = request.POST.get('number_extension_f')    
         number_number_f = request.POST.get('number_number_f')
+        number_status_f = request.POST.get('number_status_f')
         
-        print('number_login_f')
-        print(number_login_f)
-        print('number_extension_f')
-        print(number_extension_f)
-        print('number_number_f')
-        print(number_number_f)
-        
+        print(number_login_f, number_extension_f, number_number_f, number_status_f)
 
         if 'up_status' in request.POST:
             number_id = request.POST.getlist('number_id')
@@ -259,6 +266,10 @@ def mumber_list(request):
     if number_number_f: 
         numbers_l = numbers_l.filter(number__icontains=number_number_f)
         url_filter += f"&number_number_f={number_number_f}"
+    
+    if number_status_f: 
+        numbers_l = numbers_l.filter(number_status__icontains=number_status_f)
+        url_filter += f"&number_status_f={number_status_f}"
 
    
     # List status
@@ -267,15 +278,13 @@ def mumber_list(request):
     for num_s in num_status:
         num = numbers_all.filter(number_status=num_s[0]).count()
         num_st_list.append((num_s[0],num_s[1],num))
-
-    print('num_st_list')
-    print(num_st_list)
     
     # Pagination
     paginator = Paginator(numbers_l, 50)
     page = request.GET.get('page')
     numbers = paginator.get_page(page)
     
+   
     # from rolepermissions.permissions import available_perm_status
     
     context = {

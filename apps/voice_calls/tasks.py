@@ -2,11 +2,14 @@ import random
 import string
 import qrcode
 import boto3
+import time
 from io import BytesIO
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.files.storage import default_storage
 from celery import shared_task
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
+from apps.send_email.tasks import send_email_voice
 
 
 @shared_task
@@ -31,7 +34,7 @@ def voices_up_status(voice_id, voice_st):
 
 @shared_task
 def number_up_status(number_id, number_st):
-    
+       
     for num_id in number_id:
        
         number_id = number_id
@@ -40,10 +43,7 @@ def number_up_status(number_id, number_st):
         # Save status System
         number = VoiceNumbers.objects.get(pk=num_id)
         number.number_status = number_st
-        number.save()
-        
-        print('---------------------------------- Task number_up_status')
-    
+        number.save()  
         
 @shared_task
 def update_password(number_id):
@@ -91,25 +91,29 @@ def update_password(number_id):
         # Save S3
         s3 = boto3.client('s3')
         s3.upload_fileobj(buffer, bucket, filename)
-        
+
         
 @shared_task
 def number_in_voice():
+    
+    send_date = datetime.now().date() + timedelta(days=2)
+
     # Select Voice Calls
-    voice_s = VoiceCalls.objects.filter(number_status='PR')
+    voice_s = VoiceCalls.objects.filter(call_status='PR').filter(id_item__activation_date__lte=send_date)
     
     # Insert Number
     for vox in voice_s:
         id_vox = vox.id
         number_s = VoiceNumbers.objects.all().order_by('id').filter(number_status='DS').first()
-        voice_put = VoiceCalls.objects.get(pk=id_vox)
         # Change Status Voice
+        voice_put = VoiceCalls.objects.get(pk=id_vox)
         voice_put.call_status = 'EE'
-        voice_put.id_number = number_s.id
+        voice_put.id_number = number_s
         voice_put.save()
         # Change Status Number
         number_s.number_status = 'AT'
         number_s.save()
-        update_password.delay(number_s.id)
+        update_password.delay(number_id=[number_s.id])
+        time.sleep(5)
         #send email
-        send_emails_voice.delay(id_vox)       
+        send_email_voice.delay(id_vox)

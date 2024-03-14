@@ -155,11 +155,12 @@ def send_email_voice(id=None):
             voice_s.call_status = 'AA'
             voice_s.save()
         
-        # # Add note
-        # add_note = Notes( 
-        #     id_item = order_id_id,
-        #     id_user = None,
-        #     note = 'E-mail de Chamada de Voz enviado com sucesso!',
-        #     type_note = 'S',
-        # )
-        # add_note.save()
+        # Add note
+        
+        add_sim = Notes( 
+            id_item = Orders.objects.get(pk=order_id_id),
+            id_user = None,
+            note = 'E-mail de Chamada de Voz enviado com sucesso!',
+            type_note = 'S',
+        )
+        add_sim.save()

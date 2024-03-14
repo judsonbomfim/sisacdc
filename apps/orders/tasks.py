@@ -10,7 +10,7 @@ import getpass
 import time
 from apps.sims.tasks import sims_in_orders
 from apps.send_email.tasks import send_email_sims
-from apps.voice_calls.tasks import update_password
+from apps.voice_calls.tasks import number_in_voice
 
 @shared_task
 def order_import():
@@ -209,12 +209,14 @@ def order_import():
 
 @shared_task
 def orders_auto():
-    
+    print('-----------------orders_auto')
     order_import.delay()
     time.sleep(20)
     sims_in_orders.delay()
     time.sleep(20)
     send_email_sims.delay()
+    time.sleep(20)
+    number_in_voice.delay()
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user):
