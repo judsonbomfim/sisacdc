@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import boto3
 from django.contrib.messages import constants as messages
+from celery.schedules import crontab
 from datetime import timedelta
 from dotenv import load_dotenv
 load_dotenv()
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'storages',
     'rolepermissions',
+    'django_celery_beat',
     'apps.orders.apps.OrdersConfig',
     'apps.sims.apps.SimsConfig',
     'apps.dashboard.apps.DashboardConfig',
@@ -188,21 +190,14 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = str(os.getenv('DEFAULT_FROM_EMAIL'))
 
-
 CELERY_BROKER_URL = str(os.getenv('CELERY_BROKER_URL'))
 CELERY_RESULT_BACKEND = str(os.getenv('CELERY_RESULT_BACKEND'))
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 CELERY_BEAT_SCHEDULE = {
-    'task__orders_auto': {
+    'task__5_min_orders_auto': {
         'task': 'apps.orders.tasks.orders_auto',
-        'schedule': timedelta(seconds=300),
+        'schedule': crontab(minute='*/1'),
     },
-}
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-    }
 }

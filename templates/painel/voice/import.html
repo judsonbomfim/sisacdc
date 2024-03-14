@@ -11,12 +11,17 @@
         <label for="formFile" class="form-label">Enviar arquivo CSV</label>
         <input class="form-control" type="file" id="formFile" name="voice" required>
     </div>
-    <div class="form-group mt-5">
+    <div class="form-group pt-4">
         <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary">
             <span class="flex items-center">
                 <i class="bi bi-sim"></i> <span>Inserir Linhas</span>
             </span>
         </button>
+    </div>
+    <div class="form-group pt-4">
+        <a href="{{ url_cdn }}/files/adicionar_linhas.csv" target="_blank">
+            <i class="bi bi-cloud-arrow-down text-info"></i> <span class='text-info'>Download do arquivo padrão</span>
+        </a>
     </div>
 
 </form>

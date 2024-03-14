@@ -2,9 +2,10 @@ from django.db import models
 from apps.orders.models import Orders
 
 NUNBER_STATUS = [
-    ('DS', 'Disponível'),
     ('AT', 'Ativado'),
     ('CC', 'Cancelado'),
+    ('DS', 'Disponível'),
+    ('IN', 'Indisponível'),
     ('TC', 'Troca'),  
 ]
 
@@ -25,7 +26,7 @@ class VoiceNumbers(models.Model):
     number = models.IntegerField()
     password = models.CharField(max_length=15, null=True, blank=True)
     number_qrcode = models.CharField(max_length=45, null=True, blank=True)
-    number_status = models.CharField(max_length=15, choices=NUNBER_STATUS)
+    number_status = models.CharField(max_length=15, choices=NUNBER_STATUS, default='IN')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:

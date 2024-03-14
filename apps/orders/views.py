@@ -113,6 +113,7 @@ def orders_list(request):
     }
     return render(request, 'painel/orders/index.html', context)
 
+
 # Update orders
 @login_required(login_url='/login/')
 @has_permission_decorator('import_orders')
@@ -128,6 +129,7 @@ def ord_import(request):
         messages.success(request, f'Processando pedidos... Aguarde alguns minutos e atualize a página de pedidos')        
 
     return render(request, 'painel/orders/import.html')
+
 
 # Order Edit
 @login_required(login_url='/login/')
@@ -359,6 +361,7 @@ def ord_edit(request,id):
         messages.success(request,f'Pedido {order.order_id} atualizado com sucesso!')
         return redirect('orders_list')
 
+
 @login_required(login_url='/login/')
 @has_permission_decorator('export_orders')
 def ord_export_act(request):
@@ -400,6 +403,7 @@ def ord_export_act(request):
     for row in data:
         writer.writerow(row)
     return response 
+
 
 @login_required(login_url='/login/')
 @has_permission_decorator('export_activations')
@@ -468,6 +472,7 @@ def ord_export_op(request):
     
     return render(request, 'painel/orders/export_op.html', context)
 
+
 @login_required(login_url='/login/')
 def send_esims(request):
     if request.method == 'GET':
@@ -477,6 +482,7 @@ def send_esims(request):
         send_email_sims.delay()
         messages.success(request, 'Processando emails... Aguarde alguns minutos e atualize a página de pedidos')
         return redirect('send_esims')
+
 
 @login_required(login_url='/login/')
 @has_permission_decorator('list_activations')
