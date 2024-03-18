@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 import boto3
 from django.contrib.messages import constants as messages
-from celery.schedules import crontab
 from datetime import timedelta
 from dotenv import load_dotenv
 load_dotenv()
@@ -196,8 +195,8 @@ CELERY_RESULT_BACKEND = str(os.getenv('CELERY_RESULT_BACKEND'))
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 CELERY_BEAT_SCHEDULE = {
-    'task__5_min_orders_auto': {
+    'task__orders_auto': {
         'task': 'apps.orders.tasks.orders_auto',
-        'schedule': crontab(minute='*/1'),
+        'schedule': timedelta(seconds=300),
     },
 }
