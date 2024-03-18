@@ -4,6 +4,7 @@ class Atendente(AbstractUserRole):
     available_permissions = {
         'view_orders': True,
         'send_esims_but': True,
+        'view_voice': True,
     }
 class Gerente(AbstractUserRole):
     available_permissions = {
