@@ -44,11 +44,12 @@ def voice_index(request):
         'id_item__days': 'days',
         'id_item__activation_date': 'activation_date',
         })
-    voices_df['activation_date'] = pd.to_datetime(voices_df['activation_date'])
-    voices_df['return_date'] = voices_df['activation_date'] + pd.to_timedelta(voices_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
-    voices_df['call_status'] = voices_df['call_status'].map(vox_status_dict)
-    voices_df['num_number'] = voices_df['num_number'].fillna(0).astype(int)
-    voices_df['number_id'] = voices_df['number_id'].fillna(0).astype(int)
+    if voices_df.empty == False:
+        voices_df['activation_date'] = pd.to_datetime(voices_df['activation_date'])
+        voices_df['return_date'] = voices_df['activation_date'] + pd.to_timedelta(voices_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
+        voices_df['call_status'] = voices_df['call_status'].map(vox_status_dict)
+        voices_df['num_number'] = voices_df['num_number'].fillna(0).astype(int)
+        voices_df['number_id'] = voices_df['number_id'].fillna(0).astype(int)
     
     if request.method == 'GET':
         
