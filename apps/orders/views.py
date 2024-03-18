@@ -509,7 +509,7 @@ def orders_activations(request):
     today = datetime.now()
     days60 = today - timedelta(days=60)
     
-    orders_all = Orders.objects.filter(activation_date__gte=days60,id_sim__isnull=False).order_by('activation_date','item_id')
+    orders_all = Orders.objects.filter(activation_date__gte=days60,order_status__icontains='AA').order_by('activation_date','item_id')
     
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
     orders_df['product'] = orders_df['product'].map(product_choice_dict)
