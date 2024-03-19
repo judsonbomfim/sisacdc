@@ -163,7 +163,7 @@ def order_import():
                     add_sim.save()
                     
                     # Insert Voice Calls
-                    if countries_i == True:
+                    if calls_i == True:
                         
                         add_voice = VoiceCalls(
                             id_item = order_add.id,
@@ -171,14 +171,14 @@ def order_import():
                         )
                         add_voice.save()
                     
-                    # Save Notes
-                    add_sim = Notes( 
-                        id_item = Orders.objects.get(pk=order_add.id),
-                        id_user = None,
-                        note = f'Chamada de Voz Criada',
-                        type_note = 'S',
-                    )
-                    add_sim.save()
+                        # Save Notes
+                        add_sim = Notes( 
+                            id_item = Orders.objects.get(pk=order_add.id),
+                            id_user = None,
+                            note = f'Chamada de Voz Criada',
+                            type_note = 'S',
+                        )
+                        add_sim.save()
                     
                     # Alterar status
                     # Status sis : Status Loja
