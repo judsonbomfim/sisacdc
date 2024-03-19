@@ -166,7 +166,7 @@ def order_import():
                     if calls_i == True:
                         
                         add_voice = VoiceCalls(
-                            id_item = order_add,
+                            id_item = Orders.objects.get(pk=order_add.id),
                             status = 'PR'
                         )
                         add_voice.save()
