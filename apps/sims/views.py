@@ -19,6 +19,7 @@ from .tasks import sims_in_orders
 
 
 # Script Upload S3
+@login_required(login_url='/login/')
 def get_s3_client():
     return boto3.client(
         's3', 
@@ -26,6 +27,7 @@ def get_s3_client():
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
     )
 
+@login_required(login_url='/login/')
 def upload_file_to_s3(file):
     s3 = get_s3_client()
     bucket_name = settings.AWS_STORAGE_BUCKET_NAME
@@ -132,7 +134,13 @@ def sims_list(request):
 def sims_add_sim(request):
     if request.method == "GET":
         
-        return render(request, 'painel/sims/add-sim.html')
+        url_cdn = settings.URL_CDN
+        
+        context = {
+            'url_cdn': url_cdn,
+        }
+        
+        return render(request, 'painel/sims/add-sim.html', context)
         
     if request.method == 'POST':
         
@@ -262,7 +270,7 @@ def exportSIMs(request):
 
     return response
 
-login_required(login_url='/login/')
+@login_required(login_url='/login/')
 def delSIMs(request):
     orders = Orders.objects.all()
     
@@ -281,6 +289,7 @@ def delSIMs(request):
     
     return HttpResponse('SIMs deletados com sucesso')
 
+@login_required(login_url='/login/')
 def corectLinkSIm(request):
     sims = Sims.objects.all()
     for sim in sims:

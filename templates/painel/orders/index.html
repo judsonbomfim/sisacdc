@@ -139,9 +139,9 @@
                         <div class="userDatatable-content">{{ order.item_id }}</div>
                     </td>
                     <td>
-                        <div class="userDatatable-content">{{ order.client|truncatechars:30 }}</div>
+                        <div class="userDatatable-content">{{ order.client|truncatechars:25 }}</div>
                     </td>
-                    <td class="text-center">
+                    <td class="text-left">
                         <div class="userDatatable-content">
                             {% if order.id_sim %}
                             <span data-bs-toggle="popover" data-bs-placement="top" data-bs-custom-class="custom-popover"
@@ -152,11 +152,13 @@
                             -
                             {% endif %}
 
-                            {% if order.id_sim.type_sim == 'esim' %} <a href="{{ url_cdn }}{{ order.id_sim.link }}" target="_blank">
-                                <i class="bi bi-box-arrow-in-up-right text-info" data-bs-toggle="tooltip"
-                                    data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                                    data-bs-title="Ver QRCode">
-                                </i></a>
+                            {% if order.id_sim.type_sim == 'esim' %} 
+                                <a href="{{ url_cdn }}{{ order.id_sim.link }}" target="_blank">
+                                    <i class="bi bi-qr-code text-primary ps-2" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                        data-bs-title="Ver QRCode">
+                                    </i>
+                                </a>
                             {% endif %}
                         </div>
                     </td>
@@ -234,7 +236,7 @@
                             <a href="{% url 'send_email' order.id %}">
                                 <i class="bi bi-envelope-at pe-1 text-primary" data-bs-toggle="tooltip"
                                     data-bs-placement="top" data-bs-custom-class="custom-tooltip"
-                                    data-bs-title="Enviar e-amil"></i></a>
+                                    data-bs-title="Enviar e-mail"></i></a>
                             {% endif %}
                             {% endif %}
                         </div>
