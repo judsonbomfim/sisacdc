@@ -266,7 +266,7 @@ def orders_up_status(ord_id, ord_s, id_user):
                 
                 if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
                     voice_d = VoiceCalls.objects.get(id_item=order_id)
-                    num_s = VoiceNumbers.objects.get(id=voice_d.id_number)
+                    num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)
                     
                     num_s.number_status = 'DS'
                     num_s.save()                  
