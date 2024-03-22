@@ -1,7 +1,8 @@
 from celery import shared_task
 import os
-from apps.orders.models import Orders
+from apps.orders.models import Orders, Notes
 from apps.orders.views import ApiStore, StatusSis
+from apps.send_email.tasks import send_email_sims
 from apps.sims.models import Sims
 from datetime import datetime, timedelta
 
@@ -24,7 +25,18 @@ def sims_in_orders():
         product_i = ord.product
         countries_i = ord.countries
         type_sim_i = ord.type_sim
-        update_store = {}    
+        update_store = {}
+        esim_eua = type_sim_i == 'esim' and product_i == 'chip-internacional-eua'
+        esim_ok = type_sim_i == 'esim' and product_i != 'chip-internacional-eua'
+        
+        # Notes
+        def addNote(t_note):
+            add_sim = Notes( 
+                id_item = Orders.objects.get(pk=id_id_i),
+                note = t_note,
+                type_note = 'S',
+            )
+            add_sim.save()
 
         # Escolher operadora
         # if product_i == 'chip-internacional-europa' and countries_i == False and type_sim_i == 'esim':
@@ -40,24 +52,34 @@ def sims_in_orders():
             operator_i = 'TM'
         else: operator_i = 'CM'            
         
-        # First SIM
-        sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
-        if sim_ds:
-            pass
-        else:                
-            msg_error.append(f'Não há estoque de {operator_i} - {type_sim_i} no sistema')
-            continue
+        # Select SIM
+        if esim_eua: 
+            sim_ds = Sims.objects.all().get(pk=0)
+        else: 
+            sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
+            if sim_ds:
+                pass
+            else:
+                addNote(f'Não há estoque de {operator_i} - {type_sim_i} no sistema')      
+                msg_error.append(f'Não há estoque de {operator_i} - {type_sim_i} no sistema')
+                continue
         
         # update order
         # Save SIMs
-        if sim_ds.type_sim == 'esim':
+        if esim_ok:
             status_ord = 'EE'
-        else: status_ord = 'ES'
+        else: status_ord = 'AI'
         
         order_put = Orders.objects.get(pk=id_id_i)
         order_put.id_sim_id = sim_ds.id            
         order_put.order_status = status_ord
         order_put.save()
+        
+        # Verification esim x eua
+        if esim_eua:
+            send_email_sims.delay(id_id_i)
+            msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
+            continue
         
         # update sim
         sim_put = Sims.objects.get(pk=sim_ds.id)
@@ -65,13 +87,12 @@ def sims_in_orders():
         sim_put.save()           
         
         status_sis_site = StatusSis.st_sis_site()
-                
         if status_ord in status_sis_site:
             update_store = {
                 'status': status_sis_site[status_ord]
             }
         # Enviar eSIM para site
-        if sim_put.type_sim == 'esim':
+        if esim_ok:
             url_painel = str(os.getenv('URL_PAINEL'))
             esims_order = Orders.objects.filter(order_id=order_id_i).filter(type_sim='esim')
             esims_list = ''
@@ -105,4 +126,3 @@ def sims_in_orders():
         n_item_total += 1
     
     print('>>>>>>>>>>>>>>>>>>>>>>> SIMs atribuidos!')
-    

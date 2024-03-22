@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 import csv
 import os
+import imghdr
 from datetime import date
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -19,7 +20,6 @@ from .tasks import sims_in_orders
 
 
 # Script Upload S3
-@login_required(login_url='/login/')
 def get_s3_client():
     return boto3.client(
         's3', 
@@ -27,7 +27,6 @@ def get_s3_client():
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
     )
 
-@login_required(login_url='/login/')
 def upload_file_to_s3(file):
     s3 = get_s3_client()
     bucket_name = settings.AWS_STORAGE_BUCKET_NAME
@@ -196,7 +195,7 @@ def sims_add_esim(request):
     if request.method == "GET":
         
         return render(request, 'painel/sims/add-esim.html')
-        
+    
     if request.method == 'POST':
                 
         type_sim = request.POST.get('type_sim')
@@ -210,13 +209,18 @@ def sims_add_esim(request):
         
         for sim_img in esims:
             sim_i = sim_img.name.split('.')
-            # # Save image
-            # fs = FileSystemStorage()
-            # file = fs.save(sim_img.name, sim_img)
-            # fileurl = fs.url(file)
             
-            fileurl = upload_file_to_s3(sim_img)
-            fileurl = fileurl.replace(settings.URL_CDN,'')
+            print(sim_img.name)
+            print(sim_img)
+            
+            fileurl = ''
+            if imghdr.what(sim_img):
+                fileurl = upload_file_to_s3(sim_img)
+                fileurl = fileurl.replace(settings.URL_CDN,'')
+            else:
+                messages.error(request,'O arquivo não é uma imagem. Verifique por favor!')
+                return render(request, 'painel/sims/add-esim.html')           
+
             
             sims_all = Sims.objects.all().filter(sim=sim_i[0]).filter(type_sim='esim')
             if sims_all:

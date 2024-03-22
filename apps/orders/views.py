@@ -12,7 +12,7 @@ from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from .classes import ApiStore, StatusSis, DateFormats
-from .tasks import order_import, orders_up_status
+from .tasks import order_import, orders_up_status, check_esim_eua
 import pandas as pd
 
 #Date today
@@ -270,8 +270,9 @@ def ord_edit(request,id):
                     esim_v = True             
             else:
                 if operator != None and type_sim != None:
-                    insertSIM(ord_st)
-                    up_plan = True # verificação para nota
+                    if product != 'chip-internacional-europa' and type_sim != 'esim':
+                        insertSIM(ord_st)
+                        up_plan = True # verificação para nota
 
                     
         # Liberar SIMs
@@ -513,8 +514,6 @@ def orders_activations(request):
     
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
     
-    print('............................................orders_df')
-    print(orders_df)
     
     orders_df['product'] = orders_df['product'].map(product_choice_dict)
     orders_df['data_day'] = orders_df['data_day'].map(data_choice_dict)
@@ -643,6 +642,10 @@ def orders_activations(request):
     }
     return render(request, 'painel/orders/activations.html', context)
     
+
+def esim_eua(request):
+    check_esim_eua.delay()
+    return HttpResponse('Verificação eSIM EUA concluída')
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza
