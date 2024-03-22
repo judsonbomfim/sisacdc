@@ -90,7 +90,7 @@
                                 <br>
                                 <div class="input-group flex-nowrap">
                                     <span class="input-group-text" id="sim"><i class="bi bi-sim"></i></span>
-                                    <input type="text" class="form-control" value="{% if order.product != 'chip-internacional-eua' %}{{ order.id_sim.sim }}{% endif %}" disabled>
+                                    <input type="text" class="form-control" value="{{ order.id_sim.sim }}" disabled>
                                     <span class="input-group-text ms-3" id="sim">Novo SIM</span>
                                     <input type="text" class="form-control" name="sim" placeholder="SIM"
                                         aria-label="SIM">
