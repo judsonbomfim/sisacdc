@@ -70,7 +70,7 @@ def send_email_sims(id=None):
         email.attach_alternative(html_content, "text/html")
         email.send()
         
-        if order_st != 'CN':
+        if order_st != 'CN' or (product_plan != 'USA' and type_sim == 'esim'):
             # Update Order
             order = Orders.objects.get(pk=id)
             order.order_status = 'AA'
