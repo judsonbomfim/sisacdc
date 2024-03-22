@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from rolepermissions.decorators import has_permission_decorator
-import os
 import csv
 from django.http import HttpResponse
 from datetime import date, datetime, timedelta
@@ -8,11 +7,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.conf import settings
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from .classes import ApiStore, StatusSis, DateFormats
-from .tasks import order_import, orders_up_status
+from .tasks import order_import, orders_up_status, check_esim_eua
 import pandas as pd
 
 #Date today
@@ -24,24 +24,25 @@ today = datetime.now()
 def orders_list(request):
     global orders_l
     orders_l = ''
-    
-    url_cdn = str(os.getenv('URL_CDN'))
-    
+
+    url_cdn = settings.URL_CDN
+
     orders_all = Orders.objects.all().order_by('-id')
+    sims = Sims.objects.all().order_by('-id')
     orders_l = orders_all
-    
+
     if request.method == 'GET':
-        
+
         ord_name_f = request.GET.get('ord_name')
-        ord_order_f = request.GET.get('ord_order')    
+        ord_order_f = request.GET.get('ord_order')
         ord_sim_f = request.GET.get('ord_sim')
         oper_f = request.GET.get('oper')
         ord_st_f = request.GET.get('ord_st')
-    
+
     if request.method == 'POST':
-        
+
         ord_name_f = request.POST.get('ord_name_f')
-        ord_order_f = request.POST.get('ord_order_f')       
+        ord_order_f = request.POST.get('ord_order_f')  
         ord_sim_f = request.POST.get('ord_sim_f')
         oper_f = request.POST.get('oper_f')
         ord_st_f = request.POST.get('ord_st_f')
@@ -49,23 +50,20 @@ def orders_list(request):
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
-            id_user = request.user.id            
-                        
+            id_user = request.user.id
+
             print('----------------------------------ord_id')
-            print(ord_id)
-            print(ord_s)
-            print(id_user)
-            
+
             if ord_id and ord_s:
                 print('----------------------------------TAREFA')
-             
+
                 orders_up_status.delay(ord_id, ord_s,id_user)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')     
-    
+
      # FIlters
-    
+
     url_filter = ''
 
     if ord_name_f:
@@ -79,7 +77,7 @@ def orders_list(request):
     if ord_sim_f: 
         orders_l = orders_l.filter(id_sim__sim__icontains=ord_sim_f)
         url_filter += f"&ord_sim={ord_sim_f}"
-    
+
     if oper_f: 
         orders_l = orders_l.filter(id_sim__operator__icontains=oper_f)
         url_filter += f"&oper={oper_f}"
@@ -88,23 +86,22 @@ def orders_list(request):
         orders_l = orders_l.filter(order_status__icontains=ord_st_f)
         url_filter += f"&ord_st={ord_st_f}"
 
-    sims = Sims.objects.all()
     ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
-    
+
     # Listar status dos pedidos
     ord_st_list = []
     for ord_s in ord_status:
         ord = orders_all.filter(order_status=ord_s[0]).count()
         ord_st_list.append((ord_s[0],ord_s[1],ord))
-    
+
     # Paginação
     paginator = Paginator(orders_l, 50)
     page = request.GET.get('page')
     orders = paginator.get_page(page)
-    
+
     from rolepermissions.permissions import available_perm_status
-    
+
     context = {
         'url_cdn': url_cdn,
         'orders_l': orders_l,
@@ -115,7 +112,8 @@ def orders_list(request):
         'url_filter': url_filter,
     }
     return render(request, 'painel/orders/index.html', context)
-    
+
+
 # Update orders
 @login_required(login_url='/login/')
 @has_permission_decorator('import_orders')
@@ -123,14 +121,15 @@ def ord_import(request):
     if request.method == 'GET':
 
         return render(request, 'painel/orders/import.html')    
-       
+
     if request.method == 'POST':
-        
+
         # Orderm Import       
         order_import.delay()
         messages.success(request, f'Processando pedidos... Aguarde alguns minutos e atualize a página de pedidos')        
 
     return render(request, 'painel/orders/import.html')
+
 
 # Order Edit
 @login_required(login_url='/login/')
@@ -271,8 +270,9 @@ def ord_edit(request,id):
                     esim_v = True             
             else:
                 if operator != None and type_sim != None:
-                    insertSIM(ord_st)
-                    up_plan = True # verificação para nota
+                    if product != 'chip-internacional-europa' and type_sim != 'esim':
+                        insertSIM(ord_st)
+                        up_plan = True # verificação para nota
 
                     
         # Liberar SIMs
@@ -362,6 +362,7 @@ def ord_edit(request,id):
         messages.success(request,f'Pedido {order.order_id} atualizado com sucesso!')
         return redirect('orders_list')
 
+
 @login_required(login_url='/login/')
 @has_permission_decorator('export_orders')
 def ord_export_act(request):
@@ -403,6 +404,7 @@ def ord_export_act(request):
     for row in data:
         writer.writerow(row)
     return response 
+
 
 @login_required(login_url='/login/')
 @has_permission_decorator('export_activations')
@@ -471,6 +473,7 @@ def ord_export_op(request):
     
     return render(request, 'painel/orders/export_op.html', context)
 
+
 @login_required(login_url='/login/')
 def send_esims(request):
     if request.method == 'GET':
@@ -480,6 +483,7 @@ def send_esims(request):
         send_email_sims.delay()
         messages.success(request, 'Processando emails... Aguarde alguns minutos e atualize a página de pedidos')
         return redirect('send_esims')
+
 
 @login_required(login_url='/login/')
 @has_permission_decorator('list_activations')
@@ -506,9 +510,11 @@ def orders_activations(request):
     today = datetime.now()
     days60 = today - timedelta(days=60)
     
-    orders_all = Orders.objects.filter(activation_date__gte=days60,id_sim__isnull=False).order_by('activation_date','item_id')
+    orders_all = Orders.objects.filter(activation_date__gte=days60).order_by('activation_date')
     
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
+    
+    
     orders_df['product'] = orders_df['product'].map(product_choice_dict)
     orders_df['data_day'] = orders_df['data_day'].map(data_choice_dict)
     orders_df['activation_date'] = pd.to_datetime(orders_df['activation_date'])
@@ -572,11 +578,8 @@ def orders_activations(request):
             
             print('----------------------------------ord_id')
             print(ord_id)
-            print(ord_s)
-            print(id_user)
             
             if ord_id and ord_s:
-                print('----------------------------------TAREFA')
                           
                 orders_up_status.delay(ord_id, ord_s,id_user)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
@@ -639,6 +642,10 @@ def orders_activations(request):
     }
     return render(request, 'painel/orders/activations.html', context)
     
+
+def esim_eua(request):
+    check_esim_eua.delay()
+    return HttpResponse('Verificação eSIM EUA concluída')
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza

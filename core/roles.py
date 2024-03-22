@@ -4,6 +4,7 @@ class Atendente(AbstractUserRole):
     available_permissions = {
         'view_orders': True,
         'send_esims_but': True,
+        'view_voice': True,
     }
 class Gerente(AbstractUserRole):
     available_permissions = {
@@ -18,5 +19,9 @@ class Gerente(AbstractUserRole):
         'send_esims': True,
         'send_esims_but': True,
         'list_activations': True,
+        'view_voice': True,
+        'edit_voice': True,
+        'import_voice': True,
         'export_activations': True,
+        'list_number': True,
     }

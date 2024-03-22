@@ -115,7 +115,7 @@
 
 {% block content_def %}
 
-<form action="{% url 'orders_activations' %}" method="POST">
+    <form action="{% url 'orders_activations' %}" method="POST">
     {% csrf_token %}
     {% if request.user|can:'edit_orders' %}
         
@@ -187,7 +187,8 @@
                 </a>
             </div>
         </div>    
-</div><!--End Row-->
+    </div><!--End Row-->
+    </form>
 
 
     <div class="table-responsive">
@@ -230,7 +231,7 @@
 
                             {% if order.id_sim__type_sim == 'esim' %}
                             <a href="{{ order.id_sim__link }}" target="_blank">
-                                <i class="bi bi-box-arrow-in-up-right text-info" data-bs-toggle="tooltip"
+                                <i class="bi bi-qr-code text-primary" data-bs-toggle="tooltip"
                                     data-bs-placement="top" data-bs-custom-class="custom-tooltip"
                                     data-bs-title="Ver QRCode">
                                 </i>
@@ -280,7 +281,7 @@
                 {% endfor %}
                 {% else %}
                 <tr class="table-tr">
-                    <td>
+                    <td colspan="12">
                         <div class="userDatatable-content">
                             Nenhum pedido encontrado.
                         </div>
