@@ -227,9 +227,10 @@
                     </td>
                     <td class="text-center">
                         <div class="userDatatable-content">
-                            {{ order.id_sim__sim }}
-
-                            {% if order.id_sim__type_sim == 'esim' %}
+                            {% if order.product != 'USA' %}
+                                {{ order.id_sim__sim }}
+                            {% endif %}
+                            {% if order.id_sim__type_sim == 'esim' and order.product != 'USA' %}
                             <a href="{{ order.id_sim__link }}" target="_blank">
                                 <i class="bi bi-qr-code text-primary" data-bs-toggle="tooltip"
                                     data-bs-placement="top" data-bs-custom-class="custom-tooltip"
