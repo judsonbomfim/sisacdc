@@ -66,9 +66,10 @@ def sims_in_orders():
         
         # update order
         # Save SIMs
-        if esim_ok:
-            status_ord = 'EE'
-        else: status_ord = 'AI'
+        if sim_ds.type_sim == 'esim':
+            if product_i == 'chip-internacional-eua': status_ord = 'AI'
+            else: status_ord = 'EE'
+        else: status_ord = 'ES'
         
         order_put = Orders.objects.get(pk=id_id_i)
         order_put.id_sim_id = sim_ds.id            
@@ -78,6 +79,7 @@ def sims_in_orders():
         # Verification esim x eua
         if esim_eua:
             send_email_sims.delay(id_id_i)
+            addNote(f'eSIM EUA - SIM padrão adicionado')
             msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
             continue
         
