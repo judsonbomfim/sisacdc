@@ -300,3 +300,18 @@ def orders_up_status(ord_id, ord_s, id_user):
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
             send_email_sims.delay(id=order.id)
+
+
+@shared_task
+def check_esim_eua():
+    
+    orders_all = Orders.objects.all().filter(type_sim='esim').filter(product='chip-internacional-eua')
+    
+    count = 0
+    for ord in orders_all:
+        order_put = Orders.objects.get(pk=ord.id)
+        order_put.id_sim_id = 0            
+        order_put.save()
+        
+        count+=1
+        print(f'>>>>>>>>>>>>>>> Pedido {ord.order_id} atualizado com sucesso. TOTAL: {count}')

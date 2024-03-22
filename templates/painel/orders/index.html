@@ -143,7 +143,7 @@
                     </td>
                     <td class="text-left">
                         <div class="userDatatable-content">
-                            {% if order.id_sim %}
+                            {% if order.id_sim and order.product != 'chip-internacional-eua'%}
                             <span data-bs-toggle="popover" data-bs-placement="top" data-bs-custom-class="custom-popover"
                                 data-bs-content="{{order.id_sim.get_operator_display}} - {% if order.id_sim.type_sim == 'sim' %}SIM{% elif order.id_sim.type_sim == 'esim' %}eSIM{% endif %}">
                                 {{ order.id_sim }}
@@ -152,7 +152,7 @@
                             -
                             {% endif %}
 
-                            {% if order.id_sim.type_sim == 'esim' %} 
+                            {% if order.id_sim.type_sim == 'esim' and order.product != 'chip-internacional-eua'%} 
                                 <a href="{{ url_cdn }}{{ order.id_sim.link }}" target="_blank">
                                     <i class="bi bi-qr-code text-primary ps-2" data-bs-toggle="tooltip"
                                         data-bs-placement="top" data-bs-custom-class="custom-tooltip"

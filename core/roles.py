@@ -22,5 +22,6 @@ class Gerente(AbstractUserRole):
         'view_voice': True,
         'edit_voice': True,
         'import_voice': True,
+        'export_activations': True,
         'list_number': True,
     }

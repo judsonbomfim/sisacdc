@@ -21,6 +21,7 @@ ORDER_STATUS = [
     ('AE', 'Agd. Envio'),
     ('AG', 'Agência'),
     ('AS', 'Atribuir SIM'),
+    ('AI', 'Atribuir IMEI'),
     ('AT', 'Ativado'),
     ('CC', 'Cancelado'),
     ('CN', 'Concluido'),
