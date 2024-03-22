@@ -86,7 +86,9 @@ def sims_in_orders():
         # update sim
         sim_put = Sims.objects.get(pk=sim_ds.id)
         sim_put.sim_status = 'AT'
-        sim_put.save()           
+        sim_put.save()
+        
+        addNote(f'(e)SIM adicionado')
         
         status_sis_site = StatusSis.st_sis_site()
         if status_ord in status_sis_site:
