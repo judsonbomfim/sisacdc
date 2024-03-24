@@ -70,18 +70,25 @@ def send_email_sims(id=None):
         email.attach_alternative(html_content, "text/html")
         email.send()
         
-        if order_st != 'CN' or (product_plan != 'USA' and type_sim == 'esim'):
-            # Update Order
-            order = Orders.objects.get(pk=id)
-            order.order_status = 'AA'
-            order.save()
-            # Update Store
-            apiStore = ApiStore.conectApiStore()
-            status_def_sis = StatusSis.st_sis_site()            
-            update_store = {
-                'status': status_def_sis['AA']
-            }
-            apiStore.put(f'orders/{order.order_id}', update_store).json()        
+        if order_st != 'CN':
+            if product_plan == 'USA' and type_sim == 'esim':
+                # Update Order
+                order = Orders.objects.get(pk=id)
+                order.order_status = 'AI'
+                order.save()
+                # Update Store
+            elif product_plan != 'USA' and type_sim == 'esim':
+                # Update Order
+                order = Orders.objects.get(pk=id)
+                order.order_status = 'AA'
+                order.save()
+                # Update Store
+                apiStore = ApiStore.conectApiStore()
+                status_def_sis = StatusSis.st_sis_site()            
+                update_store = {
+                    'status': status_def_sis['AA']
+                }
+                apiStore.put(f'orders/{order.order_id}', update_store).json()
         
         # Add note
         add_note = Notes( 
