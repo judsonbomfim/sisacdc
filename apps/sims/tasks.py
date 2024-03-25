@@ -41,12 +41,6 @@ def sims_in_orders():
         # Escolher operadora
         # if product_i == 'chip-internacional-europa' and countries_i == False and type_sim_i == 'esim':
         if product_i == 'chip-internacional-europa' and countries_i == False:
-            # ALteração provisória
-            now = datetime.now().date()
-            date_2_days = now + timedelta(days=2)
-            if ord.activation_date > date_2_days:
-                operator_i = 'TC'
-            else: operator_i = 'CM'
             operator_i = 'TC'
         elif product_i == 'chip-internacional-eua':
             operator_i = 'TM'
