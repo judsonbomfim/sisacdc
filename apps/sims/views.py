@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 import csv
 import os
+import imghdr
 from datetime import date
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -34,6 +35,7 @@ def upload_file_to_s3(file):
     return default_storage.url(file_path)
 
 @login_required(login_url='/login/')
+@has_permission_decorator('view_sims')
 def sims_list(request):
     global sims_l
     sims_l = ''
@@ -127,10 +129,17 @@ def sims_list(request):
     return render(request, 'painel/sims/index.html', context)
 
 @login_required(login_url='/login/')
+@has_permission_decorator('add_sims')
 def sims_add_sim(request):
     if request.method == "GET":
         
-        return render(request, 'painel/sims/add-sim.html')
+        url_cdn = settings.URL_CDN
+        
+        context = {
+            'url_cdn': url_cdn,
+        }
+        
+        return render(request, 'painel/sims/add-sim.html', context)
         
     if request.method == 'POST':
         
@@ -181,11 +190,12 @@ def sims_add_sim(request):
             return render(request, 'painel/sims/add-sim.html')
 
 @login_required(login_url='/login/')
+@has_permission_decorator('edit_sims')
 def sims_add_esim(request):
     if request.method == "GET":
         
         return render(request, 'painel/sims/add-esim.html')
-        
+    
     if request.method == 'POST':
                 
         type_sim = request.POST.get('type_sim')
@@ -199,13 +209,18 @@ def sims_add_esim(request):
         
         for sim_img in esims:
             sim_i = sim_img.name.split('.')
-            # # Save image
-            # fs = FileSystemStorage()
-            # file = fs.save(sim_img.name, sim_img)
-            # fileurl = fs.url(file)
             
-            fileurl = upload_file_to_s3(sim_img)
-            fileurl = fileurl.replace(settings.URL_CDN,'')
+            print(sim_img.name)
+            print(sim_img)
+            
+            fileurl = ''
+            if imghdr.what(sim_img):
+                fileurl = upload_file_to_s3(sim_img)
+                fileurl = fileurl.replace(settings.URL_CDN,'')
+            else:
+                messages.error(request,'O arquivo não é uma imagem. Verifique por favor!')
+                return render(request, 'painel/sims/add-esim.html')           
+
             
             sims_all = Sims.objects.all().filter(sim=sim_i[0]).filter(type_sim='esim')
             if sims_all:
@@ -222,9 +237,9 @@ def sims_add_esim(request):
 
         messages.success(request,'Lista gravada com sucesso')
         return render(request, 'painel/sims/add-esim.html')
-   
 
 @login_required(login_url='/login/')
+@has_permission_decorator('add_ord_sims')
 def sims_ord(request):
     if request.method == "GET":
         return render(request, 'painel/sims/sim-order.html')
@@ -237,6 +252,7 @@ def sims_ord(request):
     return render(request, 'painel/sims/sim-order.html')
 
 @login_required(login_url='/login/')
+@has_permission_decorator('export_activations')
 def exportSIMs(request):
     
     sims_all = Sims.objects.all().order_by('id')
@@ -258,7 +274,7 @@ def exportSIMs(request):
 
     return response
 
-login_required(login_url='/login/')
+@login_required(login_url='/login/')
 def delSIMs(request):
     orders = Orders.objects.all()
     
@@ -277,6 +293,7 @@ def delSIMs(request):
     
     return HttpResponse('SIMs deletados com sucesso')
 
+@login_required(login_url='/login/')
 def corectLinkSIm(request):
     sims = Sims.objects.all()
     for sim in sims:

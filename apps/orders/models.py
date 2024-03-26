@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from apps.sims.models import Sims
 
-# make choice
-
 PRODUCT = [
     ('chip-internacional-eua', 'USA'),
     ('chip-internacional-eua-e-canada', 'USA/CANADA'),
@@ -23,12 +21,13 @@ ORDER_STATUS = [
     ('AE', 'Agd. Envio'),
     ('AG', 'Agência'),
     ('AS', 'Atribuir SIM'),
+    ('AI', 'Atribuir IMEI'),
     ('AT', 'Ativado'),
     ('CC', 'Cancelado'),
     ('CN', 'Concluido'),
     ('DS', 'Desativado'),
     ('ES', 'Em Separação'),
-    ('EE', 'Enviar eSIM'),
+    ('EE', 'Enviar E-mail'),
     ('MB', 'Motoboy'),
     ('PR', 'Processando'),
     ('RE', 'Reembolsar'),
