@@ -276,7 +276,7 @@ def ord_edit(request,id):
 
                     
         # Liberar SIMs
-        if ord_st == 'CC':
+        if ord_st == 'CC' or ord_st == 'DS':
             
             if order.id_sim:
                 updateSIM()

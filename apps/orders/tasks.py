@@ -220,9 +220,6 @@ def orders_auto():
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user):
-    
-    print('-----------------ord_id, ord_s, id_user')
-    print(ord_id, ord_s, id_user)
 
     ord_id = ord_id
     ord_s = ord_s
@@ -245,18 +242,19 @@ def orders_up_status(ord_id, ord_s, id_user):
         # Save status System
         order.order_status = ord_s
         order.save()
+        time.sleep(5)
         
         if ord_s == 'CC' or ord_s == 'DS':
             if order.id_sim:
                 # Update SIM
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
                 if order.id_sim.type_sim == 'esim':
-                    sim_put.sim_status = 'TC'
-                    # Deletar eSIM para site                            
-                    ApiStore.updateEsimStore(order_id)
-                else:
                     sim_put.sim_status = 'DS'
-                sim_put.sim_status = 'TC'
+                    if order.product != 'chip-internacional-eua':
+                        # Deletar eSIM para site                            
+                        ApiStore.updateEsimStore(order_id)
+                else:
+                    sim_put.sim_status = 'TC'
                 sim_put.save()
                     
                 # Delete SIM in Order
@@ -264,6 +262,7 @@ def orders_up_status(ord_id, ord_s, id_user):
                 order_put.id_sim_id = ''
                 order_put.save()
                 
+                # Edit Voice
                 if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
                     voice_d = VoiceCalls.objects.get(id_item=order_id)
                     num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)
@@ -272,16 +271,30 @@ def orders_up_status(ord_id, ord_s, id_user):
                     num_s.save()                  
                     
                     voice_d.delete()
-
+        
+        # Ver. Status Cancelled in items
+        order_itens = 0
+        order_ver = Orders.objects.filter(order_id=order.order_id)
+        for ord_v in order_ver:
+            if ord_v.order_status != 'CC':
+                order_itens += 1 
+        
         # Status sis : Status Loja
         status_sis_site = StatusSis.st_sis_site()
-        
-        if ord_s in status_sis_site:
+        if order_itens == 0 and ord_s == 'CC':
+            print('--------------------------- Alterar STATUS Cancelled')         
             update_store = {
-                'status': status_sis_site[ord_s]
+                'status': 'cancelled'
             }
             apiStore.put(f'orders/{order.order_id}', update_store).json()
-        
+        elif ord_s != 'CC':
+            print('--------------------------- Alterar STATUS Loja')            
+            if ord_s in status_sis_site:
+                update_store = {
+                    'status': status_sis_site[ord_s]
+                }
+                apiStore.put(f'orders/{order.order_id}', update_store).json()
+                
         # Save Notes
         def addNote(t_note):
             add_sim = Notes( 

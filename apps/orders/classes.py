@@ -48,7 +48,6 @@ class StatusSis():
             'AE': 'agd-envio',
             'AG': 'agencia',
             'AS': 'em-separacao',
-            'CC': 'cancelled',
             'CN': 'completed',        
             'ES': 'em-separacao',
             'MB': 'motoboy',
