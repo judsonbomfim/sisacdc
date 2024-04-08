@@ -220,9 +220,9 @@ def ord_edit(request,id):
         # Se SIM preenchico
         if sim:
             # Verificar se Operadora e Tipo de SIM estão marcados
-            if type_sim =='esim':
-                msg_error.append(f'Não é possível adicionar um eSIM desta forma')
-            elif operator != None and type_sim != None:
+            # if type_sim =='esim':
+            #     msg_error.append(f'Não é possível adicionar um eSIM desta forma')
+            if operator != None and type_sim != None:
                 if order.id_sim:
                     # Alterar status no sistema e no site
                     updateSIM()
