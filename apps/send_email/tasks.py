@@ -156,7 +156,7 @@ def send_email_voice(id=None):
         email.attach_alternative(html_content, "text/html")
         email.send()
         
-        if order_st != 'CN':
+        if order_st == 'EE':
             # Update Voice
             voice_s = VoiceCalls.objects.get(pk=id_voice)
             voice_s.call_status = 'AA'
