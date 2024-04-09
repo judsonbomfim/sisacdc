@@ -149,9 +149,9 @@ def order_import():
                     except:
                         msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
                     
-                    id_user = None
-                    if getpass.getuser():
-                        id_user = getpass.getuser()
+                    # id_user = None
+                    # if getpass.getuser():
+                    #     id_user = getpass.getuser()
                     
                     # Save Notes
                     add_sim = Notes( 

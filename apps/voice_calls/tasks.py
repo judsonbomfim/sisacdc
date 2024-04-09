@@ -32,6 +32,7 @@ def voices_up_status(voice_id, voice_st):
             voice.id_number = None
             voice.save()
 
+
 @shared_task
 def number_up_status(number_id, number_st):
        
@@ -44,7 +45,8 @@ def number_up_status(number_id, number_st):
         number = VoiceNumbers.objects.get(pk=num_id)
         number.number_status = number_st
         number.save()  
-        
+
+  
 @shared_task
 def update_password(number_id):
     
@@ -91,8 +93,8 @@ def update_password(number_id):
         # Save S3
         s3 = boto3.client('s3')
         s3.upload_fileobj(buffer, bucket, filename)
+   
 
-        
 @shared_task
 def number_in_voice():
     
@@ -107,7 +109,7 @@ def number_in_voice():
         number_s = VoiceNumbers.objects.all().order_by('id').filter(number_status='DS').first()
         # Change Status Voice
         voice_put = VoiceCalls.objects.get(pk=id_vox)
-        voice_put.call_status = 'EE'
+        voice_put.call_status = 'AA'
         voice_put.id_number = number_s
         voice_put.save()
         # Change Status Number
