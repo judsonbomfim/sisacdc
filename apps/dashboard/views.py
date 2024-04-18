@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from apps.sims.models import Sims
@@ -35,7 +36,7 @@ def index(request):
     # Queries
     simsAll = Sims.objects.all()
     # Use range queries for each date range
-    ordersWeek = Orders.objects.filter(order_date__range=(dateWeek, dateDay))
+    ordersWeek = Orders.objects.filter(order_date__range=(dateMonth, dateDay))
     ordersMonth = Orders.objects.filter(order_date__range=(dateMonth, dateDay))
     ordersYear = Orders.objects.filter(order_date__range=(dateYear, dateDay))     
     
@@ -76,7 +77,6 @@ def index(request):
     yearSalesDates = [(dateSalesYear).strftime('%Y-%m') for dateSalesYear in yearSalesDates]
     yearSalesDates = json.dumps(yearSalesDates)    
     yearSalesValues = json.dumps(yearSalesReport['countSalesYear'].tolist())
-    
     
     # SIMs
     # --- Week  
@@ -127,7 +127,7 @@ def index(request):
     monthOperDates = json.dumps(monthOperDates)
     monthOperValuesTM = json.dumps(monthOperTM['countOperMonth'].tolist())
     monthOperValuesCM = json.dumps(monthOperCM['countOperMonth'].tolist())
-    monthOperValuesTC = json.dumps(monthOperTC['countOperMonth'].tolist())
+    monthOperValuesTC = json.dumps(monthOperTC['countOperMonth'].tolist())    
     # --- Year
     yearOperReport = yearDf.groupby(['month','operator']).size().reset_index(name='countSimsYear')
     yearOperReport = yearOperReport.pivot_table(index='month', columns='operator', values='countSimsYear', fill_value=0)
@@ -191,3 +191,10 @@ def index(request):
     }
     
     return render(request, 'painel/dashboard/index.html', context)
+
+
+@login_required(login_url='/login/')
+def clear_cache(request):
+    from django.core.cache import cache
+    cache.clear()
+    return HttpResponse("Cache cleared")
