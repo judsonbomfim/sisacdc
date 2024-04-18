@@ -28,7 +28,7 @@ def sims_in_orders():
         update_store = {}
         esim_eua = type_sim_i == 'esim' and product_i == 'chip-internacional-eua'
         esim_ok = type_sim_i == 'esim' and product_i != 'chip-internacional-eua'
-        
+                
         if ord.id_sim != None:
             if ord.order_status == 'AS':
                 sim_put = Sims.objects.get(pk=sim_ds.id)
@@ -37,8 +37,6 @@ def sims_in_orders():
                 else:
                     sim_put.sim_status = 'AA'
                 sim_put.save()
-                continue
-            continue
         else:    
             # Notes
             def addNote(t_note):
@@ -65,8 +63,7 @@ def sims_in_orders():
                 if sim_ds:
                     pass
                 else:
-                    addNote(f'Não há estoque de {operator_i} - {type_sim_i} no sistema')      
-                    msg_error.append(f'Não há estoque de {operator_i} - {type_sim_i} no sistema')
+                    print('>>>>>>>>>>>>>>>>>>>>>>> SIMs indisponíveis!')
                     continue
             
             # update order

@@ -293,12 +293,35 @@ def delSIMs(request):
     
     return HttpResponse('SIMs deletados com sucesso')
 
-@login_required(login_url='/login/')
-def corectLinkSIm(request):
-    sims = Sims.objects.all()
-    for sim in sims:
-        if sim.link:
-            link = sim.link.replace('https://cdn.simpaxx.com.br','')
-            sim.link = link
-            sim.save()
-    return HttpResponse('Links corrigidos com sucesso')
+# @login_required(login_url='/login/')
+# def verify_sim(request):
+#     simsAT = Sims.objects.all().filter(sim_status='AT').filter(type_sim='sim')
+#     simsDS = Sims.objects.all().filter(sim_status='DS').filter(type_sim='sim')
+#     simsTC = Sims.objects.all().filter(sim_status='TC')
+#     orders = Orders.objects.all()
+
+#     print('>>>>>> SIMs Ativados sem pedidos')
+#     print('----------------------------------')
+#     for simAT in simsAT:    
+#         if orders.filter(id_sim__sim=simAT.sim):
+#             continue
+#         else:
+#             print(simAT.sim,simAT.type_sim)
+            
+#     print('>>>>>> SIMs Disponíveis com pedidos')
+#     print('----------------------------------')
+#     for simDS in simsDS:
+#         if orders.filter(id_sim__sim=simDS.sim):
+#             print(simDS.sim,simDS.type_sim)
+#         else:
+#             continue
+    
+#     print('>>>>>> SIMs Troca com pedidos')
+#     print('----------------------------------')
+#     for simTC in simsTC:
+#         if orders.filter(id_sim__sim=simTC.sim):
+#             print(simTC.sim,simDS.type_sim)
+#         else:
+#             continue
+            
+#     return HttpResponse('Links corrigidos com sucesso')
