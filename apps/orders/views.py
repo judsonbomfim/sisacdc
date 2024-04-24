@@ -432,6 +432,7 @@ def ord_export_op(request):
         ord_prod_list = {
             'chip-internacional-eua': 'T-Mobile',
             'chip-internacional-eua-e-canada': 'USA E CANADA',
+            'chip-internacional-eua-canada-e-mexico': 'USA/CAN/MEX',
             'chip-internacional-europa': 'EUROPA',
             'chip-internacional-global': 'GLOBAL PREMIUM',
         }
