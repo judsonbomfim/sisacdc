@@ -204,6 +204,7 @@
                     <th class="userDatatable-title text-center">Países</th>
                     <th class="userDatatable-title text-center">Voz</th>
                     <th class="userDatatable-title text-center">Dias</th>
+                    <th class="userDatatable-title text-center">Celular</th>
                     <th class="userDatatable-title text-center">Ativação</th>
                     <th class="userDatatable-title text-center">Término</th>
                     <th class="userDatatable-title text-center">Status</th>
@@ -266,6 +267,31 @@
                             {{ order.days }}
                         </div>
                     </td>
+                    <td>
+                        <div class="userDatatable-content">
+                            {% if order.cell_mod %}
+                                <i class="bi bi-phone text-primary"
+                                    style="cursor: pointer;"
+                                    data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top"
+                                    data-bs-content="{{order.cell_mod}}">
+                                </i>
+                            {% endif %}
+                            {% if order.cell_imei %}
+                                <i class="bi bi-phone text-secondary"
+                                    style="cursor: pointer;" 
+                                    data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top"
+                                    data-bs-content="IMEI - {{order.cell_imei}}">
+                                </i>
+                            {% endif %}
+                            {% if order.cell_eid %}
+                                <i class="bi bi-phone text-secondary" 
+                                    style="cursor: pointer;" 
+                                    data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top"
+                                    data-bs-content="EID - {{order.cell_eid}}">
+                                </i>
+                            {% endif %}
+                        </div>
+                    </td>
                     <td class="text-center">
                         <div class="userDatatable-content">{{ order.activation_date|date:"d/m/Y" }}</div>
                     </td>
@@ -326,14 +352,6 @@
     });
 </script>
 <script>
-    /* Tooltips */
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-    /* Popovers */
-    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-    const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
-</script>
-<script>
         (function ($) {
             $(document).ready(function () {
                 $("#activGoing_f").dateRangePicker({
@@ -354,5 +372,13 @@
                 });
             });
         })(jQuery);
+</script>
+<script>
+    /* Tooltips */
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    /* Popovers */
+    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+    const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
 </script>
 {% endblock %}

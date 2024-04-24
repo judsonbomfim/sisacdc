@@ -501,7 +501,7 @@ def orders_activations(request):
     ord_st_f = None
 
         
-    fields_df = ['id', 'item_id','client', 'id_sim__sim', 'id_sim__link', 'id_sim__type_sim', 'id_sim__operator', 'product', 'data_day', 'calls', 'countries', 'days', 'activation_date', 'order_status']
+    fields_df = ['id', 'item_id','client', 'id_sim__sim', 'id_sim__link', 'id_sim__type_sim', 'id_sim__operator', 'product', 'data_day', 'calls', 'countries', 'days', 'cell_mod', 'cell_eid', 'cell_imei', 'activation_date', 'order_status']
 
     product_choice_dict = dict(Orders.product.field.choices)
     data_choice_dict = dict(Orders.data_day.field.choices)
