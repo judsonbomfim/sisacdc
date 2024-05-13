@@ -12,7 +12,7 @@ from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from apps.sims.models import Sims
 from apps.orders.models import Orders
-from apps.orders.views import ApiStore, StatusSis
+from apps.orders.views import ApiStore, StatusStore
 import boto3
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -292,6 +292,36 @@ def delSIMs(request):
         sim.delete()
     
     return HttpResponse('SIMs deletados com sucesso')
+
+@login_required(login_url='/login/')
+def delSimTC(request):
+    list_icc = {
+        '8932042000002327335',
+        '8932042000002327334',
+        '8932042000002327333',
+        '8932042000002327332',
+        '8932042000002327331',
+        '8932042000002327330',
+        '8932042000002327329',
+        '8932042000002327328',
+        '8932042000002327327',
+        '8932042000002327326',
+    }
+    
+    sims = Sims.objects.filter(type_sim='esim', operator='TC')
+    
+    for sim in sims:
+        sim_iccid = sim.sim
+        if sim_iccid not in list_icc:
+            sim.orders_set.all().update(id_sim=None)  # Set foreign key to NULL in related Order objects
+            sim.delete()
+            print(f'SIM {sim_iccid} deletado com sucesso!')
+        else:
+            print(f'SIM {sim_iccid} não deletado!')
+    
+    print('>>>>>>>>>>>>>>>>>>> FINALIZADO')
+    return HttpResponse('SIMs deletados com sucesso')
+
 
 # @login_required(login_url='/login/')
 # def verify_sim(request):

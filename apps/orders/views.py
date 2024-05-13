@@ -11,7 +11,7 @@ from django.conf import settings
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
-from .classes import ApiStore, StatusSis, DateFormats
+from .classes import ApiStore, StatusStore, DateFormats
 from .tasks import order_import, orders_up_status, check_esim_eua
 import pandas as pd
 
@@ -330,7 +330,7 @@ def ord_edit(request,id):
         if ord_st != order.order_status:
             # Alterar status
             # Status sis : Status Loja
-            status_sis_site = StatusSis.st_sis_site()
+            status_sis_site = StatusStore.st_sis_site()
             if ord_st in status_sis_site:            
                 
                 update_store = {
