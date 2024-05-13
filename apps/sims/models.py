@@ -4,6 +4,7 @@ SIM_STATUS = [
     ('AT', 'Ativado'),
     ('CC', 'Cancelado'),    
     ('DS', 'Disponível'),
+    ('DE', 'Desativado'),
     ('IN', 'Indisponível'),
     ('TC', 'Troca'),
 ]

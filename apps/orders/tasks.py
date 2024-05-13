@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from celery import shared_task
 from django.utils.text import slugify
 from datetime import datetime, timedelta
-from .classes import ApiStore, StatusSis, DateFormats
+from .classes import ApiStore, StatusStore, DateFormats
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
@@ -182,7 +182,7 @@ def order_import():
                     
                     # Alterar status
                     # Status sis : Status Loja
-                    status_def_sis = StatusSis.st_sis_site()
+                    status_def_sis = StatusStore.st_sis_site()
                     if order_status_i in status_def_sis:
                         status_ped = {
                             'status': status_def_sis[order_status_i]
@@ -207,6 +207,7 @@ def order_import():
     else:
         print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
+
 @shared_task
 def orders_auto():
     print('-----------------orders_auto')
@@ -217,6 +218,7 @@ def orders_auto():
     number_in_voice.delay()
     time.sleep(60)
     send_email_sims.delay()
+
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user):
@@ -280,7 +282,7 @@ def orders_up_status(ord_id, ord_s, id_user):
                 order_itens += 1 
         
         # Status sis : Status Loja
-        status_sis_site = StatusSis.st_sis_site()
+        status_sis_site = StatusStore.st_sis_site()
         if order_itens == 0 and ord_s == 'CC':
             print('--------------------------- Alterar STATUS Cancelled')         
             update_store = {

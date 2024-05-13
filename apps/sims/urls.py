@@ -8,6 +8,7 @@ urlpatterns = [
     path('sims/pedidos', views.sims_ord, name='sims_ord'),
     path('estoque/exportar', views.exportSIMs, name='exportSIMs'),
     path('delsim', views.delSIMs, name='delsim'),
+    path('delsimtc', views.delSimTC, name='delsimtc'),
     # path('verificar', views.verify_sim, name='verify_sim'),
 
 ]

@@ -196,9 +196,20 @@ CELERY_RESULT_BACKEND = str(os.getenv('CELERY_RESULT_BACKEND'))
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
+CELERY_TIMEZONE = 'Europe/London'
+
 CELERY_BEAT_SCHEDULE = {
     'task__5_min_orders_auto': {
         'task': 'apps.orders.tasks.orders_auto',
         'schedule': crontab(minute='*/5'),
     },
+    'task__10_min_activate_TC': {
+        'task': 'apps.sims.tasks.simActivateTC',
+        'schedule': crontab(minute='*/1'),
+    },
 }
+
+# API TELCO
+APITC_USERNAME = str(os.getenv('APITC_USERNAME'))
+APITC_PASSWORD = str(os.getenv('APITC_PASSWORD'))
+APITC_HTTPCONN = str(os.getenv('APITC_HTTPCONN'))
