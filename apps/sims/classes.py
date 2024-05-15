@@ -12,7 +12,6 @@ class ApiTC:
             "username": settings.APITC_USERNAME,
             "password": settings.APITC_PASSWORD
         })
-        print('>>>>>>>>>>>>>>>> payload_token',payload_token)
         headers_token = {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'

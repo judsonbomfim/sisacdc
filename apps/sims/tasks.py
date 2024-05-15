@@ -10,6 +10,7 @@ from apps.orders.classes import ApiStore, StatusStore, NotesAdd, UpdateOrder
 from apps.send_email.tasks import send_email_sims
 from apps.sims.models import Sims
 from datetime import datetime
+import pytz
 import pandas as pd
 
 
@@ -92,12 +93,13 @@ def sims_in_orders():
                 msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
                 continue
             
-            addNote(f'(e)SIM adicionado')
-
             # update sim
             sim_put = Sims.objects.get(pk=sim_ds.id)
             sim_put.sim_status = 'AT'
             sim_put.save()
+            sim_e = sim_put.sim 
+            
+            addNote(f'(e)SIM {sim_e} adicionado')
             
             status_sis_site = StatusStore.st_sis_site()
             if status_ord in status_sis_site:
@@ -138,22 +140,22 @@ def sims_in_orders():
             
             n_item_total += 1
     
-    print('>>>>>>>>>>>>>>>>>>>>>>> SIMs atribuidos!')
+        print('>>>>>>>>>>>>>>>>>>>>>>> SIMs atribuidos!')
     
 @shared_task
-def simActivateTC():
-    
-    print('>>>>>>>>>> INICIANDO ATIVAÇÂO')
+def simActivateTC(id=None):
+        
+    london_tz = pytz.timezone('Europe/London')
+    today = datetime.now(london_tz).date()
+
+    print('>>>>>>>>>> ATIVAÇÂO INICIADA')
     
     # Select Orders
-    today = datetime.now()
-    print('>>>>>>>>> today',today)
-    status_list = ['AA','DS']
-    orders_all = Orders.objects.filter(order_status__in=status_list, id_sim__operator='TC', activation_date=today)
-    
-    print('>>>>>>>>>> ATIVAÇÂO INICIADA')
-    print(orders_all)
-    
+    if id == None:
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date=today)
+    else:
+        orders_all = Orders.objects.get(pk=id)
+            
     for order in orders_all:
         
         order = Orders.objects.get(pk=order.id)
@@ -162,8 +164,6 @@ def simActivateTC():
         iccid = order.id_sim.sim
         dataDay = order.data_day
         
-        print('>>>>>>>>>> iccid',iccid)
-
         # Get tokem de acesso a API
         tokenApi = ApiTC.get_token()
         time.sleep(2)
@@ -175,10 +175,7 @@ def simActivateTC():
         # Get EndPointID / Status
         get_iccid = ApiTC.get_iccid(iccid, headers)
         endpointId = get_iccid[0]
-        simStatus = get_iccid[1]
-        print('>>>>>>>>>> endpointId',endpointId)
-        print('>>>>>>>>>> simStatus',simStatus)
-        
+        simStatus = get_iccid[1]        
         ##
 
         # Variaveis globais
@@ -207,12 +204,15 @@ def simActivateTC():
         else:
             # Alterar SIM na operadora
             if simStatus == 'Active':
+                print('simStatus == Active')
                 # Add note
                 NotesAdd.addNote(order,f'{iccid} já estava ativado na Telcon')
                 # Change Status
                 UpdateOrder.upStatus(id_item,'AT')
                 continue
+            
             elif simStatus == 'Suspended':
+                print('simStatus == Suspended')
                 payload = json.dumps({
                     "Request": {
                         "endPointId": f"{endpointId}",
@@ -229,6 +229,7 @@ def simActivateTC():
                 process = True
                 
             else:
+                print('simStatus == Other')
                 # Change Status
                 UpdateOrder.upStatus(id_item,'EA')
                 NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
@@ -238,14 +239,16 @@ def simActivateTC():
             
             res = conn.getresponse()
             data = json.loads(res.read())
-            resultCode = data["Response"]["resultParam"]["resultCode"]
+            resultCode = int(data["Response"]["resultCode"])
             resultDescription = data["Response"]["resultParam"]["resultDescription"]
+            print('>>>>>>>>>> resultCode', resultCode)
+            print('>>>>>>>>>> resultDescription', resultDescription)
             if resultCode == 0:
                 # Change Status
                 UpdateOrder.upStatus(id_item,'AT')
                 StatusStore.upStatus(order_id,'ativado')
                 # Add note
-                NotesAdd.addNote(id_item,f'{note} TC: {resultDescription}')
+                NotesAdd.addNote(order,f'{note} TC: {resultDescription}')
             else:
                 # Change Status
                 UpdateOrder.upStatus(id_item,'EA')
@@ -254,46 +257,60 @@ def simActivateTC():
                 
     print('>>>>>>>>>> ATIVAÇÂO FINALIZADA')
 
-
 @shared_task
-def simDeactivateTC():
+def simDeactivateTC(id=None):
     
-    print('>>>>>>>>>> INICIANDO DESATIVAÇÂO')
+    if id is not None:
+        print(f'O id fornecido é {id}')
+    else:
+        print('Nenhum id fornecido')
+        
+    # Timezone /Today
+    london_tz = pytz.timezone('Europe/London')
+    today = pd.Timestamp.now(tz=london_tz).date()
     
     # Select Orders
-    # >>>>>>>>>> Criar tabela com volta
-    fields_df = ['id', 'order_id', 'id_sim__sim', 'days', 'activation_date']
-
+    if id == None:
+        print('>>>>>>>>>> desativer SEM ID')
+        orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC')
+    else:
+        print('>>>>>>>>>> desativer com ID')
+        orders_all = Orders.objects.filter(pk=id)
     
-    today = datetime.now()
-    print('>>>>>>>>> today',today)
-    orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC').order_by('activation_date')
+    # Verificar se há pedidos para desativar
+    if not orders_all:
+        print('>>>>>>>>>> Nenhum pedido para desativar')
+        return
+    print('>>>>>>>>>> orders_all',orders_all)
+    
+    fields_df = ['id', 'order_id', 'id_sim__sim', 'days', 'activation_date']
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
+    print('>>>>>>>>>> orders_df 1',orders_df)
+    # orders_df['id'] = pd.to_numeric(orders_df['id'])
     orders_df['activation_date'] = pd.to_datetime(orders_df['activation_date'])
     orders_df['return_date'] = orders_df['activation_date'] + pd.to_timedelta(orders_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
-    orders_df['return_date'] = orders_df['return_date'].dt.date  # convert datetime to date
-    orders_df = orders_df[orders_df['return_date'] == today]  # filter rows where return_date is today
-    orders_l = orders_df
-    
-    print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
-    print('>>>>>>>>>> ',orders_l)
-    
-    for order in orders_l:
-        
-        order = Orders.objects.get(pk=order.id)
-        order_id = order.order_id
-        id_item = order.id
-        iccid = order.id_sim.sim
-        
-        print('>>>>>>>>>> iccid',iccid)
+    # orders_df['return_date'] = pd.to_datetime(orders_df['return_date'])
+    if id == None:
+        orders_df = orders_df[orders_df['return_date'] == today]
 
+    print('>>>>>>>>>> orders_df 2',orders_df)
+    print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
+    
+    for index, ord in orders_df.iterrows():
+        order = Orders.objects.get(pk=ord['id'])
+        order_id = ord['order_id']
+        ord['order_id']
+        id_item = ord['id']
+        iccid = ord['id_sim__sim']
+        
         # Get tokem de acesso a API
         tokenApi = ApiTC.get_token()
         time.sleep(2)
         ##
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         headers = ApiTC.get_headers(tokenApi)
-        time.sleep(2)        
+        time.sleep(2)
+         
         # Get EndPointID / Status
         get_iccid = ApiTC.get_iccid(iccid, headers)
         endpointId = get_iccid[0]
@@ -320,17 +337,29 @@ def simDeactivateTC():
             
         res = conn.getresponse()
         data = json.loads(res.read())
-        resultCode = data["Response"]["resultParam"]["resultCode"]
+        resultCode = int(data["Response"]["resultCode"])
         resultDescription = data["Response"]["resultParam"]["resultDescription"]
+        print('>>>>>>>>>> resultCode', resultCode)
+        print('>>>>>>>>>> resultDescription', resultDescription)
+        
         if resultCode == 0:
-            # Change Status
-            UpdateOrder.upStatus(id_item,'AT')
-            StatusStore.upStatus(order_id,'completed')
+            print('>>>>>>>>>> DESATIVADO')
+            print('>>>>>>>>>> id', id)
+            if id == None:
+                print('>>>>>>>>>> Change Status')                
+                # Change Status                
+                UpdateOrder.upStatus(id_item,'CN')
+                StatusStore.upStatus(order_id,'completed')
+                sim_put = Sims.objects.get(pk=order.id_sim.id)
+                sim_put.sim_status = 'DE'
+                sim_put.save()
             # Add note
-            NotesAdd.addNote(id_item,f'{iccid} desativado com sucesso na Telcon. TC: {resultDescription}')
+            NotesAdd.addNote(order,f'{iccid} desativado com sucesso na Telcon. TC: {resultDescription}')
         else:
-            # Change Status
-            UpdateOrder.upStatus(id_item,'ED')
+            print('>>>>>>>>>> ERRO DESATIVADO')
+            if id == None:
+                # Change Status
+                UpdateOrder.upStatus(id_item,'ED')
             # Add note
             NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro. TC: {resultDescription}')
                 

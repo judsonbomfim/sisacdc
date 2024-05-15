@@ -11,6 +11,7 @@ from django.conf import settings
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
+from apps.sims.tasks import simDeactivateTC
 from .classes import ApiStore, StatusStore, DateFormats
 from .tasks import order_import, orders_up_status, check_esim_eua
 import pandas as pd
@@ -153,6 +154,8 @@ def ord_edit(request,id):
         
     if request.method == 'POST':
         
+        print('>>>>>>>>>> EDITAR PEDIDO')
+        
         global msg_info
         msg_info = []
         global msg_error
@@ -217,6 +220,24 @@ def ord_edit(request,id):
             else:       
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
             
+        
+        print('>>>>>>>>>> ord_st', ord_st)
+            
+        # Liberar SIMs
+        if ord_st == 'CC' or ord_st == 'DS' or ord_st == 'RB':
+            print('>>>>>>>>>> Liberar SIMs')
+            if order.id_sim:
+                # executar tarefa
+                print('>>>>>>>>>> operator', operator)
+                if operator == 'TC':
+                    print('>>>>>>>>>> Desativar - order.id', order.id)                    
+                    simDeactivateTC(id=order.id)
+                # Update SIM                
+                updateSIM()
+            
+        print('>>>>>>>>>> passou desativação status')
+
+        
         # Se SIM preenchico
         if sim:
             # Verificar se Operadora e Tipo de SIM estão marcados
@@ -273,13 +294,6 @@ def ord_edit(request,id):
                     if product != 'chip-internacional-europa' and type_sim != 'esim':
                         insertSIM(ord_st)
                         up_plan = True # verificação para nota
-
-                    
-        # Liberar SIMs
-        if ord_st == 'CC' or ord_st == 'DS':
-            
-            if order.id_sim:
-                updateSIM()
             
         # Update Order
         if activation_date == '':

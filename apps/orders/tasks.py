@@ -8,7 +8,7 @@ from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 import getpass
 import time
-from apps.sims.tasks import sims_in_orders
+from apps.sims.tasks import sims_in_orders, simDeactivateTC
 from apps.send_email.tasks import send_email_sims
 from apps.voice_calls.tasks import number_in_voice
 
@@ -246,7 +246,8 @@ def orders_up_status(ord_id, ord_s, id_user):
         order.save()
         time.sleep(5)
         
-        if ord_s == 'CC' or ord_s == 'DS':
+        if ord_s == 'CC' or ord_s == 'DS' or ord_s == 'RB':
+            print('>>>>>>>>>> preparar para desativar reembolsado')
             if order.id_sim:
                 # Update SIM
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
@@ -264,15 +265,22 @@ def orders_up_status(ord_id, ord_s, id_user):
                 order_put.id_sim_id = ''
                 order_put.save()
                 
-                # Edit Voice
-                if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
-                    voice_d = VoiceCalls.objects.get(id_item=order_id)
-                    num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)
-                    
-                    num_s.number_status = 'DS'
-                    num_s.save()                  
-                    
-                    voice_d.delete()
+                # executar tarefa
+                print('>>>>>>>>>> order.id_sim.operator', order.id_sim.operator)
+                if order.id_sim.operator == 'TC':
+                    print('>>>>>>>>>> Desativar - order.id', order.id)                    
+                    simDeactivateTC.delay(id=order.id)
+                
+            # Edit Voice
+            if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
+                voice_d = VoiceCalls.objects.get(id_item=order_id)
+                num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)
+                
+                num_s.number_status = 'DS'
+                num_s.save()
+                
+                voice_d.delete()
+            
         
         # Ver. Status Cancelled in items
         order_itens = 0

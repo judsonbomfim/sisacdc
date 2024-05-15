@@ -26,7 +26,7 @@ ORDER_STATUS = [
     ('AT', 'Ativado'),
     ('CC', 'Cancelado'),
     ('CN', 'Concluido'),
-    ('DS', 'Desativado'),
+    ('DE', 'Desativado'),
     ('EA', 'Erro Ativação'),
     ('ED', 'Erro Desativação'),
     ('EE', 'Enviar E-mail'),
