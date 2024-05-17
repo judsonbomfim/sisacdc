@@ -231,7 +231,10 @@ def ord_edit(request,id):
                 print('>>>>>>>>>> operator', operator)
                 if operator == 'TC':
                     print('>>>>>>>>>> Desativar - order.id', order.id)                    
-                    simDeactivateTC(id=order.id)
+                    result = simDeactivateTC(id=order.id)
+                    if result == 'errorApiResult':
+                        print('>>>>>>>>>> Interromper processo', order.id)                    
+                        return
                 # Update SIM                
                 updateSIM()
             

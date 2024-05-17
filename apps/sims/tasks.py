@@ -39,7 +39,7 @@ def sims_in_orders():
                 
         if ord.id_sim != None:
             if ord.order_status == 'AS':
-                sim_put = Sims.objects.get(pk=sim_ds.id)
+                sim_put = Sims.objects.get(pk=id_id_i)
                 if esim_eua:
                     sim_put.sim_status = 'AI'
                 else:
@@ -155,6 +155,15 @@ def simActivateTC(id=None):
         orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date=today)
     else:
         orders_all = Orders.objects.get(pk=id)
+        
+    def errorAPI():
+        print('>>>>>>>>>> ERRO API')
+        # Change Status
+        UpdateOrder.upStatus(id_item,'ED')
+        # Add note
+        NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
+        error = 'errorApiResult'
+        return error
             
     for order in orders_all:
         
@@ -164,18 +173,32 @@ def simActivateTC(id=None):
         iccid = order.id_sim.sim
         dataDay = order.data_day
         
+        global endpointId
+        endpointId = None
+        global simStatus
+        simStatus = None
+        
         # Get tokem de acesso a API
-        tokenApi = ApiTC.get_token()
-        time.sleep(2)
+        try:
+            tokenApi = ApiTC.get_token()
+            time.sleep(2)
+        except:
+            errorAPI()
         ##
+        
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         headers = ApiTC.get_headers(tokenApi)
         time.sleep(2)
         
         # Get EndPointID / Status
-        get_iccid = ApiTC.get_iccid(iccid, headers)
-        endpointId = get_iccid[0]
-        simStatus = get_iccid[1]        
+        try:
+            get_iccid = ApiTC.get_iccid(iccid, headers)
+            endpointId = get_iccid[0]
+            simStatus = get_iccid[1]
+            print('>>>>>>>>>> endpointId',endpointId)
+            print('>>>>>>>>>> simStatus',simStatus)  
+        except:            
+            errorAPI()      
         ##
 
         # Variaveis globais
@@ -241,8 +264,16 @@ def simActivateTC(id=None):
             data = json.loads(res.read())
             resultCode = int(data["Response"]["resultCode"])
             resultDescription = data["Response"]["resultParam"]["resultDescription"]
+            try:
+                resultCode = int(data["Response"]["resultCode"])
+                resultDescription = data["Response"]["resultParam"]["resultDescription"]
+            except:
+                resultCode = None
+                resultDescription = None
+            
             print('>>>>>>>>>> resultCode', resultCode)
             print('>>>>>>>>>> resultDescription', resultDescription)
+            
             if resultCode == 0:
                 # Change Status
                 UpdateOrder.upStatus(id_item,'AT')
@@ -303,25 +334,50 @@ def simDeactivateTC(id=None):
         id_item = ord['id']
         iccid = ord['id_sim__sim']
         
+        global note
+        note = ''
+        global resultCode
+        resultCode = None
+        global resultDescription
+        resultDescription = None        
+        global endpointId
+        endpointId = None
+        global simStatus
+        simStatus = None
+        
+        def errorAPI():
+            print('>>>>>>>>>> ERRO API')
+            # Change Status
+            UpdateOrder.upStatus(id_item,'ED')
+            # Add note
+            NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
+            error = 'errorApiResult'
+            return error
+        
         # Get tokem de acesso a API
-        tokenApi = ApiTC.get_token()
-        time.sleep(2)
+        try:
+            tokenApi = ApiTC.get_token()
+            time.sleep(2)
+        except:
+            errorAPI()
         ##
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         headers = ApiTC.get_headers(tokenApi)
         time.sleep(2)
          
         # Get EndPointID / Status
-        get_iccid = ApiTC.get_iccid(iccid, headers)
-        endpointId = get_iccid[0]
-        simStatus = get_iccid[1]
-        print('>>>>>>>>>> endpointId',endpointId)
-        print('>>>>>>>>>> simStatus',simStatus)        
+        try:
+            get_iccid = ApiTC.get_iccid(iccid, headers)
+            endpointId = get_iccid[0]
+            simStatus = get_iccid[1]
+            print('>>>>>>>>>> endpointId',endpointId)
+            print('>>>>>>>>>> simStatus',simStatus)  
+        except:            
+            errorAPI()
+      
         ##
 
-        # Variaveis globais
-        global note
-        note = ''        
+        # Variaveis globais      
 
         payload = json.dumps({
             "Request": {
@@ -337,8 +393,13 @@ def simDeactivateTC(id=None):
             
         res = conn.getresponse()
         data = json.loads(res.read())
-        resultCode = int(data["Response"]["resultCode"])
-        resultDescription = data["Response"]["resultParam"]["resultDescription"]
+        try:
+            resultCode = int(data["Response"]["resultCode"])
+            resultDescription = data["Response"]["resultParam"]["resultDescription"]
+        except:
+            resultCode = None
+            resultDescription = None
+
         print('>>>>>>>>>> resultCode', resultCode)
         print('>>>>>>>>>> resultDescription', resultDescription)
         
