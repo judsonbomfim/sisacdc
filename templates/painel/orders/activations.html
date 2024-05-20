@@ -188,8 +188,6 @@
             </div>
         </div>    
     </div><!--End Row-->
-    </form>
-
 
     <div class="table-responsive">
         <table class="table mb-0 table-hover table-responsive">
@@ -216,8 +214,7 @@
                 <tr class="table-tr">
                     <td class="text-center">
                         <div class="userDatatable-content">
-                            <input class="checkItem form-check-input " type="checkbox" value="{{order.id}}"
-                                name="ord_id">
+                            <input class="checkItem form-check-input " type="checkbox" value="{{order.id}}" name="ord_id">
                         </div>
                     </td>
                     <td>
@@ -317,6 +314,10 @@
             </tbody>
         </table>
     </div>
+
+    </form>
+
+
     <nav aria-label="navigation">
         <ul class="pagination">
             {% if orders.has_previous %}

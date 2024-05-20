@@ -246,18 +246,14 @@ def orders_up_status(ord_id, ord_s, id_user):
         order.save()
         time.sleep(5)
         
-        if ord_s == 'CC' or ord_s == 'DS' or ord_s == 'RB':
+        if ord_s == 'CC' or ord_s == 'DS' or ord_s == 'RE':
             print('>>>>>>>>>> preparar para desativar reembolsado')
             if order.id_sim:                
                 # Change TC
                 print('>>>>>>>>>> order.id_sim.operator', order.id_sim.operator)
                 if order.id_sim.operator == 'TC':
                     print('>>>>>>>>>> Desativar - order.id', order.id)            
-                    result = simDeactivateTC(id=order.id)
-                    print('>>>>>>>>>> result', result)               
-                    if result == 'errorApiResult':
-                        print('>>>>>>>>>> Interromper processo', order.id)                    
-                        return
+                    simDeactivateTC(id=order.id)
                 
                 # Update SIM
                 sim_put = Sims.objects.get(pk=order.id_sim.id)

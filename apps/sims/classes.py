@@ -26,14 +26,15 @@ class ApiTC:
 
 
     # Set headers
-    @staticmethod
-    def get_headers(tokenApi):
+    @staticmethod    
+    def get_headers(token_api, cookie=None):
         headers = {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-Authorization': f'Bearer {tokenApi}',
-            'Cookie': 'Encrypt_cookies=rd20o00000000000000000000ffff0af30e15o12021'
+            'X-Authorization': f'Bearer {token_api}'
         }
+        if cookie is None:
+            headers['Cookie'] = 'Encrypt_cookies=rd20o00000000000000000000ffff0af30e15o12021'
         return headers
 
 

@@ -58,7 +58,7 @@ def orders_list(request):
             if ord_id and ord_s:
                 print('----------------------------------TAREFA')
 
-                orders_up_status.delay(ord_id, ord_s,id_user)
+                orders_up_status(ord_id, ord_s,id_user)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')     
@@ -219,10 +219,7 @@ def ord_edit(request,id):
                 order_put.save()
             else:       
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
-            
-        
-        print('>>>>>>>>>> ord_st', ord_st)
-            
+                        
         # Liberar SIMs
         if ord_st == 'CC' or ord_st == 'DS' or ord_st == 'RB':
             print('>>>>>>>>>> Liberar SIMs')
@@ -231,15 +228,11 @@ def ord_edit(request,id):
                 print('>>>>>>>>>> operator', operator)
                 if operator == 'TC':
                     print('>>>>>>>>>> Desativar - order.id', order.id)                    
-                    result = simDeactivateTC(id=order.id)
-                    if result == 'errorApiResult':
-                        print('>>>>>>>>>> Interromper processo', order.id)                    
-                        return
+                    simDeactivateTC(id=order.id)
+
                 # Update SIM                
                 updateSIM()
-            
-        print('>>>>>>>>>> passou desativação status')
-
+        
         
         # Se SIM preenchico
         if sim:
@@ -593,16 +586,32 @@ def orders_activations(request):
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
             id_user = request.user.id
-            
-            print('----------------------------------ord_id')
-            print(ord_id)
-            
-            if ord_id and ord_s:
-                          
-                orders_up_status.delay(ord_id, ord_s,id_user)
-                messages.success(request,f'Pedido(s) atualizado com sucesso!')
-            else:
-                messages.info(request,f'Você precisa marcar alguma opção')     
+
+            for order in ord_id:
+                                
+                order = Orders.objects.get(pk=order)
+                operator = order.id_sim.operator
+                print('>>>>>>>>>> order', order)
+                
+                # Liberar SIMs
+                if ord_s == 'CC' or ord_s == 'DS' or ord_s == 'RB':
+                    print('>>>>>>>>>> Liberar SIMs')
+                    if order.id_sim:
+                        # executar tarefa
+                        if operator == 'TC':
+                            simDeactivateTC(id=order.id)
+
+                        # Delete SIM in Order
+                        order_put = Orders.objects.get(pk=order.id)
+                        order_put.id_sim_id = ''
+                        order_put.save()
+                        
+                if ord_id and ord_s:
+                            
+                    orders_up_status.delay(ord_id, ord_s,id_user)
+                    messages.success(request,f'Pedido(s) atualizado com sucesso!')
+                else:
+                    messages.info(request,f'Você precisa marcar alguma opção')     
                
     
         # End up_status / POST
