@@ -204,16 +204,15 @@ CELERY_TIMEZONE = 'Europe/London'
 CELERY_BEAT_SCHEDULE = {
     'task__5_min_orders_auto': {
         'task': 'apps.orders.tasks.orders_auto',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(minute='*/5'),
     },
     'task__10_min_activate_TC': {
         'task': 'apps.sims.tasks.simActivateTC',
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab(minute='*/10'),
     },
         'task__deactivate_TC': {
         'task': 'apps.sims.tasks.simDeactivateTC',
-        # 'schedule': crontab( hour=23, minute=55),
-        'schedule': crontab(minute='*/1'),
+        'schedule': crontab( hour=23, minute=55),
     },
 }
 

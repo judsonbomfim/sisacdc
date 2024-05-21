@@ -290,12 +290,7 @@ def simActivateTC(id=None):
 
 @shared_task
 def simDeactivateTC(id=None):
-    
-    if id is not None:
-        print(f'O id fornecido é {id}')
-    else:
-        print('Nenhum id fornecido')
-        
+           
     # Timezone /Today
     london_tz = pytz.timezone('Europe/London')
     today = pd.Timestamp.now(tz=london_tz).date()
@@ -312,15 +307,11 @@ def simDeactivateTC(id=None):
     if not orders_all:
         print('>>>>>>>>>> Nenhum pedido para desativar')
         return
-    print('>>>>>>>>>> orders_all',orders_all)
     
     fields_df = ['id', 'order_id', 'id_sim__sim', 'days', 'activation_date']
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
-    print('>>>>>>>>>> orders_df 1',orders_df)
-    # orders_df['id'] = pd.to_numeric(orders_df['id'])
     orders_df['activation_date'] = pd.to_datetime(orders_df['activation_date'])
     orders_df['return_date'] = orders_df['activation_date'] + pd.to_timedelta(orders_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
-    # orders_df['return_date'] = pd.to_datetime(orders_df['return_date'])
     if id == None:
         orders_df = orders_df[orders_df['return_date'] == today]
 
@@ -409,8 +400,8 @@ def simDeactivateTC(id=None):
             if id == None:
                 print('>>>>>>>>>> Change Status')                
                 # Change Status                
-                UpdateOrder.upStatus(id_item,'CN')
-                StatusStore.upStatus(order_id,'completed')
+                UpdateOrder.upStatus(id_item,'DE')
+                StatusStore.upStatus(order_id,'desativado')
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
                 sim_put.sim_status = 'DE'
                 sim_put.save()
