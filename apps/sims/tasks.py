@@ -286,10 +286,8 @@ def simDeactivateTC(id=None):
     
     # Selecionar pedidos
     if id is None:
-        print('>>>>>>>>>> desativer SEM ID')
         orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC')
     else:
-        print('>>>>>>>>>> desativer COM ID')
         orders_all = Orders.objects.filter(pk=id)
         
     # Se não houver pedidos, encerre a execução
@@ -299,11 +297,8 @@ def simDeactivateTC(id=None):
     
     fields_df = ['id', 'order_id', 'id_sim__sim', 'days', 'activation_date']
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
-    print('>>>>>>>>>> orders_df 1',orders_df)
-    # orders_df['id'] = pd.to_numeric(orders_df['id'])
     orders_df['activation_date'] = pd.to_datetime(orders_df['activation_date'])
     orders_df['return_date'] = orders_df['activation_date'] + pd.to_timedelta(orders_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
-    # orders_df['return_date'] = pd.to_datetime(orders_df['return_date'])
     
     if id is None:
         orders_df = orders_df[orders_df['return_date'] == today]
@@ -348,9 +343,7 @@ def simDeactivateTC(id=None):
             headers = ApiTC.get_headers(token_api, cookie=True)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
-            simStatus = get_iccid[1]
-            print('>>>>>>>>>> endpointId',endpointId)
-            print('>>>>>>>>>> simStatus',simStatus)  
+            simStatus = get_iccid[1] 
         except Exception:            
             error_api()
             continue      
@@ -379,17 +372,12 @@ def simDeactivateTC(id=None):
             resultCode = None
             resultDescription = None
 
-        print('>>>>>>>>>> resultCode', resultCode)
-        print('>>>>>>>>>> resultDescription', resultDescription)
-        
         if resultCode == 0:
-            print('>>>>>>>>>> DESATIVADO')
-            print('>>>>>>>>>> id', id)
             if id is None:
                 print('>>>>>>>>>> Alterar status')                
                 # Alterar status                
-                UpdateOrder.upStatus(id_item,'CN')
-                StatusStore.upStatus(order_id,'completed')
+                UpdateOrder.upStatus(id_item,'DE')
+                StatusStore.upStatus(order_id,'desativado')
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
                 sim_put.sim_status = 'DE'
                 sim_put.save()

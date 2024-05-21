@@ -53,15 +53,7 @@ def orders_list(request):
             ord_s = request.POST.get('ord_staus')
             id_user = request.user.id
 
-            print('----------------------------------ord_id')
-
-            if ord_id and ord_s:
-                print('----------------------------------TAREFA')
-
-                orders_up_status(ord_id, ord_s,id_user)
-                messages.success(request,f'Pedido(s) atualizado com sucesso!')
-            else:
-                messages.info(request,f'Você precisa marcar alguma opção')     
+            orders_up_status.delay(ord_id, ord_s,id_user)                               
 
      # FIlters
 
@@ -221,24 +213,30 @@ def ord_edit(request,id):
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
                         
         # Liberar SIMs
-        if ord_st == 'CC' or ord_st == 'DS' or ord_st == 'RB':
+        if ord_st == 'CC' or ord_st == 'DE' or ord_st == 'RE':
             print('>>>>>>>>>> Liberar SIMs')
-            if order.id_sim:
-                # executar tarefa
-                print('>>>>>>>>>> operator', operator)
-                if operator == 'TC':
-                    print('>>>>>>>>>> Desativar - order.id', order.id)                    
+            if order.id_sim:                
+                # Change TC
+                if order.id_sim.operator == 'TC':
                     simDeactivateTC(id=order.id)
-
-                # Update SIM                
-                updateSIM()
-        
+                
+                # Update SIM
+                sim_put = Sims.objects.get(pk=order.id_sim.id)
+                sim_put.sim_status = 'DE'
+                sim_put.save()
+                
+                if order.product != 'chip-internacional-eua':
+                    # Deletar eSIM para site                            
+                    ApiStore.updateEsimStore(order_id)
+       
+                # Delete SIM in Order
+                order_put = Orders.objects.get(pk=order_id)
+                order_put.id_sim_id = ''
+                order_put.save()        
         
         # Se SIM preenchico
         if sim:
             # Verificar se Operadora e Tipo de SIM estão marcados
-            # if type_sim =='esim':
-            #     msg_error.append(f'Não é possível adicionar um eSIM desta forma')
             if operator != None and type_sim != None:
                 if order.id_sim:
                     # Alterar status no sistema e no site
@@ -587,32 +585,8 @@ def orders_activations(request):
             ord_s = request.POST.get('ord_staus')
             id_user = request.user.id
 
-            for order in ord_id:
-                                
-                order = Orders.objects.get(pk=order)
-                operator = order.id_sim.operator
-                print('>>>>>>>>>> order', order)
-                
-                # Liberar SIMs
-                if ord_s == 'CC' or ord_s == 'DS' or ord_s == 'RB':
-                    print('>>>>>>>>>> Liberar SIMs')
-                    if order.id_sim:
-                        # executar tarefa
-                        if operator == 'TC':
-                            simDeactivateTC(id=order.id)
+            orders_up_status.delay(ord_id, ord_s,id_user)                        
 
-                        # Delete SIM in Order
-                        order_put = Orders.objects.get(pk=order.id)
-                        order_put.id_sim_id = ''
-                        order_put.save()
-                        
-                if ord_id and ord_s:
-                            
-                    orders_up_status.delay(ord_id, ord_s,id_user)
-                    messages.success(request,f'Pedido(s) atualizado com sucesso!')
-                else:
-                    messages.info(request,f'Você precisa marcar alguma opção')     
-               
     
         # End up_status / POST
 
