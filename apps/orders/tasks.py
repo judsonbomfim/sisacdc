@@ -252,24 +252,18 @@ def orders_up_status(ord_id, ord_s, id_user):
                 # Change TC
                 print('>>>>>>>>>> order.id_sim.operator', order.id_sim.operator)
                 if order.id_sim.operator == 'TC':
-                    print('>>>>>>>>>> Desativar - order.id', order.id)            
                     result = simDeactivateTC(id=order.id)
                     print('>>>>>>>>>> result', result)               
                     if result == 'errorApiResult':
-                        print('>>>>>>>>>> Interromper processo', order.id)                    
                         return
                 
                 # Update SIM
-                sim_put = Sims.objects.get(pk=order.id_sim.id)
-                if order.id_sim.type_sim == 'esim':
-                    sim_put.sim_status = 'TC'
-                    if order.product != 'chip-internacional-eua':
-                        # Deletar eSIM para site                            
-                        ApiStore.updateEsimStore(order_id)
-                else:
-                    sim_put.sim_status = 'TC'
-                sim_put.save()
-                    
+                sim_put = Sims.objects.get(pk=order.id_sim.id)                
+                sim_put.sim_status = 'DE'
+                sim_put.save()                
+                if order.product != 'chip-internacional-eua':
+                    # Deletar eSIM para site                            
+                    ApiStore.updateEsimStore(order_id)                    
                 # Delete SIM in Order
                 order_put = Orders.objects.get(pk=order_id)
                 order_put.id_sim_id = ''
@@ -296,6 +290,7 @@ def orders_up_status(ord_id, ord_s, id_user):
         
         # Status sis : Status Loja
         status_sis_site = StatusStore.st_sis_site()
+        # Só desativar quando os itens do pedido estiverem todos cancelados
         if order_itens == 0 and ord_s == 'CC':
             print('--------------------------- Alterar STATUS Cancelled')         
             update_store = {
