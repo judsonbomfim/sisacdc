@@ -584,9 +584,17 @@ def orders_activations(request):
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
             id_user = request.user.id
-
-            orders_up_status.delay(ord_id, ord_s,id_user)                        
-
+            
+            print('----------------------------------ord_id')
+            print(ord_id)
+            
+            if ord_id and ord_s:
+                          
+                orders_up_status.delay(ord_id, ord_s,id_user)
+                messages.success(request,f'Pedido(s) atualizado com sucesso!')
+            else:
+                messages.info(request,f'Você precisa marcar alguma opção')     
+               
     
         # End up_status / POST
 
