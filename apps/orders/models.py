@@ -5,6 +5,7 @@ from apps.sims.models import Sims
 PRODUCT = [
     ('chip-internacional-eua', 'USA'),
     ('chip-internacional-eua-e-canada', 'USA/CANADA'),
+    ('chip-internacional-eua-canada-e-mexico', 'USA/CAN/MEX'),
     ('chip-internacional-europa', 'EUROPA'),
     ('chip-internacional-global', 'GLOBAL')
 ]
@@ -25,9 +26,11 @@ ORDER_STATUS = [
     ('AT', 'Ativado'),
     ('CC', 'Cancelado'),
     ('CN', 'Concluido'),
-    ('DS', 'Desativado'),
-    ('ES', 'Em Separação'),
+    ('DE', 'Desativado'),
+    ('EA', 'Erro Ativação'),
+    ('ED', 'Erro Desativação'),
     ('EE', 'Enviar E-mail'),
+    ('ES', 'Em Separação'),
     ('MB', 'Motoboy'),
     ('PR', 'Processando'),
     ('RE', 'Reembolsar'),

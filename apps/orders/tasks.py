@@ -2,13 +2,13 @@ from django.contrib.auth.models import User
 from celery import shared_task
 from django.utils.text import slugify
 from datetime import datetime, timedelta
-from .classes import ApiStore, StatusSis, DateFormats
+from .classes import ApiStore, StatusStore, DateFormats
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 import getpass
 import time
-from apps.sims.tasks import sims_in_orders
+from apps.sims.tasks import sims_in_orders, simDeactivateTC
 from apps.send_email.tasks import send_email_sims
 from apps.voice_calls.tasks import number_in_voice
 
@@ -149,9 +149,9 @@ def order_import():
                     except:
                         msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
                     
-                    id_user = None
-                    if getpass.getuser():
-                        id_user = getpass.getuser()
+                    # id_user = None
+                    # if getpass.getuser():
+                    #     id_user = getpass.getuser()
                     
                     # Save Notes
                     add_sim = Notes( 
@@ -182,7 +182,7 @@ def order_import():
                     
                     # Alterar status
                     # Status sis : Status Loja
-                    status_def_sis = StatusSis.st_sis_site()
+                    status_def_sis = StatusStore.st_sis_site()
                     if order_status_i in status_def_sis:
                         status_ped = {
                             'status': status_def_sis[order_status_i]
@@ -207,6 +207,7 @@ def order_import():
     else:
         print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
+
 @shared_task
 def orders_auto():
     print('-----------------orders_auto')
@@ -214,9 +215,10 @@ def orders_auto():
     time.sleep(20)
     sims_in_orders.delay()
     time.sleep(20)
-    send_email_sims.delay()
-    time.sleep(20)
     number_in_voice.delay()
+    time.sleep(60)
+    send_email_sims.delay()
+
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user):
@@ -244,12 +246,23 @@ def orders_up_status(ord_id, ord_s, id_user):
         order.save()
         time.sleep(5)
         
-        if ord_s == 'CC' or ord_s == 'DS':
-            if order.id_sim:
+        if ord_s == 'CC' or ord_s == 'DS' or ord_s == 'RB':
+            print('>>>>>>>>>> preparar para desativar reembolsado')
+            if order.id_sim:                
+                # Change TC
+                print('>>>>>>>>>> order.id_sim.operator', order.id_sim.operator)
+                if order.id_sim.operator == 'TC':
+                    print('>>>>>>>>>> Desativar - order.id', order.id)            
+                    result = simDeactivateTC(id=order.id)
+                    print('>>>>>>>>>> result', result)               
+                    if result == 'errorApiResult':
+                        print('>>>>>>>>>> Interromper processo', order.id)                    
+                        return
+                
                 # Update SIM
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
                 if order.id_sim.type_sim == 'esim':
-                    sim_put.sim_status = 'DS'
+                    sim_put.sim_status = 'TC'
                     if order.product != 'chip-internacional-eua':
                         # Deletar eSIM para site                            
                         ApiStore.updateEsimStore(order_id)
@@ -261,16 +274,18 @@ def orders_up_status(ord_id, ord_s, id_user):
                 order_put = Orders.objects.get(pk=order_id)
                 order_put.id_sim_id = ''
                 order_put.save()
+            
                 
-                # Edit Voice
-                if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
-                    voice_d = VoiceCalls.objects.get(id_item=order_id)
-                    num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)
-                    
-                    num_s.number_status = 'DS'
-                    num_s.save()                  
-                    
-                    voice_d.delete()
+            # Edit Voice
+            if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
+                voice_d = VoiceCalls.objects.get(id_item=order_id)
+                num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)
+                
+                num_s.number_status = 'DS'
+                num_s.save()
+                
+                voice_d.delete()
+            
         
         # Ver. Status Cancelled in items
         order_itens = 0
@@ -280,7 +295,7 @@ def orders_up_status(ord_id, ord_s, id_user):
                 order_itens += 1 
         
         # Status sis : Status Loja
-        status_sis_site = StatusSis.st_sis_site()
+        status_sis_site = StatusStore.st_sis_site()
         if order_itens == 0 and ord_s == 'CC':
             print('--------------------------- Alterar STATUS Cancelled')         
             update_store = {

@@ -190,22 +190,25 @@
                     <td>
                         <div class="userDatatable-content">
                             {% if order.cell_mod %}
-                            <a href="#"><i class="bi bi-phone text-primary" data-bs-toggle="popover"
-                                    data-bs-placement="top" data-bs-custom-class="custom-popover"
+                                <i class="bi bi-phone text-primary"
+                                    style="cursor: pointer;"
+                                    data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top"
                                     data-bs-content="{{order.cell_mod}}">
-                                </i></a>
+                                </i>
                             {% endif %}
                             {% if order.cell_imei %}
-                            <a href="#"><i class="bi bi-phone text-secondary" data-bs-toggle="popover"
-                                    data-bs-placement="top" data-bs-custom-class="custom-popover"
+                                <i class="bi bi-phone text-secondary"
+                                    style="cursor: pointer;" 
+                                    data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top"
                                     data-bs-content="IMEI - {{order.cell_imei}}">
-                                </i></a>
+                                </i>
                             {% endif %}
                             {% if order.cell_eid %}
-                            <a href="#"><i class="bi bi-phone text-secondary" data-bs-toggle="popover"
-                                    data-bs-placement="top" data-bs-custom-class="custom-popover"
+                                <i class="bi bi-phone text-secondary" 
+                                    style="cursor: pointer;" 
+                                    data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top"
                                     data-bs-content="EID - {{order.cell_eid}}">
-                                </i></a>
+                                </i>
                             {% endif %}
                         </div>
                     </td>

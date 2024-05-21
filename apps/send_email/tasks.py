@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from apps.orders.models import Orders, Notes
-from apps.orders.classes import ApiStore, StatusSis
+from apps.orders.classes import ApiStore, StatusStore
 from apps.voice_calls.models import VoiceCalls
 from apps.voice_calls.classes import NumberFormatter
 
@@ -84,7 +84,7 @@ def send_email_sims(id=None):
                 order.save()
                 # Update Store
                 apiStore = ApiStore.conectApiStore()
-                status_def_sis = StatusSis.st_sis_site()            
+                status_def_sis = StatusStore.st_sis_site()            
                 update_store = {
                     'status': status_def_sis['AA']
                 }
@@ -156,7 +156,7 @@ def send_email_voice(id=None):
         email.attach_alternative(html_content, "text/html")
         email.send()
         
-        if order_st != 'CN':
+        if order_st == 'EE':
             # Update Voice
             voice_s = VoiceCalls.objects.get(pk=id_voice)
             voice_s.call_status = 'AA'
