@@ -260,11 +260,7 @@ def orders_up_status(ord_id, ord_s, id_user):
                 if order.product != 'chip-internacional-eua':
                     # Deletar eSIM para site                            
                     ApiStore.updateEsimStore(order_id)
-       
-                # Delete SIM in Order
-                order_put = Orders.objects.get(pk=order_id)
-                order_put.id_sim_id = ''
-                order_put.save()
+
             
                 
             # Edit Voice
