@@ -285,7 +285,7 @@ def simDeactivateTC(id=None):
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC')
+        orders_all = Orders.objects.filter(id_sim__operator='TC')
     else:
         orders_all = Orders.objects.filter(pk=id)
         
