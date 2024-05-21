@@ -116,6 +116,6 @@ def number_in_voice():
         number_s.number_status = 'AT'
         number_s.save()
         update_password.delay(number_id=[number_s.id])
-        time.sleep(5)
+        time.sleep(2)
         #send email
         # send_email_voice.delay(id_vox)

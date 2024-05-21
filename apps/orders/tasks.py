@@ -212,11 +212,11 @@ def order_import():
 def orders_auto():
     print('-----------------orders_auto')
     order_import.delay()
-    time.sleep(20)
+    time.sleep(5)
     sims_in_orders.delay()
-    time.sleep(20)
+    time.sleep(5)
     number_in_voice.delay()
-    time.sleep(60)
+    time.sleep(10)
     send_email_sims.delay()
 
 
