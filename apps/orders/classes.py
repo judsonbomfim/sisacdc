@@ -50,7 +50,7 @@ class StatusStore():
             'AS': 'em-separacao',
             'AT': 'ativado',
             'CN': 'completed',      
-            'DS': 'completed',      
+            'DS': 'desativado',      
             'ES': 'em-separacao',
             'MB': 'motoboy',
             'RE': 'reembolsar',
