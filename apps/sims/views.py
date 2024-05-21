@@ -5,13 +5,14 @@ from django.http import HttpResponse
 from django.urls import reverse
 import csv
 import os
+import imghdr
 from datetime import date
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from apps.sims.models import Sims
 from apps.orders.models import Orders
-from apps.orders.views import ApiStore, StatusSis
+from apps.orders.views import ApiStore, StatusStore
 import boto3
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -34,6 +35,7 @@ def upload_file_to_s3(file):
     return default_storage.url(file_path)
 
 @login_required(login_url='/login/')
+@has_permission_decorator('view_sims')
 def sims_list(request):
     global sims_l
     sims_l = ''
@@ -127,10 +129,17 @@ def sims_list(request):
     return render(request, 'painel/sims/index.html', context)
 
 @login_required(login_url='/login/')
+@has_permission_decorator('add_sims')
 def sims_add_sim(request):
     if request.method == "GET":
         
-        return render(request, 'painel/sims/add-sim.html')
+        url_cdn = settings.URL_CDN
+        
+        context = {
+            'url_cdn': url_cdn,
+        }
+        
+        return render(request, 'painel/sims/add-sim.html', context)
         
     if request.method == 'POST':
         
@@ -181,11 +190,12 @@ def sims_add_sim(request):
             return render(request, 'painel/sims/add-sim.html')
 
 @login_required(login_url='/login/')
+@has_permission_decorator('edit_sims')
 def sims_add_esim(request):
     if request.method == "GET":
         
         return render(request, 'painel/sims/add-esim.html')
-        
+    
     if request.method == 'POST':
                 
         type_sim = request.POST.get('type_sim')
@@ -199,13 +209,18 @@ def sims_add_esim(request):
         
         for sim_img in esims:
             sim_i = sim_img.name.split('.')
-            # # Save image
-            # fs = FileSystemStorage()
-            # file = fs.save(sim_img.name, sim_img)
-            # fileurl = fs.url(file)
             
-            fileurl = upload_file_to_s3(sim_img)
-            fileurl = fileurl.replace(settings.URL_CDN,'')
+            print(sim_img.name)
+            print(sim_img)
+            
+            fileurl = ''
+            if imghdr.what(sim_img):
+                fileurl = upload_file_to_s3(sim_img)
+                fileurl = fileurl.replace(settings.URL_CDN,'')
+            else:
+                messages.error(request,'O arquivo não é uma imagem. Verifique por favor!')
+                return render(request, 'painel/sims/add-esim.html')           
+
             
             sims_all = Sims.objects.all().filter(sim=sim_i[0]).filter(type_sim='esim')
             if sims_all:
@@ -222,9 +237,9 @@ def sims_add_esim(request):
 
         messages.success(request,'Lista gravada com sucesso')
         return render(request, 'painel/sims/add-esim.html')
-   
 
 @login_required(login_url='/login/')
+@has_permission_decorator('add_ord_sims')
 def sims_ord(request):
     if request.method == "GET":
         return render(request, 'painel/sims/sim-order.html')
@@ -237,6 +252,7 @@ def sims_ord(request):
     return render(request, 'painel/sims/sim-order.html')
 
 @login_required(login_url='/login/')
+@has_permission_decorator('export_activations')
 def exportSIMs(request):
     
     sims_all = Sims.objects.all().order_by('id')
@@ -258,7 +274,7 @@ def exportSIMs(request):
 
     return response
 
-login_required(login_url='/login/')
+@login_required(login_url='/login/')
 def delSIMs(request):
     orders = Orders.objects.all()
     
@@ -277,11 +293,65 @@ def delSIMs(request):
     
     return HttpResponse('SIMs deletados com sucesso')
 
-def corectLinkSIm(request):
-    sims = Sims.objects.all()
+@login_required(login_url='/login/')
+def delSimTC(request):
+    list_icc = {
+        '8932042000002327335',
+        '8932042000002327334',
+        '8932042000002327333',
+        '8932042000002327332',
+        '8932042000002327331',
+        '8932042000002327330',
+        '8932042000002327329',
+        '8932042000002327328',
+        '8932042000002327327',
+        '8932042000002327326',
+    }
+    
+    sims = Sims.objects.filter(type_sim='esim', operator='TC')
+    
     for sim in sims:
-        if sim.link:
-            link = sim.link.replace('https://cdn.simpaxx.com.br','')
-            sim.link = link
-            sim.save()
-    return HttpResponse('Links corrigidos com sucesso')
+        sim_iccid = sim.sim
+        if sim_iccid not in list_icc:
+            sim.orders_set.all().update(id_sim=None)  # Set foreign key to NULL in related Order objects
+            sim.delete()
+            print(f'SIM {sim_iccid} deletado com sucesso!')
+        else:
+            print(f'SIM {sim_iccid} não deletado!')
+    
+    print('>>>>>>>>>>>>>>>>>>> FINALIZADO')
+    return HttpResponse('SIMs deletados com sucesso')
+
+
+# @login_required(login_url='/login/')
+# def verify_sim(request):
+#     simsAT = Sims.objects.all().filter(sim_status='AT').filter(type_sim='sim')
+#     simsDS = Sims.objects.all().filter(sim_status='DS').filter(type_sim='sim')
+#     simsTC = Sims.objects.all().filter(sim_status='TC')
+#     orders = Orders.objects.all()
+
+#     print('>>>>>> SIMs Ativados sem pedidos')
+#     print('----------------------------------')
+#     for simAT in simsAT:    
+#         if orders.filter(id_sim__sim=simAT.sim):
+#             continue
+#         else:
+#             print(simAT.sim,simAT.type_sim)
+            
+#     print('>>>>>> SIMs Disponíveis com pedidos')
+#     print('----------------------------------')
+#     for simDS in simsDS:
+#         if orders.filter(id_sim__sim=simDS.sim):
+#             print(simDS.sim,simDS.type_sim)
+#         else:
+#             continue
+    
+#     print('>>>>>> SIMs Troca com pedidos')
+#     print('----------------------------------')
+#     for simTC in simsTC:
+#         if orders.filter(id_sim__sim=simTC.sim):
+#             print(simTC.sim,simDS.type_sim)
+#         else:
+#             continue
+            
+#     return HttpResponse('Links corrigidos com sucesso')

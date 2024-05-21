@@ -40,7 +40,7 @@ class ApiStore():
         apiStore = ApiStore.conectApiStore()
         apiStore.put(f'orders/{order_id}', update_store).json() 
 
-class StatusSis():
+class StatusStore():
     @staticmethod
     def st_sis_site():
         status_sis_site = {
@@ -48,8 +48,9 @@ class StatusSis():
             'AE': 'agd-envio',
             'AG': 'agencia',
             'AS': 'em-separacao',
-            'CC': 'cancelled',
-            'CN': 'completed',        
+            'AT': 'ativado',
+            'CN': 'completed',      
+            'DS': 'desativado',      
             'ES': 'em-separacao',
             'MB': 'motoboy',
             'RE': 'reembolsar',
@@ -57,6 +58,15 @@ class StatusSis():
             'RT': 'retirada',
         }
         return status_sis_site
+    
+    @staticmethod
+    def upStatus(order_id,order_st):
+        apiStore = ApiStore.conectApiStore()
+        update_store = {
+                'status': order_st
+            }
+        apiStore.put(f'orders/{order_id}', update_store).json()
+        
 
 class DateFormats():
     # Date - 2023-05-16T18:40:27
@@ -82,3 +92,21 @@ class DateFormats():
         dia = dma[8:10]
         data_dma = f'{dia}/{mes}/{ano}'
         return data_dma
+
+class NotesAdd():
+    @staticmethod
+    def addNote(id_item,note,id_user=None,type_note='S'):
+        add_sim = Notes( 
+            id_item = id_item,
+            id_user = id_user,
+            note = note,
+            type_note = type_note,
+        )
+        add_sim.save()
+
+class UpdateOrder():
+    @staticmethod
+    def upStatus(order_id,order_st):
+        order = Orders.objects.get(pk=order_id)
+        order.order_status = order_st
+        order.save()

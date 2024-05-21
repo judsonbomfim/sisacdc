@@ -9,6 +9,7 @@ urlpatterns = [
     path('enviar/esims/', views.send_esims, name='send_esims'),
     path('ativacoes/', views.orders_activations, name='orders_activations'),
     path('ativacoes/exportar', views.ord_export_act, name='ord_export_act'),
+    path('esim_eua', views.esim_eua, name='esim_eua'),
     
     # path('texto/', views.textImg, name='text_img'),
     # path('esimstore/', views.esimExpSis, name='esimstore'),

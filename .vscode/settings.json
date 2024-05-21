@@ -1,0 +1,15 @@
+{
+    "remote.autoForwardPortsFallback": 0,
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "dbsisacdc",
+            "database": "dbsisacdc",
+            "username": "postgres",
+            "password": "root"
+        }
+    ]
+}
