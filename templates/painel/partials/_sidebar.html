@@ -47,11 +47,9 @@
                         <i class="toggle-icon bi bi-plus-circle text-light"></i>
                     </a>
                     <ul>
-                        {% if request.user|can:'list_activations' %}
                         <li class="{% urL_active request '/pedidos/ativacoes/' %}">
                             <a href="{% url 'orders_activations' %}">Listar Ativações</a>
                         </li>
-                        {% endif %}
                         {% if request.user|can:'export_activations' %}
                         <li class="{% urL_active request '/pedidos/exportar/' %}">
                             <a href="{% url 'ord_export_op' %}">Exportar para Ativação</a>
@@ -61,6 +59,7 @@
                 </li>
                 {% endif %}
 
+                {% if request.user|can:'view_sims' %}
                 <li class="has-child open">
                     <a>
                         <i class="nav-icon bi bi-sim"></i>
@@ -82,7 +81,31 @@
                         </li>
                     </ul>
                 </li>
-
+                {% endif %}
+                {% if request.user|can:'view_voice' %}
+                <li class="has-child open">
+                    <a>
+                        <i class="nav-icon bi bi-telephone"></i>
+                        <span class="menu-text">Chamadas de Voz</span>
+                        <i class="toggle-icon bi bi-plus-circle text-light"></i>
+                    </a>
+                    <ul>
+                        <li class="{% urL_active request '/voz/listar/' %}">
+                            <a href="{% url 'voice_index' %}">Listar Voz</a>
+                        </li>
+                        {% if request.user|can:'list_number' %}
+                        <li class="{% urL_active request '/voz/listar/numeros/' %}">
+                            <a href="{% url 'mumber_list' %}">Listar Linhas</a>
+                        </li>
+                        {% endif %}
+                        {% if request.user|can:'import_voice' %}
+                        <li class="{% urL_active request '/voz/importar/' %}">
+                            <a href="{% url 'voice_import' %}">Adicionar Linhas</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>

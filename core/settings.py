@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import boto3
 from django.contrib.messages import constants as messages
+from celery.schedules import crontab
 from datetime import timedelta
 from dotenv import load_dotenv
 load_dotenv()
@@ -41,11 +42,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'storages',
     'rolepermissions',
+    'django_celery_beat',
     'apps.orders.apps.OrdersConfig',
     'apps.sims.apps.SimsConfig',
     'apps.dashboard.apps.DashboardConfig',
     'apps.users.apps.UsersConfig',
     'apps.send_email.apps.SendEmailConfig',
+    'apps.voice_calls.apps.VoiceCallsConfig',
 ]
 
 MIDDLEWARE = [
@@ -124,28 +127,21 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
-DATE_INPUT_FORMATS = ('%d-%m-%Y')
+DATE_INPUT_FORMATS = ('%d/%m/%Y',)
 USE_I18N = True
 USE_L10N = True
 USE_TZ = False
+
+DATE_FORMAT = '%d/%m/%Y'
 
 DATA_UPLOAD_MAX_NUMBER_FILES = 1000
 
 # Expirar sessão em 10h
 SESSION_COOKIE_AGE = 36000
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-# STATIC_URL = 'static/'
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'core/static')
-# ]
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
-# # Media
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# MEDIA_URL = "/media/"
+URL_PAINEL = str(os.getenv('URL_PAINEL'))
+URL_CDN = 'https://'+str(os.getenv('URL_CDN'))
 
 
 AWS_ACCESS_KEY_ID = str(os.getenv('AWS_ACCESS_KEY_ID'))
@@ -195,17 +191,34 @@ EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = str(os.getenv('DEFAULT_FROM_EMAIL'))
 
 
-URL_PAINEL = str(os.getenv('URL_PAINEL'))
-URL_CDN = str(os.getenv('URL_CDN'))
+# CELERY
 
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_BROKER_URL = str(os.getenv('CELERY_BROKER_URL'))
+CELERY_RESULT_BACKEND = str(os.getenv('CELERY_RESULT_BACKEND'))
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+CELERY_TIMEZONE = 'Europe/London'
 
 CELERY_BEAT_SCHEDULE = {
-    'task__orders_auto': {
+    'task__5_min_orders_auto': {
         'task': 'apps.orders.tasks.orders_auto',
-        'schedule': timedelta(seconds=300),
+        'schedule': crontab(minute='*/5'),
+    },
+    'task__5_min_activate_TC': {
+        'task': 'apps.sims.tasks.simActivateTC',
+        'schedule': crontab(minute='2-59/5'),
+    },
+        'task__deactivate_TC': {
+        'task': 'apps.sims.tasks.simDeactivateTC',
+        'schedule': crontab( hour=23, minute=55),
     },
 }
+
+
+# API TELCON
+
+APITC_USERNAME = str(os.getenv('APITC_USERNAME'))
+APITC_PASSWORD = str(os.getenv('APITC_PASSWORD'))
+APITC_HTTPCONN = str(os.getenv('APITC_HTTPCONN'))

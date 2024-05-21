@@ -1,16 +1,16 @@
+from django.contrib.auth.models import User
 from celery import shared_task
 from django.utils.text import slugify
 from datetime import datetime, timedelta
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from rolepermissions.decorators import has_permission_decorator
-from .classes import ApiStore, StatusSis, DateFormats
+from .classes import ApiStore, StatusStore, DateFormats
 from apps.orders.models import Orders, Notes
+from apps.sims.models import Sims
+from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 import getpass
-from celery import chain
 import time
-from apps.sims.tasks import sims_in_orders
+from apps.sims.tasks import sims_in_orders, simDeactivateTC
 from apps.send_email.tasks import send_email_sims
+from apps.voice_calls.tasks import number_in_voice
 
 @shared_task
 def order_import():
@@ -149,9 +149,9 @@ def order_import():
                     except:
                         msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
                     
-                    id_user = None
-                    if getpass.getuser():
-                        id_user = getpass.getuser()
+                    # id_user = None
+                    # if getpass.getuser():
+                    #     id_user = getpass.getuser()
                     
                     # Save Notes
                     add_sim = Notes( 
@@ -160,11 +160,29 @@ def order_import():
                         note = f'Pedido importado para o sistema',
                         type_note = 'S',
                     )
-                    add_sim.save()                       
+                    add_sim.save()
+                    
+                    # Insert Voice Calls
+                    if calls_i == True:
+                        
+                        add_voice = VoiceCalls(
+                            id_item = Orders.objects.get(pk=order_add.id),
+                            call_status = 'PR'
+                        )
+                        add_voice.save()
+                    
+                        # Save Notes
+                        add_sim = Notes( 
+                            id_item = Orders.objects.get(pk=order_add.id),
+                            id_user = None,
+                            note = f'Chamada de Voz Criada',
+                            type_note = 'S',
+                        )
+                        add_sim.save()
                     
                     # Alterar status
                     # Status sis : Status Loja
-                    status_def_sis = StatusSis.st_sis_site()
+                    status_def_sis = StatusStore.st_sis_site()
                     if order_status_i in status_def_sis:
                         status_ped = {
                             'status': status_def_sis[order_status_i]
@@ -189,11 +207,130 @@ def order_import():
     else:
         print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
+
 @shared_task
 def orders_auto():
-    
+    print('-----------------orders_auto')
     order_import.delay()
     time.sleep(20)
     sims_in_orders.delay()
     time.sleep(20)
+    number_in_voice.delay()
+    time.sleep(60)
     send_email_sims.delay()
+
+
+@shared_task
+def orders_up_status(ord_id, ord_s, id_user):
+
+    ord_id = ord_id
+    ord_s = ord_s
+    
+    for o_id in ord_id:
+        
+        print('-----------------o_id')
+        print(o_id)
+        
+        order = Orders.objects.get(pk=o_id)
+        user = User.objects.get(pk=id_user)
+        
+        order_id = order.id
+        order_st = order.order_status
+        order_plan = order.get_product_display()
+        try: type_sim = order.id_sim.type_sim
+        except: type_sim = 'esim'
+        apiStore = ApiStore.conectApiStore()
+
+        # Save status System
+        order.order_status = ord_s
+        order.save()
+        
+        if ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE':
+            print('>>>>>>>>>> preparar para desativar reembolsado')
+            if order.id_sim:                
+                # Change TC
+                if order.id_sim.operator == 'TC':
+                    simDeactivateTC(id=order.id)
+                
+                # Update SIM
+                sim_put = Sims.objects.get(pk=order.id_sim.id)
+                sim_put.sim_status = 'DE'
+                sim_put.save()
+                
+                if order.product != 'chip-internacional-eua':
+                    # Deletar eSIM para site                            
+                    ApiStore.updateEsimStore(order_id)
+       
+                # Delete SIM in Order
+                order_put = Orders.objects.get(pk=order_id)
+                order_put.id_sim_id = ''
+                order_put.save()
+            
+                
+            # Edit Voice
+            if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
+                voice_d = VoiceCalls.objects.get(id_item=order_id)
+                num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)
+                
+                num_s.number_status = 'DS'
+                num_s.save()
+                
+                voice_d.delete()
+        
+        # Ver. Status Cancelled in items
+        order_itens = 0
+        order_ver = Orders.objects.filter(order_id=order.order_id)
+        for ord_v in order_ver:
+            if ord_v.order_status != 'CC':
+                order_itens += 1 
+        
+        # Status sis : Status Loja
+        status_sis_site = StatusStore.st_sis_site()
+        # Só cancelar se todos os itens estiverem cancelados
+        if order_itens == 0 and ord_s == 'CC':
+            print('--------------------------- Alterar STATUS Cancelled')         
+            update_store = {
+                'status': 'cancelled'
+            }
+            apiStore.put(f'orders/{order.order_id}', update_store).json()
+        elif ord_s != 'CC':
+            print('--------------------------- Alterar STATUS Loja')            
+            if ord_s in status_sis_site:
+                update_store = {
+                    'status': status_sis_site[ord_s]
+                }
+                apiStore.put(f'orders/{order.order_id}', update_store).json()
+                
+        # Save Notes
+        def addNote(t_note):
+            add_sim = Notes( 
+                id_item = Orders.objects.get(pk=order.id),
+                id_user = user,
+                note = t_note,
+                type_note = 'S',
+            )
+            add_sim.save()
+        
+        ord_status = Orders.order_status.field.choices
+        for st in ord_status:
+            if order_st == st[0] :
+                addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
+        
+        # Enviar email
+        if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
+            send_email_sims.delay(id=order.id)
+
+
+@shared_task
+def check_esim_eua():
+    
+    orders_all = Orders.objects.all().filter(type_sim='esim').filter(product='chip-internacional-eua')
+    
+    count = 0
+    for ord in orders_all:
+        order_put = Orders.objects.get(pk=ord.id)
+        order_put.id_sim_id = 0            
+        order_put.save()
+        
+        count+=1
+        print(f'>>>>>>>>>>>>>>> Pedido {ord.order_id} atualizado com sucesso. TOTAL: {count}')
