@@ -275,7 +275,7 @@ def ord_edit(request,id):
                 msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         else:
             # Troca de SIM
-            if order.id_sim:
+            if order.id_sim is not None:
                 if order.id_sim.operator != operator or order.id_sim.type_sim != type_sim or up_oper != None:
                     updateSIM()
                     insertSIM(ord_st)
