@@ -267,7 +267,7 @@ def ord_edit(request,id):
                     add_sim.save()
                 
                     # Update order
-                    order_put = Orders.objects.get(pk=order.id)
+                    order_put = order
                     order_put.id_sim_id = add_sim.id
                     order_put.save()
                     up_plan = True # verificação para nota
