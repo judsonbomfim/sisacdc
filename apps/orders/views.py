@@ -215,7 +215,7 @@ def ord_edit(request,id):
         # Liberar SIMs
         if ord_st == 'CC' or ord_st == 'DE' or ord_st == 'RE':
             print('>>>>>>>>>> Liberar SIMs')
-            if order.id_sim:                
+            if order.id_sim is not None:
                 # Change TC
                 if order.id_sim.operator == 'TC':
                     simDeactivateTC(id=order.id)
@@ -226,13 +226,13 @@ def ord_edit(request,id):
                 sim_put.save()
                 
                 if order.product != 'chip-internacional-eua':
-                    # Deletar eSIM para site                            
+                    # Deletar eSIM para site
                     ApiStore.updateEsimStore(order_id)
        
                 # Delete SIM in Order
                 order_put = Orders.objects.get(pk=order_id)
                 order_put.id_sim_id = ''
-                order_put.save()        
+                order_put.save()
         
         # Se SIM preenchico
         if sim:
