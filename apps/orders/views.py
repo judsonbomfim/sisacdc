@@ -230,7 +230,7 @@ def ord_edit(request,id):
                     ApiStore.updateEsimStore(order_id)
        
                 # Delete SIM in Order
-                order_put = Orders.objects.get(pk=order_id)
+                order_put = order
                 order_put.id_sim_id = ''
                 order_put.save()
         
