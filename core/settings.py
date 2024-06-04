@@ -198,6 +198,7 @@ CELERY_RESULT_BACKEND = str(os.getenv('CELERY_RESULT_BACKEND'))
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_BEAT_SYNC_EVERY = 300
 
 CELERY_TIMEZONE = 'Europe/London'
 
@@ -209,13 +210,11 @@ CELERY_BEAT_SCHEDULE = {
     'task__5_min_activate_TC': {
         'task': 'apps.sims.tasks.simActivateTC',
         'schedule': crontab(minute='2-59/5'),
-        # 'schedule': crontab(minute='*/1'),
-
+        # 'schedule': crontab(minute='*/2'),
     },
-        'task__deactivate_TC': {
+    'task__deactivate_TC': {
         'task': 'apps.sims.tasks.simDeactivateTC',
-        'schedule': crontab( hour=23, minute=55),
-        # 'schedule': crontab(minute='*/1'),
+        'schedule': crontab( hour=23, minute=50),
     },
 }
 

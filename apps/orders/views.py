@@ -16,6 +16,7 @@ from .classes import ApiStore, StatusStore, DateFormats
 from .tasks import order_import, orders_up_status, check_esim_eua
 import pandas as pd
 
+
 #Date today
 today = datetime.now()
 
@@ -52,8 +53,8 @@ def orders_list(request):
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
             id_user = request.user.id
-
-            orders_up_status.delay(ord_id, ord_s,id_user)                               
+            if ord_s is not '':
+                orders_up_status.delay(ord_id, ord_s,id_user)                               
 
      # FIlters
 
@@ -647,6 +648,7 @@ def orders_activations(request):
 def esim_eua(request):
     check_esim_eua.delay()
     return HttpResponse('Verificação eSIM EUA concluída')
+
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza
