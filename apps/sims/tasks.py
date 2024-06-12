@@ -278,6 +278,18 @@ def simActivateTC(id=None):
 
 @shared_task
 def simDeactivateTC(id=None):
+    
+    timezone = pytz.timezone("America/Sao_Paulo")
+    min_hour = 23  # 8 AM
+    min_minute = 40  # 30 minutos
+
+    current_hour = datetime.now(timezone).hour
+    current_minute = datetime.now(timezone).minute
+
+    # Verifique se a hora e o minuto atuais são depois da hora e do minuto mínimos
+    if current_hour > min_hour or (current_hour == min_hour and current_minute >= min_minute):
+        # Se for depois da hora mínima, execute a tarefa
+        return
            
     print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
     
