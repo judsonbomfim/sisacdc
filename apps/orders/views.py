@@ -53,7 +53,7 @@ def orders_list(request):
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
             id_user = request.user.id
-            if ord_s is not '':
+            if ord_s != '':
                 orders_up_status.delay(ord_id, ord_s,id_user)                               
 
      # FIlters
