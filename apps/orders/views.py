@@ -196,7 +196,7 @@ def ord_edit(request,id):
             sim_up = Sims.objects.filter(sim_status='DS', type_sim=type_sim, operator=operator).first()
             if sim_up:
                 sim_put = Sims.objects.get(pk=sim_up.id)
-                if order_sim is not '':
+                if order_sim != '':
                     # Update SIM
                     updateSIM()
                 sim_put.sim_status = 'AT'
@@ -216,7 +216,7 @@ def ord_edit(request,id):
         # Liberar SIMs
         if ord_st == 'CC' or ord_st == 'DE' or ord_st == 'RE':
             print('>>>>>>>>>> Liberar SIMs')
-            if order_sim is not '':
+            if order_sim != '':
                 # Change TC
                 if order.id_sim.operator == 'TC':
                     simDeactivateTC(id=order.id)
@@ -239,7 +239,7 @@ def ord_edit(request,id):
         if sim:
             # Verificar se Operadora e Tipo de SIM estão marcados
             if operator != None and type_sim != None:
-                if order_sim is not '':
+                if order_sim != '':
                     # Alterar status no sistema e no site
                     updateSIM()
                 
@@ -276,7 +276,7 @@ def ord_edit(request,id):
                 msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         else:
             # Troca de SIM
-            if order_sim is not '':
+            if order_sim != '':
                 if order.id_sim.operator != operator or order.id_sim.type_sim != type_sim or up_oper != None:
                     updateSIM()
                     insertSIM(ord_st)
