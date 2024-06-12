@@ -183,7 +183,7 @@ def ord_edit(request,id):
         # Update SIM in Order and update SIM
         def updateSIM():
             # Update SIM
-            sim_put = Sims.objects.get(pk=order.id_sim.id)            
+            sim_put = Sims.objects.get(pk=order_sim)            
             sim_put.sim_status = 'TC'
             sim_put.save()
             # Delete SIM in Order
@@ -196,7 +196,7 @@ def ord_edit(request,id):
             sim_up = Sims.objects.filter(sim_status='DS', type_sim=type_sim, operator=operator).first()
             if sim_up:
                 sim_put = Sims.objects.get(pk=sim_up.id)
-                if order.id_sim:
+                if order_sim is not '':
                     # Update SIM
                     updateSIM()
                 sim_put.sim_status = 'AT'
@@ -216,13 +216,13 @@ def ord_edit(request,id):
         # Liberar SIMs
         if ord_st == 'CC' or ord_st == 'DE' or ord_st == 'RE':
             print('>>>>>>>>>> Liberar SIMs')
-            if order.id_sim is not None:
+            if order_sim is not '':
                 # Change TC
                 if order.id_sim.operator == 'TC':
                     simDeactivateTC(id=order.id)
                 
                 # Update SIM
-                sim_put = Sims.objects.get(pk=order.id_sim.id)
+                sim_put = Sims.objects.get(pk=order_sim)
                 sim_put.sim_status = 'DE'
                 sim_put.save()
                 
@@ -239,7 +239,7 @@ def ord_edit(request,id):
         if sim:
             # Verificar se Operadora e Tipo de SIM estão marcados
             if operator != None and type_sim != None:
-                if order.id_sim:
+                if order_sim is not '':
                     # Alterar status no sistema e no site
                     updateSIM()
                 
@@ -276,7 +276,7 @@ def ord_edit(request,id):
                 msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         else:
             # Troca de SIM
-            if order.id_sim is not None:
+            if order_sim is not '':
                 if order.id_sim.operator != operator or order.id_sim.type_sim != type_sim or up_oper != None:
                     updateSIM()
                     insertSIM(ord_st)
