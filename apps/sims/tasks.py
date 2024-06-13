@@ -279,7 +279,7 @@ def simActivateTC(id=None):
 @shared_task
 def simDeactivateTC(id=None):
     
-    timezone = pytz.timezone("America/Sao_Paulo")
+    timezone = pytz.timezone('Europe/London')
     min_hour = 23  # 8 AM
     min_minute = 40  # 30 minutos
 
@@ -294,8 +294,7 @@ def simDeactivateTC(id=None):
     print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
     
     # Timezone / Hoje
-    london_tz = pytz.timezone('Europe/London')
-    today = pd.Timestamp.now(tz=london_tz).date()
+    today = pd.Timestamp.now(tz=timezone).date()
     
     # Selecionar pedidos
     if id is None:

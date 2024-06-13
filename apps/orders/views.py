@@ -164,6 +164,8 @@ def ord_edit(request,id):
         order_id = order.order_id
         try: order_sim = order.id_sim.sim
         except: order_sim = ''
+        try: sim_id = int(order.id_sim.id)
+        except: sim_id = ''
         days = request.POST.get('days')
         product = request.POST.get('product')
         data_day = request.POST.get('data_day')
@@ -180,10 +182,14 @@ def ord_edit(request,id):
         up_oper = request.POST.get('upOper')
         esim_v = None
         
+        print('>>>>>>>>>> order',order)
+        print('>>>>>>>>>> order_id',order_id)
+        print('>>>>>>>>>> sim_id',sim_id)
+        
         # Update SIM in Order and update SIM
         def updateSIM():
             # Update SIM
-            sim_put = Sims.objects.get(pk=order_sim)            
+            sim_put = Sims.objects.get(pk=sim_id)            
             sim_put.sim_status = 'TC'
             sim_put.save()
             # Delete SIM in Order
@@ -222,7 +228,7 @@ def ord_edit(request,id):
                     simDeactivateTC(id=order.id)
                 
                 # Update SIM
-                sim_put = Sims.objects.get(pk=order_sim)
+                sim_put = Sims.objects.get(pk=sim_id)
                 sim_put.sim_status = 'DE'
                 sim_put.save()
                 
