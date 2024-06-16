@@ -296,7 +296,7 @@ def simDeactivateTC(id=None):
     today = pd.Timestamp.now(tz=timezone).date()
     
     # Verifique se a hora e o minuto atuais são depois da hora e do minuto mínimos
-    if current_hour > min_hour or (current_hour == min_hour and current_minute >= min_minute):
+    if current_hour < min_hour or (current_hour == min_hour and current_minute < min_minute):
         # Se for depois da hora mínima, execute a tarefa
         return
 
