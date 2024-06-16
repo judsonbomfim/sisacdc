@@ -286,22 +286,20 @@ def simActivateTC(id=None):
 def simDeactivateTC(id=None):
     
     timezone = pytz.timezone('Europe/London')
-    min_hour = 23  # 8 AM
-    min_minute = 40  # 30 minutos
+    min_hour = 23  # hora
+    min_minute = 45  # 45 minutos
 
     current_hour = datetime.now(timezone).hour
     current_minute = datetime.now(timezone).minute
-
+               
+    # Timezone / Hoje
+    today = pd.Timestamp.now(tz=timezone).date()
+    
     # Verifique se a hora e o minuto atuais são depois da hora e do minuto mínimos
     if current_hour > min_hour or (current_hour == min_hour and current_minute >= min_minute):
         # Se for depois da hora mínima, execute a tarefa
         return
-           
-    print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
-    
-    # Timezone / Hoje
-    today = pd.Timestamp.now(tz=timezone).date()
-    
+
     # Selecionar pedidos
     if id is None:
         orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC')
@@ -318,9 +316,6 @@ def simDeactivateTC(id=None):
     orders_df['activation_date'] = pd.to_datetime(orders_df['activation_date'])
     orders_df['return_date'] = orders_df['activation_date'] + pd.to_timedelta(orders_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
 
-    
-    print('>>>>>>>>>> orders_df 1',orders_df)
-    
     if id is None:
         orders_df = orders_df.loc[orders_df['return_date'].dt.date == today]
     
@@ -328,8 +323,6 @@ def simDeactivateTC(id=None):
     if orders_df is None:
         print('>>>>>>>>>> Nenhum pedido para desativar')
         return
-
-    print('>>>>>>>>>> orders_df 2',orders_df)
     
     def error_api():
         print('>>>>>>>>>> ERRO API')
@@ -340,8 +333,10 @@ def simDeactivateTC(id=None):
         error = 'error_api Result'
         return error       
 
+    print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
     
     for index, o in orders_df.iterrows():
+        
         print('>>>>>>>>>> ord', o)
         order = Orders.objects.get(pk=o['id'])
         order_id = order.order_id
