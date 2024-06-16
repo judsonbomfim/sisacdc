@@ -153,8 +153,10 @@ def simActivateTC(id=None):
     if id is None:
         orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=today)
     else:
-        orders_all = Orders.objects.get(pk=id)
+        orders_all = Orders.objects.filter(pk=id)
         
+    print('>>>>>>>>>> orders_all ativação',orders_all)
+    
     # Checar conexão com API
     def error_api():
         print('>>>>>>>>>> ERRO API')
@@ -170,7 +172,11 @@ def simActivateTC(id=None):
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
         id_item = order.id
-        iccid = order.id_sim.sim
+        try:
+            iccid = order.id_sim.sim
+        except Exception:
+            iccid = None
+            continue
         dataDay = order.data_day
         
         # Variaveis globais        

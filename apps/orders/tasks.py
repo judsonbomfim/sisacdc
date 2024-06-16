@@ -6,9 +6,8 @@ from .classes import ApiStore, StatusStore, DateFormats
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
-import getpass
 import time
-from apps.sims.tasks import sims_in_orders, simDeactivateTC
+from apps.sims.tasks import sims_in_orders, simDeactivateTC, simActivateTC
 from apps.send_email.tasks import send_email_sims
 from apps.voice_calls.tasks import number_in_voice
 
@@ -260,7 +259,6 @@ def orders_up_status(ord_id, ord_s, id_user):
                 if order.product != 'chip-internacional-eua':
                     # Deletar eSIM para site                            
                     ApiStore.updateEsimStore(order_id)
-
             
                 
             # Edit Voice
@@ -272,6 +270,10 @@ def orders_up_status(ord_id, ord_s, id_user):
                 num_s.save()
                 
                 voice_d.delete()
+ 
+        # Ativar SIM TC
+        if ord_s == 'AT' and order.id_sim.operator == 'TC':
+            simActivateTC(id=order.id)
         
         # Ver. Status Cancelled in items
         order_itens = 0
