@@ -11,7 +11,7 @@ from django.conf import settings
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
-from apps.sims.tasks import simDeactivateTC
+from apps.sims.tasks import simDeactivateTC, simActivateTC
 from .classes import ApiStore, StatusStore, DateFormats
 from .tasks import order_import, orders_up_status, check_esim_eua
 import pandas as pd
@@ -235,12 +235,12 @@ def ord_edit(request,id):
                 if order.product != 'chip-internacional-eua':
                     # Deletar eSIM para site
                     ApiStore.updateEsimStore(order_id)
-       
-                # Delete SIM in Order
-                order_put = order
-                order_put.id_sim_id = ''
-                order_put.save()
-        
+    
+
+        # Activate TC
+        if ord_st == 'AT' and order.order_status != 'AT' and operator == 'TC':
+            simActivateTC(id=order.id)
+
         # Se SIM preenchico
         if sim:
             # Verificar se Operadora e Tipo de SIM estão marcados
@@ -364,7 +364,7 @@ def ord_edit(request,id):
                 send_email_sims(id=order_id)
                 
                 addNote(f'E-mail enviado com sucesso!')
-                messages.success(request,'E-mail enviado com sucesso!')
+                messages.success(request,'E-mail enviado com sucesso!')     
         
         if type_sim == 'esim' or esim_v == True:
             # Enviar eSIM para site
