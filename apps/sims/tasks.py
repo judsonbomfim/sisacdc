@@ -286,19 +286,19 @@ def simActivateTC(id=None):
 @shared_task
 def simDeactivateTC(id=None):
     
-    def verify_hour():
-        from apps.orders.tasks import up_order_st_store    
-        
-        timezone = pytz.timezone('Europe/London')
-        min_hour = 23  # hora
-        min_minute = 45  # 45 minutos
+    from apps.orders.tasks import up_order_st_store    
+    
+    timezone = pytz.timezone('Europe/London')
+    min_hour = 23  # hora
+    min_minute = 45  # 45 minutos
 
-        current_hour = datetime.now(timezone).hour
-        current_minute = datetime.now(timezone).minute
-                
-        # Timezone / Hoje
-        today = pd.Timestamp.now(tz=timezone).date()
-        
+    current_hour = datetime.now(timezone).hour
+    current_minute = datetime.now(timezone).minute
+            
+    # Timezone / Hoje
+    today = pd.Timestamp.now(tz=timezone).date()
+    
+    def verify_hour():        
         # Verifique se a hora e o minuto atuais são depois da hora e do minuto mínimos
         if current_hour < min_hour or (current_hour == min_hour and current_minute < min_minute):
             # Se for depois da hora mínima, execute a tarefa
