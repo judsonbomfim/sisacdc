@@ -143,6 +143,8 @@ def sims_in_orders():
     
 @shared_task
 def simActivateTC(id=None):
+    
+    from apps.orders.tasks import up_order_st_store    
         
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
@@ -154,9 +156,7 @@ def simActivateTC(id=None):
         orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=today)
     else:
         orders_all = Orders.objects.filter(pk=id)
-        
-    print('>>>>>>>>>> orders_all ativação',orders_all)
-    
+            
     # Checar conexão com API
     def error_api():
         print('>>>>>>>>>> ERRO API')
@@ -271,6 +271,7 @@ def simActivateTC(id=None):
             if resultCode == 0:
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'AT')
+                up_order_st_store.delay(order_id,'ativado')
                 StatusStore.upStatus(order_id,'ativado')
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{note} TC: {resultDescription}')
@@ -285,23 +286,27 @@ def simActivateTC(id=None):
 @shared_task
 def simDeactivateTC(id=None):
     
-    timezone = pytz.timezone('Europe/London')
-    min_hour = 23  # hora
-    min_minute = 45  # 45 minutos
+    def verify_hour():
+        from apps.orders.tasks import up_order_st_store    
+        
+        timezone = pytz.timezone('Europe/London')
+        min_hour = 23  # hora
+        min_minute = 45  # 45 minutos
 
-    current_hour = datetime.now(timezone).hour
-    current_minute = datetime.now(timezone).minute
-               
-    # Timezone / Hoje
-    today = pd.Timestamp.now(tz=timezone).date()
-    
-    # Verifique se a hora e o minuto atuais são depois da hora e do minuto mínimos
-    if current_hour < min_hour or (current_hour == min_hour and current_minute < min_minute):
-        # Se for depois da hora mínima, execute a tarefa
-        return
+        current_hour = datetime.now(timezone).hour
+        current_minute = datetime.now(timezone).minute
+                
+        # Timezone / Hoje
+        today = pd.Timestamp.now(tz=timezone).date()
+        
+        # Verifique se a hora e o minuto atuais são depois da hora e do minuto mínimos
+        if current_hour < min_hour or (current_hour == min_hour and current_minute < min_minute):
+            # Se for depois da hora mínima, execute a tarefa
+            return
 
     # Selecionar pedidos
     if id is None:
+        verify_hour()
         orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC')
     else:
         orders_all = Orders.objects.filter(pk=id)
@@ -337,7 +342,6 @@ def simDeactivateTC(id=None):
     
     for index, o in orders_df.iterrows():
         
-        print('>>>>>>>>>> ord', o)
         order = Orders.objects.get(pk=o['id'])
         order_id = order.order_id
         id_item = order.id
@@ -392,7 +396,7 @@ def simDeactivateTC(id=None):
                 print('>>>>>>>>>> Alterar status')                
                 # Alterar status                
                 UpdateOrder.upStatus(id_item,'DE')
-                StatusStore.upStatus(order_id,'desativado')
+                up_order_st_store.delay(order.id,'desativado')
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
                 sim_put.sim_status = 'DE'
                 sim_put.save()

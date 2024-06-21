@@ -181,11 +181,7 @@ def ord_edit(request,id):
         ord_note = request.POST.get('ord_note')
         up_oper = request.POST.get('upOper')
         esim_v = None
-        
-        print('>>>>>>>>>> order',order)
-        print('>>>>>>>>>> order_id',order_id)
-        print('>>>>>>>>>> sim_id',sim_id)
-        
+                
         # Update SIM in Order and update SIM
         def updateSIM():
             # Update SIM

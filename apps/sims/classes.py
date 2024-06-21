@@ -49,8 +49,6 @@ class ApiTC:
         data_endpointId = json.loads(res_endpointId.read())
         simStatus = data_endpointId["Response"]["responseParam"]["rows"][0]['simStatus']
         endpointId = data_endpointId["Response"]["responseParam"]["rows"][0]['endPointId']
-        print('>>>>>>>>>>>>>>>> get_iccid - endpointId',endpointId)
-        print('>>>>>>>>>>>>>>>> get_iccid - simStatus',simStatus)
         return endpointId, simStatus
 
 

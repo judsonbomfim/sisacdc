@@ -245,7 +245,6 @@ def orders_up_status(ord_id, ord_s, id_user):
         order.save()
         
         if ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE':
-            print('>>>>>>>>>> preparar para desativar reembolsado')
             if order.id_sim:                
                 # Change TC
                 if order.id_sim.operator == 'TC':
@@ -291,7 +290,7 @@ def orders_up_status(ord_id, ord_s, id_user):
                 'status': 'cancelled'
             }
             apiStore.put(f'orders/{order.order_id}', update_store).json()
-        elif ord_s != 'CC':
+        elif ord_s != 'CC' or ord_s != 'DE':
             print('--------------------------- Alterar STATUS Loja')            
             if ord_s in status_sis_site:
                 update_store = {
@@ -318,6 +317,14 @@ def orders_up_status(ord_id, ord_s, id_user):
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
             send_email_sims.delay(id=order.id)
 
+@shared_task
+def up_order_st_store(order_id,order_st):
+    print('>>>>>>>>>> Alterando status do site')
+    apiStore = ApiStore.conectApiStore()
+    update_store = {
+            'status': order_st
+        }
+    apiStore.put(f'orders/{order_id}', update_store).json()
 
 @shared_task
 def check_esim_eua():
