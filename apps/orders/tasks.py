@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from celery import shared_task
 from django.utils.text import slugify
 from datetime import datetime, timedelta
-from .classes import ApiStore, StatusStore, DateFormats
+from .classes import ApiStore, NotesAdd, StatusStore, DateFormats, UpdateOrder
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
@@ -272,7 +272,15 @@ def orders_up_status(ord_id, ord_s, id_user):
  
         # Ativar SIM TC
         if ord_s == 'AT' and order.id_sim.operator == 'TC':
-            simActivateTC(id=order.id)
+            if order.order_status == 'ED':
+                # Alterar status
+                UpdateOrder.upStatus(order.id,'AT')
+                up_order_st_store.delay(order.id,'ativado')
+                StatusStore.upStatus(order.id,'ativado')
+                # Adicionar nota
+                NotesAdd.addNote(order,f'SIM ativado')
+            else:
+                simActivateTC(id=order.id)
         
         # Ver. Status Cancelled in items
         order_itens = 0
