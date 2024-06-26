@@ -161,7 +161,7 @@ def simActivateTC(id=None):
     def error_api():
         print('>>>>>>>>>> ERRO API')
         # Checar Status
-        UpdateOrder.upStatus(id_item,'ED')
+        UpdateOrder.upStatus(id_item,'EA')
         # Adicionar nota
         NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
         error = 'error_apiResult'
