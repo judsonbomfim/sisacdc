@@ -248,7 +248,7 @@ def orders_up_status(ord_id, ord_s, id_user):
         if ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE':
             if order.id_sim:                
                 # Change TC
-                if order.id_sim.operator == 'TC':
+                if order.id_sim.operator == 'TC' and order.order_status != 'ED':
                     simDeactivateTC(id=order.id)
                 
                 # Update SIM
