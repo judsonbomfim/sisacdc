@@ -4,6 +4,7 @@ from apps.sims.models import Sims
 
 PRODUCT = [
     ('chip-internacional-eua', 'USA'),
+    ('chip-internacional-eua-30-dias', 'USA 30 Dias'),
     ('chip-internacional-eua-e-canada', 'USA/CANADA'),
     ('chip-internacional-eua-canada-e-mexico', 'USA/CAN/MEX'),
     ('chip-internacional-europa', 'EUROPA'),
