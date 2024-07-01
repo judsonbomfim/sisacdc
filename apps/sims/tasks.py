@@ -33,8 +33,8 @@ def sims_in_orders():
         countries_i = ord.countries
         type_sim_i = ord.type_sim
         update_store = {}
-        esim_eua = type_sim_i == 'esim' and product_i == 'chip-internacional-eua'
-        esim_ok = type_sim_i == 'esim' and product_i != 'chip-internacional-eua'
+        esim_eua = type_sim_i == 'esim' and (product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias')
+        esim_ok = type_sim_i == 'esim' and (product_i != 'chip-internacional-eua' or product_i != 'chip-internacional-eua-30-dias')
                 
         if ord.id_sim != None:
             if ord.order_status == 'AS':
@@ -58,14 +58,14 @@ def sims_in_orders():
             # if product_i == 'chip-internacional-europa' and countries_i == False and type_sim_i == 'esim':
             if product_i == 'chip-internacional-europa' and countries_i == False:
                 operator_i = 'TC'
-            elif product_i == 'chip-internacional-eua':
+            elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
-            else: operator_i = 'CM'            
+            else: operator_i = 'CM'
             
             # Select SIM
-            if esim_eua: 
+            if esim_eua:
                 sim_ds = Sims.objects.all().get(pk=0)
-            else: 
+            else:
                 sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
                 if sim_ds:
                     pass
