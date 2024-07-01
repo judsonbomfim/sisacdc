@@ -55,7 +55,7 @@ def order_import():
             for item in order['line_items']:
                                     
                 # Especificar produtos a serem listados
-                prod_sel = [50760, 8873, 8791, 8761]
+                prod_sel = [50760, 8873, 8791, 8761, 77027]
                 if item['product_id'] not in prod_sel:
                     continue
                                 
@@ -89,6 +89,7 @@ def order_import():
                         if i['key'] == 'pa_plano-de-voz': 
                             if i['value'] == 'sem-ligacoes': calls_i = False
                             else: calls_i = True
+                        else: calls_i = False
                         if 'Visitará' in i['key']:
                             if i['display_value'] == 'Sim': countries_i = True 
                             else: countries_i = False
@@ -325,6 +326,7 @@ def orders_up_status(ord_id, ord_s, id_user):
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
             send_email_sims.delay(id=order.id)
 
+
 @shared_task
 def up_order_st_store(order_id,order_st):
     print('>>>>>>>>>> Alterando status do site')
@@ -333,6 +335,7 @@ def up_order_st_store(order_id,order_st):
             'status': order_st
         }
     apiStore.put(f'orders/{order_id}', update_store).json()
+
 
 @shared_task
 def check_esim_eua():

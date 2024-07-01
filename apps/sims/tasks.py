@@ -297,17 +297,14 @@ def simDeactivateTC(id=None):
             
     # Timezone / Hoje
     today = pd.Timestamp.now(tz=timezone).date()
-    
-    def verify_hour():        
-        # Verifique se a hora e o minuto atuais são depois da hora e do minuto mínimos
-        if current_hour < min_hour or (current_hour == min_hour and current_minute < min_minute):
-            # Se for depois da hora mínima, execute a tarefa
-            return
 
     # Selecionar pedidos
     if id is None:
-        verify_hour()
-        orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC')
+        if current_hour < min_hour or (current_hour == min_hour and current_minute < min_minute):
+            # Se for depois da hora mínima, execute a tarefa
+            return
+        else:
+            orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC')
     else:
         orders_all = Orders.objects.filter(pk=id)
         
