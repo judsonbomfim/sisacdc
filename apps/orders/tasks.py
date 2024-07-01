@@ -89,6 +89,7 @@ def order_import():
                         if i['key'] == 'pa_plano-de-voz': 
                             if i['value'] == 'sem-ligacoes': calls_i = False
                             else: calls_i = True
+                        else: calls_i = False
                         if 'Visitará' in i['key']:
                             if i['display_value'] == 'Sim': countries_i = True 
                             else: countries_i = False
