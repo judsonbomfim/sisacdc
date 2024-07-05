@@ -71,7 +71,7 @@ def send_email_sims(id=None):
         email.send()
         
         if order_st != 'CN' and type_sim == 'esim':
-            if product_plan == 'USA':
+            if product_plan == 'USA' or product_plan == 'USA 30 Dias':
                 # Update Order
                 order = Orders.objects.get(pk=id)
                 order.order_status = 'AI'
