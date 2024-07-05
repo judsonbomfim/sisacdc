@@ -115,7 +115,12 @@ def order_import():
                     elif condition_i == 'reuso-sim':
                         order_status_i = 'RS'
                     else:
-                        order_status_i = 'AS'                    
+                        order_status_i = 'AS'
+                        
+                        
+                    # Se for um plano EUA 30 dias
+                    if product_i == 'chip-internacional-eua-30-dias':
+                        calls_i = False             
                     
                     # Definir variáveis para salvar no banco de dados                            
                     order_add = Orders(                    
