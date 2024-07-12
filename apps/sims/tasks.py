@@ -35,7 +35,8 @@ def sims_in_orders():
         update_store = {}
         esim_eua = type_sim_i == 'esim' and (product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias')
         esim_ok = type_sim_i == 'esim' and (product_i != 'chip-internacional-eua' or product_i != 'chip-internacional-eua-30-dias')
-                
+        
+        # Se já houver SIM   
         if ord.id_sim != None:
             if ord.order_status == 'AS':
                 sim_put = Sims.objects.get(pk=id_id_i)
