@@ -220,7 +220,7 @@ def ord_edit(request,id):
             print('>>>>>>>>>> Liberar SIMs')
             if order_sim != '':
                 # Change TC
-                if order.id_sim.operator == 'TC':
+                if order.id_sim.operator == 'TC' and order.order_status != 'ED':
                     simDeactivateTC(id=order.id)
                 
                 # Update SIM
