@@ -277,7 +277,7 @@ def orders_up_status(ord_id, ord_s, id_user):
  
         # Ativar SIM TC
         if ord_s == 'AT' and order.id_sim.operator == 'TC':
-            if order.order_status == 'ED':
+            if order.order_status == 'EA':
                 # Alterar status
                 UpdateOrder.upStatus(order.id,'AT')
                 up_order_st_store.delay(order.id,'ativado')
