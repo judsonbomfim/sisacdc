@@ -217,7 +217,6 @@ def ord_edit(request,id):
                         
         # Liberar SIMs
         if ord_st == 'CC' or ord_st == 'DE' or ord_st == 'RE':
-            print('>>>>>>>>>> Liberar SIMs')
             if order_sim != '':
                 # Change TC
                 if order.id_sim.operator == 'TC' and order.order_status != 'ED':
