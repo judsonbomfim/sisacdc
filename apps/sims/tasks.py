@@ -390,7 +390,7 @@ def simActivateTM(id=None):
     
     from apps.orders.tasks import up_order_st_store    
     today = datetime.now().date()
-    date_filter = today + timedelta(days=14)
+    date_filter = today + timedelta(days=3)
 
     print('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
     
