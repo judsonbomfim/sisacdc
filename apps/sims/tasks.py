@@ -39,13 +39,7 @@ def sims_in_orders():
         
         # Se já houver SIM   
         if ord.id_sim != None:
-            if ord.order_status == 'AS':
-                sim_put = Sims.objects.get(pk=id_id_i)
-                if esim_eua:
-                    sim_put.sim_status = 'AI'
-                else:
-                    sim_put.sim_status = 'AA'
-                sim_put.save()
+            continue
         else:    
             # Notes
             def addNote(t_note):
@@ -106,33 +100,7 @@ def sims_in_orders():
                 update_store = {
                     'status': status_sis_site[status_ord]
                 }
-            # Enviar eSIM para site
-            if esim_ok:
-                url_painel = str(os.getenv('URL_PAINEL'))
-                esims_order = Orders.objects.filter(order_id=order_id_i).filter(type_sim='esim')
-                esims_list = ''
-                for esims_o in esims_order:
-                    try:
-                        link_sim = esims_o.id_sim.link              
-                        esims_list = esims_list + f"<img src='{url_painel}{link_sim}' style='width: 300px; margin:40px;'>"
-                        update_store = {
-                            "meta_data":[
-                                {
-                                    "key": "campo_esims",
-                                    "value": esims_list
-                                },
-                            ]
-                        }
-                    except Exception:
-                        update_store = {
-                            "meta_data":[
-                                {
-                                    "key": "campo_esims",
-                                    "value": ''
-                                },
-                            ]
-                        }
-                
+    
             apiStore = ApiStore.conectApiStore()                    
             apiStore.put(f'orders/{order_id_i}', update_store).json()
             
