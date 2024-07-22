@@ -425,7 +425,7 @@ def simActivateTM(id=None):
             "imei": imei,
             "area": "",
             "customer_email": "",
-            "comment": "TEST",
+            "comment": "",
             "carrier": "T-Mobile",
             "token": "ba8cbf5fd3c288c21d6725b532f04d73"
         })        
