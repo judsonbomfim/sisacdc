@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 from celery import shared_task
 import os
 import http.client
@@ -9,7 +10,7 @@ from apps.orders.models import Orders, Notes
 from apps.orders.classes import ApiStore, StatusStore, NotesAdd, UpdateOrder
 from apps.send_email.tasks import send_email_sims
 from apps.sims.models import Sims
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 import pandas as pd
 
@@ -38,13 +39,7 @@ def sims_in_orders():
         
         # Se já houver SIM   
         if ord.id_sim != None:
-            if ord.order_status == 'AS':
-                sim_put = Sims.objects.get(pk=id_id_i)
-                if esim_eua:
-                    sim_put.sim_status = 'AI'
-                else:
-                    sim_put.sim_status = 'AA'
-                sim_put.save()
+            continue
         else:    
             # Notes
             def addNote(t_note):
@@ -105,33 +100,7 @@ def sims_in_orders():
                 update_store = {
                     'status': status_sis_site[status_ord]
                 }
-            # Enviar eSIM para site
-            if esim_ok:
-                url_painel = str(os.getenv('URL_PAINEL'))
-                esims_order = Orders.objects.filter(order_id=order_id_i).filter(type_sim='esim')
-                esims_list = ''
-                for esims_o in esims_order:
-                    try:
-                        link_sim = esims_o.id_sim.link              
-                        esims_list = esims_list + f"<img src='{url_painel}{link_sim}' style='width: 300px; margin:40px;'>"
-                        update_store = {
-                            "meta_data":[
-                                {
-                                    "key": "campo_esims",
-                                    "value": esims_list
-                                },
-                            ]
-                        }
-                    except Exception:
-                        update_store = {
-                            "meta_data":[
-                                {
-                                    "key": "campo_esims",
-                                    "value": ''
-                                },
-                            ]
-                        }
-                
+    
             apiStore = ApiStore.conectApiStore()                    
             apiStore.put(f'orders/{order_id_i}', update_store).json()
             
@@ -272,7 +241,6 @@ def simActivateTC(id=None):
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'AT')
                 up_order_st_store.delay(order_id,'ativado')
-                StatusStore.upStatus(order_id,'ativado')
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{note} TC: {resultDescription}')
             else:
@@ -280,8 +248,12 @@ def simActivateTC(id=None):
                 UpdateOrder.upStatus(id_item,'EA')
                 # Adicionar nota
                 NotesAdd.addNote(order,f'TC: {resultDescription}')
+        
+        # Fecha a conexão
+        conn.close()
                 
     print('>>>>>>>>>> ATIVAÇÂO FINALIZADA')
+
 
 @shared_task
 def simDeactivateTC(id=None):
@@ -406,6 +378,92 @@ def simDeactivateTC(id=None):
                 UpdateOrder.upStatus(id_item,'ED')
             # Adicionar nota
             NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro. TC: {resultDescription}')
+        
+        # Fecha a conexão
+        conn.close()
                 
     print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
 
+
+@shared_task
+def simActivateTM(id=None):
+    
+    from apps.orders.tasks import up_order_st_store    
+    today = datetime.now().date()
+    date_filter = today + timedelta(days=3)
+
+    print('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
+    
+    # Selecionar pedidos
+    if id is None:
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TM', activation_date__lte=date_filter)
+    else:
+        orders_all = Orders.objects.filter(pk=id)        
+    
+    for order in orders_all:
+        
+        order = Orders.objects.get(pk=order.id)
+        order_id = order.order_id
+        id_item = order.id
+        if order.id_sim.type_sim == 'sim':
+            iccid = order.id_sim.sim
+            imei = ""
+        else:
+            iccid = order.cell_eid
+            imei = order.cell_imei
+        activation_date = order.activation_date
+        days = order.days
+                
+        # Dados para a solicitação
+        url = "https://usasimactivation.com/activation/index/submit"
+        parsed_url = urlparse(url)
+        payload = json.dumps({
+            "active_time": activation_date.strftime("%Y-%m-%d"),
+            "sim": iccid,
+            "plan": "$50",
+            "day": days,
+            "imei": imei,
+            "area": "",
+            "customer_email": "",
+            "comment": "TEST",
+            "carrier": "T-Mobile",
+            "token": "ba8cbf5fd3c288c21d6725b532f04d73"
+        })        
+        
+        # Cabeçalhos da solicitação
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        # Estabelece a conexão HTTPS
+        conn = http.client.HTTPSConnection(parsed_url.netloc)
+        # Envia a solicitação POST
+        conn.request("POST", parsed_url.path, payload, headers)
+        # Obtém a resposta
+        res = conn.getresponse()
+        data = res.read()
+        # Decodifica a resposta
+        response_data = json.loads(data.decode("utf-8"))
+        # Verifica o código de resposta
+        if 'code' in response_data:
+            if response_data['code'] == 0:
+                # Alterar status
+                UpdateOrder.upStatus(id_item,'AT')
+                up_order_st_store.delay(order_id,'ativado')
+                # Adicionar nota
+                NotesAdd.addNote(order,f'{iccid} Enviado para ativação na T-Mobile')
+            else:
+                # Alterar status
+                UpdateOrder.upStatus(id_item,'EA')
+                # Adicionar nota
+                NotesAdd.addNote(order,f'Houve um erro ao ativar o SIM {iccid}. Verificar manualmente.')
+        else:
+            # Alterar status
+            UpdateOrder.upStatus(id_item,'EA')
+            # Adicionar nota
+            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.')
+
+        # Fecha a conexão
+        conn.close()
+        
+                
+    print('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
