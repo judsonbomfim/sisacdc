@@ -51,7 +51,7 @@ def sims_in_orders():
                 add_sim.save()
 
             # ESCOLHER OPERADORA
-            if product_i == 'chip-internacional-europa' and countries_i == False:
+            if (product_i == 'chip-internacional-europa' and countries_i == False) or product_i == 'chip-internacional-america-do-sul':
                 operator_i = 'TC'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
@@ -147,6 +147,7 @@ def simActivateTC(id=None):
             iccid = None
             continue
         dataDay = order.data_day
+        product = order.product
         
         # Variaveis globais        
         endpointId = None
@@ -171,7 +172,7 @@ def simActivateTC(id=None):
         ##
         
         # Alterar plano
-        ApiTC.planChange(endpointId,headers,dataDay)
+        ApiTC.planChange(endpointId,headers,dataDay, product)
         NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay}')    
 
         if simStatus == 'Pre-Active':

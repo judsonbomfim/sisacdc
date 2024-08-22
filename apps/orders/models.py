@@ -8,7 +8,8 @@ PRODUCT = [
     ('chip-internacional-eua-e-canada', 'USA/CANADA'),
     ('chip-internacional-eua-canada-e-mexico', 'USA/CAN/MEX'),
     ('chip-internacional-europa', 'EUROPA'),
-    ('chip-internacional-global', 'GLOBAL')
+    ('chip-internacional-global', 'GLOBAL'),
+    ('chip-internacional-america-do-sul', 'América do Sul'),
 ]
 
 DATA = [

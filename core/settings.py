@@ -206,11 +206,12 @@ CELERY_BEAT_SCHEDULE = {
     'task__5_min_orders_auto': {
         'task': 'apps.orders.tasks.orders_auto',
         'schedule': crontab(minute='*/5'),
+        # 'schedule': crontab(minute='*/1'),
     },
     'task__5_min_activate_TC': {
         'task': 'apps.sims.tasks.simActivateTC',
         'schedule': crontab(minute='2-59/5'),
-        # 'schedule': crontab(minute='*/2'),
+        # 'schedule': crontab(minute='*/1'),
     },
     'task__5_min_activate_TM': {
         'task': 'apps.sims.tasks.simActivateTM',

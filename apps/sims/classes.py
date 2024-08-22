@@ -54,12 +54,20 @@ class ApiTC:
 
     # Pl0an Change
     @staticmethod
-    def planChange(endpointId,headers,dataDay):  
-        planList = {
-            '500mb-dia': '572960',
-            '1gb': '572961',
-            '2gb': '572963',
-        }
+    def planChange(endpointId,headers,dataDay, product):
+        planList = {}
+        if product == 'chip-internacional-america-do-sul':
+            planList = {
+                '500mb-dia': '607128',
+                '1gb': '607131',
+                '2gb': '607132',
+            }
+        else:
+            planList = {
+                '500mb-dia': '572960',
+                '1gb': '572961',
+                '2gb': '572963',
+            }
         plan_list = json.loads(planList[dataDay])       
         payload = json.dumps({
             "Request": {
@@ -75,5 +83,4 @@ class ApiTC:
         res_plan = conn.getresponse()
         data_plan = res_plan.read()
         return data_plan
-    
-    
+   
