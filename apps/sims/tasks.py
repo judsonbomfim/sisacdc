@@ -66,7 +66,7 @@ def sims_in_orders():
         
         # update order
         # Save SIMs
-        if sim_ds.type_sim == 'esim':
+        if type_sim_i == 'esim':
             if product_i == 'chip-internacional-eua': status_ord = 'AI'
             else: status_ord = 'EE'
         else: status_ord = 'ES'
