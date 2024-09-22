@@ -11,5 +11,7 @@
             "username": "postgres",
             "password": "root"
         }
-    ]
+    ],
+    "editor.fontSize": 14,
+    "python.analysis.autoImportCompletions": true
 }
