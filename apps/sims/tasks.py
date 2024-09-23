@@ -51,13 +51,8 @@ def sims_in_orders():
                 add_sim.save()
 
             # ESCOLHER OPERADORA
-            # if (product_i == 'chip-internacional-europa' and countries_i == False) or product_i == 'chip-internacional-america-do-sul':
-            #     operator_i = 'TC'
             if (product_i == 'chip-internacional-europa' and countries_i == False) or product_i == 'chip-internacional-america-do-sul':
-                if type_sim_i == 'esim' and product_i != 'chip-internacional-america-do-sul':
-                    operator_i = 'CM'
-                else:
-                    operator_i = 'TC'
+                operator_i = 'TC'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
             else: operator_i = 'CM'
