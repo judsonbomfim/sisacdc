@@ -390,14 +390,15 @@ def simDeactivateTC(id=None):
 def simActivateTM(id=None):
     
     from apps.orders.tasks import up_order_st_store    
-    today = datetime.now().date()
-    date_filter = today + timedelta(days=3)
+        
+    london_tz = pytz.timezone('Europe/London')
+    today = datetime.now(london_tz).date()
 
-    print('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
+    print('>>>>>>>>>> ATIVAÇÂO INICIADA')
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TM', activation_date__lte=date_filter)
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TM', activation_date__lte=today)
     else:
         orders_all = Orders.objects.filter(pk=id)        
     
