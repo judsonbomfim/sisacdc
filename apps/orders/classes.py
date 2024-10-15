@@ -1,6 +1,7 @@
 from woocommerce import API
 import os
 from apps.orders.models import Orders, Notes
+from django.contrib.auth.models import User
 
 # Conect woocommerce api
 class ApiStore():
@@ -67,7 +68,19 @@ class StatusStore():
                 'status': order_st
             }
         apiStore.put(f'orders/{order_id}', update_store).json()
-        
+
+class NoteStore():
+    @staticmethod
+    def addNoteStore(order_id,note,user_name='Sistema'):
+        order_id = order_id
+        note = note
+        user_name = user_name
+        apiStore = ApiStore.conectApiStore()
+        note_i = f'{user_name} - {note}'        
+        add_note = {
+            "note": note_i
+        }
+        apiStore.post(f'orders/{order_id}/notes', add_note).json()        
 
 class DateFormats():
     # Date - 2023-05-16T18:40:27

@@ -12,7 +12,7 @@ from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
-from .classes import ApiStore, StatusStore, DateFormats
+from .classes import ApiStore, NoteStore, StatusStore, DateFormats
 from .tasks import order_import, orders_up_status, check_esim_eua
 import pandas as pd
 
@@ -230,7 +230,11 @@ def ord_edit(request,id):
                 if order.product != 'chip-internacional-eua':
                     # Deletar eSIM para site
                     ApiStore.updateEsimStore(order_id)
-    
+
+            # Adiconar Nota na Loja
+            user_name = request.user.username
+            NoteStore.addNoteStore(order_id,ord_note,user_name)
+            
 
         # Activate TC
         if ord_st == 'AT' and order.order_status != 'AT' and operator == 'TC':
@@ -336,14 +340,9 @@ def ord_edit(request,id):
         # Status Notes
         if ord_st != order.order_status:
             # Alterar status
-            # Status sis : Status Loja
-            status_sis_site = StatusStore.st_sis_site()
-            if ord_st in status_sis_site:            
-                
-                update_store = {
-                    'status': status_sis_site[ord_st]
-                }
-            apiStore.put(f'orders/{order.order_id}', update_store).json()
+            # Status sis : Status Loja            
+            user_name = request.user.username
+            orders_up_status.delay(order.item_id, ord_st,user_name) 
             
             # Salvar notas    
             ord_status = Orders.order_status.field.choices

@@ -249,6 +249,7 @@ def orders_up_status(ord_id, ord_s, id_user):
         order.order_status = ord_s
         order.save()
         
+        # Desativar (e)SIM
         if ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE':
             if order.id_sim:                
                 # Change TC
@@ -287,23 +288,24 @@ def orders_up_status(ord_id, ord_s, id_user):
             else:
                 simActivateTC(id=order.id)
         
-        # Ver. Status Cancelled in items
-        order_itens = 0
+        # Verificar se todos os itens estão cancelados
         order_ver = Orders.objects.filter(order_id=order.order_id)
+
+        order_canc = 0
         for ord_v in order_ver:
             if ord_v.order_status != 'CC':
-                order_itens += 1 
+                order_canc += 1 
+        
+        order_reemb = 0
+        # Verificar se todos os itens estão reembolsados
+        for ord_v in order_ver:
+            if ord_v.order_status != 'RB':
+                order_reemb += 1 
         
         # Status sis : Status Loja
         status_sis_site = StatusStore.st_sis_site()
-        # Só cancelar se todos os itens estiverem cancelados
-        if order_itens == 0 and ord_s == 'CC':
-            print('--------------------------- Alterar STATUS Cancelled')         
-            update_store = {
-                'status': 'cancelled'
-            }
-            apiStore.put(f'orders/{order.order_id}', update_store).json()
-        elif ord_s != 'CC' or ord_s != 'DE':
+        # Só cancelar se todos os itens estiverem cancelados / reembolsados
+        if (order_canc == 0 and ord_s == 'CC') or (order_reemb == 0 and ord_s == 'RB') or ord_s != 'DE':
             print('--------------------------- Alterar STATUS Loja')            
             if ord_s in status_sis_site:
                 update_store = {
