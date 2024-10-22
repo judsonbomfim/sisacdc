@@ -359,7 +359,7 @@ def apiTestCM(request):
     # Corpo da requisição
     payload = json.dumps({
         "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoxMDYsInVzZXJpZCI6ImI2NjUwNWQ5Zjg3ZTRiNjhhZGVhZDg0NTc2NGViOGQxIiwiaWF0IjoxNzI5NTk2NTY0fQ.Ss8oXd-FtQz9iynUbZyCTW3Ue-7GxmJLugCsA0Sj_MYiUm69HmPGOLOH1YkJswNv4bVlsi8x6Dqg5nBlZm8BHw",
-        "iccid": 8932042000002035349,
+        "iccid": "8932042000002035349",
         "dataBundleId": "D181029093919_215465",
     })
 
