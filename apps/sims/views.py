@@ -340,7 +340,7 @@ def apiTestCM(request):
         return nonce, created, digest
 
     # URL do endpoint
-    url = "https://gdsadmin.cmlink.com:35041/aep/APP_createOrder_SBO/v1"
+    url = "https://gdschannel.cmlink.com:39043/aep/APP_createOrder_SBO/v1"
     parsed_url = urlparse(url)
     app_key = "b66505d9f87e4b68adead845764eb8d1"
     app_secret = "65e4507f61804077bb1058b73bf1eba0"
