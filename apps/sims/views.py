@@ -374,6 +374,8 @@ def apiTestCM(request):
         print(data.decode('utf-8'))
     finally:
         conn.close()
+    
+    return HttpResponse("Resposta da API")
 
 # @login_required(login_url='/login/')
 # def verify_sim(request):
