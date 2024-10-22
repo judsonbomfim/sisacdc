@@ -10,6 +10,8 @@ urlpatterns = [
     path('delsim', views.delSIMs, name='delsim'),
     path('delsimtc', views.delSimTC, name='delsimtc'),
     path('apitestcm', views.apiTestCM, name='apiTestCM'),
+    path('apitestcm/', views.sims_list, name='sims_index'),
+    
     # path('verificar', views.verify_sim, name='verify_sim'),
 
 ]

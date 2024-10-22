@@ -324,7 +324,7 @@ def delSimTC(request):
 
 
 @login_required(login_url='/login/')
-def apiTestCM():
+def apiTestCM(request):
     
     import base64
     import hashlib
