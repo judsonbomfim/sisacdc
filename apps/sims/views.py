@@ -327,20 +327,15 @@ def delSimTC(request):
 def apiTestCM(request):
     
     import base64
-    import os
-    import datetime
     import hashlib
-    import requests
-    from urllib.parse import urlparse
     import json
     import http.client
+    from urllib.parse import urlparse
+    import time
 
-
-
-    # Função para gerar o PasswordDigest
     def generate_password_digest(app_secret):
-        nonce = base64.b64encode(os.urandom(16)).decode('utf-8')
-        created = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        nonce = str(int(time.time() * 1000))
+        created = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         digest = base64.b64encode(hashlib.sha256((nonce + created + app_secret).encode('utf-8')).digest()).decode('utf-8')
         return nonce, created, digest
 
@@ -355,11 +350,10 @@ def apiTestCM(request):
 
     # Cabeçalhos da requisição
     headers = {
-        # "Host": "aep.sdp.com",
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         "Accept": "application/json",
         "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
-        "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
+        "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
     }
 
     # Corpo da requisição
