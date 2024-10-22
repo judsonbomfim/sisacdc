@@ -327,20 +327,25 @@ def delSimTC(request):
 def apiTestCM(request):
     
     import base64
+    import os
+    import datetime
     import hashlib
+    import requests
+    from urllib.parse import urlparse
     import json
     import http.client
-    from urllib.parse import urlparse
-    import time
 
+
+
+    # Função para gerar o PasswordDigest
     def generate_password_digest(app_secret):
-        nonce = str(int(time.time() * 1000))
-        created = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        nonce = base64.b64encode(os.urandom(16)).decode('utf-8')
+        created = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         digest = base64.b64encode(hashlib.sha256((nonce + created + app_secret).encode('utf-8')).digest()).decode('utf-8')
         return nonce, created, digest
 
     # URL do endpoint
-    url = "https://gdschannel.cmlink.com:39043/aep/APP_getAccessToken_SBO/v1"
+    url = "https://gdsadmin.cmlink.com:35041/aep/APP_createOrder_SBO/v1"
     parsed_url = urlparse(url)
     app_key = "b66505d9f87e4b68adead845764eb8d1"
     app_secret = "65e4507f61804077bb1058b73bf1eba0"
