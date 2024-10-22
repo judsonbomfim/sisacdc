@@ -348,19 +348,21 @@ def apiTestCM(request):
     # Gerar PasswordDigest
     nonce, created, password_digest = generate_password_digest(app_secret)
 
-    # Corpo da requisição
-    payload = json.dumps({
-        "id": app_key,
-        "type": "106",
-    })
-
     # Cabeçalhos da requisição
     headers = {
-        'Content-Type': 'application/json',
+        # "Host": "aep.sdp.com",
+        "Content-Type": "application/json",
         "Accept": "application/json",
         "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
-        "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
+        "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
     }
+
+    # Corpo da requisição
+    payload = json.dumps({
+        "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoxMDYsInVzZXJpZCI6ImI2NjUwNWQ5Zjg3ZTRiNjhhZGVhZDg0NTc2NGViOGQxIiwiaWF0IjoxNzI5NTk2NTY0fQ.Ss8oXd-FtQz9iynUbZyCTW3Ue-7GxmJLugCsA0Sj_MYiUm69HmPGOLOH1YkJswNv4bVlsi8x6Dqg5nBlZm8BHw",
+        "iccid": 8932042000002035349,
+        "dataBundleId": "D181029093919_215465",
+    })
 
     # Fazer a requisição POST com tempo limite
     try:
