@@ -323,6 +323,58 @@ def delSimTC(request):
     return HttpResponse('SIMs deletados com sucesso')
 
 
+@login_required(login_url='/login/')
+def apiTestCM():
+    
+    import base64
+    import hashlib
+    import json
+    import http.client
+    from urllib.parse import urlparse
+    import time
+
+    def generate_password_digest(app_secret):
+        nonce = str(int(time.time() * 1000))
+        created = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        digest = base64.b64encode(hashlib.sha256((nonce + created + app_secret).encode('utf-8')).digest()).decode('utf-8')
+        return nonce, created, digest
+
+    # URL do endpoint
+    url = "https://gdschannel.cmlink.com:39043/aep/APP_getAccessToken_SBO/v1"
+    parsed_url = urlparse(url)
+    app_key = "b66505d9f87e4b68adead845764eb8d1"
+    app_secret = "65e4507f61804077bb1058b73bf1eba0"
+
+    # Gerar PasswordDigest
+    nonce, created, password_digest = generate_password_digest(app_secret)
+
+    # Corpo da requisição
+    payload = json.dumps({
+        "id": app_key,
+        "type": "106",
+    })
+
+    # Cabeçalhos da requisição
+    headers = {
+        'Content-Type': 'application/json',
+        "Accept": "application/json",
+        "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
+        "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
+    }
+
+    # Fazer a requisição POST com tempo limite
+    try:
+        conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
+        conn.request("POST", parsed_url.path, payload, headers)
+        res = conn.getresponse()
+
+        # Verificar o status da resposta
+        print(res.status, res.reason)
+        data = res.read()
+        print(data.decode('utf-8'))
+    finally:
+        conn.close()
+
 # @login_required(login_url='/login/')
 # def verify_sim(request):
 #     simsAT = Sims.objects.all().filter(sim_status='AT').filter(type_sim='sim')
