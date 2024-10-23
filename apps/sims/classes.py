@@ -104,9 +104,9 @@ class apiCM:
             return nonce, created, digest
 
         # URL do endpoint
-        url_api = f'{settings.APITCM_URL}/aep/APP_getAccessToken_SBO/v1'
+        url_api = f'{settings.APICM_URL}/aep/APP_getAccessToken_SBO/v1'
         parsed_url = urlparse(url_api)
-        app_key = settings.APITCM_KEY
+        app_key = settings.APICM_KEY
         app_secret = settings.APICM_SECRET
 
         # Gerar PasswordDigest
@@ -126,23 +126,27 @@ class apiCM:
             "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
         }
 
-        # Fazer a requisição POST com tempo limite
-        try:
-            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
-            conn.request("POST", parsed_url.path, payload, headers)
-            res = conn.getresponse()
+        conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
+        conn.request("POST", parsed_url.path, payload, headers)
+        res = conn.getresponse()
+        conn.close()
 
-            # Verificar o status da resposta
-            data = res.read()
-            
-            if res.status != 200:
-                result_token = 'error'
-            else:
-                data_dict = json.loads(data)
-                result_token = data_dict['accessToken']          
-        finally:
-            conn.close()
+        # Verificar o status da resposta
+        data = res.read()
         
+        if res.status != 200:
+            result_token = 'error'
+        else:
+            try:
+                if data:
+                    data_dict = json.loads(data)
+                    print('>>>>>>>>>>>>>>>> data_dict',data_dict)
+                    result_token = data_dict.get('accessToken')
+                else:
+                    result_token = 'error: resposta vazia'
+            except json.JSONDecodeError:
+                result_token = 'error: JSON malformado'
+            
         return result_token
         
         

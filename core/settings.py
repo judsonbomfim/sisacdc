@@ -238,4 +238,4 @@ APITC_HTTPCONN = str(os.getenv('APITC_HTTPCONN'))
 # API CHINA MOBILE
 APICM_KEY = str(os.getenv('APICM_KEY'))
 APICM_SECRET = str(os.getenv('APICM_SECRET'))
-APITCM_URL = str(os.getenv('APITCM_URL'))
+APICM_URL = str(os.getenv('APICM_URL'))
