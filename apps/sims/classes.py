@@ -137,8 +137,15 @@ class apiCM:
         if res.status != 200:
             result_token = 'error'
         else:
-            data_dict = json.loads(data)
-            result_token = data_dict.get('accessToken')
+            try:
+                if data:
+                    data_dict = json.loads(data)
+                    print('>>>>>>>>>>>>>>>> data_dict',data_dict)
+                    result_token = data_dict.get('accessToken')
+                else:
+                    result_token = 'error: resposta vazia'
+            except json.JSONDecodeError:
+                result_token = 'error: JSON malformado'
             
         return result_token
         
