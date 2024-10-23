@@ -5,7 +5,7 @@ import http.client
 import json
 import time
 from django.conf import settings
-from .classes import ApiTC
+from .classes import ApiTC, apiCM
 from apps.orders.models import Orders, Notes
 from apps.orders.classes import ApiStore, StatusStore, NotesAdd, UpdateOrder
 from apps.send_email.tasks import send_email_sims
@@ -473,7 +473,13 @@ def simActivateTM(id=None):
 
 @shared_task
 def simActivateCM(id=None):
-    from apps.orders.tasks import up_order_st_store    
+    from apps.orders.tasks import up_order_st_store
+    import base64
+    import hashlib
+    import json
+    import http.client
+    from urllib.parse import urlparse
+    import time 
 
     list_cm_europe = [
         ["5", "500mb-dia", "D181029093919_215465"],
@@ -728,7 +734,14 @@ def simActivateCM(id=None):
     if id is None:
         orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='CM', activation_date__lte=today)
     else:
-        orders_all = Orders.objects.filter(pk=id)
+        orders_all = Orders.objects.filter(pk=id)    
+    
+    # Gerar Token
+    api_token = apiCM.get_token()
+    
+    if api_token == "error":
+        print('>>>>>>>>>> ERRO DE TOKEN')
+        return
     
     for order in orders_all:    
         
@@ -756,4 +769,65 @@ def simActivateCM(id=None):
             day, data, cod = plan
             if (day, data) in sel_plan:
                 plan_code = cod
-                
+        
+        
+        def generate_password_digest(app_secret):
+            nonce = str(int(time.time() * 1000))
+            created = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            digest = base64.b64encode(hashlib.sha256((nonce + created + app_secret).encode('utf-8')).digest()).decode('utf-8')
+            return nonce, created, digest
+
+        # URL do endpoint
+        url_api = f'{settings.APITCM_URL}/aep/APP_createOrder_SBO/v1'
+        parsed_url = urlparse(url_api)
+        app_key = settings.APITCM_KEY
+        app_secret = settings.APICM_SECRET
+
+        # Gerar PasswordDigest
+        nonce, created, password_digest = generate_password_digest(app_secret)
+
+        # Cabeçalhos da requisição
+        headers = {
+            'Content-Type': 'application/json',
+            "Accept": "application/json",
+            "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
+            "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
+        }
+
+        # Corpo da requisição
+        payload = json.dumps({
+            "accessToken": api_token,
+            "dataBundleId": plan_code,
+            "ICCID": order_sim,
+            "thirdOrderId": order_item,
+            "includeCard":"0",
+            "is_Refuel":"1",
+            "quantity":"1",
+        })
+        
+        # Fazer a requisição POST com tempo limite
+        try:
+            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
+            conn.request("POST", parsed_url.path, payload, headers)
+            res = conn.getresponse()
+
+            # Verificar o status da resposta
+            data = res.read()
+            
+            if res.status != 200:
+                # Adicionar Nota
+                note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente.'
+                NotesAdd.addNote(order_id,note)
+                # ALterar status do sistema
+                UpdateOrder.upStatus(order_item,'EA')
+            else:
+                # Adicionar Nota
+                note = f'SIM {order_sim} ativado na China Mobile.'
+                NotesAdd.addNote(order_id,note)
+                # ALterar status do sistema
+                UpdateOrder.upStatus(order_item,'AT')            
+        finally:
+            conn.close()
+
+    print('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
+

@@ -222,11 +222,20 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.sims.tasks.simDeactivateTC',
         'schedule': crontab( hour=23, minute=50),
     },
+    'task__5_min_activate_TM': {
+        'task': 'apps.sims.tasks.simActivateCM',
+        'schedule': crontab(minute='4-59/5'),
+        # 'schedule': crontab(minute='*/1'),
+    },
 }
-
 
 # API TELCON
 
 APITC_USERNAME = str(os.getenv('APITC_USERNAME'))
 APITC_PASSWORD = str(os.getenv('APITC_PASSWORD'))
 APITC_HTTPCONN = str(os.getenv('APITC_HTTPCONN'))
+
+# API CHINA MOBILE
+APICM_KEY = str(os.getenv('APICM_KEY'))
+APICM_SECRET = str(os.getenv('APICM_SECRET'))
+APITCM_URL = str(os.getenv('APITCM_URL'))
