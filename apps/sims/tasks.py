@@ -860,9 +860,9 @@ def simActivateCM(id=None):
             return nonce, created, digest
 
         # URL do endpoint
-        url_api = f'{settings.APITCM_URL}/aep/APP_createOrder_SBO/v1'
+        url_api = f'{settings.APICM_URL}/aep/APP_createOrder_SBO/v1'
         parsed_url = urlparse(url_api)
-        app_key = settings.APITCM_KEY
+        app_key = settings.APICM_KEY
         app_secret = settings.APICM_SECRET
 
         # Gerar PasswordDigest
