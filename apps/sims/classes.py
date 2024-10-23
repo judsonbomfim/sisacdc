@@ -138,7 +138,7 @@ class apiCM:
             result_token = 'error'
         else:
             data_dict = json.loads(data)
-            result_token = data_dict['accessToken']
+            result_token = data_dict.get('accessToken')
             
         return result_token
         
