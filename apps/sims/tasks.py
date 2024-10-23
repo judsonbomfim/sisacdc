@@ -888,28 +888,26 @@ def simActivateCM(id=None):
         })
         
         # Fazer a requisição POST com tempo limite
-        try:
-            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
-            conn.request("POST", parsed_url.path, payload, headers)
-            res = conn.getresponse()
+        conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
+        conn.request("POST", parsed_url.path, payload, headers)
+        res = conn.getresponse()
+        conn.close()
 
-            # Verificar o status da resposta
-            data = res.read()
-            
-            if res.status != 200:
-                # Adicionar Nota
-                note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente.'
-                NotesAdd.addNote(order_id,note)
-                # ALterar status do sistema
-                UpdateOrder.upStatus(order_item,'EA')
-            else:
-                # Adicionar Nota
-                note = f'SIM {order_sim} ativado na China Mobile.'
-                NotesAdd.addNote(order_id,note)
-                # ALterar status do sistema
-                UpdateOrder.upStatus(order_item,'AT')            
-        finally:
-            conn.close()
+        # Verificar o status da resposta
+        data = res.read()
+        
+        if res.status != 200:
+            # Adicionar Nota
+            note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente.'
+            NotesAdd.addNote(order_id,note)
+            # ALterar status do sistema
+            UpdateOrder.upStatus(order_item,'EA')
+        else:
+            # Adicionar Nota
+            note = f'SIM {order_sim} ativado na China Mobile.'
+            NotesAdd.addNote(order_id,note)
+            # ALterar status do sistema
+            UpdateOrder.upStatus(order_item,'AT')
 
     print('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
 

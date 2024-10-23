@@ -126,23 +126,20 @@ class apiCM:
             "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
         }
 
-        # Fazer a requisição POST com tempo limite
-        try:
-            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
-            conn.request("POST", parsed_url.path, payload, headers)
-            res = conn.getresponse()
+        conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
+        conn.request("POST", parsed_url.path, payload, headers)
+        res = conn.getresponse()
+        conn.close()
 
-            # Verificar o status da resposta
-            data = res.read()
-            
-            if res.status != 200:
-                result_token = 'error'
-            else:
-                data_dict = json.loads(data)
-                result_token = data_dict['accessToken']          
-        finally:
-            conn.close()
+        # Verificar o status da resposta
+        data = res.read()
         
+        if res.status != 200:
+            result_token = 'error'
+        else:
+            data_dict = json.loads(data)
+            result_token = data_dict['accessToken']
+            
         return result_token
         
         
