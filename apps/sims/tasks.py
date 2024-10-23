@@ -473,6 +473,7 @@ def simActivateTM(id=None):
 
 @shared_task
 def simActivateCM(id=None):
+    pass
     # from apps.orders.tasks import up_order_st_store
     # import base64
     # import hashlib
