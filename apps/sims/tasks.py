@@ -118,7 +118,7 @@ def simActivateTC(id=None):
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
 
-    print('>>>>>>>>>> ATIVAÇÂO INICIADA')
+    print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -137,9 +137,10 @@ def simActivateTC(id=None):
         return error
     
     # Gerar Token de acesso a API
-    try:
-        token_api = ApiTC.get_token()
-    except Exception:            
+    if orders_all is None:
+        try:
+            token_api = ApiTC.get_token()
+        except Exception:            
             error_api()
     
     for order in orders_all:
@@ -258,7 +259,7 @@ def simActivateTC(id=None):
         # Fecha a conexão
         conn.close()
                 
-    print('>>>>>>>>>> ATIVAÇÂO FINALIZADA')
+    print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
 
 
 @shared_task
@@ -403,7 +404,7 @@ def simActivateTM(id=None):
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
 
-    print('>>>>>>>>>> ATIVAÇÂO INICIADA')
+    print('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -911,13 +912,13 @@ def simActivateCM(id=None):
         if res.status != 200:
             # Adicionar Nota
             note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente.'
-            NotesAdd.addNote(order_id,note)
+            NotesAdd.addNote(order,note)
             # ALterar status do sistema
             UpdateOrder.upStatus(order_item,'EA')
         else:
             # Adicionar Nota
             note = f'SIM {order_sim} ativado na China Mobile.'
-            NotesAdd.addNote(order_id,note)
+            NotesAdd.addNote(order,note)
             # ALterar status do sistema
             UpdateOrder.upStatus(order_item,'AT')
 
