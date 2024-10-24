@@ -343,7 +343,7 @@ def ord_edit(request,id):
             # Alterar status
             # Status sis : Status Loja            
             user_name = request.user.id
-            orders_up_status.delay(order.item_id, ord_st,user_name) 
+            orders_up_status.delay(order_id, ord_st,user_name) 
             
             # Salvar notas    
             ord_status = Orders.order_status.field.choices
