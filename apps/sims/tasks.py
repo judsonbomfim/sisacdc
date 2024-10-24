@@ -847,6 +847,8 @@ def simActivateCM(id=None):
         order_sim = order.id_sim.sim
         plan_code = None
         
+        print(f">>>>> order_day: {order_day}")
+        print(f">>>>> order_data: {order_data}")
         
         
         # Definir lista
