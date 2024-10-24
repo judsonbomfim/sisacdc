@@ -342,7 +342,7 @@ def ord_edit(request,id):
         if ord_st != order.order_status:
             # Alterar status
             # Status sis : Status Loja            
-            user_name = request.user.username
+            user_name = request.user.id
             orders_up_status.delay(order.item_id, ord_st,user_name) 
             
             # Salvar notas    
