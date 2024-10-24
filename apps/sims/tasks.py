@@ -866,12 +866,14 @@ def simActivateCM(id=None):
         print(f">>>>> list_plan: {list_plan}")        
         
         # Selecionar plano
-        sel_plan = [(order_day, order_data)]
+        sel_plan = [(str(order_day), str(order_data))]
         for plan in list_plan:
             day, data, cod = plan
             if (day, data) in sel_plan:
                 plan_code = cod
-                break
+                break        
+        
+        print(f">>>>> plan_code: {plan_code}")    
         
         # Verificar se plan_code foi definido
         if plan_code is None:
