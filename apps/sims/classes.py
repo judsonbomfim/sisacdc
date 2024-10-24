@@ -95,7 +95,6 @@ class apiCM:
         import http.client
         from urllib.parse import urlparse
         import time
-        
 
         def generate_password_digest(app_secret):
             nonce = str(int(time.time() * 1000))
@@ -108,6 +107,10 @@ class apiCM:
         parsed_url = urlparse(url_api)
         app_key = settings.APICM_KEY
         app_secret = settings.APICM_SECRET
+        
+        print('>>>>>>>>>>>>>>>> url_api',url_api)
+        print('>>>>>>>>>>>>>>>> app_key',app_key)
+        print('>>>>>>>>>>>>>>>> app_secret',app_secret)
 
         # Gerar PasswordDigest
         nonce, created, password_digest = generate_password_digest(app_secret)
@@ -129,11 +132,11 @@ class apiCM:
         conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
         conn.request("POST", parsed_url.path, payload, headers)
         res = conn.getresponse()
-        conn.close()
-
-        # Verificar o status da resposta
         data = res.read()
         
+        print('>>>>>>>>>>>>>>>> data',data)
+        
+        # Verificar status da requisição        
         if res.status != 200:
             result_token = 'error'
         else:
@@ -146,6 +149,8 @@ class apiCM:
                     result_token = 'error: resposta vazia'
             except json.JSONDecodeError:
                 result_token = 'error: JSON malformado'
+
+        conn.close()
             
         return result_token
         
