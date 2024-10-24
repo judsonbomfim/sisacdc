@@ -842,10 +842,12 @@ def simActivateCM(id=None):
         order_item = order.id
         order_product = order.product
         order_country = order.countries
-        order_day = order.data_day
+        order_day = order.days
         order_data = order.data_day
         order_sim = order.id_sim.sim
-        plan_code = ""
+        plan_code = None
+        
+        
         
         # Definir lista
         if order_product == "chip-internacional-europa" and order_country == True:
@@ -864,6 +866,11 @@ def simActivateCM(id=None):
             day, data, cod = plan
             if (day, data) in sel_plan:
                 plan_code = cod
+                break
+        
+        # Verificar se plan_code foi definido
+        if plan_code is None:
+            raise ValueError("Nenhum plano correspondente encontrado para order_day e order_data.")
         
         
         def generate_password_digest(app_secret):
