@@ -233,7 +233,7 @@ def ord_edit(request,id):
                     ApiStore.updateEsimStore(order_id)
 
             # Adiconar Nota na Loja
-            user_name = request.user.username
+            user_name = request.user.id
             NoteStore.addNoteStore(order_id,ord_note,user_name)
             
 

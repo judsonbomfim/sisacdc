@@ -846,11 +846,7 @@ def simActivateCM(id=None):
         order_data = order.data_day
         order_sim = order.id_sim.sim
         plan_code = None
-        list_plan = None
-        
-        print(f">>>>> order_day: {order_day}")
-        print(f">>>>> order_data: {order_data}")
-        
+        list_plan = None        
         
         # Definir lista
         if order_product == "chip-internacional-europa" and order_country == True:
@@ -861,9 +857,7 @@ def simActivateCM(id=None):
             else:
                 list_plan = list_cm_global
         elif order_product == "chip-internacional-eua-canada-e-mexico":
-            list_plan = list_cm_north
-        
-        print(f">>>>> list_plan: {list_plan}")        
+            list_plan = list_cm_north       
         
         # Selecionar plano
         sel_plan = [(str(order_day), str(order_data))]
@@ -871,9 +865,7 @@ def simActivateCM(id=None):
             day, data, cod = plan
             if (day, data) in sel_plan:
                 plan_code = cod
-                break        
-        
-        print(f">>>>> plan_code: {plan_code}")    
+                break
         
         # Verificar se plan_code foi definido
         if plan_code is None:
