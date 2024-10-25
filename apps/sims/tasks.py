@@ -304,7 +304,6 @@ def simDeactivateTC(id=None):
         return
     
     def error_api():
-        print('>>>>>>>>>> ERRO API')
         # Alterar status
         UpdateOrder.upStatus(id_item,'ED')
         # Adicionar nota
@@ -315,13 +314,15 @@ def simDeactivateTC(id=None):
     print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
     
     # Gerar Token de acesso a API
-    try:
-        token_api = ApiTC.get_token()
-    except Exception:            
-        error_api()
     
     for index, o in orders_df.iterrows():
         
+        try:
+            token_api = ApiTC.get_token()
+        except Exception:
+            print('>>>>>>>>>> ERRO API - TOKEN')                
+            error_api()
+            
         order = Orders.objects.get(pk=o['id'])
         order_id = order.order_id
         id_item = order.id
@@ -341,7 +342,8 @@ def simDeactivateTC(id=None):
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1] 
-        except Exception:            
+        except Exception:
+            print('>>>>>>>>>> ERRO API - comm')                          
             error_api()
             continue      
         ##
@@ -833,7 +835,10 @@ def simActivateCM(id=None):
             print('>>>>>>>>>> ERRO DE TOKEN')
             return
     
-    for order in orders_all:    
+    for order in orders_all:
+        
+        # Aguardar 1 segundo
+        time.sleep(1)
         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
