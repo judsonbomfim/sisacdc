@@ -903,7 +903,6 @@ def simActivateCM(id=None):
         conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
         conn.request("POST", parsed_url.path, payload, headers)
         res = conn.getresponse()
-        conn.close()
 
         # Verificar o status da resposta
         data = res.read()
@@ -918,6 +917,7 @@ def simActivateCM(id=None):
         if res.status != 200:
             errorData()
         else:
+            print('DATA',data)
             data_dict = json.loads(data)
             result_data = data_dict.get('description')
             if result_data != 'Success':
@@ -929,6 +929,8 @@ def simActivateCM(id=None):
                 # ALterar status do sistema
                 UpdateOrder.upStatus(order_item,'AT')
                 up_order_st_store.delay(order_id,'ativado')
+
+        conn.close()
 
     print('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
 
