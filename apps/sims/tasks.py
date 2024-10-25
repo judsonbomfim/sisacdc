@@ -907,7 +907,6 @@ def simActivateCM(id=None):
 
         # Verificar o status da resposta
         data = res.read()
-        data_dict = json.loads(data)
         
         def errorData():
             # Adicionar Nota
@@ -919,6 +918,7 @@ def simActivateCM(id=None):
         if res.status != 200:
             errorData()
         else:
+            data_dict = json.loads(data)
             result_data = data_dict.get('description')
             if result_data != 'Success':
                 errorData()

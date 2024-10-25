@@ -52,7 +52,8 @@ def orders_list(request):
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
-            id_user = request.user.id
+            if request.user.is_authenticated:
+                id_user = request.user.id
             print(f"ID do usuário logado: {id_user}")
             if ord_s != '':
                 orders_up_status.delay(ord_id, ord_s,id_user)                               
