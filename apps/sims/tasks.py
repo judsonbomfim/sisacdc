@@ -314,15 +314,15 @@ def simDeactivateTC(id=None):
     print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
     
     # Gerar Token de acesso a API
+    token_api = None 
+    try:
+        token_api = ApiTC.get_token()
+    except Exception:
+        print('>>>>>>>>>> ERRO API - TOKEN')                
+        error_api()
     
     for index, o in orders_df.iterrows():
         
-        try:
-            token_api = ApiTC.get_token()
-        except Exception:
-            print('>>>>>>>>>> ERRO API - TOKEN')                
-            error_api()
-            
         order = Orders.objects.get(pk=o['id'])
         order_id = order.order_id
         id_item = order.id
@@ -333,7 +333,6 @@ def simDeactivateTC(id=None):
         resultDescription = None        
         endpointId = None
         simStatus = None
-        token_api = None    
          
         # Get EndPointID / Status
         try:
