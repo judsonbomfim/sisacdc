@@ -385,6 +385,7 @@ def simDeactivateTC(id=None):
                 
     print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
 
+
 @shared_task
 def simActivateTM(id=None):
     
@@ -472,7 +473,7 @@ def simActivateTM(id=None):
 
 @shared_task
 def simActivateCM(id=None):
-    pass
+    
     from apps.orders.tasks import up_order_st_store
     import base64
     import hashlib
@@ -851,6 +852,10 @@ def simActivateCM(id=None):
         elif order_product == "chip-internacional-eua-canada-e-mexico":
             list_plan = list_cm_north       
         
+        print('>>>>>>>>>> order_day',str(order_day))
+        print('>>>>>>>>>> order_data',str(order_data))
+        print('>>>>>>>>>> list_plan',str(list_plan))
+        
         # Selecionar plano
         sel_plan = [(str(order_day), str(order_data))]
         for plan in list_plan:
@@ -919,6 +924,7 @@ def simActivateCM(id=None):
             NotesAdd.addNote(order,note)
             # ALterar status do sistema
             UpdateOrder.upStatus(order_item,'AT')
+            up_order_st_store.delay(order_id,'ativado')
 
     print('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
 
