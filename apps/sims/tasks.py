@@ -118,7 +118,7 @@ def simActivateTC(id=None):
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
 
-    print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
+    print('>>>>>>>>>> ATIVAÇÂO INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -128,19 +128,13 @@ def simActivateTC(id=None):
             
     # Checar conexão com API
     def error_api():
+        print('>>>>>>>>>> ERRO API')
         # Checar Status
         UpdateOrder.upStatus(id_item,'EA')
         # Adicionar nota
         NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
         error = 'error_apiResult'
-        return error
-    
-    # Gerar Token de acesso a API
-    try:
-        token_api = ApiTC.get_token()
-    except Exception:
-        print('>>>>>>>>>> ERRO API - TOKEN')
-        error_api()
+        return error     
     
     for order in orders_all:
         
@@ -164,13 +158,15 @@ def simActivateTC(id=None):
         
         # Verificar EndPointID / Status
         try:
+            token_api = ApiTC.get_token()
             conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             headers = ApiTC.get_headers(token_api)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1]
-        except Exception:
-            print('>>>>>>>>>> ERRO API - comm')
+            print('>>>>>>>>>> endpointId',endpointId)
+            print('>>>>>>>>>> simStatus',simStatus)  
+        except Exception:            
             error_api()
             continue
         ##
@@ -257,7 +253,7 @@ def simActivateTC(id=None):
         # Fecha a conexão
         conn.close()
                 
-    print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
+    print('>>>>>>>>>> ATIVAÇÂO FINALIZADA')
 
 
 @shared_task
@@ -304,6 +300,7 @@ def simDeactivateTC(id=None):
         return
     
     def error_api():
+        print('>>>>>>>>>> ERRO API')
         # Alterar status
         UpdateOrder.upStatus(id_item,'ED')
         # Adicionar nota
@@ -312,14 +309,6 @@ def simDeactivateTC(id=None):
         return error       
 
     print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
-    
-    # Gerar Token de acesso a API
-    token_api = None 
-    try:
-        token_api = ApiTC.get_token()
-    except Exception:
-        print('>>>>>>>>>> ERRO API - TOKEN')                
-        error_api()
     
     for index, o in orders_df.iterrows():
         
@@ -333,16 +322,18 @@ def simDeactivateTC(id=None):
         resultDescription = None        
         endpointId = None
         simStatus = None
+        token_api = None    
          
         # Get EndPointID / Status
         try:
+            # Gerar tokem de acesso a API
+            token_api = ApiTC.get_token()
             conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             headers = ApiTC.get_headers(token_api, cookie=True)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1] 
-        except Exception:
-            print('>>>>>>>>>> ERRO API - comm')                          
+        except Exception:            
             error_api()
             continue      
         ##
@@ -393,7 +384,6 @@ def simDeactivateTC(id=None):
         conn.close()
                 
     print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
-
 
 @shared_task
 def simActivateTM(id=None):
