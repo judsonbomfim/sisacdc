@@ -128,7 +128,6 @@ def simActivateTC(id=None):
             
     # Checar conexão com API
     def error_api():
-        print('>>>>>>>>>> ERRO API')
         # Checar Status
         UpdateOrder.upStatus(id_item,'EA')
         # Adicionar nota
@@ -137,11 +136,11 @@ def simActivateTC(id=None):
         return error
     
     # Gerar Token de acesso a API
-    if orders_all is None:
-        try:
-            token_api = ApiTC.get_token()
-        except Exception:            
-            error_api()
+    try:
+        token_api = ApiTC.get_token()
+    except Exception:
+        print('>>>>>>>>>> ERRO API - TOKEN')
+        error_api()
     
     for order in orders_all:
         
@@ -170,9 +169,8 @@ def simActivateTC(id=None):
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1]
-            print('>>>>>>>>>> endpointId',endpointId)
-            print('>>>>>>>>>> simStatus',simStatus)  
-        except Exception:            
+        except Exception:
+            print('>>>>>>>>>> ERRO API - comm')
             error_api()
             continue
         ##
@@ -320,7 +318,7 @@ def simDeactivateTC(id=None):
     try:
         token_api = ApiTC.get_token()
     except Exception:            
-            error_api()    
+        error_api()
     
     for index, o in orders_df.iterrows():
         
@@ -863,7 +861,7 @@ def simActivateCM(id=None):
         sel_plan = [(str(order_day), str(order_data))]
         for plan in list_plan:
             day, data, cod = plan
-            if (day, data) in sel_plan:
+            if (str(day), str(data)) in sel_plan:
                 plan_code = cod
                 break
         
