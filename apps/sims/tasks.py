@@ -835,14 +835,19 @@ def simActivateCM(id=None):
         order_item = order.id
         order_product = order.product
         order_country = order.countries
-        order_day = order.days
-        order_data = order.data_day
+        order_day = str(order.days)
+        order_data = str(order.data_day)
         order_sim = order.id_sim.sim
-        plan_code = None
         list_plan = None        
         
+                
+        print('>>>>>>>>>> order_day',order_day)
+        print('>>>>>>>>>> order_data',order_data)
+        print('>>>>>>>>>> list_plan',list_plan)
+        print('>>>>>>>>>> order_country',order_country)
+        
         # Definir lista
-        if order_product == "chip-internacional-europa" and order_country == True:
+        if order_product == "chip-internacional-europa":
             list_plan = list_cm_europe
         elif order_product == "chip-internacional-global":
             if order_country == True:
@@ -852,15 +857,12 @@ def simActivateCM(id=None):
         elif order_product == "chip-internacional-eua-canada-e-mexico":
             list_plan = list_cm_north       
         
-        print('>>>>>>>>>> order_day',str(order_day))
-        print('>>>>>>>>>> order_data',str(order_data))
-        print('>>>>>>>>>> list_plan',str(list_plan))
-        
         # Selecionar plano
-        sel_plan = [(str(order_day), str(order_data))]
+        sel_plan = [(order_day, order_data)]
+        plan_code = None        
         for plan in list_plan:
             day, data, cod = plan
-            if (str(day), str(data)) in sel_plan:
+            if (day, data) in sel_plan:
                 plan_code = cod
                 break
         
