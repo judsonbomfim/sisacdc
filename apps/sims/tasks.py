@@ -907,20 +907,28 @@ def simActivateCM(id=None):
 
         # Verificar o status da resposta
         data = res.read()
+        data_dict = json.loads(data)
         
-        if res.status != 200:
+        def errorData():
             # Adicionar Nota
-            note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente.'
+            note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente. ERRO: {data_dict}'
             NotesAdd.addNote(order,note)
             # ALterar status do sistema
             UpdateOrder.upStatus(order_item,'EA')
+        
+        if res.status != 200:
+            errorData()
         else:
-            # Adicionar Nota
-            note = f'SIM {order_sim} ativado na China Mobile.'
-            NotesAdd.addNote(order,note)
-            # ALterar status do sistema
-            UpdateOrder.upStatus(order_item,'AT')
-            up_order_st_store.delay(order_id,'ativado')
+            result_data = data_dict.get('description')
+            if result_data != 'Success':
+                errorData()
+            else:
+                # Adicionar Nota
+                note = f'SIM {order_sim} ativado na China Mobile.'
+                NotesAdd.addNote(order,note)
+                # ALterar status do sistema
+                UpdateOrder.upStatus(order_item,'AT')
+                up_order_st_store.delay(order_id,'ativado')
 
     print('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
 
