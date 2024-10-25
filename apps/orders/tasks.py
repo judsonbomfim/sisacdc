@@ -227,110 +227,108 @@ def orders_auto():
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user):
 
-    ord_id = ord_id
+    o_id = ord_id
     ord_s = ord_s
     
-    for o_id in ord_id:
-        
-        print('-----------------o_id')
-        print(o_id)
-        
-        order = Orders.objects.get(pk=o_id)
-        user = User.objects.get(pk=id_user)
-        
-        order_id = order.id
-        order_st = order.order_status
-        order_plan = order.get_product_display()
-        try: type_sim = order.id_sim.type_sim
-        except: type_sim = 'esim'
-        apiStore = ApiStore.conectApiStore()
+    print('-----------------o_id')
+    print(o_id)
+    
+    order = Orders.objects.get(pk=o_id)
+    user = User.objects.get(pk=id_user)
+    
+    order_id = order.id
+    order_st = order.order_status
+    order_plan = order.get_product_display()
+    try: type_sim = order.id_sim.type_sim
+    except: type_sim = 'esim'
+    apiStore = ApiStore.conectApiStore()
 
-        # Save status System
-        order.order_status = ord_s
-        order.save()
-        
-        # Desativar (e)SIM
-        if ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE':
-            if order.id_sim:                
-                # Change TC
-                if order.id_sim.operator == 'TC' and order.order_status != 'ED':
-                    simDeactivateTC(id=order.id)
-                
-                # Update SIM
-                sim_put = Sims.objects.get(pk=order.id_sim.id)
-                sim_put.sim_status = 'DE'
-                sim_put.save()
-                
-                if order.product != 'chip-internacional-eua':
-                    # Deletar eSIM para site                            
-                    ApiStore.updateEsimStore(order_id)
+    # Save status System
+    order.order_status = ord_s
+    order.save()
+    
+    # Desativar (e)SIM
+    if ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE':
+        if order.id_sim:                
+            # Change TC
+            if order.id_sim.operator == 'TC' and order.order_status != 'ED':
+                simDeactivateTC(id=order.id)
             
-                
-            # Edit Voice
-            if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
-                voice_d = VoiceCalls.objects.get(id_item=order_id)
-                num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)
-                
-                num_s.number_status = 'DS'
-                num_s.save()
-                
-                voice_d.delete()
- 
-        # Ativar SIM TC
-        if ord_s == 'AT' and order.id_sim.operator == 'TC':
-            if order.order_status == 'EA':
-                # Alterar status
-                UpdateOrder.upStatus(order.id,'AT')
-                up_order_st_store.delay(order.id,'ativado')
-                StatusStore.upStatus(order.id,'ativado')
-                # Adicionar nota
-                NotesAdd.addNote(order,f'SIM ativado')
-            else:
-                simActivateTC(id=order.id)
+            # Update SIM
+            sim_put = Sims.objects.get(pk=order.id_sim.id)
+            sim_put.sim_status = 'DE'
+            sim_put.save()
+            
+            if order.product != 'chip-internacional-eua':
+                # Deletar eSIM para site                            
+                ApiStore.updateEsimStore(order_id)
         
-        # Verificar se todos os itens estão cancelados
-        order_ver = Orders.objects.filter(order_id=order.order_id)
+            
+        # Edit Voice
+        if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
+            voice_d = VoiceCalls.objects.get(id_item=order_id)
+            num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)
+            
+            num_s.number_status = 'DS'
+            num_s.save()
+            
+            voice_d.delete()
 
-        order_canc = 0
-        for ord_v in order_ver:
-            if ord_v.order_status != 'CC':
-                order_canc += 1 
-        
-        order_reemb = 0
-        # Verificar se todos os itens estão reembolsados
-        for ord_v in order_ver:
-            if ord_v.order_status != 'RB':
-                order_reemb += 1 
-        
-        # Status sis : Status Loja
-        status_sis_site = StatusStore.st_sis_site()
-        # Só cancelar se todos os itens estiverem cancelados / reembolsados
-        if (order_canc == 0 and ord_s == 'CC') or (order_reemb == 0 and ord_s == 'RB') or ord_s != 'DE':
-            print('--------------------------- Alterar STATUS Loja')            
-            if ord_s in status_sis_site:
-                update_store = {
-                    'status': status_sis_site[ord_s]
-                }
-                apiStore.put(f'orders/{order.order_id}', update_store).json()
-                
-        # Save Notes
-        def addNote(t_note):
-            add_sim = Notes( 
-                id_item = Orders.objects.get(pk=order.id),
-                id_user = user,
-                note = t_note,
-                type_note = 'S',
-            )
-            add_sim.save()
-        
-        ord_status = Orders.order_status.field.choices
-        for st in ord_status:
-            if order_st == st[0] :
-                addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
-        
-        # Enviar email
-        if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
-            send_email_sims.delay(id=order.id)
+    # Ativar SIM TC
+    if ord_s == 'AT' and order.id_sim.operator == 'TC':
+        if order.order_status == 'EA':
+            # Alterar status
+            UpdateOrder.upStatus(order.id,'AT')
+            up_order_st_store.delay(order.id,'ativado')
+            StatusStore.upStatus(order.id,'ativado')
+            # Adicionar nota
+            NotesAdd.addNote(order,f'SIM ativado')
+        else:
+            simActivateTC(id=order.id)
+    
+    # Verificar se todos os itens estão cancelados
+    order_ver = Orders.objects.filter(order_id=order.order_id)
+
+    order_canc = 0
+    for ord_v in order_ver:
+        if ord_v.order_status != 'CC':
+            order_canc += 1 
+    
+    order_reemb = 0
+    # Verificar se todos os itens estão reembolsados
+    for ord_v in order_ver:
+        if ord_v.order_status != 'RB':
+            order_reemb += 1 
+    
+    # Status sis : Status Loja
+    status_sis_site = StatusStore.st_sis_site()
+    # Só cancelar se todos os itens estiverem cancelados / reembolsados
+    if (order_canc == 0 and ord_s == 'CC') or (order_reemb == 0 and ord_s == 'RB') or ord_s != 'DE':
+        print('--------------------------- Alterar STATUS Loja')            
+        if ord_s in status_sis_site:
+            update_store = {
+                'status': status_sis_site[ord_s]
+            }
+            apiStore.put(f'orders/{order.order_id}', update_store).json()
+            
+    # Save Notes
+    def addNote(t_note):
+        add_sim = Notes( 
+            id_item = Orders.objects.get(pk=order.id),
+            id_user = user,
+            note = t_note,
+            type_note = 'S',
+        )
+        add_sim.save()
+    
+    ord_status = Orders.order_status.field.choices
+    for st in ord_status:
+        if order_st == st[0] :
+            addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
+    
+    # Enviar email
+    if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
+        send_email_sims.delay(id=order.id)
 
 
 @shared_task
