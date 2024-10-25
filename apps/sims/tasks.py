@@ -366,7 +366,7 @@ def simDeactivateTC(id=None):
                 print('>>>>>>>>>> Alterar status')                
                 # Alterar status                
                 UpdateOrder.upStatus(id_item,'DE')
-                up_order_st_store.delay(order.id,'desativado')
+                up_order_st_store.delay(order_id,'desativado')
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
                 sim_put.sim_status = 'DE'
                 sim_put.save()
