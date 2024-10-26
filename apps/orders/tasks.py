@@ -279,7 +279,7 @@ def orders_up_status(ord_id, ord_s, id_user):
         if order.order_status == 'EA':
             # Alterar status
             UpdateOrder.upStatus(order.id,'AT')
-            up_order_st_store.delay(order.id,'ativado')
+            up_order_st_store.delay(order.order_id,'ativado')
             StatusStore.upStatus(order.id,'ativado')
             # Adicionar nota
             NotesAdd.addNote(order,f'SIM ativado')
