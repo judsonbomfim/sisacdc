@@ -237,11 +237,6 @@ def ord_edit(request,id):
             user_name = request.user.id
             NoteStore.addNoteStore(order_id,ord_note,user_name)
             
-
-        # Activate TC
-        # if ord_st == 'AT' and order.order_status != 'AT' and operator == 'TC':
-        #     simActivateTC(id=order.id)
-
         # Se SIM preenchico
         if sim:
             # Verificar se Operadora e Tipo de SIM estão marcados
