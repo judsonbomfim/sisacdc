@@ -1,3 +1,4 @@
+from urllib import request
 from celery import shared_task
 from django.shortcuts import redirect
 from django.core.mail import EmailMultiAlternatives
@@ -70,7 +71,7 @@ def send_email_sims(id=None):
         email.attach_alternative(html_content, "text/html")
         email.send()
         
-        if order_st != 'CN' and type_sim == 'esim':
+        if (order_st != 'CN' or order_st != 'AT') and type_sim == 'esim':
             if product_plan == 'USA' or product_plan == 'USA 30 Dias':
                 # Update Order
                 order = Orders.objects.get(pk=id)
