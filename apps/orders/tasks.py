@@ -273,18 +273,6 @@ def orders_up_status(ord_id, ord_s, id_user):
             num_s.save()
             
             voice_d.delete()
-
-    # Ativar SIM TC
-    # if ord_s == 'AT' and order.id_sim.operator == 'TC':
-    #     if order.order_status == 'EA':
-    #         # Alterar status
-    #         UpdateOrder.upStatus(order.id,'AT')
-    #         up_order_st_store.delay(order.order_id,'ativado')
-    #         StatusStore.upStatus(order.id,'ativado')
-    #         # Adicionar nota
-    #         NotesAdd.addNote(order,f'SIM ativado')
-    #     else:
-    #         simActivateTC(id=order.id)
     
     # Verificar se todos os itens estão cancelados
     order_ver = Orders.objects.filter(order_id=order.order_id)
