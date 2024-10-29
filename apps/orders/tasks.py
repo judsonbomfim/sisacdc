@@ -227,8 +227,11 @@ def orders_auto():
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user):
+    
+    # Verificar se ord_id é uma lista
+    if not isinstance(ord_id, list):
+        ord_id = [ord_id]
 
-    ord_id = ord_id
     ord_s = ord_s
     
     for o_id in ord_id:
@@ -294,12 +297,12 @@ def orders_up_status(ord_id, ord_s, id_user):
         status_sis_site = StatusStore.st_sis_site()
         # Só cancelar se todos os itens estiverem cancelados / reembolsados
         if (order_canc == 0 and ord_s == 'CC') or (order_reemb == 0 and ord_s == 'RB') or ord_s != 'DE':
-            print('--------------------------- Alterar STATUS Loja')            
+            print('--------------------------- Alterar STATUS Loja')        
             if ord_s in status_sis_site:
-                update_store = {
-                    'status': status_sis_site[ord_s]
-                }
-                apiStore.put(f'orders/{order.order_id}', update_store).json()
+                up_order_st_store(order.order_id,status_sis_site[ord_s])
+        elif ord_s not in ['CC', 'RB', 'DE']:
+            print('--------------------------- Alterar STATUS Loja')        
+            up_order_st_store(order.order_id,status_sis_site[ord_s])        
                 
         # Save Notes
         def addNote(t_note):
