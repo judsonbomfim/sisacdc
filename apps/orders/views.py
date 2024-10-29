@@ -171,7 +171,7 @@ def ord_edit(request,id):
         product = request.POST.get('product')
         data_day = request.POST.get('data_day')
         type_sim = request.POST.get('type_sim')
-        operator = request.POST.get('operator')
+        operator = request.POST.get('operator02')
         sim = request.POST.get('sim')
         activation_date = request.POST.get('activation_date')
         email = request.POST.get('email')
