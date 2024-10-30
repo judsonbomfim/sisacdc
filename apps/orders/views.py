@@ -136,13 +136,17 @@ def ord_edit(request,id):
         ord_status = Orders.order_status.field.choices
         ord_product = Orders.product.field.choices
         ord_data_day = Orders.data_day.field.choices
+        ord_operators = Sims.operator.field.choices
+
+        days = list(range(1, 31))
         
         context = {
             'order': order,
             'ord_status': ord_status,
             'ord_product': ord_product,
             'ord_data_day': ord_data_day,
-            'days': range(1, 31),
+            'ord_operators': ord_operators,
+            'ord_days': days,
         }
         return render(request, 'painel/orders/edit.html', context)
         
@@ -171,7 +175,7 @@ def ord_edit(request,id):
         product = request.POST.get('product')
         data_day = request.POST.get('data_day')
         type_sim = request.POST.get('type_sim')
-        operator = request.POST.get('operator02')
+        operator = request.POST.get('operator')
         sim = request.POST.get('sim')
         activation_date = request.POST.get('activation_date')
         email = request.POST.get('email')
@@ -238,40 +242,36 @@ def ord_edit(request,id):
             
         # Se SIM preenchico
         if sim:
-            # Verificar se Operadora e Tipo de SIM estão marcados
-            if operator != None and type_sim != None:
-                if order_sim != '':
-                    # Alterar status no sistema e no site
-                    updateSIM()
-                
-                sims_all = Sims.objects.all().filter(sim=sim)
-                if sims_all:
-                    # Update order
-                    sim_id = sims_all[0].id
-                    sims_put = Sims.objects.get(pk=sim_id)
-                    sims_put.sim_status = 'AT'
-                    sims_put.save()
-                    order_put = Orders.objects.get(pk=order.id)
-                    order_put.id_sim_id = sim_id
-                    order_put.save()
-                    up_plan = True # verificação para nota
-                else:
-                    # Save SIMs - Insert Stock
-                    add_sim = Sims( 
-                        sim = sim,
-                        type_sim = type_sim,
-                        operator = operator,
-                        sim_status = 'AT',
-                    )
-                    add_sim.save()
-                
-                    # Update order
-                    order_put = order
-                    order_put.id_sim_id = add_sim.id
-                    order_put.save()
-                    up_plan = True # verificação para nota
+            if order_sim != '':
+                # Alterar status no sistema e no site
+                updateSIM()
+            
+            sims_all = Sims.objects.all().filter(sim=sim)
+            if sims_all:
+                # Update order
+                sim_id = sims_all[0].id
+                sims_put = Sims.objects.get(pk=sim_id)
+                sims_put.sim_status = 'AT'
+                sims_put.save()
+                order_put = Orders.objects.get(pk=order.id)
+                order_put.id_sim_id = sim_id
+                order_put.save()
+                up_plan = True # verificação para nota
             else:
-                msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
+                # Save SIMs - Insert Stock
+                add_sim = Sims( 
+                    sim = sim,
+                    type_sim = type_sim,
+                    operator = operator,
+                    sim_status = 'AT',
+                )
+                add_sim.save()
+            
+                # Update order
+                order_put = order
+                order_put.id_sim_id = add_sim.id
+                order_put.save()
+                up_plan = True # verificação para nota
         else:
             # Troca de SIM
             if order_sim != '':
@@ -304,6 +304,8 @@ def ord_edit(request,id):
         order_put.cell_eid = cell_eid
         order_put.tracking = tracking
         order_put.order_status = ord_st
+        order_put.type_sim = type_sim
+        order_put.oper_sim = operator
         order_put.save()
         
         # Notes
