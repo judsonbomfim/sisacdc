@@ -226,7 +226,7 @@ def orders_auto():
 
 
 @shared_task
-def orders_up_status(ord_id, ord_s, id_user):
+def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
     
     # Verificar se ord_id é uma lista
     if not isinstance(ord_id, list):
@@ -253,20 +253,21 @@ def orders_up_status(ord_id, ord_s, id_user):
         order.save()
         
         # Desativar (e)SIM
-        if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE') and order_st != 'ED':
+        if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE'):
             if order.id_sim:                
                 # Change TC
-                if order.id_sim.operator == 'TC' and order.order_status != 'ED':
+                if order.id_sim.operator == 'TC' and ord_s_prev != 'ED':
                     simDeactivateTC(id=order.id)
                 
-                # Update SIM
-                sim_put = Sims.objects.get(pk=order.id_sim.id)
-                sim_put.sim_status = 'DE'
-                sim_put.save()
-                
-                if order.product != 'chip-internacional-eua':
-                    # Deletar eSIM para site                            
-                    ApiStore.updateEsimStore(order_id)
+                if ord_s_prev != 'ED':
+                    # Update SIM
+                    sim_put = Sims.objects.get(pk=order.id_sim.id)
+                    sim_put.sim_status = 'DE'
+                    sim_put.save()
+                    
+                    if order.product != 'chip-internacional-eua':
+                        # Deletar eSIM para site                            
+                        ApiStore.updateEsimStore(order_id)
             
                 
             # Edit Voice
