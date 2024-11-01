@@ -220,27 +220,7 @@ def ord_edit(request,id):
                 order_put.save()
             else:       
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
-        
-        print('>>>>>>>>>> order_status:',order_status)
-        # Liberar SIMs
-        if (ord_st == 'CC' or ord_st == 'DE' or ord_st == 'RE') and order_status != 'ED':
-            if order_sim != '':
-                # Change TC
-                if order.id_sim.operator == 'TC':
-                    simDeactivateTC(id=order.id)
-                
-                # Update SIM
-                sim_put = Sims.objects.get(pk=sim_id)
-                sim_put.sim_status = 'DE'
-                sim_put.save()
-                
-                if order.product != 'chip-internacional-eua':
-                    # Deletar eSIM para site
-                    ApiStore.updateEsimStore(order_id)
-
-            # Adiconar Nota na Loja
-            user_name = request.user.id
-            NoteStore.addNoteStore(order_id,ord_note,user_name)
+    
             
         # Se SIM preenchico
         if sim:
@@ -342,7 +322,7 @@ def ord_edit(request,id):
             # Alterar status
             # Status sis : Status Loja            
             user_name = request.user.id
-            orders_up_status.delay(order.id, ord_st,user_name) 
+            orders_up_status(order.id, ord_st,user_name) 
             
             # Salvar notas    
             ord_status = Orders.order_status.field.choices

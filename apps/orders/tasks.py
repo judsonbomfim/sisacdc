@@ -253,7 +253,7 @@ def orders_up_status(ord_id, ord_s, id_user):
         order.save()
         
         # Desativar (e)SIM
-        if ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE':
+        if ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE' and order_st != 'ED':
             if order.id_sim:                
                 # Change TC
                 if order.id_sim.operator == 'TC' and order.order_status != 'ED':
@@ -315,10 +315,11 @@ def orders_up_status(ord_id, ord_s, id_user):
             add_sim.save()
         
         ord_status = Orders.order_status.field.choices
-        for st in ord_status:
-            if order_st == st[0] :
-                addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
-        
+        if order_st != 'ED':
+            for st in ord_status:
+                if order_st == st[0] :
+                    addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
+            
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
             send_email_sims.delay(id=order.id)
