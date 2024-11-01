@@ -18,7 +18,7 @@ class ApiStore():
         return wcapi
 
     @staticmethod
-    def updateEsimStore(order_id):    
+    def updateEsimStore(order_id):
         url_painel = str(os.getenv('URL_PAINEL'))
         esims_order = Orders.objects.filter(order_id=order_id).filter(id_sim__link__isnull=False)
         esims_list = ''

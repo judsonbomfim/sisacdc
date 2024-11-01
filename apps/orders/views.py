@@ -318,16 +318,18 @@ def ord_edit(request,id):
         apiStore = ApiStore.conectApiStore() 
             
         # Status Notes
-        if ord_st != order.order_status:
+        if ord_st != order_status:
             # Alterar status
             # Status sis : Status Loja            
             user_name = request.user.id
-            orders_up_status(order.id, ord_st,user_name) 
+            ord_s_prev = order_status
+            
+            orders_up_status(order.id, ord_st,user_name, ord_s_prev) 
             
             # Salvar notas    
             ord_status = Orders.order_status.field.choices
             for st in ord_status:
-                if ord_st == st[0] :
+                if ord_st == st[0]:
                     addNote(f'Alterado de {dict(Orders.order_status.field.choices).get(order_status)} para {st[1]}')
             
             # Enviar email
