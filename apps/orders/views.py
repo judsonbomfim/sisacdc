@@ -220,12 +220,13 @@ def ord_edit(request,id):
                 order_put.save()
             else:       
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
-                        
+        
+        print('>>>>>>>>>> order_status:',order_status)
         # Liberar SIMs
-        if ord_st == 'CC' or ord_st == 'DE' or ord_st == 'RE':
+        if (ord_st == 'CC' or ord_st == 'DE' or ord_st == 'RE') and order_status != 'ED':
             if order_sim != '':
                 # Change TC
-                if order.id_sim.operator == 'TC' and order_status != 'ED':
+                if order.id_sim.operator == 'TC':
                     simDeactivateTC(id=order.id)
                 
                 # Update SIM
@@ -347,7 +348,7 @@ def ord_edit(request,id):
             ord_status = Orders.order_status.field.choices
             for st in ord_status:
                 if ord_st == st[0] :
-                    addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}')
+                    addNote(f'Alterado de {dict(Orders.ORDER_STATUS_CHOICES).get(order_status)} para {st[1]}')
             
             # Enviar email
             if ord_st == 'CN' and type_sim == 'sim':
