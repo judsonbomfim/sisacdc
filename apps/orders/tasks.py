@@ -253,7 +253,7 @@ def orders_up_status(ord_id, ord_s, id_user):
         order.save()
         
         # Desativar (e)SIM
-        if ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE' and order_st != 'ED':
+        if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE') and order_st != 'ED':
             if order.id_sim:                
                 # Change TC
                 if order.id_sim.operator == 'TC' and order.order_status != 'ED':
