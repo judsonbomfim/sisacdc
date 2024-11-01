@@ -348,7 +348,7 @@ def ord_edit(request,id):
             ord_status = Orders.order_status.field.choices
             for st in ord_status:
                 if ord_st == st[0] :
-                    addNote(f'Alterado de {dict(Orders.ORDER_STATUS_CHOICES).get(order_status)} para {st[1]}')
+                    addNote(f'Alterado de {dict(Orders.order_status.field.choices).get(order_status)} para {st[1]}')
             
             # Enviar email
             if ord_st == 'CN' and type_sim == 'sim':
