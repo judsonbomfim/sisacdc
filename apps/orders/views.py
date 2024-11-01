@@ -167,6 +167,7 @@ def ord_edit(request,id):
         
         order = Orders.objects.get(pk=id)
         order_id = order.order_id
+        order_status = order.order_status
         try: order_sim = order.id_sim.sim
         except: order_sim = ''
         try: sim_id = int(order.id_sim.id)
@@ -222,9 +223,9 @@ def ord_edit(request,id):
                         
         # Liberar SIMs
         if ord_st == 'CC' or ord_st == 'DE' or ord_st == 'RE':
-            if order_sim != '' and order.order_status != 'ED':
+            if order_sim != '':
                 # Change TC
-                if order.id_sim.operator == 'TC' and order.order_status != 'ED':
+                if order.id_sim.operator == 'TC' and order_status != 'ED':
                     simDeactivateTC(id=order.id)
                 
                 # Update SIM
