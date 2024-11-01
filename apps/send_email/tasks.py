@@ -36,7 +36,9 @@ def send_email_sims(id=None):
         days = order.days     
         product_plan = order.get_product_display()
         try: type_sim = order.id_sim.type_sim
-        except: continue            
+        except: continue
+        try: sim = order.id_sim.sim
+        except: continue     
         countries = order.countries
         
         context = {
@@ -50,6 +52,7 @@ def send_email_sims(id=None):
             'days': days,
             'product_plan': product_plan,
             'type_sim': type_sim,
+            'sim': sim,
             'countries': countries,        
         }
         html_content = render_to_string('painel/emails/send_email.html', context)
