@@ -83,7 +83,7 @@ def voice_index(request):
     voices_l = voices_df
        
     if voice_item_f is not None:
-        voices_l = voices_l[(voices_l['order_id'] == voice_item_f)]
+        voices_l = voices_l[voices_l['order_id'].astype(str).str.contains(str(voice_item_f))]
         url_filter += f"&voice_item_f={voice_item_f}"
     
     if voice_number_f is not None:
