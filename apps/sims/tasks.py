@@ -118,7 +118,7 @@ def simActivateTC(id=None):
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
 
-    print('>>>>>>>>>> ATIVAÇÂO INICIADA')
+    print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -253,7 +253,7 @@ def simActivateTC(id=None):
         # Fecha a conexão
         conn.close()
                 
-    print('>>>>>>>>>> ATIVAÇÂO FINALIZADA')
+    print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
 
 
 @shared_task
@@ -393,7 +393,7 @@ def simActivateTM(id=None):
         
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
-    tomorrow = today - timedelta(days=-1)
+    tomorrow = today + timedelta(days=1)
     
     print('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
     
