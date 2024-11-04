@@ -393,12 +393,13 @@ def simActivateTM(id=None):
         
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
-
+    tomorrow = today - timedelta(days=-1)
+    
     print('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TM', activation_date__lte=today)
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TM', activation_date__lte=tomorrow)
     else:
         orders_all = Orders.objects.filter(pk=id)        
     
