@@ -117,12 +117,13 @@ def simActivateTC(id=None):
         
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
+    tomorrow = today - timedelta(days=-1)
 
     print('>>>>>>>>>> ATIVAÇÂO INICIADA')
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=today)
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=tomorrow)
     else:
         orders_all = Orders.objects.filter(pk=id)
             
@@ -392,9 +393,9 @@ def simActivateTM(id=None):
     from apps.orders.tasks import up_order_st_store    
         
     london_tz = pytz.timezone('Europe/London')
-    now = datetime.now(london_tz)
-    today = (now - timedelta(hours=12)).date()    
-
+    today = datetime.now(london_tz).date()
+    yesterday = today - timedelta(days=1)
+    
     print('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
     
     # Selecionar pedidos
