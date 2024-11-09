@@ -839,7 +839,7 @@ def simActivateCM(id=None):
         order_day = str(order.days)
         order_data = str(order.data_day)
         order_sim = order.id_sim.sim
-        list_plan = None
+        list_plan = []
         
         # Definir lista
         if order_product == "chip-internacional-europa":
