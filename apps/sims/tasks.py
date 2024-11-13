@@ -113,7 +113,7 @@ def sims_in_orders():
 @shared_task
 def simActivateTC(id=None):
     
-    from apps.orders.tasks import up_order_st_store    
+    from apps.orders.tasks import up_order_st_store
         
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
@@ -261,9 +261,9 @@ def simDeactivateTC(id=None):
     
     from apps.orders.tasks import up_order_st_store    
     
-    timezone = pytz.timezone('Europe/London')
+    timezone = pytz.timezone('America/Sao_Paulo')
     min_hour = 23  # hora
-    min_minute = 45  # 45 minutos
+    min_minute = 50  # minutos
 
     current_hour = datetime.now(timezone).hour
     current_minute = datetime.now(timezone).minute
@@ -274,9 +274,9 @@ def simDeactivateTC(id=None):
     # Selecionar pedidos
     if id is None:
         if current_hour < min_hour or (current_hour == min_hour and current_minute < min_minute):
-            # Se for depois da hora mínima, execute a tarefa
             return
         else:
+            # Se for depois da hora mínima, execute a tarefa
             orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC')
     else:
         orders_all = Orders.objects.filter(pk=id)
