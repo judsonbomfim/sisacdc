@@ -200,7 +200,7 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BEAT_SYNC_EVERY = None
 
-CELERY_TIMEZONE = 'Europe/London'
+CELERY_TIMEZONE = 'America/Sao_Paulo'
 
 CELERY_BEAT_SCHEDULE = {
     'task__5_min_orders_auto': {
