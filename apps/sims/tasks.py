@@ -115,8 +115,7 @@ def simActivateTC(id=None):
     
     from apps.orders.tasks import up_order_st_store
         
-    london_tz = pytz.timezone('Europe/London')
-    today = datetime.now(london_tz).date()
+    today = datetime.now().date()
 
     print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
     
