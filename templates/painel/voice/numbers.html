@@ -1,0 +1,187 @@
+{% extends 'painel/partials/_content_default.html' %}
+{% load permission_tags %}
+{% load static %}
+{% load date_day %}
+{% block title_page %}<i class="bi bi-telephone"></i> Números da Voz{% endblock %}
+{% block title_content %}Lista de Números de Voz{% endblock %}
+{%block js_custom %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+{% endblock %}
+
+{% block content_top %}
+<!-- Conteúdo do topo -->
+<!-- {% include 'painel/partials/_sims_stock.html' %} -->
+{% endblock %}
+
+{% block content_def %}
+<!-- Conteúdo do Principal -->
+{% comment %} {% if request.user|can:'edit_sims' %} {% endcomment %}
+<div class="col-md-12">
+    <div class="dm-button-list d-flex flex-wrap">
+        {% for num_st in num_st_list %}
+            {% if num_st.2 != 0 %}
+            <button class="btn btn-default btn-squared color-primary btn-outline-primary m-1">{{num_st.1}}
+                ({{num_st.2}})</button>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% comment %} {% endif %} {% endcomment %}
+<div class="row">
+    <form class="row g-3" action="{% url 'mumber_list' %}" method="POST">
+        {% csrf_token %}
+        <div class="col-md-1">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="number_st">
+                    <option value="" selected>Alterar Status</option>
+                    {% for number_st in num_status %}
+                    <option value="{{number_st.0}}">{{number_st.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary"
+                name="up_status">Alterar</button>
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control form-control-lg" placeholder="Login" name="number_login_f">
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control form-control-lg" placeholder="Ramal" name="number_extension_f">
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control form-control-lg" placeholder="Número" name="number_number_f">
+        </div>
+        <div class="col-md-2">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="number_status_f">
+                    <option value="" selected>Filtrar Status - Todos</option>
+                    {% for number_st in num_status %}
+                    <option value="{{number_st.0}}">{{number_st.1}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary"
+                name="up_filter">Filtrar</button>
+        </div>
+        <div class="col-md-1 p-2">
+            <a class="btn-default btn-rounded" href="{% url 'mumber_list' %}">
+                <i class="bi bi-arrow-clockwise"></i>Limpar
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table mb-0 table-hover table-responsive">
+                <thead>
+                    <tr class="userDatatable-header">
+                        <th><input class="form-check-input" type="checkbox" id="checkAll"></th>
+                        <th class="userDatatable-title">Login</th>
+                        <th class="userDatatable-title">Ramal</th>
+                        <th class="userDatatable-title">Número</th>
+                        <th class="userDatatable-title">Senha</th>
+                        <th class="userDatatable-title">QrCode</th>
+                        <th class="userDatatable-title">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if numbers %}
+                    {% for num in numbers %}
+                    <tr class="table-tr">
+                        <td>
+                            <div class="userDatatable-content">
+                                <input class="checkItem form-check-input" type="checkbox" value="{{num.id}}"
+                                    name="number_id">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ num.login }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ num.extension }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ num.number }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ num.password|default:"---" }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {% comment %} {{ num.number_qrcode|default:"---" }} {% endcomment %}
+                                {% if num.number_qrcode %}                                    
+                                <a href="{{ url_cdn }}/{{ num.number_qrcode }}" target="_blank">
+                                    <i class="bi bi-qr-code text-primary" data-bs-toggle="tooltip"
+                                        data-bs-placement="top" data-bs-custom-class="custom-tooltip"
+                                        data-bs-title="Ver QRCode">
+                                    </i>
+                                </a>
+                                {% else %}
+                                ---
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="userDatatable-content">
+                                {{ num.get_number_status_display }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr class="table-tr">
+                        <td>
+                            <div class="userDatatable-content">
+                                Nenhum (e)SIM encontrado.
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            <nav aria-label="navigation">
+                <ul class="pagination">
+                    {% if numbers.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ numbers.previous_page_number }}{{ url_filter }}"
+                            aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item">
+                        <a class="page-link" href="">{{ numbers.number }} de {{ numbers.paginator.num_pages }}</a>
+                    </li>
+                    {% if numbers.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ numbers.next_page_number }}{{ url_filter }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+{% block script_custom %}
+<script>
+    $(document).ready(function () {
+        // Ação do botão "Marcar Todos"
+        $('#checkAll').on('change', function () {
+            $('.checkItem').prop('checked', this.checked);
+        });
+    });
+</script>
+{% endblock %}

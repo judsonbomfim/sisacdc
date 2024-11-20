@@ -25,7 +25,7 @@ class SendEmail():
     #     else:
     #         orders_all = Orders.objects.filter(pk=id)
             
-    #     url_site = str(os.getenv('URL_CDN'))
+    #     url_site = settings.URL_CDN
     #     url_img = f'{url_site}/email/'
         
     #     if not orders_all:           

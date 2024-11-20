@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from rolepermissions.decorators import has_permission_decorator
-import os
 import csv
 from django.http import HttpResponse
 from datetime import date, datetime, timedelta
@@ -8,13 +7,15 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.conf import settings
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
-from .classes import ApiStore, StatusSis, DateFormats
-from .tasks import order_import
+from apps.sims.tasks import simDeactivateTC, simActivateTC
+from .classes import ApiStore, StatusStore, DateFormats
+from .tasks import order_import, orders_up_status, check_esim_eua
 import pandas as pd
-import json
+
 
 #Date today
 today = datetime.now()
@@ -25,24 +26,25 @@ today = datetime.now()
 def orders_list(request):
     global orders_l
     orders_l = ''
-    
-    url_cdn = str(os.getenv('URL_CDN'))
-    
+
+    url_cdn = settings.URL_CDN
+
     orders_all = Orders.objects.all().order_by('-id')
+    sims = Sims.objects.all().order_by('-id')
     orders_l = orders_all
-    
+
     if request.method == 'GET':
-        
+
         ord_name_f = request.GET.get('ord_name')
-        ord_order_f = request.GET.get('ord_order')    
+        ord_order_f = request.GET.get('ord_order')
         ord_sim_f = request.GET.get('ord_sim')
         oper_f = request.GET.get('oper')
         ord_st_f = request.GET.get('ord_st')
-    
+
     if request.method == 'POST':
-        
+
         ord_name_f = request.POST.get('ord_name_f')
-        ord_order_f = request.POST.get('ord_order_f')       
+        ord_order_f = request.POST.get('ord_order_f')  
         ord_sim_f = request.POST.get('ord_sim_f')
         oper_f = request.POST.get('oper_f')
         ord_st_f = request.POST.get('ord_st_f')
@@ -50,79 +52,12 @@ def orders_list(request):
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
-            if ord_id and ord_s:
-                for o_id in ord_id:
-                    
-                    order = Orders.objects.get(pk=o_id)
-                    order.order_status = ord_s
-                    order.save()
-                    
-                    order_id = order.order_id
-                    order_st = order.order_status
-                    order_plan = order.get_product_display()
-                    try: type_sim = order.id_sim.type_sim
-                    except: type_sim = 'esim'
-                    apiStore = ApiStore.conectApiStore()
-                    
-                    if ord_s == 'CC' or ord_s == 'DS':
-                        if order.id_sim:
-                            # Update SIM
-                            sim_put = Sims.objects.get(pk=order.id_sim.id)
-                            if order.id_sim.type_sim == 'esim':
-                                sim_put.sim_status = 'TC'
-                                esim_v = True
-                            else:
-                                sim_put.sim_status = 'DS'
-                            sim_put.sim_status = 'TC'
-                            sim_put.save()
-                                
-                            # Delete SIM in Order
-                            order_put = Orders.objects.get(pk=order.id)
-                            order_put.id_sim_id = ''
-                            order_put.save()
-                            
-                            # Deletar eSIM para site                            
-                            if esim_v == True:    
-                                ApiStore.updateEsimStore(order_id)
-                        
-                    # Save Notes
-                    def addNote(t_note):
-                        add_sim = Notes( 
-                            id_item = Orders.objects.get(pk=order.id),
-                            id_user = User.objects.get(pk=request.user.id),
-                            note = t_note,
-                            type_note = 'S',
-                        )
-                        add_sim.save()
-                    
-                    ord_status = Orders.order_status.field.choices
-                    for st in ord_status:
-                        if order_st == st[0] :    
-                            addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
-                    
-                    # Alterar status
-                    # Status sis : Status Loja
-                    status_sis_site = StatusSis.st_sis_site()
-                    
-                    if ord_s in status_sis_site:
-                        update_store = {
-                            'status': status_sis_site[ord_s]
-                        }
-                        apiStore.put(f'orders/{order.order_id}', update_store).json()
-                    
-                    # Enviar email
-                    if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
-                        send_email_sims.delay(id=order_id)
-                        
-                        addNote(f'E-mail enviado com sucesso!')
-                        messages.success(request,'E-mail enviado com sucesso!')
-                    
-                messages.success(request,f'Pedido(s) atualizado com sucesso!')
-            else:
-                messages.info(request,f'Você precisa marcar alguma opção')        
-    
+            id_user = request.user.id
+            if ord_s != '':
+                orders_up_status.delay(ord_id, ord_s,id_user)                               
+
      # FIlters
-    
+
     url_filter = ''
 
     if ord_name_f:
@@ -136,7 +71,7 @@ def orders_list(request):
     if ord_sim_f: 
         orders_l = orders_l.filter(id_sim__sim__icontains=ord_sim_f)
         url_filter += f"&ord_sim={ord_sim_f}"
-    
+
     if oper_f: 
         orders_l = orders_l.filter(id_sim__operator__icontains=oper_f)
         url_filter += f"&oper={oper_f}"
@@ -145,21 +80,22 @@ def orders_list(request):
         orders_l = orders_l.filter(order_status__icontains=ord_st_f)
         url_filter += f"&ord_st={ord_st_f}"
 
-    sims = Sims.objects.all()
     ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
-    
+
     # Listar status dos pedidos
     ord_st_list = []
     for ord_s in ord_status:
         ord = orders_all.filter(order_status=ord_s[0]).count()
         ord_st_list.append((ord_s[0],ord_s[1],ord))
-    
+
     # Paginação
     paginator = Paginator(orders_l, 50)
     page = request.GET.get('page')
     orders = paginator.get_page(page)
-    
+
+    from rolepermissions.permissions import available_perm_status
+
     context = {
         'url_cdn': url_cdn,
         'orders_l': orders_l,
@@ -170,7 +106,8 @@ def orders_list(request):
         'url_filter': url_filter,
     }
     return render(request, 'painel/orders/index.html', context)
-    
+
+
 # Update orders
 @login_required(login_url='/login/')
 @has_permission_decorator('import_orders')
@@ -178,14 +115,15 @@ def ord_import(request):
     if request.method == 'GET':
 
         return render(request, 'painel/orders/import.html')    
-       
+
     if request.method == 'POST':
-        
+
         # Orderm Import       
         order_import.delay()
         messages.success(request, f'Processando pedidos... Aguarde alguns minutos e atualize a página de pedidos')        
 
     return render(request, 'painel/orders/import.html')
+
 
 # Order Edit
 @login_required(login_url='/login/')
@@ -209,6 +147,8 @@ def ord_edit(request,id):
         
     if request.method == 'POST':
         
+        print('>>>>>>>>>> EDITAR PEDIDO')
+        
         global msg_info
         msg_info = []
         global msg_error
@@ -224,6 +164,8 @@ def ord_edit(request,id):
         order_id = order.order_id
         try: order_sim = order.id_sim.sim
         except: order_sim = ''
+        try: sim_id = int(order.id_sim.id)
+        except: sim_id = ''
         days = request.POST.get('days')
         product = request.POST.get('product')
         data_day = request.POST.get('data_day')
@@ -239,11 +181,11 @@ def ord_edit(request,id):
         ord_note = request.POST.get('ord_note')
         up_oper = request.POST.get('upOper')
         esim_v = None
-        
+                
         # Update SIM in Order and update SIM
         def updateSIM():
             # Update SIM
-            sim_put = Sims.objects.get(pk=order.id_sim.id)            
+            sim_put = Sims.objects.get(pk=sim_id)            
             sim_put.sim_status = 'TC'
             sim_put.save()
             # Delete SIM in Order
@@ -256,7 +198,7 @@ def ord_edit(request,id):
             sim_up = Sims.objects.filter(sim_status='DS', type_sim=type_sim, operator=operator).first()
             if sim_up:
                 sim_put = Sims.objects.get(pk=sim_up.id)
-                if order.id_sim:
+                if order_sim != '':
                     # Update SIM
                     updateSIM()
                 sim_put.sim_status = 'AT'
@@ -272,31 +214,47 @@ def ord_edit(request,id):
                 order_put.save()
             else:       
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
-            
+                        
+        # Liberar SIMs
+        if ord_st == 'CC' or ord_st == 'DE' or ord_st == 'RE':
+            if order_sim != '':
+                # Change TC
+                if order.id_sim.operator == 'TC' and order.order_status != 'ED':
+                    simDeactivateTC(id=order.id)
+                
+                # Update SIM
+                sim_put = Sims.objects.get(pk=sim_id)
+                sim_put.sim_status = 'DE'
+                sim_put.save()
+                
+                if order.product != 'chip-internacional-eua':
+                    # Deletar eSIM para site
+                    ApiStore.updateEsimStore(order_id)
+    
+
+        # Activate TC
+        if ord_st == 'AT' and order.order_status != 'AT' and operator == 'TC':
+            simActivateTC(id=order.id)
+
         # Se SIM preenchico
         if sim:
             # Verificar se Operadora e Tipo de SIM estão marcados
-            if type_sim =='esim':
-                msg_error.append(f'Não é possível adicionar um eSIM desta forma')
-            elif operator != None and type_sim != None:
-                if order.id_sim:
+            if operator != None and type_sim != None:
+                if order_sim != '':
                     # Alterar status no sistema e no site
                     updateSIM()
                 
                 sims_all = Sims.objects.all().filter(sim=sim)
                 if sims_all:
-                    if order.condition == 'reuso-sim':
-                        # Update order
-                        sim_id = sims_all[0].id
-                        sims_put = Sims.objects.get(pk=sim_id)
-                        sims_put.sim_status = 'AT'
-                        sims_put.save()
-                        order_put = Orders.objects.get(pk=order.id)
-                        order_put.id_sim_id = sim_id
-                        order_put.save()
-                        up_plan = True # verificação para nota
-                    else:
-                        messages.info(request,f'O SIM {sim} já está cadastrado no sistema')
+                    # Update order
+                    sim_id = sims_all[0].id
+                    sims_put = Sims.objects.get(pk=sim_id)
+                    sims_put.sim_status = 'AT'
+                    sims_put.save()
+                    order_put = Orders.objects.get(pk=order.id)
+                    order_put.id_sim_id = sim_id
+                    order_put.save()
+                    up_plan = True # verificação para nota
                 else:
                     # Save SIMs - Insert Stock
                     add_sim = Sims( 
@@ -308,7 +266,7 @@ def ord_edit(request,id):
                     add_sim.save()
                 
                     # Update order
-                    order_put = Orders.objects.get(pk=order.id)
+                    order_put = order
                     order_put.id_sim_id = add_sim.id
                     order_put.save()
                     up_plan = True # verificação para nota
@@ -316,7 +274,7 @@ def ord_edit(request,id):
                 msg_error.append(f'Você precisa selecionar o tipo de SIM e a Operadora')
         else:
             # Troca de SIM
-            if order.id_sim:
+            if order_sim != '':
                 if order.id_sim.operator != operator or order.id_sim.type_sim != type_sim or up_oper != None:
                     updateSIM()
                     insertSIM(ord_st)
@@ -326,15 +284,9 @@ def ord_edit(request,id):
                     esim_v = True             
             else:
                 if operator != None and type_sim != None:
-                    insertSIM(ord_st)
-                    up_plan = True # verificação para nota
-
-                    
-        # Liberar SIMs
-        if ord_st == 'CC':
-            
-            if order.id_sim:
-                updateSIM()
+                    if product != 'chip-internacional-europa' and type_sim != 'esim':
+                        insertSIM(ord_st)
+                        up_plan = True # verificação para nota
             
         # Update Order
         if activation_date == '':
@@ -385,7 +337,7 @@ def ord_edit(request,id):
         if ord_st != order.order_status:
             # Alterar status
             # Status sis : Status Loja
-            status_sis_site = StatusSis.st_sis_site()
+            status_sis_site = StatusStore.st_sis_site()
             if ord_st in status_sis_site:            
                 
                 update_store = {
@@ -404,7 +356,7 @@ def ord_edit(request,id):
                 send_email_sims(id=order_id)
                 
                 addNote(f'E-mail enviado com sucesso!')
-                messages.success(request,'E-mail enviado com sucesso!')
+                messages.success(request,'E-mail enviado com sucesso!')     
         
         if type_sim == 'esim' or esim_v == True:
             # Enviar eSIM para site
@@ -417,14 +369,58 @@ def ord_edit(request,id):
         messages.success(request,f'Pedido {order.order_id} atualizado com sucesso!')
         return redirect('orders_list')
 
+
 @login_required(login_url='/login/')
 @has_permission_decorator('export_orders')
+def ord_export_act(request):
+    
+    list_status = dict(Orders.order_status.field.choices)
+    list_oper = dict(Sims.operator.field.choices)
+    
+    orders_all = request.session.get('orders_act')
+    data = [
+        ['Pedido', 'Cliente', '(e)SIM', 'Operadora', 'Produto', 'Países', 'Voz', 'Dias', 'Data Aivação', 'Data Término', 'Status']
+    ]
+    
+    for ord in orders_all:
+        ord_operator = list_oper[ord['id_sim__operator']]
+        if ord['data_day'] != 'Ilimitado': 
+            ord_data = ord['data_day']
+        else: ord_data = ''
+        ord_product = f"{ord['product']} {ord_data}"
+        ord_date_start = DateFormats.dateDMA(str(ord['activation_date']))
+        ord_date_end = DateFormats.dateDMA(str(ord['return_date']))
+        if ord['calls'] == True:
+            ord_calls = 'SIM'
+        else: ord_calls = ''
+        if ord['countries'] == True:
+            ord_countries = 'SIM'
+        else: ord_countries = ''
+        ord_status = list_status[ord['order_status']]
+        
+        data.append([ord['item_id'],ord['client'],ord['id_sim__sim'],ord_operator,ord_product,ord_countries,ord_calls,ord['days'],ord_date_start,ord_date_end,ord_status])
+        
+    data_atual = date.today()
+    
+    # Crie um objeto CSVWriter para escrever os dados no formato CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="Ativacoes-{data_atual}.csv"'
+    writer = csv.writer(response)
+    
+    # Escreva os dados no objeto CSVWriter
+    for row in data:
+        writer.writerow(row)
+    return response 
+
+
+@login_required(login_url='/login/')
+@has_permission_decorator('export_activations')
 def ord_export_op(request):
     
     sims_op = Sims.operator.field.choices
     context= {
         'sims_op': sims_op,
-    }  
+    } 
     
     if request.method == 'POST':
         
@@ -443,6 +439,7 @@ def ord_export_op(request):
         ord_prod_list = {
             'chip-internacional-eua': 'T-Mobile',
             'chip-internacional-eua-e-canada': 'USA E CANADA',
+            'chip-internacional-eua-canada-e-mexico': 'USA/CAN/MEX',
             'chip-internacional-europa': 'EUROPA',
             'chip-internacional-global': 'GLOBAL PREMIUM',
         }
@@ -484,6 +481,8 @@ def ord_export_op(request):
     
     return render(request, 'painel/orders/export_op.html', context)
 
+
+@login_required(login_url='/login/')
 def send_esims(request):
     if request.method == 'GET':
         return render(request, 'painel/orders/send_esim.html')
@@ -493,6 +492,9 @@ def send_esims(request):
         messages.success(request, 'Processando emails... Aguarde alguns minutos e atualize a página de pedidos')
         return redirect('send_esims')
 
+
+@login_required(login_url='/login/')
+@has_permission_decorator('list_activations')
 def orders_activations(request):
     global orders_l
     orders_l = []
@@ -507,7 +509,7 @@ def orders_activations(request):
     ord_st_f = None
 
         
-    fields_df = ['item_id','client', 'id_sim__sim', 'id_sim__link', 'id_sim__type_sim', 'id_sim__operator', 'product', 'data_day', 'calls', 'countries', 'days', 'activation_date', 'order_status']
+    fields_df = ['id', 'item_id','client', 'id_sim__sim', 'id_sim__link', 'id_sim__type_sim', 'id_sim__operator', 'product', 'data_day', 'calls', 'countries', 'days', 'cell_mod', 'cell_eid', 'cell_imei', 'activation_date', 'order_status']
 
     product_choice_dict = dict(Orders.product.field.choices)
     data_choice_dict = dict(Orders.data_day.field.choices)
@@ -519,6 +521,8 @@ def orders_activations(request):
     orders_all = Orders.objects.filter(activation_date__gte=days60).order_by('activation_date')
     
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
+    
+    
     orders_df['product'] = orders_df['product'].map(product_choice_dict)
     orders_df['data_day'] = orders_df['data_day'].map(data_choice_dict)
     orders_df['activation_date'] = pd.to_datetime(orders_df['activation_date'])
@@ -578,77 +582,10 @@ def orders_activations(request):
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_staus')
-            if ord_id and ord_s:
-                for o_id in ord_id:
-                    
-                    order = Orders.objects.get(pk=o_id)
-                    order.order_status = ord_s
-                    order.save()
-                    
-                    order_id = order.order_id
-                    order_st = order.order_status
-                    order_plan = order.get_product_display()
-                    try: type_sim = order.id_sim.type_sim
-                    except: type_sim = 'esim'
-                    apiStore = ApiStore.conectApiStore()
-                    esim_v = None
-                    
-                    if ord_s == 'CC' or ord_s == 'DS':
-                        if order.id_sim:
-                            # Update SIM
-                            sim_put = Sims.objects.get(pk=order.id_sim.id)
-                            if order.id_sim.type_sim == 'esim':
-                                sim_put.sim_status = 'TC'
-                                esim_v = True
-                            else:
-                                sim_put.sim_status = 'DS'
-                            sim_put.sim_status = 'TC'
-                            sim_put.save()
-                                
-                            # Delete SIM in Order
-                            order_put = Orders.objects.get(pk=order.id)
-                            order_put.id_sim_id = ''
-                            order_put.save()
-                            
-                            # Deletar eSIM para site                            
-                            if esim_v == True:    
-                                ApiStore.updateEsimStore(order_id)
-                        
-                    # Save Notes
-                    def addNote(t_note):
-                        add_sim = Notes( 
-                            id_item = Orders.objects.get(pk=order.id),
-                            id_user = User.objects.get(pk=request.user.id),
-                            note = t_note,
-                            type_note = 'S',
-                        )
-                        add_sim.save()
-                    
-                    ord_status = Orders.order_status.field.choices
-                    for st in ord_status:
-                        if order_st == st[0] :    
-                            addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
-                    
-                    # Alterar status
-                    # Status sis : Status Loja
-                    status_sis_site = StatusSis.st_sis_site()
-                    
-                    if ord_s in status_sis_site:
-                        update_store = {
-                            'status': status_sis_site[ord_s]
-                        }
-                        apiStore.put(f'orders/{order.order_id}', update_store).json()
-                    
-                    # Enviar email
-                    if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
-                        send_email_sims.delay(id=order.id)
-                        
-                        addNote(f'E-mail enviado com sucesso!')
-                        messages.success(request,'E-mail enviado com sucesso!')
-                    
-                messages.success(request,f'Pedido(s) atualizado com sucesso!')
-            else:
-                messages.info(request,f'Você precisa marcar alguma opção')        
+            id_user = request.user.id
+
+            orders_up_status.delay(ord_id, ord_s,id_user)                        
+
     
         # End up_status / POST
 
@@ -674,14 +611,21 @@ def orders_activations(request):
     try: countActivTC = activList[activList['id_sim__operator'] == 'TC']['countActiv'].values[0]
     except: countActivTC = 0
     
+    
+    # Save in session
+    orders_act = orders_l.copy()
+    orders_act['activation_date'] = orders_act['activation_date'].astype(str)
+    orders_act['return_date'] = orders_act['return_date'].astype(str)
+    orders_act = orders_act.to_dict(orient='records')
+    request.session['orders_act'] = orders_act
     # List
     orders_l = orders_l.to_dict('records')
+  
     
     # Paginação
     paginator = Paginator(orders_l, 100)
     page = request.GET.get('page', 1)
     orders = paginator.get_page(page)
-
     
     context = {
         'orders_l': orders_l,
@@ -698,6 +642,10 @@ def orders_activations(request):
     }
     return render(request, 'painel/orders/activations.html', context)
     
+
+def esim_eua(request):
+    check_esim_eua.delay()
+    return HttpResponse('Verificação eSIM EUA concluída')
 
 
 # def textImg(request):
@@ -738,6 +686,4 @@ def orders_activations(request):
 # dateNow = datetime.datetime.now()  
 
 # dateSem = datetime.datetime.now() - datetime.timedelta(days=7)
-# print(dateSem)
-# print(dateNow)
 # vendasDaSemana = apiStore.get('reports/sales', params={'date_min': dateSem, 'date_max': dateNow})

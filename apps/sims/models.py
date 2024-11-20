@@ -1,9 +1,11 @@
 from django.db import models
 
 SIM_STATUS = [
-    ('DS', 'Disponível'),
     ('AT', 'Ativado'),
-    ('CC', 'Cancelado'),
+    ('CC', 'Cancelado'),    
+    ('DS', 'Disponível'),
+    ('DE', 'Desativado'),
+    ('IN', 'Indisponível'),
     ('TC', 'Troca'),
 ]
 SIM_OPERATOR = [
