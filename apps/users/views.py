@@ -28,7 +28,7 @@ def login(request):
             messages.error(request, 'Usuário ou senha inválidos')
             return redirect('login')
 
-@login_required(login_url='/login/')
+@login_required(login_url='/login')
 def logout(request):
     auth.logout(request)
     messages.success(request, 'Logout efetuado com sucesso!')
