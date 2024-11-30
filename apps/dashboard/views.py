@@ -9,7 +9,7 @@ import pandas as pd
 
 
 # Create your views here.
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def index(request):
     # Dates
     today = datetime.now()
@@ -193,7 +193,7 @@ def index(request):
     return render(request, 'painel/dashboard/index.html', context)
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def clear_cache(request):
     from django.core.cache import cache
     cache.clear()

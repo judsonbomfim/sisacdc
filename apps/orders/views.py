@@ -21,7 +21,7 @@ import pandas as pd
 today = datetime.now()
 
 # Order list
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 @has_permission_decorator('view_orders')
 def orders_list(request):
     global orders_l
@@ -110,7 +110,7 @@ def orders_list(request):
 
 
 # Update orders
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 @has_permission_decorator('import_orders')
 def ord_import(request):
     if request.method == 'GET':
@@ -127,7 +127,7 @@ def ord_import(request):
 
 
 # Order Edit
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 @has_permission_decorator('edit_orders')
 def ord_edit(request,id):
     if request.method == 'GET':
@@ -351,7 +351,7 @@ def ord_edit(request,id):
         return redirect('orders_list')
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 @has_permission_decorator('export_orders')
 def ord_export_act(request):
     
@@ -394,7 +394,7 @@ def ord_export_act(request):
     return response 
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 @has_permission_decorator('export_activations')
 def ord_export_op(request):
     
@@ -463,7 +463,7 @@ def ord_export_op(request):
     return render(request, 'painel/orders/export_op.html', context)
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def send_esims(request):
     if request.method == 'GET':
         return render(request, 'painel/orders/send_esim.html')
@@ -474,7 +474,7 @@ def send_esims(request):
         return redirect('send_esims')
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 @has_permission_decorator('list_activations')
 def orders_activations(request):
     global orders_l

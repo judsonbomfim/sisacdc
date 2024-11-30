@@ -13,7 +13,7 @@ from apps.orders.classes import DateFormats
 import pandas as pd
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def voice_index(request):
     global orders_l
     orders_l = None
@@ -130,7 +130,7 @@ def voice_index(request):
     return render(request, 'painel/voice/index.html', context)
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def voice_edit(request):
     
     fields_orders = ['id','item_id','client','days','activation_date']
@@ -139,7 +139,7 @@ def voice_edit(request):
     pass
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def voice_import(request):
     
     if request.method == "GET":
@@ -216,7 +216,7 @@ def voice_import(request):
             return render(request, 'painel/voice/import.html')
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def mumber_list(request):
     
     global numbers_l
@@ -298,7 +298,7 @@ def mumber_list(request):
     return render(request, 'painel/voice/numbers.html', context)
 
 
-@login_required(login_url='/login')
+@login_required(login_url='/login/')
 def up_password(request,id):
 
     update_password.delay(number_id=[id])   
