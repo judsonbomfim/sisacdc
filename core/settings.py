@@ -24,12 +24,16 @@ ALLOWED_HOSTS = [
     if h.strip()
 ]
 
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 CSRF_TRUSTED_ORIGINS = [
     a.strip() for a in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
     if a.strip()
 ]
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # Application definition
 
