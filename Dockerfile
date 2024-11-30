@@ -1,4 +1,4 @@
-FROM python:3.12.7-alpine
+FROM python:3.12.1-slim-bullseye
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 WORKDIR /djangoapp
