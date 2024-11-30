@@ -34,7 +34,7 @@ def upload_file_to_s3(file):
     s3.upload_fileobj(file, bucket_name, file_path)
     return default_storage.url(file_path)
 
-@login_required(login_url='/login/')
+@login_required(login_url='/login')
 @has_permission_decorator('view_sims')
 def sims_list(request):
     global sims_l
@@ -128,7 +128,7 @@ def sims_list(request):
        
     return render(request, 'painel/sims/index.html', context)
 
-@login_required(login_url='/login/')
+@login_required(login_url='/login')
 @has_permission_decorator('add_sims')
 def sims_add_sim(request):
     if request.method == "GET":
@@ -189,7 +189,7 @@ def sims_add_sim(request):
             messages.error(request,'Houve um ero ao gravar a lista. Verifique se o arquivo está no formato correto')
             return render(request, 'painel/sims/add-sim.html')
 
-@login_required(login_url='/login/')
+@login_required(login_url='/login')
 @has_permission_decorator('edit_sims')
 def sims_add_esim(request):
     if request.method == "GET":
@@ -238,7 +238,7 @@ def sims_add_esim(request):
         messages.success(request,'Lista gravada com sucesso')
         return render(request, 'painel/sims/add-esim.html')
 
-@login_required(login_url='/login/')
+@login_required(login_url='/login')
 @has_permission_decorator('add_ord_sims')
 def sims_ord(request):
     if request.method == "GET":
@@ -251,7 +251,7 @@ def sims_ord(request):
         
     return render(request, 'painel/sims/sim-order.html')
 
-@login_required(login_url='/login/')
+@login_required(login_url='/login')
 @has_permission_decorator('export_activations')
 def exportSIMs(request):
     
