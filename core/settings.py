@@ -24,11 +24,6 @@ ALLOWED_HOSTS = [
     if h.strip()
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    a.strip() for a in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
-    if a.strip()
-]
-
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # Application definition
