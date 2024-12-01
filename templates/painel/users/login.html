@@ -27,7 +27,6 @@
     <main class="form-signin w-100 m-auto bg-light bg-opacity-10">
       {% include 'painel/partials/_messages.html' %}
       <form action="{% url 'login' %}" method="POST">
-        {% csrf_token %}
         <div class="text-center mb-4">
           <img class="mb-4" src="{% static 'painel/theme/img/logo-painel.png' %}" style="width: 250px" />
           <h1 class="h5 mb-3 fw-normal text-white">Login do Sistema</h1>
