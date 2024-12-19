@@ -56,7 +56,7 @@ def order_import():
             for item in order['line_items']:
                                     
                 # Especificar produtos a serem listados
-                prod_sel = [50760, 8873, 8791, 8761, 77027, 79804]
+                prod_sel = [50760, 8873, 8761, 77027, 79804, 89373, 89526]
                 if item['product_id'] not in prod_sel:
                     continue
                                 
