@@ -93,7 +93,11 @@ def order_import():
                         if 'Visitará' in i['key']:
                             if i['display_value'] == 'Sim': countries_i = True 
                             else: countries_i = False
-                        if i['key'] == 'Data de Ativação': activation_date_i = i['value']
+                        if i['key'] == 'Data de Ativação': 
+                            if i['value'] == None or i['value'] == '': 
+                                activation_date_i = '0001-01-01'
+                            else:
+                                activation_date_i = i['value']
                         if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
                         if i['key'] == 'Número de pedido ou do chip': ord_chip_nun_i = i['value']
                     shipping_i = order['shipping_lines'][0]['method_title']
@@ -115,6 +119,8 @@ def order_import():
                         order_status_i = 'MB'
                     elif condition_i == 'reuso-sim':
                         order_status_i = 'RS'
+                    elif activation_date_i == '0001-01-01':
+                        order_status_i = 'EI'
                     else:
                         order_status_i = 'AS'
                         
