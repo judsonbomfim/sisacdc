@@ -173,6 +173,15 @@ def order_import():
                     )
                     add_sim.save()
                     
+                    if activation_date_i == '0001-01-01':
+                        add_sim = Notes( 
+                            id_item = Orders.objects.get(pk=order_add.id),
+                            id_user = None,
+                            note = f'Pedido sem data de ativação. Verificar com cliente.',
+                            type_note = 'S',
+                        )
+                        add_sim.save()
+                    
                     # Insert Voice Calls
                     if calls_i == True:
                         
