@@ -99,7 +99,7 @@ def order_import():
                             else:
                                 activation_date_i = i['value']
                         if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
-                        if i['key'] == 'Número de pedido ou do chip': ord_chip_nun_i = i['value']
+                        if i['key'] == 'Número do SIM/eSIM': ord_chip_nun_i = i['value']
                     shipping_i = order['shipping_lines'][0]['method_title']
                     order_date_i = DateFormats.dateHour(order['date_created'])
                     # notes_i = 0
