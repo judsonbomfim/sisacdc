@@ -2,8 +2,8 @@ version: '3.8'
 
 services:
   web:
-    image: djangoapp:1.0
-    container_name: djangoapp
+    image: djangoweb:1.0
+    container_name: djangoweb
     build: .
     command: /djangoapp/scripts/entrypoint.sh
     ports:
