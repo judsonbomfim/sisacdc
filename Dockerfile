@@ -15,7 +15,6 @@ COPY . .
 COPY entrypoint.sh ./scripts/entrypoint.sh
 
 # Copiar o arquivo .env para o contêiner
-COPY .env .env
 
 RUN chmod +x /djangoweb/scripts/entrypoint.sh && \
     chown -R duser:duser /djangoweb
