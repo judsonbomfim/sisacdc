@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   web:
-    image: djangoweb:1.0
+    image: djangoweb:1.1
     container_name: djangoweb
     build: .
     command: /djangoweb/scripts/entrypoint.sh
