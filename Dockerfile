@@ -1,7 +1,7 @@
 FROM python:3.12.1-slim-bullseye
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-WORKDIR /djangoapp
+WORKDIR /djangoweb
 
 COPY requirements.txt .
 
@@ -14,8 +14,8 @@ COPY . .
 
 COPY entrypoint.sh ./scripts/entrypoint.sh
 
-RUN chmod +x /djangoapp/scripts/entrypoint.sh && \
-    chown -R duser:duser /djangoapp
+RUN chmod +x /djangoweb/scripts/entrypoint.sh && \
+    chown -R duser:duser /djangoweb
 
 USER duser
 
