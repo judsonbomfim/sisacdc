@@ -178,7 +178,7 @@ MESSAGE_TAGS = {
 }
 
 ROLEPERMISSIONS_MODULE = 'core.roles'
-KEYCLOAK_PERMISSIONS_METHOD = 'role'    
+KEYCLOAK_PERMISSIONS_METHOD = 'role'
 
 # E-mail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
