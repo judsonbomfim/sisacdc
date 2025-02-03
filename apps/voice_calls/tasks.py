@@ -44,7 +44,11 @@ def number_up_status(number_id, number_st):
         # Save status System
         number = VoiceNumbers.objects.get(pk=num_id)
         number.number_status = number_st
-        number.save()  
+        number.save()
+        
+        if number_st == 'AT':
+            #send email
+            send_email_voice.delay(num_id)
 
   
 @shared_task
@@ -98,10 +102,11 @@ def update_password(number_id):
 @shared_task
 def number_in_voice():
     
-    send_date = datetime.now().date() + timedelta(days=2)
+    # send_date = datetime.now().date() + timedelta(days=2)
 
     # Select Voice Calls
-    voice_s = VoiceCalls.objects.filter(call_status='PR').filter(id_item__activation_date__lte=send_date)
+    # voice_s = VoiceCalls.objects.filter(call_status='PR').filter(id_item__activation_date__lte=send_date)
+    voice_s = VoiceCalls.objects.filter(call_status='PR')
     
     # Insert Number
     for vox in voice_s:

@@ -12,6 +12,7 @@ PRODUCT = [
     ('chip-internacional-europa', 'EUROPA'),
     ('chip-internacional-global', 'GLOBAL'),
     ('chip-internacional-america-do-sul', 'América do Sul'),
+    ('plano-voz', 'Plano de Voz'),
 ]
 
 DATA = [
@@ -39,6 +40,7 @@ ORDER_STATUS = [
     ('ES', 'Em Separação'),
     ('MB', 'Motoboy'),
     ('PR', 'Processando'),
+    ('PV', 'Plano de Voz'),
     ('RE', 'Reembolsar'),
     ('RB', 'Reembolsado'),
     ('RS', 'Reuso'),
