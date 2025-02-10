@@ -55,6 +55,7 @@ class StatusStore():
             'DS': 'desativado', 
             'ES': 'em-separacao',
             'MB': 'motoboy',
+            'PV': 'agd-ativacao',
             'RE': 'reembolsar',
             'RS': 'reuso',
             'RT': 'retirada',

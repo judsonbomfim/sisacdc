@@ -1,6 +1,6 @@
 import os
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
@@ -131,13 +131,36 @@ def voice_index(request):
 
 
 @login_required(login_url='/login/')
-def voice_edit(request):
+def voice_edit(request,id):
     
-    fields_orders = ['id','item_id','client','days','activation_date']
-    orders_call = Orders.objects.filter(activation_date__gte='',id_sim__isnull=False).order_by('activation_date','item_id')   
+    if request.method == 'GET':
+            
+        vox = VoiceCalls.objects.get(pk=id)
+        vox_status = VoiceCalls.call_status.field.choices
+        vox_days = list(range(5, 31))
+        
+        context = {
+            'vox': vox,
+            'vox_status': vox_status,
+            'vox_days': vox_days,
+        }
+        return render(request, 'painel/voice/edit.html', context)
     
-    pass
-
+    if request.method == 'POST':
+        
+        print('>>>>>>>>>> EDITAR PEDIDO')
+        
+        call_put = VoiceCalls.objects.get(pk=id)
+        call_put.days = request.POST.get('days')
+        if request.POST.get('activation_date'):
+            call_put.activation_date = request.POST.get('activation_date')
+        else:
+            call_put.activation_date = call_put.activation_date
+        call_put.call_status = request.POST.get('ord_st_f')
+        call_put.save()
+        
+        messages.success(request,f'Pedido {call_put.id_item} atualizado com sucesso!')
+        return redirect('voice_index')
 
 @login_required(login_url='/login/')
 def voice_import(request):
