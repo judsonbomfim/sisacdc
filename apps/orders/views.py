@@ -29,7 +29,7 @@ def orders_list(request):
 
     url_cdn = settings.URL_CDN
 
-    orders_all = Orders.objects.all().order_by('-id')
+    orders_all = Orders.objects.exclude(product='chamada-de-voz').order_by('-id')
     sims = Sims.objects.all().order_by('-id')
     orders_l = orders_all
 

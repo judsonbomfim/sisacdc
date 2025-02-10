@@ -13,7 +13,7 @@ PRODUCT = [
     ('chip-internacional-global', 'GLOBAL'),
     ('chip-internacional-america-do-sul', 'América do Sul'),
     ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
-    ('plano-voz', 'Plano de Voz'),
+    ('chamada-de-voz', 'Plano de Voz'),
 ]
 
 DATA = [
