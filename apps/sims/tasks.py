@@ -51,7 +51,7 @@ def sims_in_orders():
                 add_sim.save()
 
             # ESCOLHER OPERADORA
-            if product_i == 'chip-internacional-europa-premium' or product_i == 'chip-internacional-america-do-sul':
+            if product_i == 'chip-internacional-europa-premium' or product_i == 'chip-internacional-america-do-sul' or product_i == 'chip-internacional-america-do-sul-premium':
                 operator_i = 'TC'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'

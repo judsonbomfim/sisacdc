@@ -57,7 +57,7 @@ class ApiTC:
     @staticmethod
     def planChange(endpointId,headers,dataDay, product):
         planList = {}
-        if product == 'chip-internacional-america-do-sul':
+        if product == 'chip-internacional-america-do-sul' or product == 'chip-internacional-america-do-sul-premium':
             planList = {
                 '500mb-dia': '607128',
                 '1gb': '607131',
