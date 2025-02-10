@@ -42,6 +42,8 @@ class VoiceCalls(models.Model):
     id = models.AutoField(primary_key=True)
     id_item = models.ForeignKey(Orders, on_delete=models.DO_NOTHING, null=True, blank=True)
     id_number = models.ForeignKey(VoiceNumbers, on_delete=models.DO_NOTHING, null=True, blank=True)
+    days = models.IntegerField(default='1')
+    activation_date = models.DateField(default='0001-01-01')
     call_status = models.CharField(max_length=15, choices=VOICE_STATUS)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

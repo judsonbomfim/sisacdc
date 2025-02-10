@@ -227,6 +227,7 @@ def order_import():
     else:
         print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
+@shared_task
 def order_import_voice():
     # Importar pedidos
     apiStore = ApiStore.conectApiStore()
@@ -375,6 +376,8 @@ def order_import_voice():
                         
                         add_voice = VoiceCalls(
                             id_item = Orders.objects.get(pk=order_add.id),
+                            days = days_i,
+                            activation_date = activation_date_i,
                             call_status = 'PR'
                         )
                         add_voice.save()
@@ -415,18 +418,18 @@ def order_import_voice():
     else:
         print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
-
 @shared_task
 def orders_auto():
     print('-----------------orders_auto')
     order_import.delay()
+    time.sleep(5)
+    order_import_voice.delay()
     time.sleep(5)
     sims_in_orders.delay()
     time.sleep(5)
     number_in_voice.delay()
     time.sleep(10)
     send_email_sims.delay()
-
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
