@@ -163,7 +163,7 @@
                     <div class="userDatatable-content">
                       {% if request.user|can:'actions_voice' %}
                         {% if voice.number_id != 0 %}
-                          <a href="{% url 'ord_edit' order.id %}"><i class="bi bi-pencil-square pe-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Editar"></i></a>
+                          <a href="{% url 'voice_edit' order.id %}"><i class="bi bi-pencil-square pe-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Editar"></i></a>
                           <a href="{% url 'up_password' voice.number_id %}"><i class="bi bi-key pe-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Redefinir senha"></i></a>
                           <a href="{% url 'send_email_voices' voice.id %}"><i class="bi bi-envelope-at pe-1 text-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Enviar e-amil"></i></a>
                         {% else %}
