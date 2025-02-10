@@ -148,9 +148,13 @@
                         data-bs-placement="top"
                         data-bs-custom-class="custom-popover"
                         data-bs-content="{{ order.id_sim.get_operator_display }} - {% if order.id_sim.type_sim == 'sim' %}
+                          
                           SIM
+
                         {% elif order.id_sim.type_sim == 'esim' %}
+                          
                           eSIM
+
                         {% endif %}">
                         {{ order.id_sim }}
                       </span>
@@ -222,7 +226,7 @@
                 <td>
                   <div class="userDatatable-content">
                     {% if request.user|can:'edit_orders' %}
-                      <a href="{% url 'ord_edit' order.id %}"><i class="bi bi-pencil-square pe-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Editar"></i></a>
+                      <a href="{% url 'voice_edit' order.id %}"><i class="bi bi-pencil-square pe-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Editar"></i></a>
                       {% if order.id_sim != None %}
                         <a href="{% url 'send_email' order.id %}"><i class="bi bi-envelope-at pe-1 text-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Enviar e-mail"></i></a>
                       {% endif %}
