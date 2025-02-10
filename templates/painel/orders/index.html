@@ -149,11 +149,15 @@
                         data-bs-custom-class="custom-popover"
                         data-bs-content="{{ order.id_sim.get_operator_display }} - {% if order.id_sim.type_sim == 'sim' %}
                           
+                          
                           SIM
+
 
                         {% elif order.id_sim.type_sim == 'esim' %}
                           
+                          
                           eSIM
+
 
                         {% endif %}">
                         {{ order.id_sim }}
