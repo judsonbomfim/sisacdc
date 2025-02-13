@@ -27,9 +27,8 @@ def voice_index(request):
     url_cdn = settings.URL_CDN
     fields_df = ['id', 'id_number__number', 'id_item__client', 'id_number__id', 'id_item__item_id', 'id_number__login', 'id_number__password', 'id_number__number_qrcode', 'id_item__days', 'id_item__activation_date', 'call_status']
     
-    voices_all = VoiceCalls.objects.all()    
-    # Listar status dos pedidos
-    vox_status = VoiceCalls.call_status.field.choices
+    voices_all = VoiceCalls.objects.all().order_by('-id')
+    vox_status = VoiceCalls.call_status.field.choices # Listar status dos pedidos
     vox_status_dict = dict(vox_status)
     
     voices_df = pd.DataFrame((voices_all.values(*fields_df)))
