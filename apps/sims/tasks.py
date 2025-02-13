@@ -159,6 +159,7 @@ def simActivateTC(id=None):
         try:
             token_api = ApiTC.get_token()
             conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
+            print('>>>>>>>>>> token_api',token_api)
             headers = ApiTC.get_headers(token_api)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
@@ -224,7 +225,9 @@ def simActivateTC(id=None):
         if process == True:            
             
             res = conn.getresponse()
+            print('>>>>>>>>>> res', res)
             data = json.loads(res.read())
+            print('>>>>>>>>>> data', data)
             resultCode = int(data["Response"]["resultCode"])
             resultDescription = data["Response"]["resultParam"]["resultDescription"]
             try:
