@@ -16,7 +16,7 @@ class ApiTC:
         headers_token = {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-Rate-Limit-TPS': '6000',
+            'X-Rate-Limit-TPS': '60000',
         }
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         conn.request("POST", "/api/login", payload_token, headers_token)
@@ -33,7 +33,7 @@ class ApiTC:
         headers = {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-Rate-Limit-TPS': '6000',
+            'X-Rate-Limit-TPS': '60000',
             'X-Authorization': f'Bearer {token_api}'
         }
         if cookie is None:
