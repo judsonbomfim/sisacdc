@@ -13,11 +13,11 @@ class ApiTC:
             "username": settings.APITC_USERNAME,
             "password": settings.APITC_PASSWORD
         })
-        headers_token = {
+        headers_token = json.dumps({
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-Rate-Limit-TPS': '60000',
-        }
+            'X-Rate-Limit-TPS': '20',
+        })
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         conn.request("POST", "/api/login", payload_token, headers_token)
         res_token = conn.getresponse()
@@ -30,12 +30,12 @@ class ApiTC:
     # Set headers
     @staticmethod    
     def get_headers(token_api, cookie=None):
-        headers = {
+        headers = json.dumps({
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-Rate-Limit-TPS': '60000',
+            'X-Rate-Limit-TPS': '20',
             'X-Authorization': f'Bearer {token_api}'
-        }
+        })
         if cookie is None:
             headers['Cookie'] = 'Encrypt_cookies=rd20o00000000000000000000ffff0af30e15o12021'
         return headers
