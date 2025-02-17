@@ -81,6 +81,7 @@ def order_import():
                     ord_chip_nun_i = '-'
                     countries_i = False
                     cell_mod_i = False
+                    activation_date_i = False
                     # Percorrer itens do pedido
                     for i in item['meta_data']:
                         if i['key'] == 'pa_tipo-de-sim': type_sim_i = i['value']
@@ -94,12 +95,11 @@ def order_import():
                             if i['display_value'] == 'Sim': countries_i = True 
                             else: countries_i = False
                         if i['key'] == 'Data de Ativação': 
-                            if i['value'] == None or i['value'] == '': 
-                                activation_date_i = '0001-01-01'
-                            else:
-                                activation_date_i = i['value']
+                            activation_date_i = i['value']
                         if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
                         if i['key'] == 'Número do SIM/eSIM': ord_chip_nun_i = i['value']
+                    if activation_date_i == False:
+                            activation_date_i = '0001-01-01'
                     shipping_i = order['shipping_lines'][0]['method_title']
                     order_date_i = DateFormats.dateHour(order['date_created'])
                     # notes_i = 0
