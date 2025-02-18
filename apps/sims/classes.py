@@ -1,5 +1,6 @@
 import http.client
 import json
+import time
 from unittest import result
 from django.conf import settings
 
@@ -16,8 +17,11 @@ class ApiTC:
         headers_token = {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-Rate-Limit-TPS': '20',
+            'X-Rate-Limit-TPS': '2',
         }
+        
+        time.sleep(0.5)
+        
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         conn.request("POST", "/api/login", payload_token, headers_token)
         res_token = conn.getresponse()
@@ -33,7 +37,7 @@ class ApiTC:
         headers = {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-Rate-Limit-TPS': '20',
+            'X-Rate-Limit-TPS': '2',
             'X-Authorization': f'Bearer {token_api}'
         }
         if cookie is None:
@@ -45,6 +49,9 @@ class ApiTC:
     @staticmethod
     def get_iccid(iccid, headers):
         payload_endpointId = ''
+        
+        time.sleep(0.5)
+        
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         conn.request(
             "GET", f"/api/fetchSIM?iccid={iccid}", payload_endpointId, headers)
