@@ -138,11 +138,12 @@ def simActivateTC(id=None):
     token_api = ApiTC.get_token()
     time.sleep(0.5)
     conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
+    time.sleep(0.5)
     headers = ApiTC.get_headers(token_api)
     print('>>>>>>>>>> token_api',token_api)
         
     for order in orders_all:
-                
+                        
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
         id_item = order.id
@@ -163,6 +164,7 @@ def simActivateTC(id=None):
         
         # Verificar EndPointID / Status
         try:
+            time.sleep(0.5)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1]
@@ -174,6 +176,7 @@ def simActivateTC(id=None):
         ##
         
         # Alterar plano
+        time.sleep(0.5)
         ApiTC.planChange(endpointId,headers,dataDay, product)
         NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay}')    
 
@@ -184,6 +187,7 @@ def simActivateTC(id=None):
                     "endPointId": f"{endpointId}"
                 }
             })
+            time.sleep(0.5)
             conn.request("POST", "/api/EndPointActivation", payload, headers)
             # Adicionar nota
             note = f'{iccid} ativado com sucesso na Telcon'
@@ -211,6 +215,7 @@ def simActivateTC(id=None):
                         }
                     }
                 })
+                time.sleep(0.5)
                 conn.request("POST", "/api/EndPointLifeCycleChange", payload, headers)
                 # Adicionar nota
                 note = f'{iccid} reativado com sucesso na Telcon'
@@ -226,6 +231,7 @@ def simActivateTC(id=None):
         
         if process == True:            
             
+            time.sleep(0.5)            
             res = conn.getresponse()
             print('>>>>>>>>>> res', res)
             data = json.loads(res.read())
