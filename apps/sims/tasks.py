@@ -136,14 +136,14 @@ def simActivateTC(id=None):
         return error
     
     token_api = ApiTC.get_token()
+    time.sleep(0.5)
     conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
-    print('>>>>>>>>>> token_api',token_api)
+    time.sleep(0.5)
     headers = ApiTC.get_headers(token_api)
-    
+    print('>>>>>>>>>> token_api',token_api)
+        
     for order in orders_all:
-        
-        time.sleep(1)
-        
+                
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
         id_item = order.id

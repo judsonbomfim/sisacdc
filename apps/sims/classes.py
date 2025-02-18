@@ -1,5 +1,6 @@
 import http.client
 import json
+import time
 from unittest import result
 from django.conf import settings
 
@@ -9,6 +10,8 @@ class ApiTC:
     # Get tokem de acesso a API
     @staticmethod
     def get_token():
+        time.sleep(0.5)
+
         payload_token = json.dumps({
             "username": settings.APITC_USERNAME,
             "password": settings.APITC_PASSWORD
@@ -22,7 +25,6 @@ class ApiTC:
         res_token = conn.getresponse()
         data_token = json.loads(res_token.read())
         token_api = data_token["AccessToken"]
-        print('>>>>>>>>>>>>>>>> token_api',token_api)
         return token_api
 
 
