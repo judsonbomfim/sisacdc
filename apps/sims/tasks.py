@@ -135,14 +135,6 @@ def simActivateTC(id=None):
         error = 'error_apiResult'
         return error 
     
-    try:
-        token_api = ApiTC.get_token()
-        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
-        print('>>>>>>>>>> token_api',token_api)
-        headers = ApiTC.get_headers(token_api)
-    except Exception:            
-        error_api()    
-    
     for order in orders_all:
         
         order = Orders.objects.get(pk=order.id)
@@ -165,6 +157,10 @@ def simActivateTC(id=None):
         
         # Verificar EndPointID / Status
         try:
+            token_api = ApiTC.get_token()
+            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
+            print('>>>>>>>>>> token_api',token_api)
+            headers = ApiTC.get_headers(token_api)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1]
