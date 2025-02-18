@@ -138,7 +138,6 @@ def simActivateTC(id=None):
     token_api = ApiTC.get_token()
     time.sleep(0.5)
     conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
-    time.sleep(0.5)
     headers = ApiTC.get_headers(token_api)
     print('>>>>>>>>>> token_api',token_api)
         
