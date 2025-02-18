@@ -138,7 +138,6 @@ def simActivateTC(id=None):
     
     try:
         token_api = ApiTC.get_token()
-        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         print('>>>>>>>>>> token_api',token_api)
     except Exception:            
         error_api()
@@ -167,6 +166,7 @@ def simActivateTC(id=None):
         
         # Verificar EndPointID / Status
         try:
+            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             headers = ApiTC.get_headers(token_api)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
