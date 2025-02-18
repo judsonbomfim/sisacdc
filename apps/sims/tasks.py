@@ -133,7 +133,7 @@ def simActivateTC(id=None):
         # Adicionar nota
         NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
         error = 'error_apiResult'
-        return error     
+        return error 
     
     for order in orders_all:
         
