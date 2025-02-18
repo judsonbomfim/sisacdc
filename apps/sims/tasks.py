@@ -135,9 +135,6 @@ def simActivateTC(id=None):
         error = 'error_apiResult'
         return error
     
-    # Gerar Token de acesso a API
-    token_api = ApiTC.get_token()
-    
     for order in orders_all:
         
         time.sleep(0.5)
@@ -162,6 +159,7 @@ def simActivateTC(id=None):
         
         # Verificar EndPointID / Status
         try:
+            token_api = ApiTC.get_token()
             conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             print('>>>>>>>>>> token_api',token_api)
             headers = ApiTC.get_headers(token_api)
