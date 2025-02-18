@@ -137,7 +137,7 @@ def simActivateTC(id=None):
     
     for order in orders_all:
         
-        time.sleep(0.5)
+        time.sleep(1)
         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
