@@ -23,7 +23,6 @@ class ApiTC:
         res_token = conn.getresponse()
         data_token = json.loads(res_token.read())
         token_api = data_token["AccessToken"]
-        print('>>>>>>>>>>>>>>>> token_api',token_api)
         return token_api
 
 
