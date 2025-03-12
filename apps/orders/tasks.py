@@ -601,6 +601,7 @@ def update_st():
                     print(f'XXXXXXXXXX = Erro ao atualizar status do pedido {id_order}')
                     continue
                 total_ord += 1
+                print(f'>>>>>>>>>> Pedidos {id_order}')
                 print(f'>>>>>>>>>> Pedidos concluídos = {total_ord}')
 
         n_page += 1
