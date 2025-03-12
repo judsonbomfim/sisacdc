@@ -543,15 +543,58 @@ def up_order_st_store(order_id,order_st):
 
 
 @shared_task
-def check_esim_eua():
+def update_st():
     
-    orders_all = Orders.objects.all().filter(type_sim='esim').filter(product='chip-internacional-eua')
+    # Importar pedidos
+    apiStore = ApiStore.conectApiStore()
+       
+    # Definir números de páginas
+    per_page = 100
+    # order_p = apiStore.get('orders', params={'after': start_date, 'before': end_date, 'status': 'processing', 'per_page': per_page})        
+    order_p = apiStore.get('orders', params={'status': 'on-hold', 'per_page': per_page})        
     
-    count = 0
-    for ord in orders_all:
-        order_put = Orders.objects.get(pk=ord.id)
-        order_put.id_sim_id = 0            
-        order_put.save()
-        
-        count+=1
-        print(f'>>>>>>>>>>>>>>> Pedido {ord.order_id} atualizado com sucesso. TOTAL: {count}')
+    total_pages = int(order_p.headers['X-WP-TotalPages'])
+    n_page = 1
+    total_ord = 0
+    
+    # orders_all = Orders.objects.all()
+    
+    while n_page <= total_pages:
+        # Pedidos com status 'processing'
+        ord = apiStore.get('orders', params={'order': 'asc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page}).json()                                   
+
+        # Listar pedidos         
+        for order_store in ord:
+            n_item = 1
+            id_ord = order_store["id"]
+            
+            id_sis = Orders.objects.filter(order_id=id_ord).first()
+            
+            if id_sis != None:
+                id_order = id_sis.id
+                order_status = id_sis.order_status
+                status_sis_site = {
+                    'AA': 'agd-ativacao',
+                    'AE': 'agd-envio',
+                    'AG': 'agencia',
+                    'AS': 'em-separacao',
+                    'AT': 'ativado',
+                    'CC': 'desativado',
+                    'CN': 'completed', 
+                    'DE': 'desativado', 
+                    'DA': 'data-em-aberto',
+                    'DS': 'desativado', 
+                    'PV': 'agd-ativacao',
+                    'RE': 'reembolsar',
+                    'RB': 'reembolsado',
+                    'RS': 'reuso',
+                    'RT': 'retirada',
+                }
+                if order_status in status_sis_site:
+                    up_order_st_store(id_sis,status_sis_site[order_status])
+                
+                
+                total_ord += 1
+                print(f'>>>>>>>>>> Pedidos concluídos = {total_ord}')
+
+        n_page += 1

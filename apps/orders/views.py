@@ -623,9 +623,9 @@ def orders_activations(request):
     }
     return render(request, 'painel/orders/activations.html', context)
     
-
-def esim_eua(request):
-    check_esim_eua.delay()
+@login_required(login_url='/login/')
+def atualizar_status(request):
+    update_st.delay()
     return HttpResponse('Verificação eSIM EUA concluída')
 
 

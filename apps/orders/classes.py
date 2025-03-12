@@ -52,7 +52,7 @@ class StatusStore():
             'AT': 'ativado',
             'CN': 'completed', 
             'DA': 'data-em-aberto', 
-            'DS': 'desativado', 
+            'DE': 'desativado', 
             'ES': 'em-separacao',
             'MB': 'motoboy',
             'PV': 'agd-ativacao',
