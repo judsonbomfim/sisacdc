@@ -590,10 +590,16 @@ def update_st():
                     'RS': 'reuso',
                     'RT': 'retirada',
                 }
-                if order_status in status_sis_site:
-                    up_order_st_store(id_sis,status_sis_site[order_status])
-                
-                
+                try:
+                    if order_status in status_sis_site:
+                        apiStore = ApiStore.conectApiStore()
+                        update_store = {
+                                'status': order_status
+                            }
+                        apiStore.put(f'orders/{order_status}', update_store).json()
+                except:
+                    print(f'XXXXXXXXXX = Erro ao atualizar status do pedido {id_order}')
+                    continue
                 total_ord += 1
                 print(f'>>>>>>>>>> Pedidos concluídos = {total_ord}')
 
