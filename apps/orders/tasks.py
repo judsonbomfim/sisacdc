@@ -596,7 +596,7 @@ def update_st():
                         update_store = {
                                 'status': order_status
                             }
-                        apiStore.put(f'orders/{order_status}', update_store).json()
+                        apiStore.put(f'orders/{id_ord}', update_store).json()
                 except:
                     print(f'XXXXXXXXXX = Erro ao atualizar status do pedido {id_order}')
                     continue
