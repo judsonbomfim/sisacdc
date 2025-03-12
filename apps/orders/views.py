@@ -13,7 +13,7 @@ from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
 from .classes import ApiStore, NoteStore, StatusStore, DateFormats
-from .tasks import order_import, orders_up_status, check_esim_eua
+from .tasks import order_import, orders_up_status, update_st
 import pandas as pd
 
 
@@ -626,7 +626,7 @@ def orders_activations(request):
 @login_required(login_url='/login/')
 def atualizar_status(request):
     update_st.delay()
-    return HttpResponse('Verificação eSIM EUA concluída')
+    return HttpResponse('Verificação de status concluída')
 
 
 # def textImg(request):
