@@ -55,6 +55,7 @@ class StatusStore():
             'DE': 'desativado', 
             'DA': 'data-em-aberto',
             'DS': 'desativado', 
+            'ES': 'em-separacao',
             'PV': 'agd-ativacao',
             'RE': 'reembolsar',
             'RB': 'reembolsado',
