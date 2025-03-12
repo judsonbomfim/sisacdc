@@ -561,7 +561,7 @@ def update_st():
     
     while n_page <= total_pages:
         # Pedidos com status 'processing'
-        ord = apiStore.get('orders', params={'order': 'asc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page}).json()                                   
+        ord = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page}).json()                                   
 
         # Listar pedidos         
         for order_store in ord:
