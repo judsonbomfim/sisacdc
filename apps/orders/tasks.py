@@ -596,6 +596,6 @@ def update_st():
                 
                 
                 total_ord += 1
-                print(f'>>>>>>>>>> Pedidos concluídos = {total_ord}')
+                print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
 
         n_page += 1
