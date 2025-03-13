@@ -550,8 +550,8 @@ def update_st():
        
     # Definir números de páginas
     per_page = 100
-    # order_p = apiStore.get('orders', params={'after': start_date, 'before': end_date, 'status': 'processing', 'per_page': per_page})        
-    order_p = apiStore.get('orders', params={'status': 'on-hold', 'per_page': per_page})        
+    # order_p = apiStore.get('orders', params={'status': 'on-hold', 'per_page': per_page})        
+    order_p = apiStore.get('orders', params={'status': 'processing', 'per_page': per_page})        
     
     total_pages = int(order_p.headers['X-WP-TotalPages'])
     n_page = 1
@@ -561,7 +561,8 @@ def update_st():
     
     while n_page <= total_pages:
         # Pedidos com status 'processing'
-        ord = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page}).json()                                   
+        # ord = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page}).json()                                   
+        ord = apiStore.get('orders', params={'order': 'desc', 'status': 'processing', 'per_page': per_page, 'page': n_page}).json()                                   
 
         # Listar pedidos         
         for order_store in ord:
