@@ -6,7 +6,7 @@ from .classes import ApiStore, NotesAdd, StatusStore, DateFormats, UpdateOrder
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
-import time
+import time, requests
 from apps.sims.tasks import sims_in_orders, simDeactivateTC, simActivateTC
 from apps.send_email.tasks import send_email_sims
 from apps.voice_calls.tasks import number_in_voice
@@ -550,19 +550,28 @@ def update_st():
        
     # Definir números de páginas
     per_page = 100
-    order_p = apiStore.get('orders', params={'status': 'on-hold', 'per_page': per_page})        
-    # order_p = apiStore.get('orders', params={'status': 'processing', 'per_page': per_page})        
+    try:
+        order_p = apiStore.get('orders', params={'status': 'on-hold', 'per_page': per_page})
+        order_p.raise_for_status()  # Verifica se a resposta HTTP contém um status de erro
+        total_pages = int(order_p.headers['X-WP-TotalPages'])
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao obter pedidos: {e}")
+        return
     
-    total_pages = int(order_p.headers['X-WP-TotalPages'])
     n_page = 1
     total_ord = 0
     
-    # orders_all = Orders.objects.all()
-    
     while n_page <= total_pages:
-        # Pedidos com status 'processing'
-        ord = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page}).json()                                   
-        # ord = apiStore.get('orders', params={'order': 'desc', 'status': 'processing', 'per_page': per_page, 'page': n_page}).json()                                   
+        try:
+            response = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page})
+            response.raise_for_status()  # Verifica se a resposta HTTP contém um status de erro
+            ord = response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao obter pedidos na página {n_page}: {e}")
+            break
+        except ValueError as e:
+            print(f"Erro ao decodificar JSON na página {n_page}: {e}")
+            break
 
         # Listar pedidos         
         for order_store in ord:
@@ -577,7 +586,6 @@ def update_st():
                 status_sis_site = StatusStore.st_sis_site()
                 if order_status in status_sis_site:                    
                     up_order_st_store(id_sis,status_sis_site[order_status])
-                
                 
                 total_ord += 1
                 print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
