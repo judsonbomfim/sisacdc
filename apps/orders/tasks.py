@@ -544,28 +544,23 @@ def up_order_st_store(order_id,order_st):
 
 @shared_task
 def update_st():
-    
     # Importar pedidos
     apiStore = ApiStore.conectApiStore()
-       
+    
     # Definir números de páginas
     per_page = 100
-    try:
-        order_p = apiStore.get('orders', params={'status': 'on-hold', 'per_page': per_page})
-        order_p.raise_for_status()  # Verifica se a resposta HTTP contém um status de erro
-        total_pages = int(order_p.headers['X-WP-TotalPages'])
-    except requests.exceptions.RequestException as e:
-        print(f"Erro ao obter pedidos: {e}")
-        return
-    
     n_page = 1
     total_ord = 0
     
-    while n_page <= total_pages:
+    while True:
         try:
             response = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page})
             response.raise_for_status()  # Verifica se a resposta HTTP contém um status de erro
             ord = response.json()
+            
+            # Se não houver mais pedidos, sair do loop
+            if not ord:
+                break
         except requests.exceptions.RequestException as e:
             print(f"Erro ao obter pedidos na página {n_page}: {e}")
             break
@@ -585,9 +580,11 @@ def update_st():
                 order_status = id_sis.order_status
                 status_sis_site = StatusStore.st_sis_site()
                 if order_status in status_sis_site:                    
-                    up_order_st_store(id_sis,status_sis_site[order_status])
+                    up_order_st_store(id_sis, status_sis_site[order_status])
                 
                 total_ord += 1
                 print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
 
         n_page += 1
+
+    print(f'Total de pedidos processados: {total_ord}')
