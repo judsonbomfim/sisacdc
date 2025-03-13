@@ -574,25 +574,8 @@ def update_st():
             if id_sis != None:
                 id_order = id_sis.id
                 order_status = id_sis.order_status
-                status_sis_site = {
-                    'AA': 'agd-ativacao',
-                    'AE': 'agd-envio',
-                    'AG': 'agencia',
-                    'AS': 'em-separacao',
-                    'AT': 'ativado',
-                    'CC': 'desativado',
-                    'CN': 'completed', 
-                    'DE': 'desativado', 
-                    'DA': 'data-em-aberto',
-                    'DS': 'desativado', 
-                    'PV': 'agd-ativacao',
-                    'RE': 'reembolsar',
-                    'RB': 'reembolsado',
-                    'RS': 'reuso',
-                    'RT': 'retirada',
-                }
-                if order_status in status_sis_site:
-                    status_sis_site = StatusStore.st_sis_site()
+                status_sis_site = StatusStore.st_sis_site()
+                if order_status in status_sis_site:                    
                     up_order_st_store(id_sis,status_sis_site[order_status])
                 
                 
