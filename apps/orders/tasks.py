@@ -534,7 +534,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
 
 @shared_task
 def up_order_st_store(order_id,order_st):
-    print('>>>>>>>>>> Alterando status do site')
+    time.sleep(0.5)
     apiStore = ApiStore.conectApiStore()
     update_store = {
             'status': order_st
