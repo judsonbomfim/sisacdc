@@ -556,6 +556,12 @@ def update_st():
         try:
             response = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page})
             response.raise_for_status()  # Verifica se a resposta HTTP contém um status de erro
+            
+            # Verificar se a resposta contém dados
+            if response.text.strip() == "":
+                print(f"Resposta vazia na página {n_page}")
+                break
+            
             ord = response.json()
             
             # Se não houver mais pedidos, sair do loop
