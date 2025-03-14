@@ -6,7 +6,7 @@ from .classes import ApiStore, NotesAdd, StatusStore, DateFormats, UpdateOrder
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
-import time
+import time, requests
 from apps.sims.tasks import sims_in_orders, simDeactivateTC, simActivateTC
 from apps.send_email.tasks import send_email_sims
 from apps.voice_calls.tasks import number_in_voice
@@ -534,7 +534,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
 
 @shared_task
 def up_order_st_store(order_id,order_st):
-    print('>>>>>>>>>> Alterando status do site')
+    time.sleep(0.5)
     apiStore = ApiStore.conectApiStore()
     update_store = {
             'status': order_st
@@ -543,15 +543,54 @@ def up_order_st_store(order_id,order_st):
 
 
 @shared_task
-def check_esim_eua():
+def update_st():
+    # Importar pedidos
+    apiStore = ApiStore.conectApiStore()
     
-    orders_all = Orders.objects.all().filter(type_sim='esim').filter(product='chip-internacional-eua')
+    # Definir números de páginas
+    per_page = 100
+    n_page = 1
+    total_ord = 0
     
-    count = 0
-    for ord in orders_all:
-        order_put = Orders.objects.get(pk=ord.id)
-        order_put.id_sim_id = 0            
-        order_put.save()
-        
-        count+=1
-        print(f'>>>>>>>>>>>>>>> Pedido {ord.order_id} atualizado com sucesso. TOTAL: {count}')
+    while True:
+        try:
+            response = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page})
+            response.raise_for_status()  # Verifica se a resposta HTTP contém um status de erro
+            
+            # Verificar se a resposta contém dados
+            if response.text.strip() == "":
+                print(f"Resposta vazia na página {n_page}")
+                break
+            
+            ord = response.json()
+            
+            # Se não houver mais pedidos, sair do loop
+            if not ord:
+                break
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao obter pedidos na página {n_page}: {e}")
+            break
+        except ValueError as e:
+            print(f"Erro ao decodificar JSON na página {n_page}: {e}")
+            break
+
+        # Listar pedidos         
+        for order_store in ord:
+            n_item = 1
+            id_ord = order_store["id"]
+            
+            id_sis = Orders.objects.filter(order_id=id_ord).first()
+            
+            if id_sis != None:
+                id_order = id_sis.id
+                order_status = id_sis.order_status
+                status_sis_site = StatusStore.st_sis_site()
+                if order_status in status_sis_site:                    
+                    up_order_st_store(id_sis, status_sis_site[order_status])
+                
+                total_ord += 1
+                print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
+
+        n_page += 1
+
+    print(f'Total de pedidos processados: {total_ord}')
