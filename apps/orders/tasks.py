@@ -563,8 +563,7 @@ def update_st():
         # Listar pedidos         
         for order_store in ord:
             n_item = 1
-            id_ord = order_store["id"]
-            
+            id_ord = order_store.id            
             id_sis = Orders.objects.filter(id=id_ord).first()
             
             if id_sis != None:
