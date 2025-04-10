@@ -548,6 +548,7 @@ def update_st():
     while True:
         try:
             ord = Orders.objects.filter(order_status="RE")
+            print('ORD >>>>>>>>>> ',ord)
             
             # Se não houver mais pedidos, sair do loop
             if not ord:
