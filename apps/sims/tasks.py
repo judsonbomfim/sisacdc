@@ -851,6 +851,19 @@ def simActivateCM(id=None):
         order_sim = order.id_sim.sim
         list_plan = []
         
+        def errorData():
+            # Adicionar Nota
+            note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente. ERRO: {data_dict}'
+            NotesAdd.addNote(order,note)
+            # ALterar status do sistema
+            UpdateOrder.upStatus(order_item,'EA')
+        
+        def generate_password_digest(app_secret):
+            nonce = str(int(time.time() * 1000))
+            created = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            digest = base64.b64encode(hashlib.sha256((nonce + created + app_secret).encode('utf-8')).digest()).decode('utf-8')
+            return nonce, created, digest
+        
         # Definir lista
         if order_product == "chip-internacional-europa-plus" or order_product == "chip-internacional-europa":
             list_plan = list_cm_europe
@@ -873,14 +886,10 @@ def simActivateCM(id=None):
         
         # Verificar se plan_code foi definido
         if plan_code is None:
-            raise ValueError("Nenhum plano correspondente encontrado para order_day e order_data.")
-        
-        
-        def generate_password_digest(app_secret):
-            nonce = str(int(time.time() * 1000))
-            created = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-            digest = base64.b64encode(hashlib.sha256((nonce + created + app_secret).encode('utf-8')).digest()).decode('utf-8')
-            return nonce, created, digest
+            # Inserir nota e alterar status do sistema
+            NotesAdd.addNote("Nenhum plano correspondente encontrado para order_day e order_data.",note)
+            errorData()
+            continue
 
         # URL do endpoint
         url_api = f'{settings.APICM_URL}/aep/APP_createOrder_SBO/v1'
@@ -918,12 +927,6 @@ def simActivateCM(id=None):
         # Verificar o status da resposta
         data = res.read()
         
-        def errorData():
-            # Adicionar Nota
-            note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente. ERRO: {data_dict}'
-            NotesAdd.addNote(order,note)
-            # ALterar status do sistema
-            UpdateOrder.upStatus(order_item,'EA')
         
         if res.status != 200:
             errorData()
