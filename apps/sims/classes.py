@@ -1,8 +1,10 @@
+from datetime import datetime
 import http.client
 import json
 import time
 from unittest import result
 from django.conf import settings
+import pytz
 
 
 class ApiTC:
@@ -97,7 +99,8 @@ class ApiTC:
         token_api = ApiTC.get_token()
         payload = ''
         headers = ApiTC.get_headers(token_api)
-        dateToday = time.strftime("%Y%m%d", time.localtime())
+        london_tz = pytz.timezone("Europe/London")
+        dateToday = datetime.now(london_tz).strftime("%Y%m%d")
         time.sleep(0.5)
         # Obter EndPointID
         endPointId = ApiTC.get_iccid(iccid, headers)
