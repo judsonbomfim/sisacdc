@@ -120,7 +120,6 @@ class ApiTC:
             # Caso a chave não exista, retornar 0
             mobile_data = 0
         
-        mobile_data = data_endpointId["Response"]["responseParam"]["dataUsage"][0]['totalVolume']
         conn.close()
         return mobile_data
 
