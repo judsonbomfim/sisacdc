@@ -168,8 +168,6 @@ def simActivateTC(id=None):
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1]
-            print('>>>>>>>>>> endpointId',endpointId)
-            print('>>>>>>>>>> simStatus',simStatus)  
         except Exception:            
             error_api()
             continue

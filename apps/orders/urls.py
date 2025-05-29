@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('listar/', views.orders_list, name='orders_list'),
+    path('detalhes/<int:order_id>', views.ord_details, name='ord_details'),
     path('importar/', views.ord_import, name='ord_import'),
     path('editar/<int:id>', views.ord_edit, name='ord_edit'),
     path('exportar/', views.ord_export_op, name='ord_export_op'),

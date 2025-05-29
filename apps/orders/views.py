@@ -1,14 +1,16 @@
+import operator
 from django.contrib.auth.models import User
 from rolepermissions.decorators import has_permission_decorator
 import csv
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from datetime import date, datetime, timedelta
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.conf import settings
 from apps.orders.models import Orders, Notes
+from apps.sims.classes import ApiTC
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
@@ -108,6 +110,63 @@ def orders_list(request):
     }
     return render(request, 'painel/orders/index.html', context)
 
+@login_required(login_url='/login/')
+def ord_details(request, order_id):
+    
+    data_d = {
+        '500mb-dia': '500',
+        '1gb': '1000',
+        '2gb': '2000',
+        'ilimitado': 'Ilimitado',
+        }
+    
+    order = Orders.objects.get(pk=order_id)
+    name = order.client
+    sim = order.id_sim.sim if order.id_sim else ''
+    data_day = data_d[order.data_day] if order.data_day else ''
+    data_day_d = order.get_data_day_display() if order.data_day else ''
+    operator = order.id_sim.operator if order.id_sim else ''
+    product = order.get_product_display()
+        
+    if operator == 'TC' and sim != '':
+        # Verificar consumo de dados TC
+        mobile_data = ApiTC.mobileData(sim)
+    elif operator == 'CM':
+        # Verificar consumo de dados CM
+        mobile_data = 568
+    else:
+        mobile_data = ''
+    
+    if mobile_data != '':
+        mobile_data_f = f"{float(mobile_data):.2f}"
+        
+    print(f'Consumo de dados: {mobile_data} MB')
+    
+    # Calcular porcentagem de dados usados
+    # data_day é o total (em MB ou 'Ilimitado'), mobile_data é o usado (em MB)
+    if data_day and data_day != 'Ilimitado':
+        try:
+            total_data = float(data_day)
+            used_data = float(mobile_data)
+            percent_used = (used_data / total_data) * 100
+            percent_used = round(percent_used, 2)
+        except Exception:
+            percent_used = None
+    else:
+        percent_used = None  # Não calcula para ilimitado ou dados inválidos        
+    
+    data = {
+        'name': name,
+        'sim': sim,
+        'data_day': data_day,
+        'data_day_d': data_day_d,
+        'operator': operator,
+        'product': product,
+        'mobile_data': mobile_data_f,        
+        'percent_used': percent_used,
+        }    
+    
+    return JsonResponse(data)
 
 # Update orders
 @login_required(login_url='/login/')

@@ -16,6 +16,7 @@ class ApiTC:
             "username": settings.APITC_USERNAME,
             "password": settings.APITC_PASSWORD
         })
+        
         headers_token = {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
@@ -25,6 +26,7 @@ class ApiTC:
         res_token = conn.getresponse()
         data_token = json.loads(res_token.read())
         token_api = data_token["AccessToken"]
+        conn.close()
         return token_api
 
 
@@ -52,12 +54,13 @@ class ApiTC:
         data_endpointId = json.loads(res_endpointId.read())
         simStatus = data_endpointId["Response"]["responseParam"]["rows"][0]['simStatus']
         endpointId = data_endpointId["Response"]["responseParam"]["rows"][0]['endPointId']
+        conn.close()
         return endpointId, simStatus
 
 
     # Pl0an Change
     @staticmethod
-    def planChange(endpointId,headers,dataDay, product):
+    def planChange(endpointId,headers,dataDay,product):
         planList = {}
         if product == 'chip-internacional-america-do-sul' or product == 'chip-internacional-america-do-sul-premium':
             planList = {
@@ -85,8 +88,30 @@ class ApiTC:
         conn.request("POST", "/api/ChangePlan", payload, headers)
         res_plan = conn.getresponse()
         data_plan = res_plan.read()
+        conn.close()
         return data_plan
-   
+    
+    @staticmethod
+    def mobileData(iccid):
+        # Gerar token de acesso a API
+        token_api = ApiTC.get_token()
+        payload = ''
+        headers = ApiTC.get_headers(token_api)
+        dateToday = time.strftime("%Y%m%d", time.localtime())
+        time.sleep(0.5)
+        # Obter EndPointID
+        endPointId = ApiTC.get_iccid(iccid, headers)
+        
+        time.sleep(0.5)
+        # Obter dados de uso
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)    
+        conn.request("GET", f"/api/GetStatistics?endPointId={endPointId[0]}&from_date={dateToday}&to_date={dateToday}", payload, headers)
+        res = conn.getresponse()
+        data_endpointId = json.loads(res.read())
+        mobile_data = data_endpointId["Response"]["responseParam"]["dataUsage"][0]['totalVolume']
+        conn.close()
+        return mobile_data
+
 
 class apiCM:
     @staticmethod
