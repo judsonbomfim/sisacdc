@@ -108,10 +108,21 @@ class ApiTC:
         conn.request("GET", f"/api/GetStatistics?endPointId={endPointId[0]}&from_date={dateToday}&to_date={dateToday}", payload, headers)
         res = conn.getresponse()
         data_endpointId = json.loads(res.read())
+        try:
+            if data_endpointId["Response"]["responseParam"]["dataUsage"][0]['totalVolume'] is None:
+                mobile_data = 0
+            else:
+                mobile_data = data_endpointId["Response"]["responseParam"]["dataUsage"][0]['totalVolume']
+        except IndexError:
+            # Caso não haja dados de uso, retornar 0
+            mobile_data = 0
+        except KeyError:
+            # Caso a chave não exista, retornar 0
+            mobile_data = 0
+        
         mobile_data = data_endpointId["Response"]["responseParam"]["dataUsage"][0]['totalVolume']
         conn.close()
         return mobile_data
-
 
 class apiCM:
     @staticmethod
