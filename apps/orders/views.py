@@ -162,7 +162,7 @@ def ord_details(request, order_id):
         'data_day_d': data_day_d,
         'operator': operator,
         'product': product,
-        'mobile_data': mobile_data_f,        
+        'mobile_data': mobile_data,        
         'percent_used': percent_used,
         }    
     
