@@ -131,16 +131,17 @@ def ord_details(request, order_id):
     if operator == 'TC' and sim != '':
         # Verificar consumo de dados TC
         mobile_data = ApiTC.mobileData(sim)
-    elif operator == 'CM':
+    elif operator == 'CM' and sim != '':
         # Verificar consumo de dados CM
         mobile_data = apiCM.mobileData(sim)
     else:
-        mobile_data = ''
+        mobile_data = 0,00
     
+    print(f'>>>>> mobile_data: {mobile_data}')
     # if mobile_data != '':
     #     mobile_data_f = f"{float(mobile_data):.2f}"
         
-    print(f'Consumo de dados: {mobile_data} MB')
+    print(f'>>>>> Consumo de dados: {mobile_data} MB')
     
     # Calcular porcentagem de dados usados
     # data_day é o total (em MB ou 'Ilimitado'), mobile_data é o usado (em MB)
