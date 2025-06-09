@@ -134,8 +134,9 @@ def ord_details(request, order_id):
     elif operator == 'CM' and sim != '':
         # Verificar consumo de dados CM
         mobile_data = apiCM.mobileData(sim)
+        print(f'>>>>> mobile_data CM: {mobile_data}')
     else:
-        mobile_data = 0,00
+        mobile_data = 0.00
     
     print(f'>>>>> mobile_data: {mobile_data}')
     # if mobile_data != '':
