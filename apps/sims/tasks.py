@@ -856,12 +856,6 @@ def simActivateCM(id=None):
             # ALterar status do sistema
             UpdateOrder.upStatus(order_item,'EA')
         
-        def generate_password_digest(app_secret):
-            nonce = str(int(time.time() * 1000))
-            created = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-            digest = base64.b64encode(hashlib.sha256((nonce + created + app_secret).encode('utf-8')).digest()).decode('utf-8')
-            return nonce, created, digest
-        
         # Definir lista
         if order_product == "chip-internacional-europa-plus" or order_product == "chip-internacional-europa":
             list_plan = list_cm_europe
@@ -896,7 +890,7 @@ def simActivateCM(id=None):
         app_secret = settings.APICM_SECRET
 
         # Gerar PasswordDigest
-        nonce, created, password_digest = generate_password_digest(app_secret)
+        nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
 
         # Cabeçalhos da requisição
         headers = {
