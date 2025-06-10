@@ -189,16 +189,16 @@ class apiCM:
     
     def mobileData(iccid):        
         # URL do endpoint
-        url_api = f'{settings.APICM_URL}/aep/APP_getAccessToken_SBO/v1'
+        url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
         app_key = settings.APICM_KEY
         app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
-        london_tz = pytz.timezone("Europe/London")
+        london_tz = pytz.timezone("Europe/London")       
         dateToday = datetime.now(london_tz).strftime("%Y%m%d")
 
         # Gerar PasswordDigest
-        nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
+        nonce, created, password_digest = apiCM.generate_password_digest(app_secret).
         print(f">>>>> Nonce: {nonce}, Created: {created}, Password Digest: {password_digest}")
 
         # Cabeçalhos da requisição
@@ -214,8 +214,8 @@ class apiCM:
             "accessToken": api_token,
             "himsi":"",
             "iccid":"0",
-            "beginTime":dateToday,
-            "endTime":dateToday,
+            "beginTime":"20250527",
+            "endTime":"20250527",
             "childOrderId":"",
             "thirdOrderId":"",
             "ext":""
