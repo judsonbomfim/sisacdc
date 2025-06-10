@@ -249,11 +249,11 @@ class apiCM:
                     consumo = data_dict['historyQuota'][0]['qtaconsumption']
                     if consumo is None:
                         # Se a chave 'qtaconsumption' for None, define como 0.0
-                        consumo = [0.0]
+                        result_data = [0.0]
                     else:
                         # Caso contrário, assume que é uma lista
-                        consumo = [consumo]
-                    print(f">>>>> Consumo obtido: {consumo}")
+                        result_data = consumo
+                    print(f">>>>> Consumo obtido: {result_data}")
                 else:
                     result_data = [0.0]
             except json.JSONDecodeError:
