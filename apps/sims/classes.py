@@ -197,9 +197,10 @@ class apiCM:
         api_token = apiCM.get_token()
         london_tz = pytz.timezone("Europe/London")
         date_today = datetime.now(london_tz)
-        date_yesterday = date_today - timedelta(days=1)
-        dateToday = date_yesterday.strftime("%Y%m%d")
-        print(f">>>>> Data de hoje: {dateToday} <<<<<")
+        dateToday = date_today - timedelta(days=1).strftime("%Y%m%d")
+        data_start = date_today - timedelta(days=4)
+        dataStart = data_start.strftime("%Y%m%d")
+        
 
         # Gerar PasswordDigest
         nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
@@ -217,7 +218,7 @@ class apiCM:
         payload = json.dumps({
             "accessToken": api_token,
             "iccid": iccid,
-            "beginTime": dateToday,
+            "beginTime": dataStart,
             "endTime": dateToday,
         })
         
