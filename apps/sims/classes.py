@@ -244,9 +244,9 @@ class apiCM:
                     result_data = data_dict.get('historyQuota')
                     print(f">>>>> Dados de uso obtidos: {result_data}")
                 else:
-                    result_data = 0.0
+                    result_data = [0.0]
             except json.JSONDecodeError:
-                result_data = 0.0
+                result_data = [0.0]
         
         return result_data
         
