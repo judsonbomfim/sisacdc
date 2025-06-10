@@ -212,13 +212,9 @@ class apiCM:
         # Corpo da requisição
         payload = json.dumps({
             "accessToken": api_token,
-            "himsi":"",
             "iccid": iccid,
             "beginTime": dateToday,
             "endTime": dateToday,
-            "childOrderId":"",
-            "thirdOrderId":"",
-            "ext":""
         })
         
         # Fazer a requisição POST com tempo limite
@@ -228,6 +224,7 @@ class apiCM:
             res = conn.getresponse()
             # Verificar o status da resposta
             data = res.read()
+            print(f"Resposta da API: {data}")
             print(f"Status da resposta: {res.status}")
         except TimeoutError as e:
             print(f"Erro ao conectar: {e}")
