@@ -240,9 +240,16 @@ class apiCM:
             try:
                 if data:
                     data_dict = json.loads(data)
-                    print(f">>>>> Resposta da API Json: {data_dict}")                    
+                    print(f">>>>> Resposta da API Json: {data_dict}")                   
+                    # Verifica se a chave 'historyQuota' existe e não é None
+                    if isinstance(data_dict['historyQuota'], list) and len(data_dict['historyQuota']) > 0:
+                        # Se for uma lista e não estiver vazia, pega o primeiro elemento
+                        result_data = data_dict['historyQuota'][0]
+                        print(f">>>>> Dados de uso obtidos: {result_data}")
+                    else:
+                        # Se não for uma lista ou estiver vazia, define como 0.0
+                        result_data = [0.0]
                     result_data = data_dict.get('historyQuota')
-                    print(f">>>>> Dados de uso obtidos: {result_data}")
                 else:
                     result_data = [0.0]
             except json.JSONDecodeError:
