@@ -197,8 +197,8 @@ class apiCM:
         api_token = apiCM.get_token()
         china_tz = pytz.timezone("Asia/Shanghai")
         dateToday = datetime.now(china_tz).strftime("%Y%m%d")
-        dateStart = (datetime.now(china_tz) - timedelta(days=1)).strftime("%Y%m%d")
-        print(f">>>>> Data de hoje: {dateToday} x {dateStart} <<<<<")
+        dateStart = (datetime.now(china_tz) - timedelta(days=2)).strftime("%Y%m%d")
+        print(f">>>>> Data de consumo: {dateStart} - {dateToday} <<<<<")
         
 
         # Gerar PasswordDigest
@@ -238,7 +238,7 @@ class apiCM:
             
         # Verificar status da requisição        
         if res.status != 200:
-            result_data = 0.0
+            result_data = [0.0]
         else:
             try:
                 if data:
