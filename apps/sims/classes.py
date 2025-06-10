@@ -199,6 +199,7 @@ class apiCM:
         date_today = datetime.now(london_tz)
         date_yesterday = date_today - timedelta(days=1)
         dateToday = date_yesterday.strftime("%Y%m%d")
+        print(f">>>>> Data de hoje: {dateToday} <<<<<")
 
         # Gerar PasswordDigest
         nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
