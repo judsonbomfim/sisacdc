@@ -196,7 +196,7 @@ class apiCM:
         app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
         china_tz = pytz.timezone("Asia/Shanghai")
-        dateToday = datetime.now(china_tz).strftime("%Y%m%d")
+        dateToday = (datetime.now(china_tz) - timedelta(days=1)).strftime("%Y%m%d")
         print(f">>>>> Data de hoje: {dateToday} <<<<<")
         
 
