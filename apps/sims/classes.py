@@ -221,8 +221,6 @@ class apiCM:
             "ext":""
         })
         
-
-
         # Fazer a requisição POST com tempo limite
         try:
             conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=100)
@@ -232,11 +230,11 @@ class apiCM:
             data = res.read()
             print(f"Status da resposta: {res.status}")
         except TimeoutError as e:
-            print(f"TimeoutError: {e}")
-            data = None
+            print(f"Erro ao conectar: {e}")
+            data = 0.0
         except Exception as e:
             print(f"Erro ao conectar: {e}")
-            data = None
+            data = 0.0
         
         return data
         
