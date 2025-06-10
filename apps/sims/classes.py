@@ -208,6 +208,7 @@ class apiCM:
         # Cabeçalhos da requisição
         headers = {
             'Content-Type': 'application/json',
+            'Content-Length': '212',
             "Accept": "application/json",
             "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
             "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
