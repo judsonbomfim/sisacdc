@@ -218,7 +218,7 @@ class apiCM:
             "accessToken": api_token,
             "iccid": iccid,
             "beginTime": dateStart,
-            "endTime": dateToday,
+            "endTime": dateStart,
         })
         
         # Fazer a requisição POST com tempo limite
