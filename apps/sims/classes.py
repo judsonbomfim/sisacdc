@@ -189,6 +189,7 @@ class apiCM:
     
     def mobileData(iccid):        
         # URL do endpoint
+        print(f">>>>> Obtendo dados de uso para o ICCID: {iccid} <<<<<")
         url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
         app_key = settings.APICM_KEY
