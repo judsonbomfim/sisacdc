@@ -200,6 +200,7 @@ class apiCM:
         dateToday = date_today.strftime("%Y%m%d")
         data_start = date_today - timedelta(days=4)
         dataStart = data_start.strftime("%Y%m%d")
+        print(f">>>>> Data de início: {dataStart}, Data de hoje: {dateToday} <<<<<")
         
 
         # Gerar PasswordDigest
@@ -244,7 +245,8 @@ class apiCM:
             try:
                 if data:
                     data_dict = json.loads(data)
-                    print(f">>>>> Resposta da API Json: {data_dict}")                   
+                    print(f">>>>> Resposta da API Json: {data_dict}")
+                    consumo = data_dict['historyQuota'][0]['qtaconsumption'],                 
                     # Verifica se a chave 'historyQuota' existe e não é None
                     if isinstance(data_dict['historyQuota'], list) and len(data_dict['historyQuota']) > 0:
                         # Se for uma lista e não estiver vazia, pega o primeiro elemento
