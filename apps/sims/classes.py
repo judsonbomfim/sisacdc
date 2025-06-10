@@ -217,7 +217,7 @@ class apiCM:
         payload = json.dumps({
             "accessToken": api_token,
             "iccid": iccid,
-            "beginTime": dateToday,
+            "beginTime": dateStart,
             "endTime": dateToday,
         })
         
