@@ -195,8 +195,8 @@ class apiCM:
         app_key = settings.APICM_KEY
         app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
-        london_tz = pytz.timezone("Europe/London")
-        date_today = datetime.now(london_tz)
+        china_tz = pytz.timezone("Asia/Shanghai")
+        date_today = datetime.now(china_tz)
         dateToday = date_today.strftime("%Y%m%d")
         data_start = date_today - timedelta(days=4)
         dataStart = data_start.strftime("%Y%m%d")
@@ -219,7 +219,7 @@ class apiCM:
         payload = json.dumps({
             "accessToken": api_token,
             "iccid": iccid,
-            "beginTime": dataStart,
+            "beginTime": '20250608',
             "endTime": dateToday,
         })
         
@@ -246,13 +246,12 @@ class apiCM:
                 if data:
                     data_dict = json.loads(data)
                     print(f">>>>> Resposta da API Json: {data_dict}")
-                    consumo = data_dict['historyQuota'][0]['qtaconsumption']
-                    if consumo is None:
-                        # Se a chave 'qtaconsumption' for None, define como 0.0
-                        result_data = [0.0]
-                    else:
-                        # Caso contrário, assume que é uma lista
-                        result_data = consumo
+                    
+                    try:
+                        consumo = data_dict['historyQuota'][0]['qtaconsumption']
+                    except (KeyError, IndexError):
+                        consumo = None
+                    result_data = consumo
                     print(f">>>>> Consumo obtido: {result_data}")
                 else:
                     result_data = [0.0]
