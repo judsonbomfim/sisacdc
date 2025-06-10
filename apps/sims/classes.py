@@ -196,8 +196,9 @@ class apiCM:
         app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
         china_tz = pytz.timezone("Asia/Shanghai")
-        dateToday = (datetime.now(china_tz) - timedelta(days=1)).strftime("%Y%m%d")
-        print(f">>>>> Data de hoje: {dateToday} <<<<<")
+        dateToday = datetime.now(china_tz).strftime("%Y%m%d")
+        dateStart = (datetime.now(china_tz) - timedelta(days=1)).strftime("%Y%m%d")
+        print(f">>>>> Data de hoje: {dateToday} x {dateStart} <<<<<")
         
 
         # Gerar PasswordDigest
@@ -216,7 +217,7 @@ class apiCM:
         payload = json.dumps({
             "accessToken": api_token,
             "iccid": iccid,
-            "beginTime": '20250608',
+            "beginTime": dateToday,
             "endTime": dateToday,
         })
         
