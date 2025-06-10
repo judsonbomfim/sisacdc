@@ -197,7 +197,7 @@ class apiCM:
         api_token = apiCM.get_token()
         london_tz = pytz.timezone("Europe/London")
         date_today = datetime.now(london_tz)
-        dateToday = date_today - timedelta(days=1).strftime("%Y%m%d")
+        dateToday = date_today.strftime("%Y%m%d")
         data_start = date_today - timedelta(days=4)
         dataStart = data_start.strftime("%Y%m%d")
         
