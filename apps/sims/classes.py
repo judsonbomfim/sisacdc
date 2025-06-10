@@ -228,10 +228,23 @@ class apiCM:
             print(f"Status da resposta: {res.status}")
         except TimeoutError as e:
             print(f"Erro ao conectar: {e}")
-            data = 0.0
+            data = None
         except Exception as e:
             print(f"Erro ao conectar: {e}")
             data = 0.0
+            
+        # Verificar status da requisição        
+        if res.status != 200:
+            result_data = 0.0
+        else:
+            try:
+                if data:
+                    data_dict = json.loads(data)
+                    result_data = data_dict.get('historyQuota')
+                else:
+                    result_data = 0.0
+            except json.JSONDecodeError:
+                result_data = 0.0
         
-        return data
+        return result_data
         
