@@ -225,7 +225,6 @@ class apiCM:
             res = conn.getresponse()
             # Verificar o status da resposta
             data = res.read()
-            print(f"Resposta da API: {data}")
             print(f"Status da resposta: {res.status}")
         except TimeoutError as e:
             print(f"Erro ao conectar: {e}")
@@ -241,7 +240,9 @@ class apiCM:
             try:
                 if data:
                     data_dict = json.loads(data)
+                    print(f"Resposta da API: {data}")                    
                     result_data = data_dict.get('historyQuota')
+                    print(f"Dados de uso obtidos: {result_data}")
                 else:
                     result_data = 0.0
             except json.JSONDecodeError:
