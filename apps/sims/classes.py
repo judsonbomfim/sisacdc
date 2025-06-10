@@ -213,13 +213,15 @@ class apiCM:
         payload = json.dumps({
             "accessToken": api_token,
             "himsi":"",
-            "iccid":"0",
-            "beginTime":"20250527",
-            "endTime":"20250527",
+            "iccid": iccid,
+            "beginTime": dateToday,
+            "endTime": dateToday,
             "childOrderId":"",
             "thirdOrderId":"",
             "ext":""
         })
+        
+
 
         # Fazer a requisição POST com tempo limite
         try:
