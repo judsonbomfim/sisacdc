@@ -193,15 +193,13 @@ class apiCM:
         parsed_url = urlparse(url_api)
         app_key = settings.APICM_KEY
         app_secret = settings.APICM_SECRET
-        
-        url_api = f'https://gdschannel.cmlink.com:39043/aep/APP_getSubscriberAllQuota_SBO/v1'
-        parsed_url = urlparse(url_api)
-        app_key = "d61aace2fd8a4506b68d4d981d630068"
-        app_secret = 'df09dadb236a452ca0000c00f6720942'
         api_token = apiCM.get_token()
+        london_tz = pytz.timezone("Europe/London")
+        dateToday = datetime.now(london_tz).strftime("%Y%m%d")
 
         # Gerar PasswordDigest
         nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
+        print(f">>>>> Nonce: {nonce}, Created: {created}, Password Digest: {password_digest}")
 
         # Cabeçalhos da requisição
         headers = {
@@ -216,8 +214,8 @@ class apiCM:
             "accessToken": api_token,
             "himsi":"",
             "iccid":"0",
-            "beginTime":"20250527",
-            "endTime":"20250527",
+            "beginTime":dateToday,
+            "endTime":dateToday,
             "childOrderId":"",
             "thirdOrderId":"",
             "ext":""
@@ -230,6 +228,7 @@ class apiCM:
             res = conn.getresponse()
             # Verificar o status da resposta
             data = res.read()
+            print(f"Status da resposta: {res.status}")
         except TimeoutError as e:
             print(f"TimeoutError: {e}")
             data = None
