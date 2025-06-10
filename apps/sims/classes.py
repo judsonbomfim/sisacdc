@@ -221,7 +221,7 @@ class apiCM:
             "beginTime": dateStart,
             "endTime": dateStart,
             "childOrderId":"",
-            "thirdOrderId":""
+            "thirdOrderId":"",
             "ext": "",
         })
         
