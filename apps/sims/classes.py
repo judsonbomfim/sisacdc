@@ -248,9 +248,9 @@ class apiCM:
                     print(f">>>>> Resposta da API Json: {data_dict}")
                     consumo = data_dict['historyQuota'][0]['qtaconsumption'],                 
                     # Verifica se a chave 'historyQuota' existe e não é None
-                    if isinstance(data_dict['historyQuota'], list) and len(data_dict['historyQuota']) > 0:
+                    if isinstance(consumo, list) and len(consumo) > 0:
                         # Se for uma lista e não estiver vazia, pega o primeiro elemento
-                        result_data = data_dict['historyQuota'][0]
+                        result_data = consumo
                         print(f">>>>> Dados de uso obtidos: {result_data}")
                     else:
                         result_data = [0.0]
