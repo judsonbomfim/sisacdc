@@ -138,8 +138,8 @@ def ord_details(request, order_id):
     else:
         mobile_data = 0.00
     
-    if mobile_data != '':
-        mobile_data_f = f"{float(mobile_data):.2f}"
+    # if mobile_data != '':
+    #     mobile_data_f = f"{float(mobile_data):.2f}"
         
     print(f'>>>>> Consumo de dados: {mobile_data} MB')
     
