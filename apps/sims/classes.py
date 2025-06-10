@@ -196,11 +196,8 @@ class apiCM:
         app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
         china_tz = pytz.timezone("Asia/Shanghai")
-        date_today = datetime.now(china_tz)
-        dateToday = date_today.strftime("%Y%m%d")
-        data_start = date_today - timedelta(days=4)
-        dataStart = data_start.strftime("%Y%m%d")
-        print(f">>>>> Data de início: {dataStart}, Data de hoje: {dateToday} <<<<<")
+        dateToday = datetime.now(china_tz).strftime("%Y%m%d")
+        print(f">>>>> Data de hoje: {dateToday} <<<<<")
         
 
         # Gerar PasswordDigest
@@ -245,12 +242,11 @@ class apiCM:
             try:
                 if data:
                     data_dict = json.loads(data)
-                    print(f">>>>> Resposta da API Json: {data_dict}")
-                    
+                    print(f">>>>> Resposta da API Json: {data_dict}")                    
                     try:
                         consumo = data_dict['historyQuota'][0]['qtaconsumption']
                     except (KeyError, IndexError):
-                        consumo = None
+                        consumo = [0.0]
                     result_data = consumo
                     print(f">>>>> Consumo obtido: {result_data}")
                 else:
