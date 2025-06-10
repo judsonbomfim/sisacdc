@@ -4,7 +4,7 @@ import time
 import pytz
 import base64
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from unittest import result
 from django.conf import settings
@@ -195,8 +195,10 @@ class apiCM:
         app_key = settings.APICM_KEY
         app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
-        london_tz = pytz.timezone("Europe/London")       
-        dateToday = datetime.now(london_tz).strftime("%Y%m%d")
+        london_tz = pytz.timezone("Europe/London")
+        date_today = datetime.now(london_tz)
+        date_yesterday = date_today - timedelta(days=1)
+        dateToday = date_yesterday.strftime("%Y%m%d")
 
         # Gerar PasswordDigest
         nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
@@ -247,9 +249,8 @@ class apiCM:
                         result_data = data_dict['historyQuota'][0]
                         print(f">>>>> Dados de uso obtidos: {result_data}")
                     else:
-                        # Se não for uma lista ou estiver vazia, define como 0.0
                         result_data = [0.0]
-                    result_data = data_dict.get('historyQuota')
+                        print(f">>>>> Dados de uso não encontrados ou inválidos: {result_data}")
                 else:
                     result_data = [0.0]
             except json.JSONDecodeError:
