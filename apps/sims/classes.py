@@ -199,7 +199,7 @@ class apiCM:
 
         # Gerar PasswordDigest
         nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
-        print(f">>>>> Nonce: {nonce}, Created: {created}, Password Digest: {password_digest}")
+        print(f">>>>> Nonce: {nonce}, Created: {created}, Password Digest: {password_digest} <<<<<")
 
         # Cabeçalhos da requisição
         headers = {
