@@ -159,8 +159,8 @@ def order_import():
                     try:
                         register = order_add.save()
                         register
-                    except:
-                        print(f'Pedido {order_id_i} deu um erro ao importar')
+                    except Exception as e:
+                        print(f'Pedido {order_id_i} deu um erro ao importar: {e}')
                         continue
                     
                     # id_user = None

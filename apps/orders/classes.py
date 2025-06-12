@@ -48,7 +48,7 @@ class StatusStore():
             'AA': 'agd-ativacao',
             'AE': 'agd-envio',
             'AG': 'agencia',
-            'AS': 'em-separacao',
+            'AS': 'em-andamento',
             'AT': 'ativado',
             'CC': 'desativado',
             'CN': 'completed', 
