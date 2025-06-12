@@ -159,9 +159,9 @@ def order_import():
                     try:
                         register = order_add.save()
                         register
-                        continue
                     except:
-                        msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
+                        print(f'Pedido {order_id_i} deu um erro ao importar')
+                        continue
                     
                     # id_user = None
                     # if getpass.getuser():
