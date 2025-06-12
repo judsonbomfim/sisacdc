@@ -15,7 +15,7 @@ from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
 from .classes import ApiStore, NoteStore, StatusStore, DateFormats
-from .tasks import order_import, orders_up_status, update_st
+from .tasks import order_import, orders_up_status, up_order_st_store, update_st
 import pandas as pd
 
 
@@ -681,12 +681,30 @@ def orders_activations(request):
         'countActivTC': countActivTC,
     }
     return render(request, 'painel/orders/activations.html', context)
-    
+
 @login_required(login_url='/login/')
 def atualizar_status(request):
     update_st.delay()
     return HttpResponse('Verificação de status concluída')
 
+
+def verifica_pedidos(request):
+    apiStore = ApiStore.conectApiStore()
+    order_p = apiStore.get('orders', params={'status': 'processing'})
+    lista_pedidos = []
+    contagem = 0
+    for order in order_p:
+        order_id = order['id']
+        data = order['order_date']
+        data = DateFormats.dateDMA(data)
+        try:
+            order_sis = Orders.objects.get(order_id=order_id)
+            contagem += 1
+        except Orders.DoesNotExist:
+            lista_pedidos.append({f'{data} - Pedido: {order_id}': 'Pedido não encontrado no sistema'})
+            up_order_st_store(order_id,'prossessando')
+    return JsonResponse(lista_pedidos, contagem, safe=False)    
+        
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza
