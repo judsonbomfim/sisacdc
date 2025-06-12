@@ -105,6 +105,7 @@ def order_import():
                     order_date_i = DateFormats.dateHour(order['date_created'])
                     # notes_i = 0
                     
+                    print(f'---------- Definindo status Loja')
                     # Definir status do pedido
                     # 'RT', 'Retirada'
                     # 'MB', 'Motoboy'
@@ -154,10 +155,11 @@ def order_import():
                         # notes = notes_i
                     )
                     
-                    # Salvar itens no banco de dados
-                    register = order_add.save()
+
                     try:
+                        register = order_add.save()
                         register
+                        continue
                     except:
                         msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
                     
