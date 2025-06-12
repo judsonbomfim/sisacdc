@@ -59,12 +59,13 @@ def order_import():
                 prod_sel = [50760, 8873, 8761, 77027, 79804, 89373, 89526]
                 if item['product_id'] not in prod_sel:
                     continue
-                                
+                
                 qtd = item['quantity']
                 q_i = 1 
                 
                 while q_i <= qtd:
                     order_id_i = order['id']
+                    print(f'---------- Importando item {order_id_i}')
                     item_id_i = f'{order_id_i}-{n_item}'
                     client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
                     email_i = order['billing']['email']

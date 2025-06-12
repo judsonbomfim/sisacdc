@@ -702,7 +702,7 @@ def verifica_pedidos(request):
             contagem += 1
         except Orders.DoesNotExist:
             lista_pedidos.append({f'{data} - Pedido: {order_id}': 'Pedido não encontrado no sistema'})
-            up_order_st_store(order_id,'prossessando')
+            up_order_st_store(order_id,'processing')
     return JsonResponse(lista_pedidos, contagem, safe=False)    
         
 
