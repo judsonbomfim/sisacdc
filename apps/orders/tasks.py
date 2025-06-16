@@ -45,6 +45,8 @@ def order_import():
             n_item = 1
             id_ord = order["id"]
             
+            print(f'---------- Importando pedido {id_ord}')
+            
             # Verificar pedido repetido
 
             id_sis = Orders.objects.filter(order_id=id_ord)
@@ -545,69 +547,16 @@ def up_order_st_store(order_id,order_st):
     apiStore.put(f'orders/{order_id}', update_store).json()
 
 
-@shared_task
-def update_st():
-    
-    total_ord = 0
-    
-    # Importar pedidos   
-    while True:
-        try:
-            ord = Orders.objects.filter(order_status="RE")
-            print('ORD >>>>>>>>>> ',ord)
-            
-            # Se não houver mais pedidos, sair do loop
-            if not ord:
-                break
-        except requests.exceptions.RequestException as e:
-            print(f"Erro ao obter pedidos na página {n_page}: {e}")
-            break
-        except ValueError as e:
-            print(f"Erro ao decodificar JSON na página {n_page}: {e}")
-            break
-
-        # Listar pedidos         
-        for order_store in ord:
-            n_item = 1
-            id_ord = order_store.id            
-            id_sis = Orders.objects.filter(id=id_ord).first()
-            
-            if id_sis != None:
-                id_order = id_sis.id
-                order_status = id_sis.order_status
-                status_sis_site = StatusStore.st_sis_site()
-                if order_status in status_sis_site:                    
-                    up_order_st_store(id_sis, status_sis_site[order_status])
-                
-                total_ord += 1
-                print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
-
-        n_page += 1
-
-    print(f'Total de pedidos processados: {total_ord}')
-    
-    
 # @shared_task
 # def update_st():
-#     # Importar pedidos
-#     apiStore = ApiStore.conectApiStore()
     
-#     # Definir números de páginas
-#     per_page = 100
-#     n_page = 1
 #     total_ord = 0
     
+#     # Importar pedidos   
 #     while True:
 #         try:
-#             response = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page})
-#             response.raise_for_status()  # Verifica se a resposta HTTP contém um status de erro
-            
-#             # Verificar se a resposta contém dados
-#             if response.text.strip() == "":
-#                 print(f"Resposta vazia na página {n_page}")
-#                 break
-            
-#             ord = response.json()
+#             ord = Orders.objects.filter(order_status="RE")
+#             print('ORD >>>>>>>>>> ',ord)
             
 #             # Se não houver mais pedidos, sair do loop
 #             if not ord:
@@ -622,9 +571,8 @@ def update_st():
 #         # Listar pedidos         
 #         for order_store in ord:
 #             n_item = 1
-#             id_ord = order_store["id"]
-            
-#             id_sis = Orders.objects.filter(order_id=id_ord).first()
+#             id_ord = order_store.id            
+#             id_sis = Orders.objects.filter(id=id_ord).first()
             
 #             if id_sis != None:
 #                 id_order = id_sis.id
@@ -639,3 +587,57 @@ def update_st():
 #         n_page += 1
 
 #     print(f'Total de pedidos processados: {total_ord}')
+    
+    
+@shared_task
+def update_st():
+    # Importar pedidos
+    apiStore = ApiStore.conectApiStore()
+    
+    # Definir números de páginas
+    per_page = 100
+    n_page = 1
+    total_ord = 0
+    
+    while True:
+        try:
+            response = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page})
+            response.raise_for_status()  # Verifica se a resposta HTTP contém um status de erro
+            
+            # Verificar se a resposta contém dados
+            if response.text.strip() == "":
+                print(f"Resposta vazia na página {n_page}")
+                break
+            
+            ord = response.json()
+            
+            # Se não houver mais pedidos, sair do loop
+            if not ord:
+                break
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao obter pedidos na página {n_page}: {e}")
+            break
+        except ValueError as e:
+            print(f"Erro ao decodificar JSON na página {n_page}: {e}")
+            break
+
+        # Listar pedidos         
+        for order_store in ord:
+            n_item = 1
+            id_ord = order_store["id"]
+            
+            id_sis = Orders.objects.filter(order_id=id_ord).first()
+            
+            if id_sis != None:
+                id_order = id_sis.id
+                order_status = id_sis.order_status
+                status_sis_site = StatusStore.st_sis_site()
+                if order_status in status_sis_site:                    
+                    up_order_st_store(id_sis, status_sis_site[order_status])
+                
+                total_ord += 1
+                print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
+
+        n_page += 1
+
+    print(f'Total de pedidos processados: {total_ord}')
