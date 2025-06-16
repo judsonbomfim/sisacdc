@@ -140,7 +140,6 @@ def simActivateTC(id=None):
     conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
     time.sleep(0.5)
     headers = ApiTC.get_headers(token_api)
-    print('>>>>>>>>>> token_api',token_api)
         
     for order in orders_all:
                         
@@ -231,9 +230,7 @@ def simActivateTC(id=None):
             
             time.sleep(0.5)            
             res = conn.getresponse()
-            print('>>>>>>>>>> res', res)
             data = json.loads(res.read())
-            print('>>>>>>>>>> data', data)
             resultCode = int(data["Response"]["resultCode"])
             resultDescription = data["Response"]["resultParam"]["resultDescription"]
             try:
@@ -242,9 +239,6 @@ def simActivateTC(id=None):
             except Exception:
                 resultCode = None
                 resultDescription = None
-            
-            print('>>>>>>>>>> resultCode', resultCode)
-            print('>>>>>>>>>> resultDescription', resultDescription)
             
             if resultCode == 0:
                 # Alterar status
@@ -849,6 +843,8 @@ def simActivateCM(id=None):
         order_sim = order.id_sim.sim
         list_plan = []
         
+        print(f'>>>>>>>>>> ATIVANDO SIM {order_sim} - {order_id}')
+        
         def errorData():
             # Adicionar Nota
             note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente. ERRO: {data_dict}'
@@ -929,7 +925,6 @@ def simActivateCM(id=None):
         if res.status != 200:
             errorData()
         else:
-            print('DATA',data)
             data_dict = json.loads(data)
             result_data = data_dict.get('description')
             if result_data != 'Success':
