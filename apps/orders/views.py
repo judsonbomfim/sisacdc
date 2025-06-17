@@ -687,7 +687,7 @@ def atualizar_status(request):
     update_st.delay()
     return HttpResponse('Verificação de status concluída')
 
-
+@login_required(login_url='/login/')
 def verifica_pedidos(request):
     apiStore = ApiStore.conectApiStore()
     order_p = apiStore.get('orders', params={'status': 'processing'})

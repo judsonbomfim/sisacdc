@@ -590,7 +590,7 @@ def up_order_st_store(order_id,order_st):
     
     
 @shared_task
-def update_st(request):
+def update_st():
     # Importar pedidos
     apiStore = ApiStore.conectApiStore()
     
