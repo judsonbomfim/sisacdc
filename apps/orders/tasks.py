@@ -48,9 +48,12 @@ def order_import():
             print(f'---------- Importando pedido {id_ord}')
             
             # Verificar pedido repetido
-
             id_sis = Orders.objects.filter(order_id=id_ord)
             if id_sis:
+                # Se o pedido já foi importado, atualizar status
+                status_sis = id_sis.first().order_status
+                StatusStore.upStatus(order_id=id_sis.first().id, order_st=status_sis)
+                print(f'---------- Pedido {id_ord} já importado. Status: {status_sis}')
                 continue
             else: pass
             
