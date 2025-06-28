@@ -56,6 +56,7 @@ class StatusStore():
             'DA': 'data-em-aberto',
             'DS': 'desativado', 
             'ES': 'em-separacao',
+            'MB': 'motoboy',
             'PV': 'agd-ativacao',
             'RE': 'reembolsar',
             'RB': 'reembolsado',
