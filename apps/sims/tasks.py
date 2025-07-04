@@ -51,7 +51,17 @@ def sims_in_orders():
                 add_sim.save()
 
             # ESCOLHER OPERADORA
-            if product_i == 'chip-internacional-europa-premium' or product_i == 'chip-internacional-america-do-sul' or product_i == 'chip-internacional-america-do-sul-premium':
+            planos = {
+                'chip-internacional-europa-premium',
+                'chip-internacional-america-do-sul',
+                'chip-internacional-america-do-sul-premium',
+                'chip-internacional-israel-premium',
+                'chip-internacional-tunisia-premium',
+                'chip-internacional-marrocos-premium',
+                'chip-internacional-egito-premium',
+                'chip-internacional-indonesia-premium',
+            }
+            if product_i in planos:
                 operator_i = 'TC'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'

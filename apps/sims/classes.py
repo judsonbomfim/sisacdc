@@ -70,6 +70,36 @@ class ApiTC:
                 '1gb': '607131',
                 '2gb': '607132',
             }
+        elif product == 'chip-internacional-israel-premium':
+            planList = {
+                '500mb-dia': '640426',
+                '1gb': '640427',
+                '2gb': '640425',
+            }
+        elif product == 'chip-internacional-tunisia-premium':
+            planList = {
+                '500mb-dia': '640418',
+                '1gb': '640420',
+                '2gb': '640424',
+            }
+        elif product == 'chip-internacional-marrocos-premium':
+            planList = {
+                '500mb-dia': '640430',
+                '1gb': '640431',
+                '2gb': '640432',
+            }
+        elif product == 'chip-internacional-egito-premium':
+            planList = {
+                '500mb-dia': '640438',
+                '1gb': '640440',
+                '2gb': '640442',
+            }
+        elif product == 'chip-internacional-indonesia-premium':
+            planList = {
+                '500mb-dia': '640433',
+                '1gb': '640434',
+                '2gb': '640437',
+            }
         else:
             planList = {
                 '500mb-dia': '572960',
