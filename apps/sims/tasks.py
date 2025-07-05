@@ -470,12 +470,12 @@ def simActivateTM(id=None):
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
                 # Adicionar nota
-                NotesAdd.addNote(order,f'Houve um erro ao ativar o SIM {iccid}. Verificar manualmente.')
+                NotesAdd.addNote(order,f'Houve um erro ao ativar o SIM {iccid}. Verificar manualmente. {response_data}')
         else:
             # Alterar status
             UpdateOrder.upStatus(id_item,'EA')
             # Adicionar nota
-            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.')
+            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.{response_data}')
 
         # Fecha a conexão
         conn.close()
