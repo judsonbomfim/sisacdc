@@ -252,7 +252,12 @@ def order_import_voice():
     per_page = 100
     order_p = apiStore.get('orders', params={'status': 'processing', 'per_page': per_page})        
     
-    total_pages = int(order_p.headers['X-WP-TotalPages'])
+    try:
+        total_pages = int(order_p.headers.get('X-WP-TotalPages', 1))
+    except Exception as e:
+        print(f"Header X-WP-TotalPages não encontrado ou inválido: {e}")
+        total_pages = 1
+        
     n_page = 1
     
     # orders_all = Orders.objects.all()
