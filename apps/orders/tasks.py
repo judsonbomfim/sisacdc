@@ -43,6 +43,8 @@ def order_import():
     while n_page <= total_pages:
         # Pedidos com status 'processing'
         response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page})
+        print('>>>>>>>>>> response.status_code',response.status_code)
+        print('>>>>>>>>>> response.text',response.text)
         try:
             ord = response.json()
         except Exception as e:
@@ -275,8 +277,8 @@ def order_import_voice():
     while n_page <= total_pages:
         # Pedidos com status 'processing'
         response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page})
-        print(response.status_code)
-        print(response.text)
+        print('>>>>>>>>>> response.status_code',response.status_code)
+        print('>>>>>>>>>> response.text',response.text)
         try:
             ord = response.json()
         except Exception as e:
