@@ -31,15 +31,25 @@ def order_import():
     # order_p = apiStore.get('orders', params={'after': start_date, 'before': end_date, 'status': 'processing', 'per_page': per_page})        
     order_p = apiStore.get('orders', params={'status': 'processing', 'per_page': per_page})        
     
-    total_pages = int(order_p.headers['X-WP-TotalPages'])
+    try:
+        total_pages = int(order_p.headers.get('X-WP-TotalPages', 1))
+    except Exception as e:
+        print(f"Header X-WP-TotalPages não encontrado ou inválido: {e}")
+        total_pages = 1
     n_page = 1
     
     # orders_all = Orders.objects.all()
     
     while n_page <= total_pages:
         # Pedidos com status 'processing'
-        ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page}).json()                                   
-
+        response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page})
+        try:
+            ord = response.json()
+        except Exception as e:
+            print(f"Erro ao decodificar JSON da resposta da API: {e}")
+            print(f"Status code: {response.status_code}, Conteúdo: {response.text}")
+            break  # ou continue, dependendo do fluxo desejado
+        
         # Listar pedidos         
         for order in ord:
             n_item = 1
@@ -264,8 +274,14 @@ def order_import_voice():
     
     while n_page <= total_pages:
         # Pedidos com status 'processing'
-        ord = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page}).json()                                   
-
+        response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page})
+        try:
+            ord = response.json()
+        except Exception as e:
+            print(f"Erro ao decodificar JSON da resposta da API: {e}")
+            print(f"Status code: {response.status_code}, Conteúdo: {response.text}")
+            break  # ou continue
+        
         # Listar pedidos         
         for order in ord:
             n_item = 1
