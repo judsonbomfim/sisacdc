@@ -891,7 +891,7 @@ def simActivateCM(id=None):
         # Verificar se plan_code foi definido
         if plan_code is None:
             # Inserir nota e alterar status do sistema
-            NotesAdd.addNote("Nenhum plano correspondente encontrado para order_day e order_data.",note)
+            NotesAdd.addNote(order, "Nenhum plano correspondente encontrado para order_day e order_data.")
             errorData()
             continue
 
