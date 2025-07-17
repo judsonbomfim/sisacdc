@@ -855,12 +855,12 @@ def simActivateCM(id=None):
         
         print(f'>>>>>>>>>> ATIVANDO SIM {order_sim} - {order_id}')
         
-        def errorData():
+        def errorData(data_dict=None):
             # Adicionar Nota
             note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente. ERRO: {data_dict}'
-            NotesAdd.addNote(order,note)
-            # ALterar status do sistema
-            UpdateOrder.upStatus(order_item,'EA')
+            NotesAdd.addNote(order, note)
+            # Alterar status do sistema
+            UpdateOrder.upStatus(order_item, 'EA')
         
         def generate_password_digest(app_secret):
             nonce = str(int(time.time() * 1000))
@@ -931,21 +931,20 @@ def simActivateCM(id=None):
         # Verificar o status da resposta
         data = res.read()
         
-        
         if res.status != 200:
-            errorData()
+            errorData(data.decode("utf-8"))
         else:
             data_dict = json.loads(data)
             result_data = data_dict.get('description')
             if result_data != 'Success':
-                errorData()
+                errorData(data_dict)
             else:
                 # Adicionar Nota
                 note = f'SIM {order_sim} ativado na China Mobile.'
-                NotesAdd.addNote(order,note)
-                # ALterar status do sistema
-                UpdateOrder.upStatus(order_item,'AT')
-                up_order_st_store.delay(order_id,'ativado')
+                NotesAdd.addNote(order, note)
+                # Alterar status do sistema
+                UpdateOrder.upStatus(order_item, 'AT')
+                up_order_st_store.delay(order_id, 'ativado')
 
         conn.close()
 
