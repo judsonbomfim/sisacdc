@@ -156,6 +156,156 @@ class ApiTC:
         conn.close()
         return mobile_data
 
+class ApiTI:
+
+    # Get tokem de acesso a API
+    @staticmethod
+    def get_token():
+        time.sleep(0.5)
+
+        payload_token = json.dumps({
+            "username": settings.APITC_USERNAME,
+            "password": settings.APITC_PASSWORD
+        })
+        
+        headers_token = {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
+        conn.request("POST", "/api/login", payload_token, headers_token)
+        res_token = conn.getresponse()
+        data_token = json.loads(res_token.read())
+        token_api = data_token["AccessToken"]
+        conn.close()
+        return token_api
+
+
+    # Set headers
+    @staticmethod    
+    def get_headers(token_api, cookie=None):
+        headers = {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-Authorization': f'Bearer {token_api}'
+        }
+        if cookie is None:
+            headers['Cookie'] = 'Encrypt_cookies=rd20o00000000000000000000ffff0af30e15o12021'
+        return headers
+
+
+    # Get EndPointID / Status
+    @staticmethod
+    def get_iccid(iccid, headers):
+        payload_endpointId = ''
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
+        conn.request(
+            "GET", f"/api/fetchSIM?iccid={iccid}", payload_endpointId, headers)
+        res_endpointId = conn.getresponse()
+        data_endpointId = json.loads(res_endpointId.read())
+        simStatus = data_endpointId["Response"]["responseParam"]["rows"][0]['simStatus']
+        endpointId = data_endpointId["Response"]["responseParam"]["rows"][0]['endPointId']
+        conn.close()
+        return endpointId, simStatus
+
+
+    # Pl0an Change
+    @staticmethod
+    def planChange(endpointId,headers,dataDay,product):
+        planList = {}
+        if product == 'chip-internacional-america-do-sul' or product == 'chip-internacional-america-do-sul-premium':
+            planList = {
+                '500mb-dia': '866503',
+                '1gb': '866507',
+                '2gb': '866509',
+            }
+        elif product == 'chip-internacional-israel-premium':
+            planList = {
+                '500mb-dia': '640426',
+                '1gb': '640427',
+                '2gb': '640425',
+            }
+        elif product == 'chip-internacional-tunisia-premium':
+            planList = {
+                '500mb-dia': '640418',
+                '1gb': '640420',
+                '2gb': '640424',
+            }
+        elif product == 'chip-internacional-marrocos-premium':
+            planList = {
+                '500mb-dia': '640430',
+                '1gb': '640431',
+                '2gb': '640432',
+            }
+        elif product == 'chip-internacional-egito-premium':
+            planList = {
+                '500mb-dia': '640438',
+                '1gb': '640440',
+                '2gb': '640442',
+            }
+        elif product == 'chip-internacional-indonesia-premium':
+            planList = {
+                '500mb-dia': '640433',
+                '1gb': '640434',
+                '2gb': '640437',
+            }
+        else:
+            planList = {
+                '500mb-dia': '865961',
+                '1gb': '864628',
+                '2gb': '865963',
+            }
+        plan_list = json.loads(planList[dataDay])       
+        payload = json.dumps({
+            "Request": {
+                "endPointId": endpointId,
+                "requestParam": {
+                    "planId": plan_list
+                }
+            }
+        })
+        
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
+        conn.request("POST", "/api/ChangePlan", payload, headers)
+        res_plan = conn.getresponse()
+        data_plan = res_plan.read()
+        conn.close()
+        return data_plan
+    
+    @staticmethod
+    def mobileData(iccid):
+        # Gerar token de acesso a API
+        token_api = ApiTI.get_token()
+        payload = ''
+        headers = ApiTI.get_headers(token_api)
+        london_tz = pytz.timezone("Europe/London")
+        dateToday = datetime.now(london_tz).strftime("%Y%m%d")
+        time.sleep(0.5)
+        # Obter EndPointID
+        endPointId = ApiTI.get_iccid(iccid, headers)
+        
+        time.sleep(0.5)
+        # Obter dados de uso
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)    
+        conn.request("GET", f"/api/GetStatistics?endPointId={endPointId[0]}&from_date={dateToday}&to_date={dateToday}", payload, headers)
+        res = conn.getresponse()
+        data_endpointId = json.loads(res.read())
+        try:
+            if data_endpointId["Response"]["responseParam"]["dataUsage"][0]['totalVolume'] is None:
+                mobile_data = 0
+            else:
+                mobile_data = data_endpointId["Response"]["responseParam"]["dataUsage"][0]['totalVolume']
+        except IndexError:
+            # Caso não haja dados de uso, retornar 0
+            mobile_data = 0
+        except KeyError:
+            # Caso a chave não exista, retornar 0
+            mobile_data = 0
+        
+        conn.close()
+        return mobile_data
+
+
 class apiCM:
     @staticmethod
     def get_token():

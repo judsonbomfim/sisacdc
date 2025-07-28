@@ -128,7 +128,7 @@ def ord_details(request, order_id):
     operator = order.id_sim.operator if order.id_sim else ''
     product = order.get_product_display()
         
-    if operator == 'TC' and sim != '':
+    if (operator == 'TI' or operator == 'TC') and sim != '':
         # Verificar consumo de dados TC
         mobile_data = ApiTC.mobileData(sim)
     elif operator == 'CM':
@@ -650,8 +650,10 @@ def orders_activations(request):
     except: countActivCM = 0
     try: countActivTC = activList[activList['id_sim__operator'] == 'TC']['countActiv'].values[0]
     except: countActivTC = 0
-    
-    
+    try: countActivTI = activList[activList['id_sim__operator'] == 'TI']['countActiv'].values[0]
+    except: countActivTI = 0
+
+
     # Save in session
     orders_act = orders_l.copy()
     orders_act['activation_date'] = orders_act['activation_date'].astype(str)
@@ -679,6 +681,7 @@ def orders_activations(request):
         'countActivTM': countActivTM,
         'countActivCM': countActivCM,
         'countActivTC': countActivTC,
+        'countActivTI': countActivTI,
     }
     return render(request, 'painel/orders/activations.html', context)
 

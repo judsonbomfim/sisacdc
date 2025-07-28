@@ -7,13 +7,13 @@ PRODUCT = [
     ('chip-internacional-eua-30-dias', 'USA 30 Dias'),
     ('chip-internacional-eua-e-canada', 'USA/CANADA'),
     ('chip-internacional-eua-canada-e-mexico', 'USA/CAN/MEX'),
-    ('chip-internacional-europa-plus', 'Europa PLUS'),
-    ('chip-internacional-europa-premium', 'Europa PREMIUM'),
+    ('chip-internacional-europa-plus', 'Europa Plus'),
+    ('chip-internacional-europa-premium', 'Europa Premium'),
     ('chip-internacional-europa', 'Europa'),
     ('chip-internacional-global', 'Global'),
     ('chip-internacional-america-do-sul', 'América do Sul'),
     ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
-    ('chip-internacional-israel-premium', 'Israel PRemium'),
+    ('chip-internacional-israel-premium', 'Israel Premium'),
     ('chip-internacional-tunisia-premium', 'Tunísia Premium'),
     ('chip-internacional-marrocos-premium', 'Marrocos Premium'),
     ('chip-internacional-egito-premium', 'Egito Premium'),
@@ -54,6 +54,7 @@ ORDER_STATUS = [
     ('RT', 'Retirada'),
     ('VS', 'Verificar SIM'),
 ]
+
 CONDITION = [
     ('novo-sim', 'Novo SIM'),
     ('reuso-sim', 'Reutilizar')

@@ -227,7 +227,7 @@
                   <div class="userDatatable-content">
                     {% if request.user|can:'edit_orders' %}
                       <a href="{% url 'ord_edit' order.id %}"><i class="bi bi-pencil-square pe-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Editar"></i></a>
-                      {% if order.id_sim.operator == 'TC' %}  
+                      {% if order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC' %}  
                         <a href="#" data-bs-toggle="modal" data-bs-target="#produtoModal" onclick="carregarDetalhes({{ order.id }})"><i class="bi bi-info-square pe-1 text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Detalhes do pedido"></i></a>
                       {% endif %}
                       {% if order.id_sim != None %}
