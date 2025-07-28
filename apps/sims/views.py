@@ -281,7 +281,7 @@ def exportSIMs(request):
 
 @login_required(login_url='/login/')
 def alterarOperadora(request):
-    sims = Sims.objects.all().filter(operator='TC', type_sim='sim', status='DS')
+    sims = Sims.objects.all().filter(operator='TC', type_sim='sim', sim_status='DS')
     
     for sim in sims:
         sim.operator = 'TI'
