@@ -26,17 +26,14 @@ today = datetime.now()
 @login_required(login_url='/login/')
 @has_permission_decorator('view_orders')
 def orders_list(request):
-    global orders_l
-    orders_l = ''
-
     url_cdn = settings.URL_CDN
 
     orders_all = Orders.objects.exclude(product='chamada-de-voz').order_by('-id')
     sims = Sims.objects.all().order_by('-id')
     orders_l = orders_all
 
+    # Obter parâmetros de filtro (tanto GET quanto POST)
     if request.method == 'GET':
-
         ord_name_f = request.GET.get('ord_name')
         ord_order_f = request.GET.get('ord_order')
         ord_sim_f = request.GET.get('ord_sim')
@@ -44,7 +41,6 @@ def orders_list(request):
         ord_st_f = request.GET.get('ord_st')
 
     if request.method == 'POST':
-
         ord_name_f = request.POST.get('ord_name_f')
         ord_order_f = request.POST.get('ord_order_f')  
         ord_sim_f = request.POST.get('ord_sim_f')
@@ -59,8 +55,7 @@ def orders_list(request):
             if ord_s != '':
                 orders_up_status.delay(ord_id, ord_s,id_user)                               
 
-     # FIlters
-
+    # Aplicar filtros
     url_filter = ''
 
     if ord_name_f:
@@ -76,11 +71,11 @@ def orders_list(request):
         url_filter += f"&ord_sim={ord_sim_f}"
 
     if oper_f: 
-        orders_l = orders_l.filter(id_sim__operator__icontains=oper_f)
+        orders_l = orders_l.filter(id_sim__operator=oper_f)
         url_filter += f"&oper={oper_f}"
 
     if ord_st_f: 
-        orders_l = orders_l.filter(order_status__icontains=ord_st_f)
+        orders_l = orders_l.filter(order_status=ord_st_f)
         url_filter += f"&ord_st={ord_st_f}"
 
     ord_status = Orders.order_status.field.choices
@@ -107,6 +102,11 @@ def orders_list(request):
         'ord_st_list': ord_st_list,
         'oper_list': oper_list,
         'url_filter': url_filter,
+        'ord_name_f': ord_name_f,
+        'ord_order_f': ord_order_f,
+        'ord_sim_f': ord_sim_f,
+        'oper_f': oper_f,
+        'ord_st_f': ord_st_f,
     }
     return render(request, 'painel/orders/index.html', context)
 
@@ -536,8 +536,6 @@ def send_esims(request):
 @login_required(login_url='/login/')
 @has_permission_decorator('list_activations')
 def orders_activations(request):
-    global orders_l
-    orders_l = []
     url_filter = ''
     activGoing_f = None
     activGoing_1 = None
@@ -548,7 +546,6 @@ def orders_activations(request):
     oper_f = None
     ord_st_f = None
 
-        
     fields_df = ['id', 'item_id','client', 'id_sim__sim', 'id_sim__link', 'id_sim__type_sim', 'id_sim__operator', 'product', 'data_day', 'calls', 'countries', 'days', 'cell_mod', 'cell_eid', 'cell_imei', 'activation_date', 'order_status']
 
     product_choice_dict = dict(Orders.product.field.choices)
@@ -562,16 +559,15 @@ def orders_activations(request):
     
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
     
-    
     orders_df['product'] = orders_df['product'].map(product_choice_dict)
     orders_df['data_day'] = orders_df['data_day'].map(data_choice_dict)
     orders_df['activation_date'] = pd.to_datetime(orders_df['activation_date'])
     orders_df['return_date'] = orders_df['activation_date'] + pd.to_timedelta(orders_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
     
     orders_l = orders_df
-    
+
+    # Obter parâmetros de filtro (tanto GET quanto POST)
     if request.method == 'GET':
-        
         if request.GET.get('activGoing_1'): activGoing_1 = request.GET.get('activGoing_1')
         if request.GET.get('activGoing_2'): activGoing_2 = request.GET.get('activGoing_2')
         if request.GET.get('activReturn_1'): activReturn_1 = request.GET.get('activReturn_1')
@@ -580,12 +576,42 @@ def orders_activations(request):
         if request.GET.get('ord_st'): ord_st_f = request.GET.get('ord_st')        
 
     if request.method == 'POST':
-
         if request.POST.get('activGoing_f'): activGoing_f = request.POST.get('activGoing_f')
         if request.POST.get('activReturn_f') : activReturn_f = request.POST.get('activReturn_f')
         if request.POST.get('oper_f'): oper_f = request.POST.get('oper_f')
         if request.POST.get('ord_st_f'): ord_st_f = request.POST.get('ord_st_f')
         
+        if 'up_status' in request.POST:
+            ord_id = request.POST.getlist('ord_id')
+            ord_s = request.POST.get('ord_staus')
+            id_user = request.user.id
+            orders_up_status.delay(ord_id, ord_s,id_user)                        
+
+    # Aplicar filtros baseados nos parâmetros GET (para paginação)
+    if activGoing_1 and activGoing_2:
+        orders_l = orders_l[(orders_l['activation_date'] >= activGoing_1) & (orders_l['activation_date'] <= activGoing_2)]
+        url_filter += f"&activGoing_1={activGoing_1}&activGoing_2={activGoing_2}"
+    elif activGoing_1:
+        orders_l = orders_l[(orders_l['activation_date'] == activGoing_1)]
+        url_filter += f"&activGoing_1={activGoing_1}"  
+        
+    if activReturn_1 and activReturn_2:
+        orders_l = orders_l[(orders_l['return_date'] >= activReturn_1) & (orders_l['return_date'] <= activReturn_2)]
+        url_filter += f"&activReturn_1={activReturn_1}&activReturn_2={activReturn_2}"
+    elif activReturn_1:
+        orders_l = orders_l[(orders_l['return_date'] == activReturn_1)]
+        url_filter += f"&activReturn_1={activReturn_1}"
+        
+    if oper_f:
+        orders_l = orders_l[(orders_l['id_sim__operator'] == oper_f)]
+        url_filter += f"&oper={oper_f}"
+        
+    if ord_st_f:
+        orders_l = orders_l[(orders_l['order_status'] == ord_st_f)]
+        url_filter += f"&ord_st={ord_st_f}"
+
+    # Aplicar filtros para POST (formulário)
+    if request.method == 'POST':
         if activGoing_f is not None:
             activGoing = [item.strip() for item in activGoing_f.split('-')]
             activGoing_1 = DateFormats.dateF(activGoing[0])
@@ -597,7 +623,6 @@ def orders_activations(request):
                 orders_l = orders_l[(orders_l['activation_date'] == activGoing_1)]
                 url_filter += f"&activGoing_1={activGoing_1}"  
                 
-        
         if activReturn_f is not None:
             activReturn = [item.strip() for item in activReturn_f.split('-')]
             activReturn_1 = DateFormats.dateF(activReturn[0])
@@ -608,26 +633,6 @@ def orders_activations(request):
             except:
                 orders_l = orders_l[(orders_l['return_date'] == activReturn_1)]
                 url_filter += f"&activReturn_1={activReturn_1}"
-            
-        if oper_f is not None:
-            orders_l = orders_l[(orders_l['id_sim__operator'] == oper_f)]
-            url_filter += f"&oper={oper_f}"
-            
-
-        if ord_st_f is not None:
-            orders_l = orders_l[(orders_l['order_status'] == ord_st_f)]
-            url_filter += f"&ord_st={ord_st_f}"
-
-
-        if 'up_status' in request.POST:
-            ord_id = request.POST.getlist('ord_id')
-            ord_s = request.POST.get('ord_staus')
-            id_user = request.user.id
-
-            orders_up_status.delay(ord_id, ord_s,id_user)                        
-
-    
-        # End up_status / POST
 
     sims = Sims.objects.all()
     ord_status = Orders.order_status.field.choices
@@ -682,6 +687,12 @@ def orders_activations(request):
         'countActivCM': countActivCM,
         'countActivTC': countActivTC,
         'countActivTI': countActivTI,
+        'activGoing_1': activGoing_1,
+        'activGoing_2': activGoing_2,
+        'activReturn_1': activReturn_1,
+        'activReturn_2': activReturn_2,
+        'oper_f': oper_f,
+        'ord_st_f': ord_st_f,
     }
     return render(request, 'painel/orders/activations.html', context)
 
