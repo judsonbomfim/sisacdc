@@ -32,6 +32,8 @@ def index(request):
     except: countActivCM = 0
     try: countActivTC = activList[activList['operator'] == 'TC']['countActiv'].values[0]
     except: countActivTC = 0
+    try: countActivTI = activList[activList['operator'] == 'TI']['countActiv'].values[0]
+    except: countActivTI = 0
     
     # Queries
     simsAll = Sims.objects.all()
@@ -161,6 +163,7 @@ def index(request):
         'countActivTM': countActivTM,
         'countActivCM': countActivCM,
         'countActivTC': countActivTC,
+        'countActivTI': countActivTI,
         'weekSalesDates': weekSalesDays,
         'weekSalesValues': weekSalesValues,
         'weekSimsDates': weekSimsDays,

@@ -1,3 +1,5 @@
+import http
+import stat
 from django.contrib.auth.decorators import login_required
 from rolepermissions.decorators import has_permission_decorator
 from django.shortcuts import render
@@ -37,7 +39,6 @@ def upload_file_to_s3(file):
 @login_required(login_url='/login/')
 @has_permission_decorator('view_sims')
 def sims_list(request):
-    global sims_l
     sims_l = ''
     
     sims_all = Sims.objects.all().order_by('-id')
@@ -53,10 +54,10 @@ def sims_list(request):
     
     if request.method == 'POST':
         
-        sim_f = request.POST.get('sim_f')
-        sim_type_f = request.POST.get('sim_type_f')       
-        sim_status_f = request.POST.get('sim_status_f')
-        sim_oper_f = request.POST.get('sim_oper_f')
+        sim_f = request.POST.get('sim')
+        sim_type_f = request.POST.get('sim_type')       
+        sim_status_f = request.POST.get('sim_status')
+        sim_oper_f = request.POST.get('sim_oper')
             
         if 'up_status' in request.POST:
                 sim_id = request.POST.getlist('sim_id')
@@ -278,3 +279,12 @@ def exportSIMs(request):
 
     return response
 
+@login_required(login_url='/login/')
+def alterarOperadora(request):
+    sims = Sims.objects.all().filter(operator='TC', type_sim='sim', status='DS')
+    
+    for sim in sims:
+        sim.operator = 'TI'
+        sim.save()
+    
+    return http.HttpResponse('Operadora alterada com sucesso!')
