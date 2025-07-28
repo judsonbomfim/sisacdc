@@ -287,4 +287,4 @@ def alterarOperadora(request):
         sim.operator = 'TI'
         sim.save()
     
-    return http.HttpResponse('Operadora alterada com sucesso!')
+    return HttpResponse('Operadora alterada com sucesso!')
