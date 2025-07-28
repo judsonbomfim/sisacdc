@@ -39,25 +39,22 @@ def upload_file_to_s3(file):
 @login_required(login_url='/login/')
 @has_permission_decorator('view_sims')
 def sims_list(request):
-    sims_l = ''
-    
     sims_all = Sims.objects.all().order_by('-id')
     sims_l = sims_all
     url_cdn = settings.URL_CDN
     
+    # Obter parâmetros de filtro (tanto GET quanto POST)
     if request.method == 'GET':
-        
         sim_f = request.GET.get('sim')
         sim_type_f = request.GET.get('sim_type')    
         sim_status_f = request.GET.get('sim_status')
         sim_oper_f = request.GET.get('sim_oper')
     
     if request.method == 'POST':
-        
-        sim_f = request.POST.get('sim')
-        sim_type_f = request.POST.get('sim_type')       
-        sim_status_f = request.POST.get('sim_status')
-        sim_oper_f = request.POST.get('sim_oper')
+        sim_f = request.POST.get('sim_f')
+        sim_type_f = request.POST.get('sim_type_f')       
+        sim_status_f = request.POST.get('sim_status_f')
+        sim_oper_f = request.POST.get('sim_oper_f')
             
         if 'up_status' in request.POST:
                 sim_id = request.POST.getlist('sim_id')
@@ -72,8 +69,7 @@ def sims_list(request):
                 else:
                     messages.info(request,f'Você precisa marcar alguma opção')
     
-    # FIlters
-    
+    # Aplicar filtros
     url_filter = ''
     
     if sim_f:
@@ -81,15 +77,15 @@ def sims_list(request):
         url_filter += f"&sim={sim_f}"
 
     if sim_type_f: 
-        sims_l = sims_l.filter(type_sim__icontains=sim_type_f)        
+        sims_l = sims_l.filter(type_sim=sim_type_f)        
         url_filter += f"&sim_type={sim_type_f}"
     
     if sim_status_f: 
-        sims_l = sims_l.filter(sim_status__icontains=sim_status_f)
+        sims_l = sims_l.filter(sim_status=sim_status_f)
         url_filter += f"&sim_status={sim_status_f}"
     
     if sim_oper_f: 
-        sims_l = sims_l.filter(operator__icontains=sim_oper_f)
+        sims_l = sims_l.filter(operator=sim_oper_f)
         url_filter += f"&sim_oper={sim_oper_f}"
         
     
@@ -129,6 +125,10 @@ def sims_list(request):
         'sim_ti': sim_ti,
         'esim_ti': esim_ti,
         'url_filter': url_filter,
+        'sim_f': sim_f,
+        'sim_type_f': sim_type_f,
+        'sim_status_f': sim_status_f,
+        'sim_oper_f': sim_oper_f,
     }
        
     return render(request, 'painel/sims/index.html', context)

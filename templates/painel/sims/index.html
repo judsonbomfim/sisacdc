@@ -33,14 +33,14 @@
                 name="up_status">Alterar</button>
         </div>
         <div class="col-md-2">
-            <input type="text" class="form-control form-control-lg" placeholder="(e)SIM)" name="sim_f">
+            <input type="text" class="form-control form-control-lg" placeholder="(e)SIM)" name="sim_f" value="{{ sim_f|default:'' }}">
         </div>
         <div class="col-md-2">
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="sim_type_f">
-                    <option value="" selected>Filtrar Tipo - Todos</option>
+                    <option value="">Filtrar Tipo - Todos</option>
                     {% for sim_t in sims_types %}
-                    <option value="{{sim_t.0}}">{{sim_t.1}}</option>
+                    <option value="{{sim_t.0}}" {% if sim_type_f == sim_t.0 %}selected{% endif %}>{{sim_t.1}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -48,9 +48,9 @@
         <div class="col-md-2">
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="sim_status_f">
-                    <option value="" selected>Filtrar Status - Todos</option>
+                    <option value="">Filtrar Status - Todos</option>
                     {% for sim_s in sims_status %}
-                    <option value="{{sim_s.0}}">{{sim_s.1}}</option>
+                    <option value="{{sim_s.0}}" {% if sim_status_f == sim_s.0 %}selected{% endif %}>{{sim_s.1}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -58,9 +58,9 @@
         <div class="col-md-2">
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="sim_oper_f">
-                    <option value="" selected>Filtrar Operadora - Todos</option>
+                    <option value="">Filtrar Operadora - Todos</option>
                     {% for sim_o in sims_oper %}
-                    <option value="{{sim_o.0}}">{{sim_o.1}}</option>
+                    <option value="{{sim_o.0}}" {% if sim_oper_f == sim_o.0 %}selected{% endif %}>{{sim_o.1}}</option>
                     {% endfor %}
                 </select>
             </div>
