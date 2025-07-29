@@ -213,6 +213,11 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='2-59/5'),
         # 'schedule': crontab(minute='*/1'),
     },
+    'task__5_min_activate_TI': {
+        'task': 'apps.sims.tasks.simActivateTI',
+        'schedule': crontab(minute='2-59/5'),
+        # 'schedule': crontab(minute='*/1'),
+    },
     'task__5_min_activate_TM': {
         'task': 'apps.sims.tasks.simActivateTM',
         'schedule': crontab(minute='3-59/5'),

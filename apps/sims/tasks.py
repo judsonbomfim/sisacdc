@@ -267,13 +267,14 @@ def simActivateTC(id=None):
                 
     print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
 
+@shared_task
 def simActivateTI(id=None):
     
     from apps.orders.tasks import up_order_st_store
         
     today = datetime.now().date()
 
-    print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
+    print('>>>>>>>>>> ATIVAÇÂO TI INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -406,12 +407,12 @@ def simActivateTI(id=None):
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
                 # Adicionar nota
-                NotesAdd.addNote(order,f'TC: {resultDescription}')
+                NotesAdd.addNote(order,f'TI: {resultDescription}')
         
         # Fecha a conexão
         conn.close()
-                
-    print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
+
+    print('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
 
 
 @shared_task
@@ -544,6 +545,7 @@ def simDeactivateTC(id=None):
     print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
 
 
+@shared_task
 def simDeactivateTI(id=None):
     
     from apps.orders.tasks import up_order_st_store    
