@@ -1,24 +1,24 @@
-import http
-import stat
 from django.contrib.auth.decorators import login_required
 from rolepermissions.decorators import has_permission_decorator
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse
 import csv
-import os
 import imghdr
 from datetime import date
 from django.core.paginator import Paginator
 from django.contrib import messages
-from django.core.files.storage import FileSystemStorage
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from ..serializers import ConsumoSerializer
+from ..classes import ApiTC
+from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
-from apps.orders.models import Orders
-from apps.orders.views import ApiStore, StatusStore
 import boto3
 from django.conf import settings
 from django.core.files.storage import default_storage
-from .tasks import sims_in_orders
+from ..tasks import sims_in_orders
 
 
 # Script Upload S3
@@ -288,3 +288,23 @@ def alterarOperadora(request):
         sim.save()
     
     return HttpResponse('Operadora alterada com sucesso!')
+
+
+class ConsumoView(APIView):
+    permission_classes = [IsAuthenticated]  # Requer autenticação JWT
+
+    def get(self, request, iccid):
+        try:
+            # Chama o método mobileData da classe ApiTC
+            mobile_data = ApiTC.mobileData(iccid)
+            # Serializa os dados
+            serializer = ConsumoSerializer(data={
+                "iccid": iccid,
+                "mobile_data": mobile_data
+            })
+            if serializer.is_valid():
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Tratamento genérico de erros
+            return Response({"error": f"Erro ao consultar consumo: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
