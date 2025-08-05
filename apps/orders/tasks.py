@@ -1,13 +1,12 @@
 from django.contrib.auth.models import User
 from celery import shared_task
 from django.utils.text import slugify
-from datetime import datetime, timedelta
-from .classes import ApiStore, NotesAdd, StatusStore, DateFormats, UpdateOrder
+from .classes import ApiStore, StatusStore, DateFormats
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 import time, requests
-from apps.sims.tasks import sims_in_orders, simDeactivateTC, simActivateTC
+from apps.sims.tasks import sims_in_orders, simDeactivateTC
 from apps.send_email.tasks import send_email_sims
 from apps.voice_calls.tasks import number_in_voice
 
@@ -25,10 +24,6 @@ def order_import():
     
     # Definir números de páginas
     per_page = 100
-    date_now = datetime.now()
-    start_date = date_now - timedelta(days=7)
-    end_date = date_now
-    # order_p = apiStore.get('orders', params={'after': start_date, 'before': end_date, 'status': 'processing', 'per_page': per_page})        
     order_p = apiStore.get('orders', params={'status': 'processing', 'per_page': per_page})        
     
     try:
@@ -70,10 +65,16 @@ def order_import():
             
             # Listar itens do pedido
             for item in order['line_items']:
-                                    
-                # Especificar produtos a serem listados
-                prod_sel = [50760, 8873, 8761, 77027, 79804, 89373, 89526, 99705, 99732, 99764, 100545]
-                if item['product_id'] not in prod_sel:
+
+                # Especificar produtos que NÃO serão listados
+                prod_sel = [
+                    8901,   # Chamada de Voz
+                    44505,  # Franquia Adicional
+                    44549,  # Alteração de Frete
+                    47058,  # Troca de Chip
+                    68666,  # Dia Adicional
+                    ]
+                if item['product_id'] in prod_sel:
                     continue
                 
                 qtd = item['quantity']
@@ -83,6 +84,7 @@ def order_import():
                     order_id_i = order['id']
                     print(f'---------- Importando item {order_id_i}')
                     item_id_i = f'{order_id_i}-{n_item}'
+                    item_id_store_i = item['id']
                     client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
                     email_i = order['billing']['email']
                     if "Global" in item['name']:
@@ -108,13 +110,12 @@ def order_import():
                         if i['key'] == 'pa_plano-de-voz': 
                             if i['value'] == 'sem-ligacoes': calls_i = False
                             else: calls_i = True
-                        if 'Visitará' in i['key']:
-                            if i['display_value'] == 'Sim': countries_i = True 
+                        if 'Visitará' in i['key']: ## VERIFICAR SITE NOVO ##
+                            if i['display_value'] == 'Sim': countries_i = True
                             else: countries_i = False
-                        if i['key'] == 'Data de Ativação': 
+                        if i['key'] == '_data_ativacao': 
                             activation_date_i = i['value']
-                        if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
-                        if i['key'] == 'Número do SIM/eSIM': ord_chip_nun_i = i['value']
+                        if i['key'] == '_numero_sim': ord_chip_nun_i = i['value']
                     if activation_date_i == False:
                             activation_date_i = '0001-01-01'
                     shipping_i = order['shipping_lines'][0]['method_title']
@@ -151,6 +152,7 @@ def order_import():
                     order_add = Orders(                    
                         order_id = order_id_i,
                         item_id = item_id_i,
+                        item_id_store = item_id_store_i,
                         client = client_i,
                         email = email_i,
                         product = product_i,
@@ -308,6 +310,7 @@ def order_import_voice():
                 while q_i <= qtd:
                     order_id_i = order['id']
                     item_id_i = f'{order_id_i}-{n_item}'
+                    item_id_store_i = item['id']
                     client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
                     email_i = order['billing']['email']
                     product_i = slugify(item['name']) # Definir nome do produto                    
