@@ -284,7 +284,7 @@ def ord_edit(request,id):
         # Se SIM preenchico
         if sim:
             if order_sim != '':
-                # Alterar status no sistema e no site
+                # Alterar status do SIM no sistema e no site
                 updateSIM()
             
             sims_all = Sims.objects.all().filter(sim=sim)
