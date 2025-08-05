@@ -396,7 +396,11 @@ def ord_edit(request,id):
                 send_email_sims(id=order_id)
                 
                 addNote(f'E-mail enviado com sucesso!')
-                messages.success(request,'E-mail enviado com sucesso!')     
+                messages.success(request,'E-mail enviado com sucesso!')
+        
+        if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
+            print('----------------- Alterar/desativar TC/TI -----------------')
+            simDeactivateTC(id=order.id)
         
         if type_sim == 'esim' or esim_v == True:
             # Enviar eSIM para site
