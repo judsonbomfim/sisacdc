@@ -495,9 +495,9 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE'):
             if order.id_sim:                
                 # Change TC
-                print(f'----------------- order.id_sim.operator == {order.id_sim.operator} and ord_s_prev != {ord_s_prev}')
+                print(f'----------------- order.id_sim.operator == {order.id_sim.operator} and ord_s_prev == {ord_s_prev}')
                 
-                if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_s_prev != 'ED':
+                if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_s_prev == 'ED':
                     print('----------------- Alterar/desativar TC/TI -----------------')
                     simDeactivateTC(id=order.id)
                 
