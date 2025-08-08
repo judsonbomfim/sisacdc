@@ -731,6 +731,7 @@ def alterarOperadora(request):
     for order in orders:
         if order.id_sim and order.id_sim.type_sim == 'sim':
             sim = order.id_sim
+            print(f'+++++++++++++++++++++ SIM {sim.sim} do pedido {order.item_id}')
             # Altera a operadora do SIM
             sim.operator = 'TI'
             sim.save()
