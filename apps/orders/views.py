@@ -726,16 +726,16 @@ def verifica_pedidos(request):
 
 @login_required(login_url='/login/')
 def alterarOperadora(request):
-    orders = Orders.objects.filter(id_sim__operator='TC', order_status='AA')
-    
+    orders = Orders.objects.filter(id_sim__operator='TC', id_sim__type_sim='sim', id_sim__type_sim='sim')
+    print(f'+++++++++++++++++++++ Pedidos encontrados: {len(orders)}')
+
     for order in orders:
-        if order.id_sim and order.id_sim.type_sim == 'sim':
-            sim = order.id_sim
-            print(f'+++++++++++++++++++++ SIM {sim.sim} do pedido {order.item_id}')
-            # Altera a operadora do SIM
-            sim.operator = 'TI'
-            sim.save()
-            return JsonResponse({'status': 'success', 'message': 'Operadora alterada com sucesso!'})
+        sim = order.id_sim
+        print(f'+++++++++++++++++++++ SIM {sim.sim} do pedido {order.item_id}')
+        # Altera a operadora do SIM
+        sim.operator = 'TI'
+        sim.save()
+        return JsonResponse({'status': 'success', 'message': 'Operadora alterada com sucesso!'})
     return JsonResponse({'status': 'error', 'message': 'Nenhum pedido encontrado.'})
 
 # def textImg(request):
