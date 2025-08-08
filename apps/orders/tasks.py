@@ -71,9 +71,15 @@ def order_import():
             # Listar itens do pedido
             for item in order['line_items']:
                                     
-                # Especificar produtos a serem listados
-                prod_sel = [50760, 8873, 8761, 77027, 79804, 89373, 89526, 99705, 99732, 99764, 100545]
-                if item['product_id'] not in prod_sel:
+                # Especificar produtos que NÃO serão listados
+                prod_sel = [
+                    8901,   # Chamada de Voz
+                    44505,  # Franquia Adicional
+                    44549,  # Alteração de Frete
+                    47058,  # Troca de Chip
+                    68666,  # Dia Adicional
+                    ]
+                if item['product_id'] in prod_sel:
                     continue
                 
                 qtd = item['quantity']
