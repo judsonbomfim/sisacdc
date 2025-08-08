@@ -726,7 +726,7 @@ def verifica_pedidos(request):
 
 @login_required(login_url='/login/')
 def alterarOperadora(request):
-    orders = Orders.objects.filter(operator='TC', order_status='AA')
+    orders = Orders.objects.filter(id_sim__operator='TC', order_status='AA')
     
     for order in orders:
         if order.id_sim and order.id_sim.type_sim == 'sim':
