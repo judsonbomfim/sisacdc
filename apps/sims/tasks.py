@@ -101,15 +101,22 @@ def sims_in_orders():
             sim_put = Sims.objects.get(pk=sim_ds.id)
             sim_put.sim_status = 'AT'
             sim_put.save()
-            sim_e = sim_put.sim 
-            
-            addNote(f'(e)SIM {sim_e} adicionado')
-            
+            _sim = sim_put.sim
+            _qrcode = sim_put.qrcode
+
+            addNote(f'(e)SIM {_sim} adicionado')
+
+            # Atualizar pedido no site
             status_sis_site = StatusStore.st_sis_site()
             if status_ord in status_sis_site:
                 update_store = {
                     'status': status_sis_site[status_ord]
                 }
+            
+            update_store.append({
+                '_sim': _sim,
+                '_qrcode': _qrcode,
+                })
     
             apiStore = ApiStore.conectApiStore()                    
             apiStore.put(f'orders/{order_id_i}', update_store).json()
@@ -120,6 +127,7 @@ def sims_in_orders():
     
         print('>>>>>>>>>>>>>>>>>>>>>>> SIMs atribuidos!')
     
+
 @shared_task
 def simActivateTC(id=None):
     
@@ -266,6 +274,7 @@ def simActivateTC(id=None):
         conn.close()
                 
     print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
+
 
 @shared_task
 def simActivateTI(id=None):
