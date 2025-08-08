@@ -726,7 +726,10 @@ def verifica_pedidos(request):
 
 @login_required(login_url='/login/')
 def alterarOperadora(request):
+    # Acessa o usuário da requisição para evitar o erro de variável não acessada
+    user = request.user
     orders = Orders.objects.filter(id_sim__operator='TC', id_sim__type_sim='sim', id_sim__type_sim='sim')
+    print(f'Usuário requisitante: {user}')
     print(f'+++++++++++++++++++++ Pedidos encontrados: {len(orders)}')
 
     for order in orders:
