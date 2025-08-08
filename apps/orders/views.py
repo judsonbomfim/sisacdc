@@ -724,6 +724,19 @@ def verifica_pedidos(request):
     return JsonResponse(lista_pedidos, contagem, safe=False)    
         
 
+@login_required(login_url='/login/')
+def alterarOperadora(request):
+    orders = Orders.objects.filter(operator='TC', order_status='AA')
+    
+    for order in orders:
+        if order.id_sim and order.id_sim.type_sim == 'sim':
+            sim = order.id_sim
+            # Altera a operadora do SIM
+            sim.operator = 'TI'
+            sim.save()
+            return JsonResponse({'status': 'success', 'message': 'Operadora alterada com sucesso!'})
+    return JsonResponse({'status': 'error', 'message': 'Nenhum pedido encontrado.'})
+
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza
 #     img = cv2.imread('static/imei2.jpg', cv2.IMREAD_GRAYSCALE)
