@@ -734,12 +734,11 @@ def alterarOperadora(request):
 
     for order in orders:
         sim = order.id_sim
-        print(f'+++++++++++++++++++++ SIM {sim.sim} do pedido {order.item_id}')
         # Altera a operadora do SIM
         sim.operator = 'TI'
         sim.save()
-        return JsonResponse({'status': 'success', 'message': 'Operadora alterada com sucesso!'})
-    return JsonResponse({'status': 'error', 'message': 'Nenhum pedido encontrado.'})
+        print(f'+++++++++++++++++++++ Operadora do SIM {sim.sim} alterada para TI')
+    return JsonResponse({'status': 'success', 'message': 'Operadora alterada com sucesso!'})
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza
