@@ -141,14 +141,13 @@ def simActivateTC(id=None):
         # Checar Status
         UpdateOrder.upStatus(id_item,'EA')
         # Adicionar nota
-        NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
+        NotesAdd.addNote(order,f'ERRO API: {iccid} com erro na Telcon. Verificar erro.')
         error = 'error_apiResult'
         return error
     
     token_api = ApiTC.get_token()
-    time.sleep(0.5)
+    time.sleep(1)
     conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
-    time.sleep(0.5)
     headers = ApiTC.get_headers(token_api)
         
     for order in orders_all:
@@ -173,7 +172,7 @@ def simActivateTC(id=None):
         
         # Verificar EndPointID / Status
         try:
-            time.sleep(0.5)
+            time.sleep(1)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1]
@@ -183,9 +182,9 @@ def simActivateTC(id=None):
         ##
         
         # Alterar plano
-        time.sleep(0.5)
-        ApiTC.planChange(endpointId,headers,dataDay, product)
-        NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay}')    
+        time.sleep(1)
+        data_plan = ApiTC.planChange(endpointId,headers,dataDay, product)
+        NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay} - TELCOM: {json.loads(data_plan)}')    
 
         if simStatus == 'Pre-Active':
             # Ativar SIM na operadora
@@ -194,7 +193,6 @@ def simActivateTC(id=None):
                     "endPointId": f"{endpointId}"
                 }
             })
-            time.sleep(0.5)
             conn.request("POST", "/api/EndPointActivation", payload, headers)
             # Adicionar nota
             note = f'{iccid} ativado com sucesso na Telcon'
@@ -233,7 +231,7 @@ def simActivateTC(id=None):
                 print('simStatus == Other')
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
-                NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
+                NotesAdd.addNote(order,f'{iccid} com erro de ativação na Telcon. Verificar erro.')
                 continue
         
         if process == True:            
@@ -288,7 +286,7 @@ def simActivateTI(id=None):
         # Checar Status
         UpdateOrder.upStatus(id_item,'EA')
         # Adicionar nota
-        NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
+        NotesAdd.addNote(order,f'ERRO API: {iccid} com erro na Telcon. Verificar erro.')
         error = 'error_apiResult'
         return error
     
@@ -380,7 +378,7 @@ def simActivateTI(id=None):
                 print('simStatus == Other')
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
-                NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
+                NotesAdd.addNote(order,f'{iccid} com erro na ativação da Telcon. Verificar erro.')
                 continue
         
         if process == True:            
@@ -463,7 +461,7 @@ def simDeactivateTC(id=None):
         # Alterar status
         UpdateOrder.upStatus(id_item,'ED')
         # Adicionar nota
-        NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
+        NotesAdd.addNote(order,f'ERRO API: {iccid} com erro na Telcon. Verificar erro.')
         error = 'error_api Result'
         return error       
 
@@ -518,7 +516,7 @@ def simDeactivateTC(id=None):
             resultDescription = data["Response"]["resultParam"]["resultDescription"]
         except Exception:
             resultCode = None
-            resultDescription = None
+            resultDescription = data
 
         if resultCode == 0:
             if id is None:
@@ -537,7 +535,7 @@ def simDeactivateTC(id=None):
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'ED')
             # Adicionar nota
-            NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro. TC: {resultDescription}')
+            NotesAdd.addNote(order,f'ERRO DESATIVADO: {iccid} com erro na Telcon. Verificar erro. TC: {resultDescription}')
         
         # Fecha a conexão
         conn.close()
@@ -552,7 +550,7 @@ def simDeactivateTI(id=None):
     
     timezone = pytz.timezone('America/Sao_Paulo')
     min_hour = 23  # hora
-    min_minute = 50  # minutos
+    min_minute = 53  # minutos
 
     current_hour = datetime.now(timezone).hour
     current_minute = datetime.now(timezone).minute
@@ -648,11 +646,11 @@ def simDeactivateTI(id=None):
             resultDescription = data["Response"]["resultParam"]["resultDescription"]
         except Exception:
             resultCode = None
-            resultDescription = None
+            resultDescription = data
 
         if resultCode == 0:
             if id is None:
-                print('>>>>>>>>>> Alterar status')                
+                print('>>>>>>>>>> Alterar status')
                 # Alterar status                
                 UpdateOrder.upStatus(id_item,'DE')
                 up_order_st_store.delay(order_id,'desativado')
@@ -660,14 +658,14 @@ def simDeactivateTI(id=None):
                 sim_put.sim_status = 'DE'
                 sim_put.save()
             # Adicionar nota
-            NotesAdd.addNote(order,f'{iccid} desativado com sucesso na Telcon. TC: {resultDescription}')
+            NotesAdd.addNote(order,f'{iccid} desativado com sucesso na Telcon. TI: {resultDescription}')
         else:
             print('>>>>>>>>>> ERRO DESATIVADO')
             if id is None:
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'ED')
             # Adicionar nota
-            NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro. TC: {resultDescription}')
+            NotesAdd.addNote(order,f'ERRO DESATIVADO: {iccid} com erro na Telcon. Verificar erro. TI: {resultDescription}')
         
         # Fecha a conexão
         conn.close()
