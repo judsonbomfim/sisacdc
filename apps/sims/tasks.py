@@ -102,7 +102,7 @@ def sims_in_orders():
             sim_put.sim_status = 'AT'
             sim_put.save()
             _sim = sim_put.sim
-            _qrcode = sim_put.qrcode
+            _qrcode = sim_put.link  # Usando o campo link que contém a URL do QR code
 
             addNote(f'(e)SIM {_sim} adicionado')
 
@@ -113,10 +113,23 @@ def sims_in_orders():
                     'status': status_sis_site[status_ord]
                 }
             
-            update_store.append({
-                '_sim': _sim,
-                '_qrcode': _qrcode,
-                })
+            # Gravar SIm e QRCode no site
+            if ord.item_id_store:
+                update_store['line_items'] = [
+                    {
+                        "id": int(ord.item_id_store),
+                        "meta_data": [
+                            {
+                                "key": "_sim",
+                                "value": _sim,
+                            },
+                            {
+                                "key": "_qrcode",
+                                "value": _qrcode if _qrcode else "",
+                            }
+                        ]
+                    }
+                ]
     
             apiStore = ApiStore.conectApiStore()                    
             apiStore.put(f'orders/{order_id_i}', update_store).json()

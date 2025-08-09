@@ -103,7 +103,7 @@ def order_import():
                     if i['key'] == 'pa_plano-de-voz': 
                         if i['value'] == 'sem-ligacoes': calls_i = False
                         else: calls_i = True
-                    if i['key'] == '_china_hongkong_taiwan': ## VERIFICAR SITE NOVO ## _china_hongkong_taiwan
+                    if i['key'] == '_china_hongkong_taiwan':
                         if i['display_value'] == 'Sim': countries_i = True
                         else: countries_i = False
                     if i['key'] == '_data_ativacao': 
@@ -134,15 +134,14 @@ def order_import():
                 elif activation_date_i == '0001-01-01':
                     order_status_i = 'EI'
                 else:
-                    order_status_i = 'AS'
-                    
+                    order_status_i = 'AS'                    
                     
                 # Se for um plano EUA 30 dias
                 if product_i == 'chip-internacional-eua-30-dias':
-                    calls_i = False             
-                
-                # Definir variáveis para salvar no banco de dados                            
-                order_add = Orders(                    
+                    calls_i = False
+
+                # Definir variáveis para salvar no banco de dados
+                order_add = Orders(
                     order_id = order_id_i,
                     item_id = item_id_i,
                     item_id_store = item_id_store_i,
@@ -216,15 +215,13 @@ def order_import():
                 
                 # Alterar status
                 # Status sis : Status Loja
-                status_def_sis = StatusStore.st_sis_site()
-                if order_status_i in status_def_sis:
-                    status_ped = {
-                        'status': status_def_sis[order_status_i]
+                status_sis_site = StatusStore.st_sis_site()
+                if order_status_i in status_sis_site:
+                    update_store = {
+                        'status': status_sis_site[order_status_i]
                     }
-                    try:                                  
-                        apiStore.put(f'orders/{order_id_i}', status_ped).json()
-                    except:
-                        msg_error.append(f'{order_id_i} - Falha ao atualizar status na loja!')
+                    print(f'>>>>>>>>>>>>>>>>>>>>>>> Atualizando pedido {order_id_i} com status {update_store["status"]}')
+                    apiStore.put(f'orders/{order_id_i}', update_store).json()
                 
                 # Definir variáveis
                 q_i += 1 
@@ -342,6 +339,7 @@ def order_import_voice():
                 order_add = Orders(                    
                     order_id = order_id_i,
                     item_id = item_id_i,
+                    item_id_store = item_id_store_i,
                     client = client_i,
                     email = email_i,
                     product = product_i,
@@ -442,10 +440,10 @@ def orders_auto():
     order_import_voice.delay()
     time.sleep(5)
     sims_in_orders.delay()
-    time.sleep(5)
-    number_in_voice.delay()
-    time.sleep(10)
-    send_email_sims.delay()
+    # time.sleep(5)
+    # number_in_voice.delay()
+    # time.sleep(10)
+    # send_email_sims.delay()
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
