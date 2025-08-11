@@ -131,9 +131,9 @@ def sims_in_orders():
                     }
                 ]
     
-            apiStore = ApiStore.conectApiStore()                    
-            apiStore.put(f'orders/{order_id_i}', update_store).json()
-            
+            apiStore = ApiStore.conectApiStore()
+            apiStore.put(f'orders/{order_id_i}', update_store)
+                             
             msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
             
             n_item_total += 1

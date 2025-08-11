@@ -51,7 +51,7 @@ def order_import():
             # Se o pedido já foi importado, atualizar status
             status_sis = id_sis.first().order_status
             status_sis_site = StatusStore.st_sis_site()
-            up_order_st_store(id_ord,status_sis_site[status_sis])
+            StatusStore.upStatusStore(id_ord, status_sis_site[status_sis])
             print(f'---------- Pedido {id_ord} já importado. Status: {status_sis_site[status_sis]}')
             continue
         else: pass
@@ -163,8 +163,7 @@ def order_import():
                     order_status = order_status_i,
                     type_sim = type_sim_i,
                     # notes = notes_i
-                )
-                
+                )                
 
                 try:
                     register = order_add.save()
@@ -217,11 +216,8 @@ def order_import():
                 # Status sis : Status Loja
                 status_sis_site = StatusStore.st_sis_site()
                 if order_status_i in status_sis_site:
-                    update_store = {
-                        'status': status_sis_site[order_status_i]
-                    }
-                    print(f'>>>>>>>>>>>>>>>>>>>>>>> Atualizando pedido {order_id_i} com status {update_store["status"]}')
-                    apiStore.put(f'orders/{order_id_i}', update_store).json()
+                    print(f'>>>>>>>>>>>>>>>>>>>>>>> Atualizando pedido {order_id_i} com status {status_sis_site[order_status_i]}')
+                    StatusStore.upStatusStore(order_id_i, status_sis_site[order_status_i])
                 
                 # Definir variáveis
                 q_i += 1 
@@ -413,13 +409,7 @@ def order_import_voice():
                 # Status sis : Status Loja
                 status_def_sis = StatusStore.st_sis_site()
                 if order_status_i in status_def_sis:
-                    status_ped = {
-                        'status': status_def_sis[order_status_i]
-                    }
-                    try:                                  
-                        apiStore.put(f'orders/{order_id_i}', status_ped).json()
-                    except:
-                        msg_error.append(f'{order_id_i} - Falha ao atualizar status na loja!')
+                    StatusStore.upStatusStore(order_id_i, status_def_sis[order_status_i])
                 
                 # Definir variáveis
                 q_i += 1 
@@ -524,11 +514,11 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         if (order_canc == 0 and ord_s == 'CC') or (order_reemb == 0 and ord_s == 'RB') or ord_s != 'DE':
             print('--------------------------- Alterar STATUS Loja')        
             if ord_s in status_sis_site:
-                up_order_st_store(order.order_id,status_sis_site[ord_s])
+                StatusStore.upStatusStore(order.order_id,status_sis_site[ord_s])
         elif ord_s not in ['CC', 'RB', 'DE']:
             print('--------------------------- Alterar STATUS Loja')        
-            up_order_st_store(order.order_id,status_sis_site[ord_s])        
-                
+            StatusStore.upStatusStore(order.order_id,status_sis_site[ord_s])        
+
         # Save Notes
         def addNote(t_note):
             add_sim = Notes( 
@@ -645,8 +635,8 @@ def update_st():
                 id_order = id_sis.id
                 order_status = id_sis.order_status
                 status_sis_site = StatusStore.st_sis_site()
-                if order_status in status_sis_site:                    
-                    up_order_st_store(id_sis, status_sis_site[order_status])
+                if order_status in status_sis_site:
+                    StatusStore.upStatusStore(id_sis, status_sis_site[order_status])
                 
                 total_ord += 1
                 print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')

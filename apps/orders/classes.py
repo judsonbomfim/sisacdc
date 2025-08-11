@@ -68,7 +68,7 @@ class StatusStore():
         return status_sis_site
     
     @staticmethod
-    def upStatus(order_id,order_st):
+    def upStatusStore(order_id,order_st):
         apiStore = ApiStore.conectApiStore()
         update_store = {
                 'status': order_st

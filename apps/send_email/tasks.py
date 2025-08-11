@@ -87,12 +87,8 @@ def send_email_sims(id=None):
                 order.order_status = 'AA'
                 order.save()
                 # Update Store
-                apiStore = ApiStore.conectApiStore()
                 status_def_sis = StatusStore.st_sis_site()            
-                update_store = {
-                    'status': status_def_sis['AA']
-                }
-                apiStore.put(f'orders/{order.order_id}', update_store).json()
+                StatusStore.upStatusStore(order.order_id, status_def_sis['AA'])                
         
         # Add note
         add_note = Notes( 

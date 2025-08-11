@@ -1,4 +1,5 @@
 import operator
+import os
 from django.contrib.auth.models import User
 from rolepermissions.decorators import has_permission_decorator
 import csv
@@ -719,6 +720,69 @@ def verifica_pedidos(request):
             up_order_st_store(order_id,'processing')
     return JsonResponse(lista_pedidos, contagem, safe=False)    
         
+def debugWP(request):
+    ...
+
+# Adicionar logs detalhados na função que atualiza o WordPress
+import logging
+
+logger = logging.getLogger(__name__)
+
+import requests
+
+def testeAPI(request):
+    # Exemplo de uso do parâmetro request
+    user_agent = request.META.get('HTTP_USER_AGENT', 'Django-App/1.0')
+    order_id = 1097202
+    status = 'em-andamento'
+    
+    try:
+        logger.info(f"Tentando atualizar pedido {order_id} para status {status}")
+
+        response = requests.put(
+            f"{os.getenv('url_site')}/orders/{order_id}",
+            json={"status": status},
+            auth=(os.getenv('consumer_key'), os.getenv('consumer_secret')),
+            timeout=30,
+            headers={'User-Agent': user_agent}
+        )
+
+        logger.info(f"Resposta: {response.status_code} - {response.text}")
+        
+        # Retornar resposta com informações detalhadas
+        return JsonResponse({
+            'success': True,
+            'status_code': response.status_code,
+            'response_text': response.text,
+            'order_id': order_id,
+            'new_status': status,
+            'message': 'Requisição enviada com sucesso'
+        })
+        
+    except requests.exceptions.Timeout:
+        logger.error("Timeout na conexão com WordPress")
+        return JsonResponse({
+            'success': False,
+            'error': 'Timeout na conexão com WordPress',
+            'order_id': order_id
+        }, status=408)
+        
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"Erro de conexão: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Erro de conexão: {str(e)}',
+            'order_id': order_id
+        }, status=500)
+        
+    except Exception as e:
+        logger.error(f"Erro inesperado: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Erro inesperado: {str(e)}',
+            'order_id': order_id
+        }, status=500)
+
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza
