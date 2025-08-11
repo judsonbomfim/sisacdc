@@ -230,6 +230,7 @@ def order_import():
     if n_item_total != 0:
         print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
+
 @shared_task
 def order_import_voice():
     # Importar pedidos
@@ -422,6 +423,7 @@ def order_import_voice():
     if n_item_total != 0:
         print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
+
 @shared_task
 def orders_auto():
     print('-----------------orders_auto')
@@ -469,8 +471,9 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         # Desativar (e)SIM
         if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE'):
             if order.id_sim:                
-                # Change TC
-                if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_s_prev != 'ED':
+                # Change TC                
+                if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_s == 'DE':
+                    print('----------------- Alterar/desativar TC/TI -----------------')
                     simDeactivateTC(id=order.id)
                 
                 if ord_s_prev != 'ED':

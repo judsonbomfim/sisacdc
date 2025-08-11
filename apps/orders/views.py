@@ -285,7 +285,7 @@ def ord_edit(request,id):
         # Se SIM preenchico
         if sim:
             if order_sim != '':
-                # Alterar status no sistema e no site
+                # Alterar status do SIM no sistema e no site
                 updateSIM()
             
             sims_all = Sims.objects.all().filter(sim=sim)
@@ -397,7 +397,11 @@ def ord_edit(request,id):
                 send_email_sims(id=order_id)
                 
                 addNote(f'E-mail enviado com sucesso!')
-                messages.success(request,'E-mail enviado com sucesso!')     
+                messages.success(request,'E-mail enviado com sucesso!')
+        
+        if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
+            print('----------------- Alterar/desativar TC/TI -----------------')
+            simDeactivateTC(id=order.id)
         
         if type_sim == 'esim' or esim_v == True:
             # Enviar eSIM para site
@@ -783,6 +787,22 @@ def testeAPI(request):
             'order_id': order_id
         }, status=500)
 
+
+@login_required(login_url='/login/')
+def alterarOperadora(request):
+    # Acessa o usuário da requisição para evitar o erro de variável não acessada
+    user = request.user
+    orders = Orders.objects.filter(id_sim__operator='TC', id_sim__type_sim='sim', order_status='AA')
+    print(f'Usuário requisitante: {user}')
+    print(f'+++++++++++++++++++++ Pedidos encontrados: {len(orders)}')
+
+    for order in orders:
+        sim = order.id_sim
+        # Altera a operadora do SIM
+        sim.operator = 'TI'
+        sim.save()
+        print(f'+++++++++++++++++++++ Operadora do SIM {sim.sim} alterada para TI')
+    return JsonResponse({'status': 'success', 'message': 'Operadora alterada com sucesso!'})
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza

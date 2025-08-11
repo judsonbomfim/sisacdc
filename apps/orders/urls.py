@@ -12,6 +12,7 @@ urlpatterns = [
     path('ativacoes/exportar', views.ord_export_act, name='ord_export_act'),
     path('atualizar_status', views.atualizar_status, name='atualizar_status'),
     path('teste_api', views.testeAPI, name='teste_api'),
+    path('alterar_operadora', views.alterarOperadora, name='alterar_operadora'),
     # path('texto/', views.textImg, name='text_img'),
     # path('esimstore/', views.esimExpSis, name='esimstore'),
 ]

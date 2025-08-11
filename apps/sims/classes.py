@@ -72,9 +72,9 @@ class ApiTC:
             }
         elif product == 'chip-internacional-israel-premium':
             planList = {
-                '500mb-dia': '640426',
-                '1gb': '640427',
-                '2gb': '640425',
+                '500mb-dia': '640425',
+                '1gb': '640426',
+                '2gb': '640427',
             }
         elif product == 'chip-internacional-tunisia-premium':
             planList = {
@@ -221,9 +221,9 @@ class ApiTI:
             }
         elif product == 'chip-internacional-israel-premium':
             planList = {
-                '500mb-dia': '640426',
-                '1gb': '640427',
-                '2gb': '640425',
+                '500mb-dia': '640425',
+                '1gb': '640426',
+                '2gb': '640427',
             }
         elif product == 'chip-internacional-tunisia-premium':
             planList = {
