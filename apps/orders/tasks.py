@@ -42,9 +42,7 @@ def order_import():
             
         n_item = 1
         id_ord = order["id"]
-        
-        print(f'---------- Importando pedido {id_ord}')
-        
+                
         # Verificar pedido repetido
         id_sis = Orders.objects.filter(order_id=id_ord)
         if id_sis:
@@ -69,6 +67,8 @@ def order_import():
                 ]
             if item['product_id'] in prod_sel:
                 continue
+            
+            print(f'---------- Importando pedido {id_ord}')
             
             qtd = item['quantity']
             q_i = 1 
