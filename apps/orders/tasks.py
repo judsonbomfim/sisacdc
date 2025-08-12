@@ -440,8 +440,6 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
     # Verificar se ord_id é uma lista
     if not isinstance(ord_id, list):
         ord_id = [ord_id]
-
-    ord_s = ord_s
     
     for o_id in ord_id:
         
@@ -449,8 +447,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
             print(f"Item de pedido inválido ou sem ID: {order}")
             continue
         
-        print('-----------------o_id')
-        print(o_id)
+        print(f'-----------------o_id - {o_id}')
         
         order = Orders.objects.get(pk=o_id)
         user = User.objects.get(pk=id_user)
