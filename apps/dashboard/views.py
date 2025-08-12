@@ -147,6 +147,8 @@ def index(request):
     esim_cm = simsAll.filter(sim_status='DS',operator='CM', type_sim='esim').count()
     sim_tc = simsAll.filter(sim_status='DS',operator='TC', type_sim='sim').count()
     esim_tc = simsAll.filter(sim_status='DS',operator='TC', type_sim='esim').count()
+    sim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='sim').count()
+    esim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='esim').count()
     sim_ms = simsAll.filter(sim_status='DS',operator='MS', type_sim='sim').count()
     esim_ms = simsAll.filter(sim_status='DS',operator='MS', type_sim='esim').count()
 
