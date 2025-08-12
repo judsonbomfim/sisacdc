@@ -292,6 +292,7 @@ def ord_edit(request,id):
             if sims_all:
                 # Update order
                 sim_id = sims_all[0].id
+                qrcode = sims_all[0].link
                 sims_put = Sims.objects.get(pk=sim_id)
                 sims_put.sim_status = 'AT'
                 sims_put.save()
@@ -314,6 +315,27 @@ def ord_edit(request,id):
                 order_put.id_sim_id = add_sim.id
                 order_put.save()
                 up_plan = True # verificação para nota
+            
+            # Gravar SIM e QRCode no site
+            if order.item_id_store:
+                update_store['line_items'] = [
+                    {
+                        "id": int(order.item_id_store),
+                        "meta_data": [
+                            {
+                                "key": "_sim",
+                                "value": sim,
+                            },
+                            {
+                                "key": "_qrcode",
+                                "value": qrcode if qrcode else "",
+                            }
+                        ]
+                    }
+                ]
+                apiStore = ApiStore.conectApiStore()
+                apiStore.put(f'orders/{order_id}', update_store)                
+            
         else:
             # Troca de SIM
             if order_sim != '':
@@ -329,6 +351,28 @@ def ord_edit(request,id):
                     if product != 'chip-internacional-europa' and type_sim != 'esim':
                         insertSIM(ord_st)
                         up_plan = True # verificação para nota
+            
+            # Gravar SIM e QRCode no site
+            if order.item_id_store:
+                sim = order.id_sim.sim
+                qrcode = order.id_sim.link
+                update_store['line_items'] = [
+                    {
+                        "id": int(order.item_id_store),
+                        "meta_data": [
+                            {
+                                "key": "_sim",
+                                "value": sim,
+                            },
+                            {
+                                "key": "_qrcode",
+                                "value": qrcode if qrcode else "",
+                            }
+                        ]
+                    }
+                ]
+                apiStore = ApiStore.conectApiStore()
+                apiStore.put(f'orders/{order_id}', update_store)    
             
         # Update Order
         if activation_date == '':
@@ -402,10 +446,6 @@ def ord_edit(request,id):
         if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
             print('----------------- Alterar/desativar TC/TI -----------------')
             simDeactivateTC(id=order.id)
-        
-        if type_sim == 'esim' or esim_v == True:
-            # Enviar eSIM para site
-            ApiStore.updateEsimStore(order_id) 
         
         for msg_e in msg_error:
             messages.error(request,msg_e)

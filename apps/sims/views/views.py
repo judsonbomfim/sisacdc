@@ -106,6 +106,8 @@ def sims_list(request):
     esim_tc = sims_all.filter(sim_status='DS',operator='TC', type_sim='esim').count()
     sim_ti = sims_all.filter(sim_status='DS',operator='TI', type_sim='sim').count()
     esim_ti = sims_all.filter(sim_status='DS',operator='TI', type_sim='esim').count()
+    sim_ms = sims_all.filter(sim_status='DS',operator='MS', type_sim='sim').count()
+    esim_ms = sims_all.filter(sim_status='DS',operator='MS', type_sim='esim').count()
     
     url = reverse('sims_index')
     
@@ -124,6 +126,8 @@ def sims_list(request):
         'esim_tc': esim_tc,
         'sim_ti': sim_ti,
         'esim_ti': esim_ti,
+        'sim_ms': sim_ms,
+        'esim_ms': esim_ms,
         'url_filter': url_filter,
         'sim_f': sim_f,
         'sim_type_f': sim_type_f,

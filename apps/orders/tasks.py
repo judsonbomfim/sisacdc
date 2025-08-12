@@ -75,7 +75,6 @@ def order_import():
             
             while q_i <= qtd:
                 order_id_i = order['id']
-                print(f'---------- Importando item {order_id_i}')
                 item_id_i = f'{order_id_i}-{n_item}'
                 item_id_store_i = item['id']
                 client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
@@ -93,7 +92,8 @@ def order_import():
                 ord_chip_nun_i = '-'
                 countries_i = False
                 cell_mod_i = False
-                activation_date_i = False
+                activation_date_i = '0001-01-01'
+                condition_i = 'novo-sim'
                 # Percorrer itens do pedido
                 for i in item['meta_data']:
                     if i['key'] == 'pa_tipo-de-sim': type_sim_i = i['value']
@@ -109,13 +109,10 @@ def order_import():
                     if i['key'] == '_data_ativacao': 
                         activation_date_i = i['value']
                     if i['key'] == '_numero_sim': ord_chip_nun_i = i['value']
-                if activation_date_i == False:
-                        activation_date_i = '0001-01-01'
                 shipping_i = order['shipping_lines'][0]['method_title']
                 order_date_i = DateFormats.dateHour(order['date_created'])
                 # notes_i = 0
                 
-                print(f'---------- Definindo status Loja')
                 # Definir status do pedido
                 # 'RT', 'Retirada'
                 # 'MB', 'Motoboy'
@@ -216,7 +213,6 @@ def order_import():
                 # Status sis : Status Loja
                 status_sis_site = StatusStore.st_sis_site()
                 if order_status_i in status_sis_site:
-                    print(f'>>>>>>>>>>>>>>>>>>>>>>> Atualizando pedido {order_id_i} com status {status_sis_site[order_status_i]}')
                     StatusStore.upStatusStore(order_id_i, status_sis_site[order_status_i])
                 
                 # Definir variáveis
@@ -274,7 +270,6 @@ def order_import_voice():
         
         # Verificar se line_items existe
         if 'line_items' not in order:
-            print(f'---------- Pedido {id_ord} sem line_items')
             continue
         
         # Listar itens do pedido
@@ -303,11 +298,11 @@ def order_import_voice():
                 ord_chip_nun_i = '-'
                 countries_i = False
                 cell_mod_i = False
-                # Percorrer itens do pedido
+                condition_i = "novo-sim"
+                activation_date_i = '0001-01-01'
+                data_day_i = 'ilimitado'                # Percorrer itens do pedido
                 for i in item['meta_data']:
                     type_sim_i = 'sim'
-                    condition_i = "novo-sim"
-                    data_day_i = 'ilimitado'
                     if i['key'] == 'pa_dias': days_i = i['value']
                     calls_i = True
                     countries_i = False
@@ -481,10 +476,6 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
                     sim_put = Sims.objects.get(pk=order.id_sim.id)
                     sim_put.sim_status = 'DE'
                     sim_put.save()
-                    
-                    if order.product != 'chip-internacional-eua':
-                        # Deletar eSIM para site                            
-                        ApiStore.updateEsimStore(order_id)
             
                 
             # Edit Voice

@@ -65,6 +65,8 @@ def sims_in_orders():
                 operator_i = 'TI'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
+            elif product_i == 'chip-internacional-europa-ilimitado':
+                operator_i = 'MS'
             else: operator_i = 'CM'
             
             # Select SIM
@@ -113,7 +115,7 @@ def sims_in_orders():
                     'status': status_sis_site[status_ord]
                 }
             
-            # Gravar SIm e QRCode no site
+            # Gravar SIM e QRCode no site
             if ord.item_id_store:
                 update_store['line_items'] = [
                     {
