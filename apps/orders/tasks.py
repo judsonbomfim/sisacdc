@@ -427,10 +427,10 @@ def orders_auto():
     order_import_voice.delay()
     time.sleep(5)
     sims_in_orders.delay()
-    # time.sleep(5)
-    # number_in_voice.delay()
-    # time.sleep(10)
-    # send_email_sims.delay()
+    time.sleep(5)
+    number_in_voice.delay()
+    time.sleep(10)
+    send_email_sims.delay()
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
