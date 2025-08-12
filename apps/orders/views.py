@@ -464,13 +464,7 @@ def ord_edit(request,id):
             ord_s_prev = order_status
             
             orders_up_status(order.id, ord_st,user_name, ord_s_prev) 
-            
-            # Salvar notas    
-            ord_status = Orders.order_status.field.choices
-            for st in ord_status:
-                if ord_st == st[0]:
-                    addNote(f'Alterado de {dict(Orders.order_status.field.choices).get(order_status)} para {st[1]}')
-            
+                        
             # Enviar email
             if ord_st == 'CN' and type_sim == 'sim':
                 send_email_sims(id=order_id)
