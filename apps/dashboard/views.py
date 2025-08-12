@@ -160,6 +160,8 @@ def index(request):
         'esim_cm': esim_cm,
         'sim_tc': sim_tc,
         'esim_tc': esim_tc,
+        'sim_ti': sim_ti,
+        'esim_ti': esim_ti,
         'sim_ms': sim_ms,
         'esim_ms': esim_ms,
         'dateDay': dateDay,
