@@ -71,8 +71,9 @@ def order_import():
             qtd = item['quantity']
             q_i = 1 
             
+            print(f'---------- Importando pedido {id_ord}')            
+            
             while q_i <= qtd:
-                print(f'---------- Importando pedido {id_ord}-{n_item}')
 
                 order_id_i = order['id']
                 item_id_i = f'{order_id_i}-{n_item}'
@@ -259,7 +260,6 @@ def order_import_voice():
         
         n_item = 1
         id_ord = order["id"]
-        print(f'---------- Importando pedido {id_ord}')
 
         # Verificar pedido repetido
 
@@ -282,6 +282,8 @@ def order_import_voice():
                             
             qtd = item['quantity']
             q_i = 1 
+            
+            print(f'---------- Importando pedido {id_ord}')
             
             while q_i <= qtd:
                 order_id_i = order['id']
