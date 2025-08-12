@@ -50,11 +50,17 @@ def orders_list(request):
 
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
-            ord_s = request.POST.get('ord_staus')
+            ord_s = request.POST.get('ord_status')  # CORRIGIDO: era 'ord_staus'
+            
+            # Adicionar validações para evitar loop infinito
+            if not ord_id or not ord_s or ord_s == '':
+                messages.error(request, 'Dados incompletos para atualização de status')
+                return redirect('orders_list')
+            
             if request.user.is_authenticated:
                 id_user = request.user.id
             if ord_s != '':
-                orders_up_status.delay(ord_id, ord_s,id_user)                               
+                orders_up_status.delay(ord_id, ord_s, id_user)                            
 
     # Aplicar filtros
     url_filter = ''
@@ -251,14 +257,18 @@ def ord_edit(request,id):
                 
         # Update SIM in Order and update SIM
         def updateSIM():
-            # Update SIM
-            sim_put = Sims.objects.get(pk=sim_id)            
-            sim_put.sim_status = 'TC'
-            sim_put.save()
-            # Delete SIM in Order
-            order_put = Orders.objects.get(pk=order.id)
-            order_put.id_sim_id = ''
-            order_put.save()
+            if sim_id:  # ADICIONAR VERIFICAÇÃO
+                # Update SIM
+                sim_put = Sims.objects.get(pk=sim_id)            
+                sim_put.sim_status = 'TC'
+                sim_put.save()
+                # Delete SIM in Order
+                order_put = Orders.objects.get(pk=order.id)
+                order_put.id_sim_id = None  # CORRIGIR: usar None em vez de ''
+                order_put.save()
+            else:
+                print("Aviso: Tentativa de atualizar SIM, mas sim_id está vazio")
+
         
         # Insert SIM in Order
         def insertSIM(ord_st=None):
@@ -339,7 +349,7 @@ def ord_edit(request,id):
             
         else:
             # Troca de SIM
-            if order_sim != '':
+            if order_sim != '' and order.id_sim:
                 if order.id_sim.operator != operator or order.id_sim.type_sim != type_sim or up_oper != None:
                     updateSIM()
                     insertSIM(ord_st)
@@ -354,7 +364,7 @@ def ord_edit(request,id):
                         up_plan = True # verificação para nota
             
             # Gravar SIM e QRCode no site
-            if order.item_id_store:
+            if order.item_id_store and order.id_sim:
                 sim = order.id_sim.sim
                 qrcode = order.id_sim.link
                 update_store['line_items'] = [
@@ -443,11 +453,11 @@ def ord_edit(request,id):
                 
                 addNote(f'E-mail enviado com sucesso!')
                 messages.success(request,'E-mail enviado com sucesso!')
-        
-        if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
+
+        if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
             print('----------------- Alterar/desativar TC/TI -----------------')
             simDeactivateTC(id=order.id)
-        
+                
         for msg_e in msg_error:
             messages.error(request,msg_e)
         for msg_o in msg_info:
@@ -625,13 +635,19 @@ def orders_activations(request):
         if request.POST.get('activGoing_f'): activGoing_f = request.POST.get('activGoing_f')
         if request.POST.get('activReturn_f') : activReturn_f = request.POST.get('activReturn_f')
         if request.POST.get('oper_f'): oper_f = request.POST.get('oper_f')
-        if request.POST.get('ord_st_f'): ord_st_f = request.POST.get('ord_st_f')
-        
+        if request.POST.get('ord_st_f'): ord_st_f = request.POST.get('ord_st_f')        
+           
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
-            ord_s = request.POST.get('ord_staus')
+            ord_s = request.POST.get('ord_status')
+            
+            # Adicionar validações
+            if not ord_id or not ord_s or ord_s == '':
+                messages.error(request, 'Dados incompletos para atualização de status')
+                return redirect('orders_activations')
+            
             id_user = request.user.id
-            orders_up_status.delay(ord_id, ord_s,id_user)                        
+            orders_up_status.delay(ord_id, ord_s, id_user)                  
 
     # Aplicar filtros baseados nos parâmetros GET (para paginação)
     if activGoing_1 and activGoing_2:
