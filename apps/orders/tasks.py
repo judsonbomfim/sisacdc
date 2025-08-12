@@ -67,13 +67,13 @@ def order_import():
                 ]
             if item['product_id'] in prod_sel:
                 continue
-            
-            print(f'---------- Importando pedido {id_ord}')
-            
+                        
             qtd = item['quantity']
             q_i = 1 
             
             while q_i <= qtd:
+                print(f'---------- Importando pedido {id_ord}-{n_item}')
+
                 order_id_i = order['id']
                 item_id_i = f'{order_id_i}-{n_item}'
                 item_id_store_i = item['id']
