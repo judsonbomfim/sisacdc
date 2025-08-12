@@ -169,6 +169,7 @@ def ord_details(request, order_id):
     
     return JsonResponse(data)
 
+
 # Update orders
 @login_required(login_url='/login/')
 @has_permission_decorator('import_orders')
@@ -702,7 +703,8 @@ def orders_activations(request):
     except: countActivTC = 0
     try: countActivTI = activList[activList['id_sim__operator'] == 'TI']['countActiv'].values[0]
     except: countActivTI = 0
-
+    try: countActivMS = activList[activList['id_sim__operator'] == 'MV']['countActiv'].values[0]
+    except: countActivMS = 0
 
     # Save in session
     orders_act = orders_l.copy()
@@ -732,6 +734,7 @@ def orders_activations(request):
         'countActivCM': countActivCM,
         'countActivTC': countActivTC,
         'countActivTI': countActivTI,
+        'countActivMS': countActivMS,
         'activGoing_1': activGoing_1,
         'activGoing_2': activGoing_2,
         'activReturn_1': activReturn_1,
@@ -741,10 +744,12 @@ def orders_activations(request):
     }
     return render(request, 'painel/orders/activations.html', context)
 
+
 @login_required(login_url='/login/')
 def atualizar_status(request):
     update_st.delay()
     return HttpResponse('Verificação de status concluída')
+
 
 @login_required(login_url='/login/')
 def verifica_pedidos(request):
@@ -763,6 +768,7 @@ def verifica_pedidos(request):
             lista_pedidos.append({f'{data} - Pedido: {order_id}': 'Pedido não encontrado no sistema'})
             up_order_st_store(order_id,'processing')
     return JsonResponse(lista_pedidos, contagem, safe=False)    
+  
         
 def debugWP(request):
     ...
@@ -774,6 +780,7 @@ logger = logging.getLogger(__name__)
 
 import requests
 
+@login_required(login_url='/login/')
 def testeAPI(request):
     # Exemplo de uso do parâmetro request
     user_agent = request.META.get('HTTP_USER_AGENT', 'Django-App/1.0')
