@@ -239,6 +239,8 @@ def ord_edit(request,id):
         except: order_sim = ''
         try: sim_id = int(order.id_sim.id)
         except: sim_id = ''
+        qrcode = ''
+        up_plan = False
         days = request.POST.get('days')
         product = request.POST.get('product')
         data_day = request.POST.get('data_day')
@@ -272,6 +274,7 @@ def ord_edit(request,id):
         
         # Insert SIM in Order
         def insertSIM(ord_st=None):
+            nonlocal qrcode
             sim_up = Sims.objects.filter(sim_status='DS', type_sim=type_sim, operator=operator).first()
             if sim_up:
                 sim_put = Sims.objects.get(pk=sim_up.id)
@@ -280,6 +283,8 @@ def ord_edit(request,id):
                     updateSIM()
                 sim_put.sim_status = 'AT'
                 sim_put.save()
+                
+                qrcode = sim_up.link if sim_up.link else ""
                 
                 if type_sim == 'esim': 
                     ord_st = 'EE'
@@ -329,6 +334,8 @@ def ord_edit(request,id):
             
             # Gravar SIM e QRCode no site
             if order.item_id_store:
+                sim = order.id_sim.sim
+                qrcode = order.id_sim.link if order.id_sim.link else ""     
                 update_store['line_items'] = [
                     {
                         "id": int(order.item_id_store),
@@ -424,10 +431,8 @@ def ord_edit(request,id):
         if sim:
             addNote(f'Alteração de {order_sim} para {sim}')
         # Plan Notes
-        try:
-            if up_plan:
-                addNote(f'Plano alterado')
-        except: pass
+        if up_plan:  # Agora up_plan está inicializado
+            addNote(f'Plano alterado')
         
         # Conect Store
         apiStore = ApiStore.conectApiStore() 
