@@ -43,26 +43,12 @@ def voice_index(request):
         'id_item__days': 'days',
         'id_item__activation_date': 'activation_date',
         })
-
     if voices_df.empty == False:
-        voices_df['activation_date'] = pd.to_datetime(voices_df['activation_date'], errors='coerce')
+        voices_df['activation_date'] = pd.to_datetime(voices_df['activation_date'])
         voices_df['return_date'] = voices_df['activation_date'] + pd.to_timedelta(voices_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
         voices_df['call_status'] = voices_df['call_status'].map(vox_status_dict)
         voices_df['num_number'] = voices_df['num_number'].fillna(0).astype(int)
         voices_df['number_id'] = voices_df['number_id'].fillna(0).astype(int)
-        
-        # CORREÇÃO MAIS ROBUSTA:
-        def safe_date_convert(date_value):
-            """Converte pandas datetime para date Python ou retorna None se inválido"""
-            try:
-                if pd.isna(date_value) or date_value is pd.NaT:
-                    return None
-                return date_value.date()
-            except:
-                return None
-        
-        voices_df['activation_date'] = voices_df['activation_date'].apply(safe_date_convert)
-        voices_df['return_date'] = voices_df['return_date'].apply(safe_date_convert)
     
     if request.method == 'GET':
         
@@ -106,14 +92,12 @@ def voice_index(request):
 
     if voice_going_f is not None:
         voice_going_f = DateFormats.dateF(voice_going_f) 
-        # CORREÇÃO: Filtrar apenas registros com datas válidas (não None)
-        voices_l = voices_l[voices_l['activation_date'] == voice_going_f]
+        voices_l = voices_l[(voices_l['activation_date'] == voice_going_f)]
         url_filter += f"&voice_going_f={voice_going_f}"
 
     if voice_return_f is not None:
-        voice_return_f = DateFormats.dateF(voice_return_f)
-        # CORREÇÃO: Filtrar apenas registros com datas válidas (não None)
-        voices_l = voices_l[voices_l['return_date'] == voice_return_f]
+        voice_return_f = DateFormats.dateF(voice_return_f) 
+        voices_l = voices_l[(voices_l['return_date'] == voice_return_f)]
         url_filter += f"&voice_return_f={voice_return_f}"
         
     if voice_status_f is not None:
