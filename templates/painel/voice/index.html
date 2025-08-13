@@ -152,7 +152,7 @@
                   </td>
                   <td>
                     <div class="userDatatable-content">
-                      {% if voice.activation_date %}
+                      {% if voice.activation_date and voice.activation_date != None %}
                           {{ voice.activation_date|date:'d/m/Y' }}
                       {% else %}
                           -
@@ -161,14 +161,13 @@
                   </td>
                   <td>
                     <div class="userDatatable-content">
-                      {% if voice.return_date %}
+                      {% if voice.return_date and voice.return_date != None %}
                           {{ voice.return_date|date:'d/m/Y' }}
                       {% else %}
                           -
                       {% endif %}
                     </div>
                   </td>
-                  <td>
                     <div class="userDatatable-content">{{ voice.call_status }}</div>
                   </td>
                   <td>
