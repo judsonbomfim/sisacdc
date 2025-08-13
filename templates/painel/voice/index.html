@@ -160,7 +160,13 @@
                     </div>
                   </td>
                   <td>
-                    <div class="userDatatable-content">{{ voice.return_date|date:'d/m/Y' }}</div>
+                    <div class="userDatatable-content">
+                      {% if voice.return_date %}
+                          {{ voice.return_date|date:'d/m/Y' }}
+                      {% else %}
+                          -
+                      {% endif %}
+                    </div>
                   </td>
                   <td>
                     <div class="userDatatable-content">{{ voice.call_status }}</div>
