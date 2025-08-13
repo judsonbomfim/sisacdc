@@ -73,6 +73,9 @@ def order_import():
             
             print(f'---------- Importando pedido {id_ord}')            
             
+            # ADICIONAR FLAG para controlar erro
+            item_error = False
+            
             while q_i <= qtd:
 
                 order_id_i = order['id']
