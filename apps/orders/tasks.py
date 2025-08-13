@@ -119,7 +119,7 @@ def order_import():
                 # 'MB', 'Motoboy'
                 # 'RS', 'Reuso'
                 # 'AS', 'Atribuir SIM'
-                if 'RETIRADA' in shipping_i:
+                if 'RETIRADA' in shipping_i.upper():
                     shipping_i = 'Retirada SP'
                     order_status_i = 'RT'
                 elif 'Entrega na Agência' in shipping_i:
@@ -129,12 +129,16 @@ def order_import():
                     order_status_i = 'MB'
                 elif condition_i == 'reuso-sim':
                     order_status_i = 'RS'
-                elif activation_date_i == '0001-01-01':
-                    order_status_i = 'EI'
                 else:
-                    order_status_i = 'AS'                    
-                    
-                # Se for um plano EUA 30 dias
+                    order_status_i = 'AS'
+
+                shipping_i = shipping_i[:40]
+
+                
+                if condition_i == 'reuso-sim':
+                    order_status_i = 'RS'
+                if activation_date_i == '0001-01-01':
+                    order_status_i = 'EI'
                 if product_i == 'chip-internacional-eua-30-dias':
                     calls_i = False
 
@@ -168,7 +172,9 @@ def order_import():
                     register
                 except Exception as e:
                     print(f'Pedido {order_id_i} deu um erro ao importar: {e}')
-                    continue
+                    item_error = True
+                    break  # Sai do while
+                
                 
                 # id_user = None
                 # if getpass.getuser():
@@ -222,6 +228,10 @@ def order_import():
                 n_item_total += 1
                 
                 msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
+                         
+        if item_error:
+            print(f'>>>>>>>>>>> Pulando item devido a erro no pedido {order_id_i}')
+            continue  # Agora vai para o próximo item do for
                     
     # Status 
     if n_item_total != 0:
@@ -360,6 +370,7 @@ def order_import_voice():
                     register
                 except:
                     msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
+                    continue
                 
                 # id_user = None
                 # if getpass.getuser():
