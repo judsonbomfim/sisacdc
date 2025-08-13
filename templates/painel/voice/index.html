@@ -152,10 +152,10 @@
                   </td>
                   <td>
                     <div class="userDatatable-content">
-                      {% if voice.activation_date and voice.activation_date != '0001-01-01' %}
-                        {{ voice.activation_date|date:'d/m/Y' }}
+                      {% if voice.activation_date %}
+                          {{ voice.activation_date|date:'d/m/Y' }}
                       {% else %}
-                        -
+                          -
                       {% endif %}
                     </div>
                   </td>
