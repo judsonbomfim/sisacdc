@@ -174,13 +174,13 @@
                 </td>
                 <td class="text-center">
                   <div class="userDatatable-content">
-                      {% if order.cell_mod == False %}
+                      {% if order.cell_mod != False %}
                         <i class="bi bi-phone text-primary" style="cursor: pointer;" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="{{ order.cell_mod }}"></i>
                       {% endif %}
-                      {% if order.cell_imei == False %}
+                      {% if order.cell_imei %}
                         <i class="bi bi-phone text-secondary" style="cursor: pointer;" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="IMEI - {{ order.cell_imei }}"></i>
                       {% endif %}
-                      {% if order.cell_eid == False %}
+                      {% if order.cell_eid %}
                         <i class="bi bi-phone text-secondary" style="cursor: pointer;" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="EID - {{ order.cell_eid }}"></i>
                       {% endif %}
                     </div>
