@@ -65,10 +65,10 @@ def orders_list(request):
             id_user = request.user.id
             
             # Log para debug
-            print(f">>>>>>>>>> ATUALIZAÇÃO EM MASSA INICIADA")
-            print(f"Pedidos selecionados: {ord_id}")
-            print(f"Novo status: {ord_s}")
-            print(f"Usuário: {id_user}")
+            # print(f">>>>>>>>>> ATUALIZAÇÃO EM MASSA INICIADA")
+            # print(f"Pedidos selecionados: {ord_id}")
+            # print(f"Novo status: {ord_s}")
+            # print(f"Usuário: {id_user}")
             
             try:
                 # Iniciar tarefa apenas UMA vez
