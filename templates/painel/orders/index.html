@@ -113,6 +113,7 @@
             <th class="userDatatable-title">(e)SIM</th>
             <th class="userDatatable-title">Op.</th>
             <th class="userDatatable-title">Produto</th>
+            <th class="userDatatable-title">Celular</th>
             <th class="userDatatable-title text-center">Países</th>
             <th class="userDatatable-title text-center">Voz</th>
             <th class="userDatatable-title text-center">Dias</th>
@@ -171,6 +172,17 @@
                 <td>
                   <div class="userDatatable-content text-center">{{ order.get_product_display }} {{ order.get_data_day_display }}</div>
                 </td>
+                <div class="userDatatable-content">
+                    {% if order.cell_mod %}
+                      <i class="bi bi-phone text-primary" style="cursor: pointer;" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="{{ order.cell_mod }}"></i>
+                    {% endif %}
+                    {% if order.cell_imei %}
+                      <i class="bi bi-phone text-secondary" style="cursor: pointer;" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="IMEI - {{ order.cell_imei }}"></i>
+                    {% endif %}
+                    {% if order.cell_eid %}
+                      <i class="bi bi-phone text-secondary" style="cursor: pointer;" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="EID - {{ order.cell_eid }}"></i>
+                    {% endif %}
+                  </div>
                 <td class="text-center">
                   <div class="userDatatable-content text-center">
                     {% if order.countries == 0 %}
