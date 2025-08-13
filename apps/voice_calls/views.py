@@ -43,31 +43,9 @@ def voice_index(request):
         'id_item__days': 'days',
         'id_item__activation_date': 'activation_date',
         })
-    
     if voices_df.empty == False:
-        # CORREÇÃO: Tratar datas inválidas antes da conversão
-        # Substituir datas problemáticas por None
-        invalid_dates = ['0001-01-01', '1-01-01', '0001-01-01 00:00:00', '1-01-01 00:00:00']
-        for invalid_date in invalid_dates:
-            voices_df['activation_date'] = voices_df['activation_date'].replace(invalid_date, None)
-        
-        # Converter para datetime com tratamento de erro
-        voices_df['activation_date'] = pd.to_datetime(
-            voices_df['activation_date'], 
-            errors='coerce'  # Converte valores problemáticos para NaT
-        )
-        
-        # Calcular return_date apenas para datas válidas
-        valid_dates_mask = voices_df['activation_date'].notna()
-        voices_df['return_date'] = None  # Inicializar coluna
-        
-        if valid_dates_mask.any():
-            voices_df.loc[valid_dates_mask, 'return_date'] = (
-                voices_df.loc[valid_dates_mask, 'activation_date'] + 
-                pd.to_timedelta(voices_df.loc[valid_dates_mask, 'days'], unit='d') - 
-                pd.to_timedelta(1, unit='d')
-            )
-        
+        voices_df['activation_date'] = pd.to_datetime(voices_df['activation_date'], errors='coerce')
+        voices_df['return_date'] = voices_df['activation_date'] + pd.to_timedelta(voices_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
         voices_df['call_status'] = voices_df['call_status'].map(vox_status_dict)
         voices_df['num_number'] = voices_df['num_number'].fillna(0).astype(int)
         voices_df['number_id'] = voices_df['number_id'].fillna(0).astype(int)
@@ -92,23 +70,11 @@ def voice_index(request):
             voice_id = request.POST.getlist('voice_id')
             voice_st = request.POST.get('voice_st')
             
-            # Validações completas
-            if not voice_id or not voice_st or voice_st == '':
-                messages.error(request, 'Dados incompletos para atualização de status')
-                return redirect('voice_index')
-            
-            # Limitar quantidade
-            if len(voice_id) > 100:
-                messages.error(request, 'Muitos registros selecionados. Máximo 100 por vez.')
-                return redirect('voice_index')
-            
             if voice_id and voice_st:
                 voices_up_status.delay(voice_id, voice_st)
-                messages.success(request, f'Atualizando {len(voice_id)} registros para status: {voice_st}')
+                messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
-                messages.info(request, 'Você precisa marcar alguma opção')
-            
-            return redirect('voice_index')
+                messages.info(request,f'Você precisa marcar alguma opção')     
 
     # FIlters
     
@@ -126,45 +92,19 @@ def voice_index(request):
 
     if voice_going_f is not None:
         voice_going_f = DateFormats.dateF(voice_going_f) 
-        # Filtrar apenas registros com datas válidas
-        valid_activation_mask = voices_l['activation_date'].notna()
-        if valid_activation_mask.any():
-            voices_l = voices_l[valid_activation_mask & (voices_l['activation_date'].dt.date == voice_going_f)]
-        else:
-            voices_l = voices_l.iloc[0:0]  # DataFrame vazio
+        voices_l = voices_l[(voices_l['activation_date'] == voice_going_f)]
         url_filter += f"&voice_going_f={voice_going_f}"
 
     if voice_return_f is not None:
-        voice_return_f = DateFormats.dateF(voice_return_f)
-        # Filtrar apenas registros com return_date válidas
-        valid_return_mask = voices_l['return_date'].notna()
-        if valid_return_mask.any():
-            voices_l = voices_l[valid_return_mask & (voices_l['return_date'].dt.date == voice_return_f)]
-        else:
-            voices_l = voices_l.iloc[0:0]  # DataFrame vazio
+        voice_return_f = DateFormats.dateF(voice_return_f) 
+        voices_l = voices_l[(voices_l['return_date'] == voice_return_f)]
         url_filter += f"&voice_return_f={voice_return_f}"
         
     if voice_status_f is not None:
         voice_status_f = voice_status_f 
         voices_l = voices_l[(voices_l['call_status'] == voice_status_f)]
         url_filter += f"&voice_status_f={voice_status_f}"   
-    
-    # Converter datas de volta para formato que o template entende
-    if not voices_l.empty:
-        # Converter datas válidas para formato date
-        valid_activation = voices_l['activation_date'].notna()
-        valid_return = voices_l['return_date'].notna()
         
-        if valid_activation.any():
-            voices_l.loc[valid_activation, 'activation_date'] = voices_l.loc[valid_activation, 'activation_date'].dt.date
-        
-        if valid_return.any():
-            voices_l.loc[valid_return, 'return_date'] = voices_l.loc[valid_return, 'return_date'].dt.date
-        
-        # Substituir NaT por None para o template
-        voices_l['activation_date'] = voices_l['activation_date'].where(voices_l['activation_date'].notna(), None)
-        voices_l['return_date'] = voices_l['return_date'].where(voices_l['return_date'].notna(), None)
-    
     voices_l = voices_l.to_dict('records')
 
     vox_st_list = []
