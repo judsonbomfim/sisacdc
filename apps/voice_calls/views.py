@@ -51,15 +51,18 @@ def voice_index(request):
         voices_df['num_number'] = voices_df['num_number'].fillna(0).astype(int)
         voices_df['number_id'] = voices_df['number_id'].fillna(0).astype(int)
         
-        # CORREÇÃO DEFINITIVA: Converter NaT para None E converter datetime para date
-        # Para activation_date
-        voices_df['activation_date'] = voices_df['activation_date'].apply(
-            lambda x: x.date() if pd.notna(x) else None
-        )
+        # CORREÇÃO MAIS ROBUSTA:
+        def safe_date_convert(date_value):
+            """Converte pandas datetime para date Python ou retorna None se inválido"""
+            try:
+                if pd.isna(date_value) or date_value is pd.NaT:
+                    return None
+                return date_value.date()
+            except:
+                return None
         
-        # Para return_date
-        voices_df['return_date'] = voices_df['return_date'].apply(
-            lambda x: x.date() if pd.notna(x) else None
+        voices_df['activation_date'] = voices_df['activation_date'].apply(safe_date_convert)
+        voices_df['return_date'] = voices_df['return_date'].apply(safe_date_convert)
         )
     
     if request.method == 'GET':
