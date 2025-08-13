@@ -20,8 +20,7 @@ def order_import():
     global msg_info
     msg_info = []
     global msg_error
-    msg_error = []
-    
+    msg_error = []    
 
     # Pedidos com status 'processing'
     response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing'})
@@ -176,8 +175,7 @@ def order_import():
                 except Exception as e:
                     print(f'Pedido {order_id_i} deu um erro ao importar: {e}')
                     item_error = True
-                    break  # Sai do while
-                
+                    break  # Sai do while                
                 
                 # id_user = None
                 # if getpass.getuser():
@@ -232,9 +230,9 @@ def order_import():
                 
                 msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
                          
-        if item_error:
-            print(f'>>>>>>>>>>> Pulando item devido a erro no pedido {order_id_i}')
-            continue  # Agora vai para o próximo item do for
+            if item_error:
+                print(f'>>>>>>>>>>> Pulando item devido a erro no pedido {order_id_i}')
+                continue  # Agora vai para o próximo item do for
                     
     # Status 
     if n_item_total != 0:
@@ -364,12 +362,12 @@ def order_import_voice():
                     activation_date = activation_date_i,
                     order_status = order_status_i,
                     type_sim = type_sim_i,
-                    # notes = notes_i
+                    # notes = notes_i 
                 )
                 
                 # Salvar itens no banco de dados
-                register = order_add.save()
                 try:
+                    register = order_add.save()
                     register
                 except:
                     msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
