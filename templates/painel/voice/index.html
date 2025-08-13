@@ -151,7 +151,13 @@
                     <div class="userDatatable-content">{{ voice.days }}</div>
                   </td>
                   <td>
-                    <div class="userDatatable-content">{{ voice.activation_date|date:'d/m/Y' }}</div>
+                    <div class="userDatatable-content">
+                      {% if voice.activation_date and voice.activation_date != '0001-01-01' %}
+                        {{ voice.activation_date|date:'d/m/Y' }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </div>
                   </td>
                   <td>
                     <div class="userDatatable-content">{{ voice.return_date|date:'d/m/Y' }}</div>

@@ -174,7 +174,7 @@
                 </td>
                 <td class="text-center">
                   <div class="userDatatable-content">
-                      {% if order.cell_mod != False %}
+                      {% if order.cell_mod and order.cell_mod != 'False' and order.cell_mod != 'false' and order.cell_mod|length > 0 %}
                         <i class="bi bi-phone text-primary" style="cursor: pointer;" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="{{ order.cell_mod }}"></i>
                       {% endif %}
                       {% if order.cell_imei %}
