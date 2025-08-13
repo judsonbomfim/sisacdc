@@ -63,7 +63,6 @@ def voice_index(request):
         
         voices_df['activation_date'] = voices_df['activation_date'].apply(safe_date_convert)
         voices_df['return_date'] = voices_df['return_date'].apply(safe_date_convert)
-        )
     
     if request.method == 'GET':
         
