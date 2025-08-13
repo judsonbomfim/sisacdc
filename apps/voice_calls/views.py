@@ -49,6 +49,26 @@ def voice_index(request):
         voices_df['call_status'] = voices_df['call_status'].map(vox_status_dict)
         voices_df['num_number'] = voices_df['num_number'].fillna(0).astype(int)
         voices_df['number_id'] = voices_df['number_id'].fillna(0).astype(int)
+        
+    voices_df = pd.DataFrame(list(voices))
+    
+    if not voices_df.empty:
+        # CORREÇÃO: Filtrar datas inválidas ANTES de converter para datetime
+        
+        # Método 1: Substituir datas inválidas por None
+        voices_df['activation_date'] = voices_df['activation_date'].apply(
+            lambda x: None if str(x) in ['0001-01-01', '1-01-01', '0001-01-01 00:00:00'] else x
+        )
+        
+        # Método 2: Converter com tratamento de erro
+        voices_df['activation_date'] = pd.to_datetime(
+            voices_df['activation_date'], 
+            errors='coerce'  # Converte valores problemáticos para NaT
+        )
+        
+        # Método 3: Filtrar registros com datas válidas apenas
+        voices_df = voices_df[voices_df['activation_date'].notna()]   
+    
     
     if request.method == 'GET':
         
