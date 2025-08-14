@@ -95,7 +95,7 @@ def order_import():
                 ord_chip_nun_i = '-'
                 countries_i = False
                 cell_mod_i = False
-                activation_date_i = '0001-01-01'
+                activation_date_i = '2001-01-01'
                 condition_i = 'novo-sim'
                 # Percorrer itens do pedido
                 for i in item['meta_data']:
@@ -139,7 +139,7 @@ def order_import():
                 
                 if condition_i == 'reuso-sim':
                     order_status_i = 'RS'
-                if activation_date_i == '0001-01-01':
+                if activation_date_i == '2001-01-01':
                     order_status_i = 'EI'
                 if product_i == 'chip-internacional-eua-30-dias':
                     calls_i = False
@@ -190,7 +190,7 @@ def order_import():
                 )
                 add_sim.save()
                 
-                if activation_date_i == '0001-01-01':
+                if activation_date_i == '2001-01-01':
                     add_sim = Notes( 
                         id_item = Orders.objects.get(pk=order_add.id),
                         id_user = None,
@@ -204,6 +204,7 @@ def order_import():
                     
                     add_voice = VoiceCalls(
                         id_item = Orders.objects.get(pk=order_add.id),
+                        activation_date = activation_date_i,
                         call_status = 'PR'
                     )
                     add_voice.save()
@@ -312,7 +313,7 @@ def order_import_voice():
                 countries_i = False
                 cell_mod_i = False
                 condition_i = "novo-sim"
-                activation_date_i = '0001-01-01'
+                activation_date_i = '2001-01-01'
                 data_day_i = 'ilimitado'                # Percorrer itens do pedido
                 for i in item['meta_data']:
                     type_sim_i = 'sim'
@@ -321,7 +322,7 @@ def order_import_voice():
                     countries_i = False
                     if i['key'] == 'Data de Ativação': 
                         if i['value'] == None or i['value'] == '': 
-                            activation_date_i = '0001-01-01'
+                            activation_date_i = '2001-01-01'
                         else:
                             activation_date_i = i['value']
                     if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
@@ -330,7 +331,7 @@ def order_import_voice():
                 order_date_i = DateFormats.dateHour(order['date_created'])
                 # notes_i = 0
                 
-                if activation_date_i == '0001-01-01':
+                if activation_date_i == '2001-01-01':
                     order_status_i = 'EI'
                 else:
                     order_status_i = 'PV'
@@ -386,7 +387,7 @@ def order_import_voice():
                 )
                 add_sim.save()
                 
-                if activation_date_i == '0001-01-01':
+                if activation_date_i == '2001-01-01':
                     add_sim = Notes( 
                         id_item = Orders.objects.get(pk=order_add.id),
                         id_user = None,

@@ -327,3 +327,13 @@ def up_password(request,id):
     messages.success(request,f'Senha e QrCode redefinidos com sucesso!')
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required(login_url='/login/')
+def atualizarDataVoz(request):
+    voxs = VoiceCalls.objects.all()
+
+    for vox in voxs:
+        if vox.activation_date == '1001-01-01':
+            order = Orders.objects.get(pk=vox.id_item.id)
+            vox.activation_date = order.activation_date
+            vox.save()
