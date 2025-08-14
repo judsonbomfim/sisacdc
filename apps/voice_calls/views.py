@@ -330,74 +330,16 @@ def up_password(request,id):
 
 @login_required(login_url='/login/')
 def atualizarDataVoz(request):
-    try:
-        # Usar filter em vez de buscar todos os registros
-        voxs_problematicos = VoiceCalls.objects.filter(
-            id_item__activation_date__in=['0001-01-01', '1-01-01']
-        ).select_related('id_item')
-        
-        contador_atualizados = 0
-        contador_erros = 0
-        
-        print(f"Encontrados {voxs_problematicos.count()} registros com datas problemáticas")
-        
-        for vox in voxs_problematicos:
-            try:
-                # Verificar se o item relacionado existe e tem data válida
-                if vox.id_item and vox.id_item.activation_date:
-                    # Verificar se a data do pedido não é também problemática
-                    if str(vox.id_item.activation_date) not in ['0001-01-01', '1-01-01']:
-                        # Atualizar dados
-                        vox.days = vox.id_item.days
-                        vox.activation_date = vox.id_item.activation_date
-                        vox.save()
-                        
-                        contador_atualizados += 1
-                        print(f"Voz {vox.id} atualizada: dias={vox.days}, data={vox.activation_date}")
-                    else:
-                        # Se a data do pedido também é problemática, definir como None
-                        vox.activation_date = None
-                        vox.save()
-                        contador_atualizados += 1
-                        print(f"Voz {vox.id} - data definida como None (pedido também tinha data inválida)")
-                else:
-                    # Se não há item relacionado ou data válida, definir como None
-                    vox.activation_date = None
-                    vox.save()
-                    contador_atualizados += 1
-                    print(f"Voz {vox.id} - data definida como None (sem item relacionado válido)")
-                    
-            except Orders.DoesNotExist:
-                # Pedido não existe mais
-                print(f"ERRO: Pedido {vox.id_item.id if vox.id_item else 'N/A'} não encontrado para voz {vox.id}")
-                vox.activation_date = None
-                vox.save()
-                contador_erros += 1
-                
-            except Exception as e:
-                print(f"ERRO ao processar voz {vox.id}: {e}")
-                contador_erros += 1
-                continue
-        
-        print(f"----------------- Atualização concluída!")
-        print(f"Registros atualizados: {contador_atualizados}")
-        print(f"Erros encontrados: {contador_erros}")
-        
-        # Mensagem de retorno
-        if contador_atualizados > 0:
-            messages.success(
-                request, 
-                f"Dados de voz atualizados com sucesso! "
-                f"{contador_atualizados} registros processados."
-            )
-        else:
-            messages.info(request, "Nenhum registro precisava ser atualizado.")
-            
-        if contador_erros > 0:
-            messages.warning(request, f"{contador_erros} registros tiveram problemas.")
-    
-    except Exception as e:
-        print(f"ERRO GERAL na função atualizarDataVoz: {e}")
-        messages.error(request, f"Erro ao atualizar dados de voz: {str(e)}")
-    
+    voxs = VoiceCalls.objects.all()
+
+    for vox in voxs:
+        if str(vox.activation_date) in ['0001-01-01', '1-01-01']:
+            order = Orders.objects.get(pk=vox.id_item.id)
+            vox.days = order.days
+            vox.activation_date = order.activation_date
+            vox.save()
+            print(f"Voz {vox.id} atualizada com sucesso!")
+    print("----------------- Dados de voz atualizados com sucesso!")
+    # mensagem de retorno
+    messages.success(request, "Dados de voz atualizados com sucesso!")
     return redirect('voice_index')
