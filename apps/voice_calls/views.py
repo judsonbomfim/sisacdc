@@ -335,5 +335,6 @@ def atualizarDataVoz(request):
     for vox in voxs:
         if vox.activation_date == '1001-01-01':
             order = Orders.objects.get(pk=vox.id_item.id)
+            vox.days = order.days
             vox.activation_date = order.activation_date
             vox.save()
