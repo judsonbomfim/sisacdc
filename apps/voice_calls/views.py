@@ -333,10 +333,11 @@ def atualizarDataVoz(request):
     voxs = VoiceCalls.objects.all()
 
     for vox in voxs:
-        if str(vox.activation_date) in ['0001-01-01', '1-01-01']:
+        # if str(vox.activation_date) in ['0001-01-01', '1-01-01']:
+        if str(vox.days) == '1':
             order = Orders.objects.get(pk=vox.id_item.id)
             vox.days = order.days
-            vox.activation_date = order.activation_date
+            # vox.activation_date = order.activation_date
             vox.save()
             print(f"Voz {vox.id} atualizada com sucesso!")
     print("----------------- Dados de voz atualizados com sucesso!")
