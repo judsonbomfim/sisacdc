@@ -338,3 +338,7 @@ def atualizarDataVoz(request):
             vox.days = order.days
             vox.activation_date = order.activation_date
             vox.save()
+    print("Dados de voz atualizados com sucesso!")
+    # mensagem de retorno
+    messages.success(request, "Dados de voz atualizados com sucesso!")
+    return redirect('voice_index')
