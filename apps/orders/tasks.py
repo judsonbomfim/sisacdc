@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from celery import shared_task
 from django.utils.text import slugify
-from .classes import ApiStore, StatusStore, DateFormats
+from .classes import ApiStore, StatusStore, DateFormats, UpdateStore
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
@@ -47,9 +47,11 @@ def order_import():
         if id_sis:
             # Se o pedido já foi importado, atualizar status
             status_sis = id_sis.first().order_status
-            status_sis_site = StatusStore.st_sis_site()
-            StatusStore.upStatusStore(id_ord, status_sis_site[status_sis])
-            print(f'---------- Pedido {id_ord} já importado. Status: {status_sis_site[status_sis]}')
+            UpdateStore.upStore(
+                order_id = id_sis.order_id if id_sis.order_id else None,
+                status_g = status_sis if status_sis else None,
+            )   
+            print(f'---------- Pedido {id_ord} já importado.')
             continue
         else: pass
         
@@ -220,10 +222,17 @@ def order_import():
                 
                 # Alterar status
                 # Status sis : Status Loja
-                status_sis_site = StatusStore.st_sis_site()
-                if order_status_i in status_sis_site:
-                    StatusStore.upStatusStore(order_id_i, status_sis_site[order_status_i])
-                
+                if type_sim_i == 'esim':
+                    order_status_i = 'EE'
+
+                # Atualizar site
+                UpdateStore.upStore(
+                    order_id = order_id_i if order_id_i else None,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _data_ativacao = item_id_store_i if item_id_store_i else None,
+                    _status = order_status_i if order_status_i else None,
+                    status_g = order_status_i if order_status_i else None,
+                )
                 # Definir variáveis
                 q_i += 1 
                 n_item += 1
@@ -418,10 +427,14 @@ def order_import_voice():
                 
                 # Alterar status
                 # Status sis : Status Loja
-                status_def_sis = StatusStore.st_sis_site()
-                if order_status_i in status_def_sis:
-                    StatusStore.upStatusStore(order_id_i, status_def_sis[order_status_i])
-                
+                if order_status_i in StatusStore.st_sis_site():
+                    UpdateStore.upStore(
+                        order_id = order.order_id if order.order_id else None,
+                        item_id_store = item_id_store_i if item_id_store_i else None,
+                        _status = order_status_i if order_status_i else None,
+                        status_g = order_status_i if order_status_i else None,
+                    )   
+
                 # Definir variáveis
                 q_i += 1 
                 n_item += 1
@@ -514,16 +527,31 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
             if ord_v.order_status != 'RB':
                 order_reemb += 1 
         
-        # Status sis : Status Loja
-        status_sis_site = StatusStore.st_sis_site()
         # Só cancelar se todos os itens estiverem cancelados / reembolsados
         if (order_canc == 0 and ord_s == 'CC') or (order_reemb == 0 and ord_s == 'RB') or ord_s != 'DE':
             print('--------------------------- Alterar STATUS Loja')        
-            if ord_s in status_sis_site:
-                StatusStore.upStatusStore(order.order_id,status_sis_site[ord_s])
+            if ord_s in StatusStore.st_sis_site():
+                UpdateStore.upStore(
+                    order_id = order.order_id if order.order_id else None,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status = ord_v.order_status if ord_v.order_status else None,
+                    status_g = ord_s if ord_s else None,
+                ) 
         elif ord_s not in ['CC', 'RB', 'DE']:
             print('--------------------------- Alterar STATUS Loja')        
-            StatusStore.upStatusStore(order.order_id,status_sis_site[ord_s])        
+            UpdateStore.upStore(
+                order_id = order.order_id if order.order_id else None,
+                item_id_store = order.item_id_store if order.item_id_store else None,
+                _status = ord_s if ord_s else None,
+                status_g = ord_s if ord_s else None,
+            )
+        elif ord_s == 'CC':
+            # Cancelar só os itens
+            UpdateStore.upStore(
+                order_id = order.order_id if order.order_id else None,
+                item_id_store = order.item_id_store if order.item_id_store else None,
+                _status = ord_s if ord_s else None,
+            )
 
         # Save Notes
         def addNote(t_note):
@@ -544,16 +572,6 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
             send_email_sims.delay(id=order.id)
-
-
-@shared_task
-def up_order_st_store(order_id,order_st):
-    time.sleep(0.5)
-    apiStore = ApiStore.conectApiStore()
-    update_store = {
-            'status': order_st
-        }
-    apiStore.put(f'orders/{order_id}', update_store).json()
 
 
 # @shared_task
@@ -598,55 +616,54 @@ def up_order_st_store(order_id,order_st):
 #     print(f'Total de pedidos processados: {total_ord}')
     
     
-@shared_task
-def update_st():
-    # Importar pedidos
-    apiStore = ApiStore.conectApiStore()
+# @shared_task
+# def update_st():
+#     # Importar pedidos
+#     apiStore = ApiStore.conectApiStore()
     
-    # Definir números de páginas
-    per_page = 100
-    n_page = 1
-    total_ord = 0
+#     # Definir números de páginas
+#     per_page = 100
+#     n_page = 1
+#     total_ord = 0
     
-    while True:
-        try:
-            response = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page})
-            response.raise_for_status()  # Verifica se a resposta HTTP contém um status de erro
+#     while True:
+#         try:
+#             response = apiStore.get('orders', params={'order': 'desc', 'status': 'on-hold', 'per_page': per_page, 'page': n_page})
+#             response.raise_for_status()  # Verifica se a resposta HTTP contém um status de erro
             
-            # Verificar se a resposta contém dados
-            if response.text.strip() == "":
-                print(f"Resposta vazia na página {n_page}")
-                break
+#             # Verificar se a resposta contém dados
+#             if response.text.strip() == "":
+#                 print(f"Resposta vazia na página {n_page}")
+#                 break
             
-            ord = response.json()
+#             ord = response.json()
             
-            # Se não houver mais pedidos, sair do loop
-            if not ord:
-                break
-        except requests.exceptions.RequestException as e:
-            print(f"Erro ao obter pedidos na página {n_page}: {e}")
-            break
-        except ValueError as e:
-            print(f"Erro ao decodificar JSON na página {n_page}: {e}")
-            break
+#             # Se não houver mais pedidos, sair do loop
+#             if not ord:
+#                 break
+#         except requests.exceptions.RequestException as e:
+#             print(f"Erro ao obter pedidos na página {n_page}: {e}")
+#             break
+#         except ValueError as e:
+#             print(f"Erro ao decodificar JSON na página {n_page}: {e}")
+#             break
 
-        # Listar pedidos         
-        for order_store in ord:
-            n_item = 1
-            id_ord = order_store["id"]
+#         # Listar pedidos         
+#         for order_store in ord:
+#             n_item = 1
+#             id_ord = order_store["id"]
             
-            id_sis = Orders.objects.filter(order_id=id_ord).first()
+#             id_sis = Orders.objects.filter(order_id=id_ord).first()
             
-            if id_sis != None:
-                id_order = id_sis.id
-                order_status = id_sis.order_status
-                status_sis_site = StatusStore.st_sis_site()
-                if order_status in status_sis_site:
-                    StatusStore.upStatusStore(id_sis, status_sis_site[order_status])
-                
-                total_ord += 1
-                print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
+#             if id_sis != None:
+#                 id_order = id_sis.id
+#                 order_status = id_sis.order_status
+#                 if order_status in StatusStore.st_sis_site():
+#                     StatusStore.upStatusStore(id_sis, order_status)
 
-        n_page += 1
+#                 total_ord += 1
+#                 print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
 
-    print(f'Total de pedidos processados: {total_ord}')
+#         n_page += 1
+
+#     print(f'Total de pedidos processados: {total_ord}')

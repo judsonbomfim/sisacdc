@@ -15,8 +15,8 @@ from apps.sims.classes import ApiTC
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
-from .classes import ApiStore, NoteStore, StatusStore, DateFormats
-from .tasks import order_import, orders_up_status, up_order_st_store, update_st
+from .classes import ApiStore, NoteStore, StatusStore, DateFormats, UpdateStore
+from .tasks import order_import, orders_up_status, update_st
 import pandas as pd
 
 
@@ -348,24 +348,7 @@ def ord_edit(request,id):
             # Gravar SIM e QRCode no site
             if order.item_id_store:
                 sim = order.id_sim.sim
-                qrcode = order.id_sim.link if order.id_sim.link else ""     
-                update_store['line_items'] = [
-                    {
-                        "id": int(order.item_id_store),
-                        "meta_data": [
-                            {
-                                "key": "_sim",
-                                "value": sim,
-                            },
-                            {
-                                "key": "_qrcode",
-                                "value": qrcode if qrcode else "",
-                            }
-                        ]
-                    }
-                ]
-                apiStore = ApiStore.conectApiStore()
-                apiStore.put(f'orders/{order_id}', update_store)                
+                qrcode = order.id_sim.link if order.id_sim.link else None    
             
         else:
             # Troca de SIM
@@ -386,25 +369,8 @@ def ord_edit(request,id):
             # Gravar SIM e QRCode no site
             if order.item_id_store and order.id_sim:
                 sim = order.id_sim.sim
-                qrcode = order.id_sim.link
-                update_store['line_items'] = [
-                    {
-                        "id": int(order.item_id_store),
-                        "meta_data": [
-                            {
-                                "key": "_sim",
-                                "value": sim,
-                            },
-                            {
-                                "key": "_qrcode",
-                                "value": qrcode if qrcode else "",
-                            }
-                        ]
-                    }
-                ]
-                apiStore = ApiStore.conectApiStore()
-                apiStore.put(f'orders/{order_id}', update_store)    
-            
+                qrcode = order.id_sim.link if order.id_sim.link else None
+
         # Update Order
         if activation_date == '':
             activation_date = order.activation_date
@@ -446,10 +412,7 @@ def ord_edit(request,id):
         # Plan Notes
         if up_plan:  # Agora up_plan está inicializado
             addNote(f'Plano alterado')
-        
-        # Conect Store
-        apiStore = ApiStore.conectApiStore() 
-            
+                 
         # Status Notes
         if ord_st != order_status:
             # Alterar status
@@ -469,6 +432,18 @@ def ord_edit(request,id):
         if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
             print('----------------- Alterar/desativar TC/TI -----------------')
             simDeactivateTC(id=order.id)
+
+        # Atualizar site
+        if order.item_id_store:
+            UpdateStore.upStore(
+                order_id = order_id if order_id else None,
+                item_id_store = order.item_id_store if order.item_id_store else None,
+                _data_ativacao = activation_date if activation_date else None,
+                _sim = sim if sim else None,
+                _qrcode = qrcode if qrcode else None,
+                _status = ord_st if ord_st else None,
+                status_g = ord_st if ord_st else None,
+            )
                 
         for msg_e in msg_error:
             messages.error(request,msg_e)
@@ -787,12 +762,6 @@ def orders_activations(request):
         'ord_st_f': ord_st_f,
     }
     return render(request, 'painel/orders/activations.html', context)
-
-
-@login_required(login_url='/login/')
-def atualizar_status(request):
-    update_st.delay()
-    return HttpResponse('Verificação de status concluída')
 
 
 @login_required(login_url='/login/')

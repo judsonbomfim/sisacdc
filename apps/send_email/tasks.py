@@ -6,7 +6,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from apps.orders.models import Orders, Notes
-from apps.orders.classes import ApiStore, StatusStore
+from apps.orders.classes import ApiStore, StatusStore, UpdateStore
 from apps.voice_calls.models import VoiceCalls
 from apps.voice_calls.classes import NumberFormatter
 
@@ -87,8 +87,15 @@ def send_email_sims(id=None):
                 order.order_status = 'AA'
                 order.save()
                 # Update Store
-                status_def_sis = StatusStore.st_sis_site()            
-                StatusStore.upStatusStore(order.order_id, status_def_sis['AA'])                
+                UpdateStore.upStore(
+                    order_id = order_id if order_id else None,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _data_ativacao = activation_date if activation_date else None,
+                    _sim = sim if sim else None,
+                    _qrcode = qrcode if qrcode else None,
+                    _status = 'Agd. Ativação',
+                    status_g = 'AA',
+                )             
         
         # Add note
         add_note = Notes( 

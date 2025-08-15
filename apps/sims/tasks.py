@@ -145,9 +145,7 @@ def sims_in_orders():
 
 @shared_task
 def simActivateTC(id=None):
-    
-    from apps.orders.tasks import up_order_st_store
-        
+           
     today = datetime.now().date()
 
     print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
@@ -274,7 +272,6 @@ def simActivateTC(id=None):
             if resultCode == 0:
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'AT')
-                up_order_st_store.delay(order_id,'ativado')
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{note} TC: {resultDescription}')
             else:
@@ -292,8 +289,6 @@ def simActivateTC(id=None):
 @shared_task
 def simActivateTI(id=None):
     
-    from apps.orders.tasks import up_order_st_store
-        
     today = datetime.now().date()
 
     print('>>>>>>>>>> ATIVAÇÂO TI INICIADA')
@@ -422,7 +417,6 @@ def simActivateTI(id=None):
             if resultCode == 0:
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'AT')
-                up_order_st_store.delay(order_id,'ativado')
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{note} TC: {resultDescription}')
             else:
@@ -439,8 +433,6 @@ def simActivateTI(id=None):
 
 @shared_task
 def simDeactivateTC(id=None):
-    
-    from apps.orders.tasks import up_order_st_store    
     
     timezone = pytz.timezone('America/Sao_Paulo')
     min_hour = 23  # hora
@@ -547,7 +539,6 @@ def simDeactivateTC(id=None):
                 print('>>>>>>>>>> Alterar status')                
                 # Alterar status                
                 UpdateOrder.upStatus(id_item,'DE')
-                up_order_st_store.delay(order_id,'desativado')
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
                 sim_put.sim_status = 'DE'
                 sim_put.save()
@@ -569,9 +560,7 @@ def simDeactivateTC(id=None):
 
 @shared_task
 def simDeactivateTI(id=None):
-    
-    from apps.orders.tasks import up_order_st_store    
-    
+       
     timezone = pytz.timezone('America/Sao_Paulo')
     min_hour = 23  # hora
     min_minute = 53  # minutos
@@ -677,7 +666,6 @@ def simDeactivateTI(id=None):
                 print('>>>>>>>>>> Alterar status')
                 # Alterar status                
                 UpdateOrder.upStatus(id_item,'DE')
-                up_order_st_store.delay(order_id,'desativado')
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
                 sim_put.sim_status = 'DE'
                 sim_put.save()
@@ -699,9 +687,7 @@ def simDeactivateTI(id=None):
 
 @shared_task
 def simActivateTM(id=None):
-    
-    from apps.orders.tasks import up_order_st_store    
-        
+          
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
     tomorrow = today + timedelta(days=1)
@@ -762,7 +748,6 @@ def simActivateTM(id=None):
             if response_data['code'] == 0:
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'AT')
-                up_order_st_store.delay(order_id,'ativado')
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{iccid} Enviado para ativação na T-Mobile')
             else:
@@ -786,7 +771,6 @@ def simActivateTM(id=None):
 @shared_task
 def simActivateCM(id=None):
     
-    from apps.orders.tasks import up_order_st_store
     import base64
     import hashlib
     import json
@@ -1243,7 +1227,6 @@ def simActivateCM(id=None):
                 NotesAdd.addNote(order, note)
                 # Alterar status do sistema
                 UpdateOrder.upStatus(order_item, 'AT')
-                up_order_st_store.delay(order_id, 'ativado')
 
         conn.close()
 
