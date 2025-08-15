@@ -112,7 +112,7 @@ def order_import():
                     if i['key'] == '_data_ativacao': 
                         activation_date_i = i['value']
                     if i['key'] == '_celular_samsung': 
-                        _celular_samsung = i['value']
+                        celular_samsung_i = i['value']
                     if i['key'] == '_numero_sim': ord_chip_nun_i = i['value']
                 shipping_i = order['shipping_lines'][0]['method_title']
                 order_date_i = DateFormats.dateHour(order['date_created'])
@@ -168,6 +168,7 @@ def order_import():
                     activation_date = activation_date_i,
                     order_status = order_status_i,
                     type_sim = type_sim_i,
+                    celular_samsung = celular_samsung_i,
                     # notes = notes_i
                 )                
 
