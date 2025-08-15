@@ -33,6 +33,7 @@ def sims_in_orders():
         product_i = ord.product
         countries_i = ord.countries
         type_sim_i = ord.type_sim
+        celular_samsung = ord.celular_samsung
         update_store = {}
         esim_eua = type_sim_i == 'esim' and (product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias')
         esim_ok = type_sim_i == 'esim' and (product_i != 'chip-internacional-eua' or product_i != 'chip-internacional-eua-30-dias')
@@ -61,7 +62,9 @@ def sims_in_orders():
                 'chip-internacional-egito-premium',
                 'chip-internacional-indonesia-premium',
             }
-            if product_i in planos:
+            if celular_samsung == 1:
+                operator_i = 'CM'
+            elif product_i in planos:
                 operator_i = 'TI'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
