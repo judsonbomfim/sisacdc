@@ -95,6 +95,7 @@ def order_import():
                 ord_chip_nun_i = '-'
                 countries_i = False
                 cell_mod_i = False
+                celular_samsung_i = False
                 activation_date_i = '2001-01-01'
                 condition_i = 'novo-sim'
                 # Percorrer itens do pedido
@@ -112,7 +113,7 @@ def order_import():
                     if i['key'] == '_data_ativacao': 
                         activation_date_i = i['value']
                     if i['key'] == '_celular_samsung': 
-                        celular_samsung_i = i['value']
+                        celular_samsung_i = True
                     if i['key'] == '_numero_sim': ord_chip_nun_i = i['value']
                 shipping_i = order['shipping_lines'][0]['method_title']
                 order_date_i = DateFormats.dateHour(order['date_created'])
@@ -137,7 +138,6 @@ def order_import():
                     order_status_i = 'AS'
 
                 shipping_i = shipping_i[:40]
-
                 
                 if condition_i == 'reuso-sim':
                     order_status_i = 'RS'
