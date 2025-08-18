@@ -231,11 +231,19 @@ def order_import():
                 # Atualizar site
                 UpdateStore.upStore(
                     order_id = order_id_i if order_id_i else None,
-                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    item_id_store = item_id_store_i if item_id_store_i else None, 
                     _data_ativacao = item_id_store_i if item_id_store_i else None,
                     _status = order_status_i if order_status_i else None,
                     status_g = order_status_i if order_status_i else None,
                 )
+                UpdateStore.upStore(
+                    order_id = order_id_i if order_id_i else None,  # CORRIGIDO: usar order_id_i
+                    item_id_store = item_id_store_i if item_id_store_i else None,
+                    _status = order_status_i if order_status_i else None,
+                    status_g = order_status_i if order_status_i else None,
+                )  
+                
+                
                 # Definir variáveis
                 q_i += 1 
                 n_item += 1
@@ -430,7 +438,7 @@ def order_import_voice():
                 # Status sis : Status Loja
                 if order_status_i in StatusStore.st_sis_site():
                     UpdateStore.upStore(
-                        order_id = order.order_id if order.order_id else None,
+                        order_id = order_id_i if order_id_i else None,
                         item_id_store = item_id_store_i if item_id_store_i else None,
                         _status = order_status_i if order_status_i else None,
                         status_g = order_status_i if order_status_i else None,
