@@ -88,6 +88,7 @@ class Orders(models.Model):
     id_sim = models.ForeignKey(Sims, on_delete=models.DO_NOTHING, null=True, blank=True)
     condition = models.CharField(max_length=15, choices=CONDITION, default='novo-sim')
     tracking = models.CharField(max_length=25, null=True, blank=True)
+    celular_samsung = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:

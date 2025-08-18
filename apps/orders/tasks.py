@@ -97,6 +97,7 @@ def order_import():
                 ord_chip_nun_i = '-'
                 countries_i = False
                 cell_mod_i = False
+                celular_samsung_i = False
                 activation_date_i = '2001-01-01'
                 condition_i = 'novo-sim'
                 # Percorrer itens do pedido
@@ -113,6 +114,8 @@ def order_import():
                         else: countries_i = False
                     if i['key'] == '_data_ativacao': 
                         activation_date_i = i['value']
+                    if i['key'] == '_celular_samsung': 
+                        celular_samsung_i = True
                     if i['key'] == '_numero_sim': ord_chip_nun_i = i['value']
                 shipping_i = order['shipping_lines'][0]['method_title']
                 order_date_i = DateFormats.dateHour(order['date_created'])
@@ -137,7 +140,6 @@ def order_import():
                     order_status_i = 'AS'
 
                 shipping_i = shipping_i[:40]
-
                 
                 if condition_i == 'reuso-sim':
                     order_status_i = 'RS'
@@ -168,6 +170,7 @@ def order_import():
                     activation_date = activation_date_i,
                     order_status = order_status_i,
                     type_sim = type_sim_i,
+                    celular_samsung = celular_samsung_i,
                     # notes = notes_i
                 )                
 
@@ -323,21 +326,19 @@ def order_import_voice():
                 cell_mod_i = False
                 condition_i = "novo-sim"
                 activation_date_i = '2001-01-01'
-                data_day_i = 'ilimitado'                # Percorrer itens do pedido
+                data_day_i = 'ilimitado'                
+                # Percorrer itens do pedido
                 for i in item['meta_data']:
                     type_sim_i = 'sim'
                     if i['key'] == 'pa_dias': days_i = i['value']
                     calls_i = True
                     countries_i = False
-                    if i['key'] == 'Data de Ativação': 
-                        if i['value'] == None or i['value'] == '': 
-                            activation_date_i = '2001-01-01'
-                        else:
-                            activation_date_i = i['value']
-                    if i['key'] == 'Modelo e marca de celular': cell_mod_i = i['value']
-                    ord_chip_nun_i = '---'
+                    if i['key'] == '_data_ativacao': 
+                        activation_date_i = i['value']
+                    if i['key'] == '_numero_sim': ord_chip_nun_i = i['value']
                 shipping_i = 'Sem Frete'
                 order_date_i = DateFormats.dateHour(order['date_created'])
+         
                 # notes_i = 0
                 
                 if activation_date_i == '2001-01-01':
