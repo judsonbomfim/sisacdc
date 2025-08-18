@@ -48,7 +48,6 @@ def order_import():
             # Se o pedido já foi importado, atualizar status
             status_sis = id_sis.first().order_status
             UpdateStore.upStore(
-                order_id = id_sis.order_id if id_sis.order_id else None,
                 status_g = status_sis if status_sis else None,
             )   
             print(f'---------- Pedido {id_ord} já importado.')
