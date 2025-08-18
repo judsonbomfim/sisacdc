@@ -284,7 +284,16 @@ def ord_edit(request,id):
             else:
                 print("Aviso: Tentativa de atualizar SIM, mas sim_id está vazio")
 
-        
+        # Notes
+        def addNote(t_note):
+            add_sim = Notes( 
+                id_item = Orders.objects.get(pk=order.id),
+                id_user = User.objects.get(pk=request.user.id),
+                note = t_note,
+                type_note = 'S',
+            )
+            add_sim.save()
+            
         # Insert SIM in Order
         def insertSIM(ord_st=None):
             nonlocal qrcode
@@ -348,7 +357,11 @@ def ord_edit(request,id):
             # Gravar SIM e QRCode no site
             if order.item_id_store:
                 sim = order.id_sim.sim
-                qrcode = order.id_sim.link if order.id_sim.link else None    
+                qrcode = order.id_sim.link if order.id_sim.link else None
+            
+            # SIM Notes
+            if sim:
+                addNote(f'Alteração de {order_sim} para {sim}')
             
         else:
             # Troca de SIM
@@ -370,6 +383,10 @@ def ord_edit(request,id):
             if order.item_id_store and order.id_sim:
                 sim = order.id_sim.sim
                 qrcode = order.id_sim.link if order.id_sim.link else None
+            
+            # SIM Notes
+            if sim:
+                addNote(f'Alteração de {order_sim} para {sim}')
 
         # Update Order
         if activation_date == '':
@@ -391,24 +408,13 @@ def ord_edit(request,id):
         order_put.oper_sim = operator
         order_put.save()
         
-        # Notes
-        def addNote(t_note):
-            add_sim = Notes( 
-                id_item = Orders.objects.get(pk=order.id),
-                id_user = User.objects.get(pk=request.user.id),
-                note = t_note,
-                type_note = 'S',
-            )
-            add_sim.save()
         # Save Notes
         if ord_note:
             addNote(ord_note)
         # Date Notes
         if activation_date != order.activation_date:
             addNote(f'Alteração de {DateFormats.dateDMA(str(order.activation_date))} para {DateFormats.dateDMA(str(activation_date))}')
-        # SIM Notes
-        if sim:
-            addNote(f'Alteração de {order_sim} para {sim}')
+
         # Plan Notes
         if up_plan:  # Agora up_plan está inicializado
             addNote(f'Plano alterado')
