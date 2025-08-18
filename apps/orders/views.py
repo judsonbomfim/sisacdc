@@ -442,13 +442,13 @@ def ord_edit(request,id):
         # Atualizar site
         if order.item_id_store:
             UpdateStore.upStore(
-                order_id = order_id if order_id else None,
-                item_id_store = order.item_id_store if order.item_id_store else None,
-                _data_ativacao = activation_date if activation_date else None,
-                _sim = sim if sim else None,
-                _qrcode = qrcode if qrcode else None,
-                _status = ord_st if ord_st else None,
-                status_g = ord_st if ord_st else None,
+                order_id=order_id if order_id else None,
+                item_id_store=order.item_id_store if order.item_id_store else None,
+                _data_ativacao=activation_date.strftime('%Y-%m-%d') if activation_date else None,  # CORRIGIDO: converter date para string
+                _sim=sim if sim else None,
+                _qrcode=qrcode if qrcode else None,
+                _status=ord_st if ord_st else None,
+                status_g=ord_st if ord_st else None,
             )
                 
         for msg_e in msg_error:
