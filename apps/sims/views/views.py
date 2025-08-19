@@ -318,26 +318,28 @@ class ConsumoView(APIView):
 @login_required(login_url='/login/')
 def testeMobileData(request, iccid):
     
-    print(f">>>>>>>>>>>>>>>>>>> ICCID recebido: {iccid}")
+    print(f"=== TESTE MOBILE DATA CM ===")
+    print(f"ICCID: {iccid}")
     
     try:
+        # Chamar método mobileData da classe apiCM
+        mobile_data = apiCM.mobileData(iccid)
         
-        # Chamar API diretamente
-        mobile_data = ApiTC.mobileData(iccid)
+        print(f"Resultado obtido: {mobile_data}")
         
-        print(f">>>>>>>>>>>>>>>>>>> Dados de uso recebidos: {mobile_data}")
-        
+        # Retornar resposta JSON
         return JsonResponse({
             'success': True,
             'iccid': iccid,
-            'mobile_data': mobile_data
+            'mobile_data': mobile_data,
+            'operator': 'CM'
         })
         
     except Exception as e:
-
-        print(f">>>>>>>>>>>>>>>>>>> Erro ao obter dados de uso para ICCID {iccid}: {e}")
-
+        print(f"Erro em testeMobileDataCM: {e}")
+        
         return JsonResponse({
             'success': False,
-            'error': str(e)
+            'error': str(e),
+            'iccid': iccid
         }, status=500)
