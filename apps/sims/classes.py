@@ -385,11 +385,10 @@ class apiCM:
         if api_token == 'error' or not api_token:
             print(f">>>>>>>>>>>>>>>>>>> Erro ao obter token para ICCID {iccid}")
             return 0
-        
-        # Gerar data atual
-        london_tz = pytz.timezone("Europe/London")
-        date_today = datetime.now(london_tz).strftime("%Y%m%d")
-        thirdOrderId = ''.join([str(random.randint(0, 9)) for _ in range(20)])
+
+        # Gerar data atual Pequim
+        beijing_tz = pytz.timezone("Asia/Shanghai")
+        date_today = datetime.now(beijing_tz).strftime("%Y%m%d")
 
         print(f">>>>>>>>>>>>>>>>>>> Data atual formatada: {date_today}")
 
@@ -407,13 +406,9 @@ class apiCM:
         # Corpo da requisição
         payload = json.dumps({
             "accessToken": api_token,
-            # "himsi": "0",
             "iccid": iccid,
             "beginTime": date_today,
             "endTime": date_today,
-            # "childOrderId":"",
-            # "thirdOrderId": thirdOrderId,
-            # "ext":""
         })
         print(f">>>>>>>>>>>>>>>>>>> Payload da requisição: {payload}")
 
