@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from ..serializers import ConsumoSerializer
-from ..classes import ApiTC
+from ..classes import ApiTC, apiCM
 from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
 from ..tasks import sims_in_orders
