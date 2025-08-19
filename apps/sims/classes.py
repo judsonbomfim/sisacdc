@@ -372,6 +372,11 @@ class apiCM:
         app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
         
+        # Verificar se token foi obtido com sucesso
+        if api_token == 'error' or not api_token:
+            print(f"Erro ao obter token para ICCID {iccid}")
+            return 0
+        
         # Gerar data atual
         london_tz = pytz.timezone("Europe/London")
         date_today = datetime.now(london_tz).strftime("%Y%m%d")
@@ -410,6 +415,9 @@ class apiCM:
                 data = res.read()
                 try:
                     data_dict = json.loads(data)
+                    
+                    print(f"Resposta completa da API: {data_dict}")
+                    
                     # Extrair dados de uso se existirem
                     mobile_data = data_dict
                     print(f">>>>>>>>>>>>>>>>>>>> mobile_data: {mobile_data}")                    
