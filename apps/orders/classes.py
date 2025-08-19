@@ -84,7 +84,6 @@ class UpdateStore():
             apiStore = ApiStore.conectApiStore()
             apiStore.put(f'orders/{order_id}', update_store)
 
-
 class NoteStore():
     @staticmethod
     def addNoteStore(order_id,note,user_name='Sistema'):

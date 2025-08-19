@@ -1,8 +1,10 @@
 from datetime import datetime
 import http.client
+import base64
+import hashlib
 import json
 import time
-from unittest import result
+from urllib.parse import urlparse
 from django.conf import settings
 import pytz
 
@@ -305,22 +307,17 @@ class ApiTI:
         conn.close()
         return mobile_data
 
-
 class apiCM:
+
+    @staticmethod
+    def generate_password_digest(app_secret):
+        nonce = str(int(time.time() * 1000))
+        created = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        digest = base64.b64encode(hashlib.sha256((nonce + created + app_secret).encode('utf-8')).digest()).decode('utf-8')
+        return nonce, created, digest
+    
     @staticmethod
     def get_token():
-        import base64
-        import hashlib
-        import json
-        import http.client
-        from urllib.parse import urlparse
-        import time
-
-        def generate_password_digest(app_secret):
-            nonce = str(int(time.time() * 1000))
-            created = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-            digest = base64.b64encode(hashlib.sha256((nonce + created + app_secret).encode('utf-8')).digest()).decode('utf-8')
-            return nonce, created, digest
 
         # URL do endpoint
         url_api = f'{settings.APICM_URL}/aep/APP_getAccessToken_SBO/v1'
@@ -329,7 +326,7 @@ class apiCM:
         app_secret = settings.APICM_SECRET
 
         # Gerar PasswordDigest
-        nonce, created, password_digest = generate_password_digest(app_secret)
+        nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
 
         # Corpo da requisição
         payload = json.dumps({
@@ -366,5 +363,54 @@ class apiCM:
         conn.close()
             
         return result_token
+    
+    @staticmethod
+    def mobileData(iccid):
+        url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
+        parsed_url = urlparse(url_api)
+        app_key = settings.APICM_KEY
+        app_secret = settings.APICM_SECRET
+        api_token = apiCM.get_token()
+
+        # Gerar PasswordDigest
+        nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
+
+        # Cabeçalhos da requisição
+        headers = {
+            'Content-Type': 'application/json',
+            "Accept": "application/json",
+            "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
+            "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
+        }
+
+        # Corpo da requisição
+        payload = json.dumps({
+            "accessToken": api_token,
+            "himsi":"",
+            "iccid":"89852342022135923604",
+            "beginTime":"20250818",
+            "endTime":"20250818",
+            "childOrderId":"",
+            "thirdOrderId":"",
+            "ext":""
+        })
+
+        # Fazer a requisição POST com tempo limite
+        try:
+            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=100)
+            conn.request("POST", parsed_url.path, payload, headers)
+            res = conn.getresponse()
+
+            # Verificar o status da resposta
+            data = res.read()
+        except TimeoutError as e:
+            print(f"TimeoutError: {e}")
+            data = None
+        except Exception as e:
+            print(f"Erro ao conectar: {e}")
+            data = None
         
+        # Resultado
+        print(f">>>>>>>>>>>>>>>>>>> Status da resposta: {data}")
         
+
