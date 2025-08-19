@@ -1,13 +1,17 @@
-from django.contrib.auth.decorators import login_required
-from rolepermissions.decorators import has_permission_decorator
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.urls import reverse
 import csv
 import imghdr
-from datetime import date
+import boto3
+from django.contrib.auth.decorators import login_required
+from rolepermissions.decorators import has_permission_decorator
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.urls import reverse
 from django.core.paginator import Paginator
 from django.contrib import messages
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.http import JsonResponse
+from datetime import date
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,9 +19,6 @@ from ..serializers import ConsumoSerializer
 from ..classes import ApiTC
 from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
-import boto3
-from django.conf import settings
-from django.core.files.storage import default_storage
 from ..tasks import sims_in_orders
 
 
@@ -314,6 +315,21 @@ class ConsumoView(APIView):
             return Response({"error": f"Erro ao consultar consumo: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
-def testeMobileData(iccid):
-    mobile_data = ApiTC.mobileData(iccid)
-    return mobile_data
+@login_required(login_url='/login/')
+def testeMobileData(request, iccid)
+        
+    try:
+        # Chamar API diretamente
+        mobile_data = ApiTC.mobileData(iccid)
+        
+        return JsonResponse({
+            'success': True,
+            'iccid': iccid,
+            'mobile_data': mobile_data
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
