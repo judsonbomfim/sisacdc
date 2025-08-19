@@ -316,11 +316,12 @@ class ConsumoView(APIView):
         
 
 @login_required(login_url='/login/')
-def testeMobileData(request, iccid):
+def testeMobileData(iccid):
     
     print(f">>>>>>>>>>>>>>>>>>> ICCID recebido: {iccid}")
     
     try:
+        
         # Chamar API diretamente
         mobile_data = ApiTC.mobileData(iccid)
         
@@ -333,6 +334,9 @@ def testeMobileData(request, iccid):
         })
         
     except Exception as e:
+
+        print(f">>>>>>>>>>>>>>>>>>> Erro ao obter dados de uso para ICCID {iccid}: {e}")
+
         return JsonResponse({
             'success': False,
             'error': str(e)
