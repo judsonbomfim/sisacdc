@@ -62,9 +62,7 @@ def sims_in_orders():
                 'chip-internacional-egito-premium',
                 'chip-internacional-indonesia-premium',
             }
-            if celular_samsung == True and type_sim_i == 'esim':
-                operator_i = 'CM'
-            elif product_i in planos:
+            if product_i in planos:
                 operator_i = 'TI'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
