@@ -371,6 +371,10 @@ class apiCM:
         app_key = settings.APICM_KEY
         app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
+        
+        # Gerar data atual
+        london_tz = pytz.timezone("Europe/London")
+        date_today = datetime.now(london_tz).strftime("%Y%m%d")
 
         # Gerar PasswordDigest
         nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
@@ -388,8 +392,8 @@ class apiCM:
             "accessToken": api_token,
             "himsi":"",
             "iccid": iccid,
-            "beginTime":"20250818",
-            "endTime":"20250818",
+            "beginTime": date_today,
+            "endTime": date_today,
             "childOrderId":"",
             "thirdOrderId":"",
             "ext":""
@@ -402,16 +406,29 @@ class apiCM:
             res = conn.getresponse()
 
             # Verificar o status da resposta
-            data = res.read()
-        except TimeoutError as e:
-            print(f"TimeoutError: {e}")
-            data = None
+            if res.status == 200:
+                data = res.read()
+                try:
+                    data_dict = json.loads(data)
+                    # Extrair dados de uso se existirem
+                    mobile_data = data_dict.get('dataUsage', 0)
+                    return mobile_data
+                except json.JSONDecodeError:
+                    print(f"Erro ao decodificar JSON: {data}")
+                    return 0
+            else:
+                print(f"Erro na API: Status {res.status}")
+                return 0
+                
         except Exception as e:
-            print(f"Erro ao conectar: {e}")
-            data = None
+            print(f"Erro ao conectar com API CM: {e}")
+            return 0
+        finally:
+            if 'conn' in locals():
+                conn.close()
         
-        # Resultado
-        print(f">>>>>>>>>>>>>>>>>>> Status da resposta: {data}")
-        return data
+        # # Resultado
+        # print(f">>>>>>>>>>>>>>>>>>> Status da resposta: {data}")
+        # return data
         
 
