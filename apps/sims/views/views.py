@@ -316,7 +316,7 @@ class ConsumoView(APIView):
         
 
 @login_required(login_url='/login/')
-def testeMobileData(iccid):
+def testeMobileData(request, iccid):
     
     print(f">>>>>>>>>>>>>>>>>>> ICCID recebido: {iccid}")
     
