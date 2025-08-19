@@ -411,7 +411,8 @@ class apiCM:
                 try:
                     data_dict = json.loads(data)
                     # Extrair dados de uso se existirem
-                    mobile_data = data_dict.get('dataUsage', 0)
+                    mobile_data = data_dict
+                    print(f">>>>>>>>>>>>>>>>>>>> mobile_data: {mobile_data}")                    
                     return mobile_data
                 except json.JSONDecodeError:
                     print(f"Erro ao decodificar JSON: {data}")
