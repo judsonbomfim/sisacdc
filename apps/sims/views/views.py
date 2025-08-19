@@ -317,6 +317,9 @@ class ConsumoView(APIView):
 
 @login_required(login_url='/login/')
 def testeMobileData(request, iccid):
+    
+    print(f">>>>>>>>>>>>>>>>>>> ICCID recebido: {iccid}")
+    
     try:
         # Chamar API diretamente
         mobile_data = ApiTC.mobileData(iccid)

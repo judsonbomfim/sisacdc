@@ -308,6 +308,8 @@ class ApiTI:
         return mobile_data
 
 class apiCM:
+    
+    print(">>>>>>>>>>>>>>>>>>> Classe apiCM iniciada")
 
     @staticmethod
     def generate_password_digest(app_secret):
@@ -319,6 +321,7 @@ class apiCM:
     @staticmethod
     def get_token():
 
+        print(">>>>>>>>>>>>>>>>>>> Obtendo token de acesso para API CM...")
         # URL do endpoint
         url_api = f'{settings.APICM_URL}/aep/APP_getAccessToken_SBO/v1'
         parsed_url = urlparse(url_api)
@@ -420,7 +423,7 @@ class apiCM:
                     
                     # Extrair dados de uso se existirem
                     mobile_data = data_dict
-                    print(f">>>>>>>>>>>>>>>>>>>> mobile_data: {mobile_data}")                    
+                    print(f">>>>>>>>>>>>>>>>>>> mobile_data: {mobile_data}")
                     return mobile_data
                 except json.JSONDecodeError:
                     print(f"Erro ao decodificar JSON: {data}")
