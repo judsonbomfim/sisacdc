@@ -3,6 +3,7 @@ import http.client
 import base64
 import hashlib
 import json
+import random
 import time
 from urllib.parse import urlparse
 from django.conf import settings
@@ -388,6 +389,9 @@ class apiCM:
         # Gerar data atual
         london_tz = pytz.timezone("Europe/London")
         date_today = datetime.now(london_tz).strftime("%Y%m%d")
+        thirdOrderId = ''.join([str(random.randint(0, 9)) for _ in range(20)])
+
+        print(f">>>>>>>>>>>>>>>>>>> Data atual formatada: {date_today}")
 
         # Gerar PasswordDigest
         nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
@@ -403,14 +407,15 @@ class apiCM:
         # Corpo da requisição
         payload = json.dumps({
             "accessToken": api_token,
-            "himsi":"",
+            "himsi": "O",
             "iccid": iccid,
             "beginTime": date_today,
             "endTime": date_today,
             "childOrderId":"",
-            "thirdOrderId":"",
+            "thirdOrderId": thirdOrderId,
             "ext":""
         })
+        print(f">>>>>>>>>>>>>>>>>>> Payload da requisição: {payload}")
 
         # Fazer a requisição POST com tempo limite
         try:
