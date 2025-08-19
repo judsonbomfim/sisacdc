@@ -8,5 +8,5 @@ urlpatterns = [
     path('sims/pedidos', views.sims_ord, name='sims_ord'),
     path('estoque/exportar', views.exportSIMs, name='exportSIMs'),  
     path('alterar/operadora', views.alterarOperadora, name='alterarOperadora'), 
-    path('mobile_data/<int:esim>', views.testeMobileData, name='testeMobileData'), 
+    path('mobile_data/<int:iccid>/', views.testeMobileData, name='testeMobileData'), 
 ]
