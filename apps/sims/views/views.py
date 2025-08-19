@@ -324,6 +324,8 @@ def testeMobileData(request, iccid):
         # Chamar API diretamente
         mobile_data = ApiTC.mobileData(iccid)
         
+        print(f">>>>>>>>>>>>>>>>>>> Dados de uso recebidos: {mobile_data}")
+        
         return JsonResponse({
             'success': True,
             'iccid': iccid,

@@ -369,15 +369,20 @@ class apiCM:
     
     @staticmethod
     def mobileData(iccid):
+        
+        print(f">>>>>>>>>>>>>>>>>>> Obtendo dados de uso para ICCID: {iccid}")
+        
         url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
         app_key = settings.APICM_KEY
         app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
-        
+
+        print(f">>>>>>>>>>>>>>>>>>> Token obtido: {api_token}")
+
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
-            print(f"Erro ao obter token para ICCID {iccid}")
+            print(f">>>>>>>>>>>>>>>>>>> Erro ao obter token para ICCID {iccid}")
             return 0
         
         # Gerar data atual
@@ -412,6 +417,8 @@ class apiCM:
             conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=100)
             conn.request("POST", parsed_url.path, payload, headers)
             res = conn.getresponse()
+            
+            print(f">>>>>>>>>>>>>>>>>>> Status da resposta: {res.status}")
 
             # Verificar o status da resposta
             if res.status == 200:
@@ -419,21 +426,21 @@ class apiCM:
                 try:
                     data_dict = json.loads(data)
                     
-                    print(f"Resposta completa da API: {data_dict}")
+                    print(f">>>>>>>>>>>>>>>>>>> Resposta completa da API: {data_dict}")
                     
                     # Extrair dados de uso se existirem
                     mobile_data = data_dict
                     print(f">>>>>>>>>>>>>>>>>>> mobile_data: {mobile_data}")
                     return mobile_data
                 except json.JSONDecodeError:
-                    print(f"Erro ao decodificar JSON: {data}")
+                    print(f">>>>>>>>>>>>>>>>>>> Erro ao decodificar JSON: {data}")
                     return 0
             else:
-                print(f"Erro na API: Status {res.status}")
+                print(f">>>>>>>>>>>>>>>>>>> Erro na API: Status {res.status}")
                 return 0
                 
         except Exception as e:
-            print(f"Erro ao conectar com API CM: {e}")
+            print(f">>>>>>>>>>>>>>>>>>> Erro ao conectar com API CM: {e}")
             return 0
         finally:
             if 'conn' in locals():
