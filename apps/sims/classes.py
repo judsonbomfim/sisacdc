@@ -407,13 +407,13 @@ class apiCM:
         # Corpo da requisição
         payload = json.dumps({
             "accessToken": api_token,
-            "himsi": "O",
+            # "himsi": "0",
             "iccid": iccid,
             "beginTime": date_today,
             "endTime": date_today,
-            "childOrderId":"",
-            "thirdOrderId": thirdOrderId,
-            "ext":""
+            # "childOrderId":"",
+            # "thirdOrderId": thirdOrderId,
+            # "ext":""
         })
         print(f">>>>>>>>>>>>>>>>>>> Payload da requisição: {payload}")
 
