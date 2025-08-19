@@ -312,3 +312,8 @@ class ConsumoView(APIView):
         except Exception as e:
             # Tratamento genérico de erros
             return Response({"error": f"Erro ao consultar consumo: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+def testeMobileData(iccid):
+    mobile_data = ApiTC.mobileData(iccid)
+    return mobile_data

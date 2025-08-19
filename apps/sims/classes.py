@@ -387,7 +387,7 @@ class apiCM:
         payload = json.dumps({
             "accessToken": api_token,
             "himsi":"",
-            "iccid":"89852342022135923604",
+            "iccid": iccid,
             "beginTime":"20250818",
             "endTime":"20250818",
             "childOrderId":"",
@@ -412,5 +412,6 @@ class apiCM:
         
         # Resultado
         print(f">>>>>>>>>>>>>>>>>>> Status da resposta: {data}")
+        return data
         
 
