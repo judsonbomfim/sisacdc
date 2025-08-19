@@ -322,6 +322,9 @@ def testeMobileData(request, iccid):
     print(f"ICCID: {iccid}")
     
     try:
+        # Verificar se a classe foi importada corretamente
+        print(f"Classe apiCM disponível: {apiCM}")
+        
         # Chamar método mobileData da classe apiCM
         mobile_data = apiCM.mobileData(iccid)
         
