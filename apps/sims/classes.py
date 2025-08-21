@@ -407,9 +407,9 @@ class apiCM:
         payload = json.dumps({
             "accessToken": api_token,
             "iccid": iccid,
-            # "childOrderId": "1956854506349832930",
-            "beginTime": date_today,
-            "endTime": date_today,            
+            "childOrderId": "1956854506349832930",
+            "beginTime": "20250820",
+            "endTime": "20250820",            
         })
 
         # Fazer a requisição POST com tempo limite
