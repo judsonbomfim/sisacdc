@@ -93,7 +93,7 @@ def send_email_sims(id=None):
                     _data_ativacao = activation_date if activation_date else None,
                     _sim = sim if sim else None,
                     _qrcode = qrcode if qrcode else None,
-                    _status = 'Agd. Ativação',
+                    _status='AA',
                     status_g = 'AA',
                 )             
         
