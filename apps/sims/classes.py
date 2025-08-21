@@ -388,7 +388,7 @@ class apiCM:
 
         # Gerar data atual Pequim
         beijing_tz = pytz.timezone("Asia/Shanghai")
-        date_today = datetime.now().strftime("%Y%m%d")
+        date_today = datetime.now(beijing_tz).strftime("%Y%m%d")
 
         print(f">>>>>>>>>>>>>>>>>>> Data atual formatada: {date_today}")
 
@@ -407,8 +407,8 @@ class apiCM:
         payload = json.dumps({
             "accessToken": api_token,
             "iccid": iccid,
-            "beginTime": date_today,
-            "endTime": date_today,
+            "beginTime": "20250819",
+            "endTime": "20250819",
         })
 
         # Fazer a requisição POST com tempo limite
