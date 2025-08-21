@@ -388,7 +388,7 @@ class apiCM:
 
         # Gerar data atual Pequim
         beijing_tz = pytz.timezone("Asia/Shanghai")
-        date_today = datetime.now(beijing_tz).strftime("%Y%m%d")
+        date_today = datetime.now().strftime("%Y%m%d")
 
         print(f">>>>>>>>>>>>>>>>>>> Data atual formatada: {date_today}")
 
@@ -400,7 +400,7 @@ class apiCM:
             'Content-Type': 'application/json',
             "Accept": "application/json",
             "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
-            "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
+            "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
         # Corpo da requisição
@@ -410,7 +410,6 @@ class apiCM:
             "beginTime": date_today,
             "endTime": date_today,
         })
-        print(f">>>>>>>>>>>>>>>>>>> Payload da requisição: {payload}")
 
         # Fazer a requisição POST com tempo limite
         try:
@@ -418,8 +417,6 @@ class apiCM:
             conn.request("POST", parsed_url.path, payload, headers)
             res = conn.getresponse()
             
-            print(f">>>>>>>>>>>>>>>>>>> Status da resposta: {res.status}")
-
             # Verificar o status da resposta
             if res.status == 200:
                 data = res.read()
