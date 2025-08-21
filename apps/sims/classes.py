@@ -371,7 +371,6 @@ class apiCM:
     @staticmethod
     def mobileData(iccid):
         
-        print(f">>>>>>>>>>>>>>>>>>> Obtendo dados de uso para ICCID: {iccid}")
         
         url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
@@ -379,18 +378,14 @@ class apiCM:
         app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
 
-        print(f">>>>>>>>>>>>>>>>>>> Token obtido: {api_token}")
 
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
-            print(f">>>>>>>>>>>>>>>>>>> Erro ao obter token para ICCID {iccid}")
             return 0
 
         # Gerar data atual Pequim
         beijing_tz = pytz.timezone("Asia/Shanghai")
         date_today = datetime.now(beijing_tz).strftime("%Y%m%d")
-
-        print(f">>>>>>>>>>>>>>>>>>> Data atual formatada: {date_today}")
 
         # Gerar PasswordDigest
         nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
@@ -408,6 +403,8 @@ class apiCM:
             "accessToken": api_token,
             "iccid": iccid,
             "childOrderId": "1956854506349832930",
+            "todayFlow": date_today,
+            "value": 2,
         })
 
         # Fazer a requisição POST com tempo limite
@@ -424,17 +421,13 @@ class apiCM:
                                         
                     # Extrair dados de uso se existirem
                     mobile_data = data_dict
-                    print(f">>>>>>>>>>>>>>>>>>> mobile_data: {mobile_data}")
                     return mobile_data
                 except json.JSONDecodeError:
-                    print(f">>>>>>>>>>>>>>>>>>> Erro ao decodificar JSON: {data}")
                     return 0
             else:
-                print(f">>>>>>>>>>>>>>>>>>> Erro na API: Status {res.status}")
                 return 0
                 
         except Exception as e:
-            print(f">>>>>>>>>>>>>>>>>>> Erro ao conectar com API CM: {e}")
             return 0
         finally:
             if 'conn' in locals():
