@@ -384,10 +384,6 @@ def ord_edit(request,id):
                 sim = order.id_sim.sim
                 qrcode = order.id_sim.link if order.id_sim.link else None
             
-            # SIM Notes
-            if sim:
-                addNote(f'Alteração de {order_sim} para {sim}')
-
         # Update Order
         if activation_date == '':
             activation_date = order.activation_date
