@@ -408,6 +408,8 @@ class apiCM:
             "accessToken": api_token,
             "iccid": iccid,
             "childOrderId": "1956854506349832930",
+            "beginTime": "20250819",
+            "endTime": "20250819",
         })
 
         # Fazer a requisição POST com tempo limite
@@ -421,9 +423,7 @@ class apiCM:
                 data = res.read()
                 try:
                     data_dict = json.loads(data)
-                    
-                    print(f">>>>>>>>>>>>>>>>>>> Resposta completa da API: {data_dict}")
-                    
+                                        
                     # Extrair dados de uso se existirem
                     mobile_data = data_dict
                     print(f">>>>>>>>>>>>>>>>>>> mobile_data: {mobile_data}")
