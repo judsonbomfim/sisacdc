@@ -403,7 +403,7 @@ class apiCM:
             "accessToken": api_token,
             "iccid": iccid,
             "childOrderId": "1956854506349832930",     
-            "ext": {"todayFlow": 2,}
+            "ext": {"todayFlow": 2}
         })
 
         # Fazer a requisição POST com tempo limite
