@@ -408,8 +408,8 @@ class apiCM:
             "accessToken": api_token,
             "iccid": iccid,
             "childOrderId": "1956854506349832930",
-            "beginTime": "20250819",
-            "endTime": "20250819",
+            "beginTime": date_today,
+            "endTime": date_today,
             
         })
 
