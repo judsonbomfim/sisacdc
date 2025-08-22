@@ -484,7 +484,6 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         order_plan = order.get_product_display()
         try: type_sim = order.id_sim.type_sim
         except: type_sim = 'esim'
-        apiStore = ApiStore.conectApiStore()
 
         # Save status System
         order.order_status = ord_s
