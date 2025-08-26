@@ -498,7 +498,7 @@ class apiCM:
                 mobile_data = soma_qtaconsumption
                 print(f">>>>>>>>>>>>>>>>>>> mobile_data {mobile_data}")
                 return mobile_data
-            except (json.JSONDecodeError, KeyError, IndexError, TypeError) as e:
+            except (KeyError, IndexError, TypeError) as e:
                 print(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso: {e}")
                 print(f">>>>>>>>>>>>>>>>>>> data_dict: {data_dict}")
                 print(f">>>>>>>>>>>>>>>>>>> date_today: {date_today}")
