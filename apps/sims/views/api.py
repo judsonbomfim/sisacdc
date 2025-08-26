@@ -11,8 +11,8 @@ class ConsumoView(APIView):
 
     def get(self, request, iccid):
 
-        sim = Sims.objects.filter(id_sim__sim=iccid).values('operator').first()
-        sim_operator = sim['operator'] if sim else None
+        sim = Sims.objects.filter(id_sim__sim=iccid).first()
+        sim_operator = sim.operator if sim else None
         print(f"ICCID recebido: {iccid}")
         print(f"Operadora do SIM: {sim_operator}")
 
