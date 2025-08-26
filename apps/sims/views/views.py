@@ -320,11 +320,9 @@ def testeMobileData(request, iccid):
     
     try:
         # Verificar se a classe foi importada corretamente
-        print(f"Classe apiCM disponível: {apiCM}")
-        
+        print(f"Classe apiCM disponível: {apiCM}")        
         # Chamar método mobileData da classe apiCM
-        mobile_data = apiCM.mobileData(iccid)
-                
+        mobile_data = apiCM.mobileData(iccid)        
         # Retornar resposta JSON
         return JsonResponse({
             'success': True,
