@@ -451,6 +451,7 @@ class apiCM:
         parsed_url = urlparse(url_api)
         api_token = apiCM.get_token()
         childOrderId = apiCM.childOrderId(iccid)
+        print(f">>>>>>>>>>>>>>>>>>> childOrderId {childOrderId}")
 
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
