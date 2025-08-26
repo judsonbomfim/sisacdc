@@ -399,9 +399,7 @@ class apiCM:
         url_api = f'{settings.APICM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
         parsed_url = urlparse(url_api)
         api_token = apiCM.get_token()
-
-        print(f">>>>>>>>>>>>>>>>>>> api_token {api_token}")
-
+        
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
             print(f">>>>>>>>>>>>>>>>>>> Erro ao obter token de acesso para API CM")
@@ -425,8 +423,6 @@ class apiCM:
             "language": 2,
         })
 
-        print(f">>>>>>>>>>>>>>>>>>> Payload da requisição: {payload}")
-
         # Fazer a requisição POST com tempo limite
         try:
             conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=100)
@@ -436,10 +432,8 @@ class apiCM:
             # Verificar o status da resposta               
             try:
                 data = res.read()
-                print(f">>>>>>>>>>>>>>>>>>> Resposta da API (body): {data}") 
                 data_dict = json.loads(data)
                 orderId = data_dict["userDataBundles"][0]["subscriptionKey"]
-                print(f">>>>>>>>>>>>>>>>>>> orderId {orderId}")
                 return orderId
             except (json.JSONDecodeError, KeyError, IndexError, TypeError):
                 return 0
@@ -452,12 +446,11 @@ class apiCM:
                
     @staticmethod
     def mobileData(iccid):
-        
-        print(f">>>>>>>>>>>>>>>>>>> childOrderId {apiCM.childOrderId(iccid)}") 
-        
+                
         url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
         api_token = apiCM.get_token()
+        childOrderId = apiCM.childOrderId(iccid)
 
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
@@ -482,7 +475,7 @@ class apiCM:
         payload = json.dumps({
             "accessToken": api_token,
             "iccid": iccid,
-            "childOrderId": "1956854506349832930",
+            "childOrderId": childOrderId,
             "ext": {"todayFlow": 2}
         })
 
@@ -500,6 +493,7 @@ class apiCM:
                                         
                     # Extrair dados de uso se existirem
                     mobile_data = data_dict
+                    print(f">>>>>>>>>>>>>>>>>>> mobile_data {mobile_data}")
                     return mobile_data
                 except json.JSONDecodeError:
                     return 0
