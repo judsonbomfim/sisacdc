@@ -318,18 +318,13 @@ class ConsumoView(APIView):
 @login_required(login_url='/login/')
 def testeMobileData(request, iccid):
     
-    print(f"=== TESTE MOBILE DATA CM ===")
-    print(f"ICCID: {iccid}")
-    
     try:
         # Verificar se a classe foi importada corretamente
         print(f"Classe apiCM disponível: {apiCM}")
         
         # Chamar método mobileData da classe apiCM
         mobile_data = apiCM.mobileData(iccid)
-        
-        print(f"Resultado obtido: {mobile_data}")
-        
+                
         # Retornar resposta JSON
         return JsonResponse({
             'success': True,
