@@ -1,13 +1,14 @@
-from datetime import datetime
 import http.client
 import base64
 import hashlib
 import json
 import random
 import time
-from urllib.parse import urlparse
-from django.conf import settings
 import pytz
+from datetime import datetime
+from django.conf import settings
+from django.core.cache import cache
+from urllib.parse import urlparse
 
 
 class ApiTC:
@@ -15,6 +16,11 @@ class ApiTC:
     # Get tokem de acesso a API
     @staticmethod
     def get_token():
+        # Verificar token
+        token_api = cache.get('api_tc_token')
+        if token_api:
+            return token_api
+        
         time.sleep(0.5)
 
         payload_token = json.dumps({
@@ -31,6 +37,8 @@ class ApiTC:
         res_token = conn.getresponse()
         data_token = json.loads(res_token.read())
         token_api = data_token["AccessToken"]
+        # Gravar token
+        cache.set('api_tc_token', token_api, timeout=540)
         conn.close()
         return token_api
 
@@ -164,6 +172,11 @@ class ApiTI:
     # Get tokem de acesso a API
     @staticmethod
     def get_token():
+        # Verificar token
+        token_api = cache.get('api_ti_token')
+        if token_api:
+            return token_api
+        
         time.sleep(0.5)
 
         payload_token = json.dumps({
@@ -180,6 +193,8 @@ class ApiTI:
         res_token = conn.getresponse()
         data_token = json.loads(res_token.read())
         token_api = data_token["AccessToken"]
+        # Gravar token
+        cache.set('api_ti_token', token_api, timeout=540)
         conn.close()
         return token_api
 
@@ -311,6 +326,9 @@ class ApiTI:
 class apiCM:
     
     print(">>>>>>>>>>>>>>>>>>> Classe apiCM iniciada")
+    
+    app_key = settings.APICM_KEY
+    app_secret = settings.APICM_SECRET
 
     @staticmethod
     def generate_password_digest(app_secret):
@@ -321,13 +339,15 @@ class apiCM:
     
     @staticmethod
     def get_token():
-
+        
+        api_token = cache.get('api_cm_token')
+        if api_token:
+            return api_token
+        
         print(">>>>>>>>>>>>>>>>>>> Obtendo token de acesso para API CM...")
         # URL do endpoint
         url_api = f'{settings.APICM_URL}/aep/APP_getAccessToken_SBO/v1'
         parsed_url = urlparse(url_api)
-        app_key = settings.APICM_KEY
-        app_secret = settings.APICM_SECRET
 
         # Gerar PasswordDigest
         nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
@@ -359,6 +379,8 @@ class apiCM:
                 if data:
                     data_dict = json.loads(data)
                     result_token = data_dict.get('accessToken')
+                    if result_token:
+                        cache.set('api_cm_token', result_token, timeout=540)
                 else:
                     result_token = 'error: resposta vazia'
             except json.JSONDecodeError:
@@ -368,16 +390,72 @@ class apiCM:
             
         return result_token
     
+
+    @staticmethod
+    def childOrderId(iccid):        
+        
+        url_api = f'{settings.APICM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
+        parsed_url = urlparse(url_api)
+        api_token = apiCM.get_token()
+
+        # Verificar se token foi obtido com sucesso
+        if api_token == 'error' or not api_token:
+            return 0
+
+        # Gerar data atual Pequim
+        beijing_tz = pytz.timezone("Asia/Shanghai")
+        date_today = datetime.now(beijing_tz).strftime("%Y%m%d")
+
+        # Gerar PasswordDigest
+        nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
+
+        # Cabeçalhos da requisição
+        headers = {
+            'Content-Type': 'application/json',
+            "Accept": "application/json",
+            "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
+            "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
+        }
+
+        # Corpo da requisição
+        payload = json.dumps({
+            "accessToken": api_token,
+            "iccid": iccid,
+        })
+
+        # Fazer a requisição POST com tempo limite
+        try:
+            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=100)
+            conn.request("POST", parsed_url.path, payload, headers)
+            res = conn.getresponse()
+            
+            # Verificar o status da resposta
+            if res.status == 200:
+                data = res.read()
+                try:
+                    data_dict = json.loads(data)                                        
+                    # Extrair dados de uso se existirem
+                    orderId = data_dict
+                    return orderId
+                except json.JSONDecodeError:
+                    return 0
+            else:
+                return 0
+                
+        except Exception as e:
+            return 0
+        finally:
+            if 'conn' in locals():
+                conn.close()
+               
     @staticmethod
     def mobileData(iccid):
         
+        print(f">>>>>>>>>>>>>>>>>>> {childOrderId(iccid)}") 
         
         url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
-        app_key = settings.APICM_KEY
-        app_secret = settings.APICM_SECRET
         api_token = apiCM.get_token()
-
 
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
@@ -431,6 +509,9 @@ class apiCM:
         finally:
             if 'conn' in locals():
                 conn.close()
+
+
+
         
         # # Resultado
         # print(f">>>>>>>>>>>>>>>>>>> Status da resposta: {data}")
