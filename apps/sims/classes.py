@@ -489,6 +489,8 @@ class apiCM:
             "accessToken": api_token,
             "iccid": iccid,
             # "childOrderId": "1956854506349832930",
+            "beginTime": date_today,
+            "endTime": date_today,
             "ext": {"todayFlow": 2}
         })
 
