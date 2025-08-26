@@ -1183,7 +1183,7 @@ def simActivateCM(id=None):
         url_api = f'{settings.ApiCM_URL}/aep/APP_createOrder_SBO/v1'
         parsed_url = urlparse(url_api)
         app_key = settings.APICM_KEY
-        app_secret = settings.ApiCM_SECRET
+        app_secret = settings.APICM_SECRET
 
         # Gerar PasswordDigest
         nonce, created, password_digest = generate_password_digest(app_secret)

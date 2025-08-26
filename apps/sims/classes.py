@@ -328,7 +328,7 @@ class ApiCM:
     print(">>>>>>>>>>>>>>>>>>> Classe ApiCM iniciada")
     
     app_key = settings.APICM_KEY
-    app_secret = settings.ApiCM_SECRET
+    app_secret = settings.APICM_SECRET
 
     @staticmethod
     def generate_password_digest(app_secret):
