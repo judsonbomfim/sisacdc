@@ -16,7 +16,7 @@ class ConsumoView(APIView):
         print(f"Operadora do SIM: {sim_operator}")
 
         try:
-            if sim_operator == 'TC':
+            if sim_operator == 'TC' or sim_operator == 'TI':
                 mobile_data = ApiTC.mobileData(iccid)
             elif sim_operator == 'CM':
                 mobile_data = ApiCM.mobileData(iccid)
