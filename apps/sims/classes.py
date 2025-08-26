@@ -350,11 +350,11 @@ class apiCM:
         parsed_url = urlparse(url_api)
 
         # Gerar PasswordDigest
-        nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
+        nonce, created, password_digest = apiCM.generate_password_digest(apiCM.app_secret)
 
         # Corpo da requisição
         payload = json.dumps({
-            "id": app_key,
+            "id": apiCM.app_key,
             "type": "106",
         })
 
@@ -363,7 +363,7 @@ class apiCM:
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
-            "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
+            "X-WSSE": f'UsernameToken Username="{apiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
         }
 
         conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
@@ -407,14 +407,14 @@ class apiCM:
         date_today = datetime.now(beijing_tz).strftime("%Y%m%d")
 
         # Gerar PasswordDigest
-        nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
+        nonce, created, password_digest = apiCM.generate_password_digest(apiCM.app_secret)
 
         # Cabeçalhos da requisição
         headers = {
             'Content-Type': 'application/json',
             "Accept": "application/json",
             "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
-            "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
+            "X-WSSE": f'UsernameToken Username="{apiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
         # Corpo da requisição
@@ -466,14 +466,14 @@ class apiCM:
         date_today = datetime.now(beijing_tz).strftime("%Y%m%d")
 
         # Gerar PasswordDigest
-        nonce, created, password_digest = apiCM.generate_password_digest(app_secret)
+        nonce, created, password_digest = apiCM.generate_password_digest(apiCM.app_secret)
 
         # Cabeçalhos da requisição
         headers = {
             'Content-Type': 'application/json',
             "Accept": "application/json",
             "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
-            "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
+            "X-WSSE": f'UsernameToken Username="{apiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
         # Corpo da requisição
