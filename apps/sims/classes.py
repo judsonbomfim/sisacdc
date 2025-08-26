@@ -438,6 +438,7 @@ class apiCM:
                 data = res.read()
                 print(f">>>>>>>>>>>>>>>>>>> Resposta da API (body): {data}") 
                 orderId = data["userDataBundles"][0]["subscriptionKey"]
+                print(f">>>>>>>>>>>>>>>>>>> orderId {orderId}")
                 return orderId
             except json.JSONDecodeError:
                 return 0
