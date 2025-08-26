@@ -392,14 +392,19 @@ class apiCM:
     
 
     @staticmethod
-    def childOrderId(iccid):        
-        
+    def childOrderId(iccid):
+
+        print(f">>>>>>>>>>>>>>>>>>> Acessando childOrderId {iccid}")
+
         url_api = f'{settings.APICM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
         parsed_url = urlparse(url_api)
         api_token = apiCM.get_token()
 
+        print(f">>>>>>>>>>>>>>>>>>> api_token {api_token}")
+
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
+            print(f">>>>>>>>>>>>>>>>>>> Erro ao obter token de acesso para API CM")
             return 0
 
         # Gerar data atual Pequim
@@ -423,12 +428,16 @@ class apiCM:
             "iccid": iccid,
         })
 
+        print(f">>>>>>>>>>>>>>>>>>> Payload da requisição: {payload}")
+
         # Fazer a requisição POST com tempo limite
         try:
             conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=100)
             conn.request("POST", parsed_url.path, payload, headers)
             res = conn.getresponse()
-            
+
+            print(f">>>>>>>>>>>>>>>>>>> Resposta da API: {res}")
+
             # Verificar o status da resposta
             if res.status == 200:
                 data = res.read()
