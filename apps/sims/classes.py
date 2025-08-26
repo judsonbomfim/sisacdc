@@ -451,7 +451,7 @@ class apiCM:
     @staticmethod
     def mobileData(iccid):
         
-        print(f">>>>>>>>>>>>>>>>>>> {childOrderId(iccid)}") 
+        print(f">>>>>>>>>>>>>>>>>>> childOrderId {apiCM.childOrderId(iccid)}") 
         
         url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
