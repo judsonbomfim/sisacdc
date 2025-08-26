@@ -323,12 +323,12 @@ class ApiTI:
         conn.close()
         return mobile_data
 
-class apiCM:
+class ApiCM:
     
-    print(">>>>>>>>>>>>>>>>>>> Classe apiCM iniciada")
+    print(">>>>>>>>>>>>>>>>>>> Classe ApiCM iniciada")
     
     app_key = settings.APICM_KEY
-    app_secret = settings.APICM_SECRET
+    app_secret = settings.ApiCM_SECRET
 
     @staticmethod
     def generate_password_digest(app_secret):
@@ -346,15 +346,15 @@ class apiCM:
         
         print(">>>>>>>>>>>>>>>>>>> Obtendo token de acesso para API CM...")
         # URL do endpoint
-        url_api = f'{settings.APICM_URL}/aep/APP_getAccessToken_SBO/v1'
+        url_api = f'{settings.ApiCM_URL}/aep/APP_getAccessToken_SBO/v1'
         parsed_url = urlparse(url_api)
 
         # Gerar PasswordDigest
-        nonce, created, password_digest = apiCM.generate_password_digest(apiCM.app_secret)
+        nonce, created, password_digest = ApiCM.generate_password_digest(ApiCM.app_secret)
 
         # Corpo da requisição
         payload = json.dumps({
-            "id": apiCM.app_key,
+            "id": ApiCM.app_key,
             "type": "106",
         })
 
@@ -363,7 +363,7 @@ class apiCM:
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
-            "X-WSSE": f'UsernameToken Username="{apiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
+            "X-WSSE": f'UsernameToken Username="{ApiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
         }
 
         conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
@@ -396,9 +396,9 @@ class apiCM:
 
         print(f">>>>>>>>>>>>>>>>>>> Acessando childOrderId {iccid}")
 
-        url_api = f'{settings.APICM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
+        url_api = f'{settings.ApiCM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
         parsed_url = urlparse(url_api)
-        api_token = apiCM.get_token()
+        api_token = ApiCM.get_token()
         
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
@@ -406,14 +406,14 @@ class apiCM:
             return 0
 
         # Gerar PasswordDigest
-        nonce, created, password_digest = apiCM.generate_password_digest(apiCM.app_secret)
+        nonce, created, password_digest = ApiCM.generate_password_digest(ApiCM.app_secret)
 
         # Cabeçalhos da requisição
         headers = {
             'Content-Type': 'application/json',
             "Accept": "application/json",
             "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
-            "X-WSSE": f'UsernameToken Username="{apiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
+            "X-WSSE": f'UsernameToken Username="{ApiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
         # Corpo da requisição
@@ -447,10 +447,10 @@ class apiCM:
     @staticmethod
     def mobileData(iccid):
                 
-        url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
+        url_api = f'{settings.ApiCM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
-        api_token = apiCM.get_token()
-        childOrderId = apiCM.childOrderId(iccid)
+        api_token = ApiCM.get_token()
+        childOrderId = ApiCM.childOrderId(iccid)
         print(f">>>>>>>>>>>>>>>>>>> childOrderId {childOrderId}")
 
         # Verificar se token foi obtido com sucesso
@@ -462,14 +462,14 @@ class apiCM:
         date_today = datetime.now(beijing_tz).strftime("%Y%m%d")
 
         # Gerar PasswordDigest
-        nonce, created, password_digest = apiCM.generate_password_digest(apiCM.app_secret)
+        nonce, created, password_digest = ApiCM.generate_password_digest(ApiCM.app_secret)
 
         # Cabeçalhos da requisição
         headers = {
             'Content-Type': 'application/json',
             "Accept": "application/json",
             "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
-            "X-WSSE": f'UsernameToken Username="{apiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
+            "X-WSSE": f'UsernameToken Username="{ApiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
         # Corpo da requisição

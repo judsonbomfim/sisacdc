@@ -5,7 +5,7 @@ import http.client
 import json
 import time
 from django.conf import settings
-from .classes import ApiTC, ApiTI, apiCM
+from .classes import ApiTC, ApiTI, ApiCM
 from apps.orders.models import Orders, Notes
 from apps.orders.classes import ApiStore, StatusStore, NotesAdd, UpdateOrder
 from apps.send_email.tasks import send_email_sims
@@ -1116,7 +1116,7 @@ def simActivateCM(id=None):
     
     if orders_all != None:
         # Gerar Token
-        api_token = apiCM.get_token()
+        api_token = ApiCM.get_token()
         
         if api_token == "error":
             print('>>>>>>>>>> ERRO DE TOKEN')
@@ -1180,10 +1180,10 @@ def simActivateCM(id=None):
             continue
 
         # URL do endpoint
-        url_api = f'{settings.APICM_URL}/aep/APP_createOrder_SBO/v1'
+        url_api = f'{settings.ApiCM_URL}/aep/APP_createOrder_SBO/v1'
         parsed_url = urlparse(url_api)
         app_key = settings.APICM_KEY
-        app_secret = settings.APICM_SECRET
+        app_secret = settings.ApiCM_SECRET
 
         # Gerar PasswordDigest
         nonce, created, password_digest = generate_password_digest(app_secret)

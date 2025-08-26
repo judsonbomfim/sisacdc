@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from ..serializers import ConsumoSerializer
-from apps.sims.classes import ApiTC, apiCM
+from apps.sims.classes import ApiTC, ApiCM
 from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
 from ..tasks import sims_in_orders
@@ -320,9 +320,9 @@ def testeMobileData(request, iccid):
     
     try:
         # Verificar se a classe foi importada corretamente
-        print(f"Classe apiCM disponível: {apiCM}")        
-        # Chamar método mobileData da classe apiCM
-        mobile_data = apiCM.mobileData(iccid)        
+        print(f"Classe ApiCM disponível: {ApiCM}")        
+        # Chamar método mobileData da classe ApiCM
+        mobile_data = ApiCM.mobileData(iccid)        
         # Retornar resposta JSON
         return JsonResponse({
             'success': True,
