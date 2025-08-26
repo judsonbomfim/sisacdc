@@ -492,7 +492,7 @@ class apiCM:
             print(f">>>>>>>>>>>>>>>>>>> date_today {date_today}")
             
             try:
-                history_quota = data_dict["mobile_data"]["historyQuota"]
+                history_quota = data_dict["historyQuota"]
                 times_x = [entry for entry in history_quota if entry["time"] == date_today]
                 soma_qtaconsumption = sum(float(entry["qtaconsumption"]) for entry in times_x)
                 mobile_data = soma_qtaconsumption
@@ -501,7 +501,7 @@ class apiCM:
             except (KeyError, IndexError, TypeError) as e:
                 print(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso: {e}")
                 return 0
-                
+                            
         except Exception as e:
             return 0
         finally:
