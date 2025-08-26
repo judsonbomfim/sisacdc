@@ -435,6 +435,8 @@ class apiCM:
             conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=100)
             conn.request("POST", parsed_url.path, payload, headers)
             res = conn.getresponse()
+            data = res.read()
+            print(f">>>>>>>>>>>>>>>>>>> Resposta da API: {data}")   
 
             # Verificar o status da resposta
             if res.status == 200:
