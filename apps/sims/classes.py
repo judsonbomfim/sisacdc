@@ -489,6 +489,8 @@ class apiCM:
             data = res.read()
             data_dict = json.loads(data)
             print(f">>>>>>>>>>>>>>>>>>> data_dict {data_dict}")
+            print(f">>>>>>>>>>>>>>>>>>> date_today {date_today}")
+            
             try:
                 history_quota = data_dict["mobile_data"]["historyQuota"]
                 times_x = [entry for entry in history_quota if entry["time"] == date_today]
