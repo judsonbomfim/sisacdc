@@ -500,8 +500,6 @@ class apiCM:
                 return mobile_data
             except (KeyError, IndexError, TypeError) as e:
                 print(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso: {e}")
-                print(f">>>>>>>>>>>>>>>>>>> data_dict: {data_dict}")
-                print(f">>>>>>>>>>>>>>>>>>> date_today: {date_today}")
                 return 0
                 
         except Exception as e:
