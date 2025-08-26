@@ -495,15 +495,13 @@ class apiCM:
                 history_quota = data_dict["mobile_data"]["historyQuota"]
                 times_x = [entry for entry in history_quota if entry["time"] == date_today]
                 soma_qtaconsumption = sum(float(entry["qtaconsumption"]) for entry in times_x)
-                # Extrair dados de uso se existirem
                 mobile_data = soma_qtaconsumption
                 print(f">>>>>>>>>>>>>>>>>>> mobile_data {mobile_data}")
                 return mobile_data
-            except (json.JSONDecodeError, KeyError, IndexError, TypeError):
-                print(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso")
-                print(f">>>>>>>>>>>>>>>>>>> KeyError {KeyError}")
-                print(f">>>>>>>>>>>>>>>>>>> IndexError {IndexError}")
-                print(f">>>>>>>>>>>>>>>>>>> TypeError {TypeError}")
+            except (json.JSONDecodeError, KeyError, IndexError, TypeError) as e:
+                print(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso: {e}")
+                print(f">>>>>>>>>>>>>>>>>>> data_dict: {data_dict}")
+                print(f">>>>>>>>>>>>>>>>>>> date_today: {date_today}")
                 return 0
                 
         except Exception as e:
