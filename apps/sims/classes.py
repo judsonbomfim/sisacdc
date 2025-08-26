@@ -346,7 +346,7 @@ class ApiCM:
         
         print(">>>>>>>>>>>>>>>>>>> Obtendo token de acesso para API CM...")
         # URL do endpoint
-        url_api = f'{settings.ApiCM_URL}/aep/APP_getAccessToken_SBO/v1'
+        url_api = f'{settings.APICM_URL}/aep/APP_getAccessToken_SBO/v1'
         parsed_url = urlparse(url_api)
 
         # Gerar PasswordDigest
@@ -396,7 +396,7 @@ class ApiCM:
 
         print(f">>>>>>>>>>>>>>>>>>> Acessando childOrderId {iccid}")
 
-        url_api = f'{settings.ApiCM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
+        url_api = f'{settings.APICM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
         parsed_url = urlparse(url_api)
         api_token = ApiCM.get_token()
         
@@ -447,7 +447,7 @@ class ApiCM:
     @staticmethod
     def mobileData(iccid):
                 
-        url_api = f'{settings.ApiCM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
+        url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
         api_token = ApiCM.get_token()
         childOrderId = ApiCM.childOrderId(iccid)
