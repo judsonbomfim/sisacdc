@@ -489,8 +489,9 @@ class apiCM:
             # Verificar o status da resposta
             if res.status == 200:
                 data = res.read()
+                data_dict = json.loads(data)
+                print(f">>>>>>>>>>>>>>>>>>> data_dict {data_dict}")
                 try:
-                    data_dict = json.loads(data)
                     history_quota = data_dict["mobile_data"]["historyQuota"]
                     times_x = [entry for entry in history_quota if entry["time"] == date_today]
                     soma_qtaconsumption = sum(float(entry["qtaconsumption"]) for entry in times_x)
