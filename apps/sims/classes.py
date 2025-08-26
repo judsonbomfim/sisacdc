@@ -432,21 +432,14 @@ class apiCM:
             conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=100)
             conn.request("POST", parsed_url.path, payload, headers)
             res = conn.getresponse()
-            data = res.read()
-            print(f">>>>>>>>>>>>>>>>>>> Resposta da API: {data}")   
 
-            # Verificar o status da resposta
-            if res.status == 200:
+            # Verificar o status da resposta               
+            try:
                 data = res.read()
-                print(f">>>>>>>>>>>>>>>>>>> Resposta da API (body): {data}")                
-                try:
-                    data_dict = json.loads(data)                                        
-                    # Extrair dados de uso se existirem
-                    orderId = data_dict
-                    return orderId
-                except json.JSONDecodeError:
-                    return 0
-            else:
+                print(f">>>>>>>>>>>>>>>>>>> Resposta da API (body): {data}") 
+                orderId = data["DataBundles"][0]["subscriptionKey"]
+                return orderId
+            except json.JSONDecodeError:
                 return 0
                 
         except Exception as e:
