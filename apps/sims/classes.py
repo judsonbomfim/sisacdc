@@ -497,7 +497,7 @@ class apiCM:
                 mobile_data = soma_qtaconsumption
                 print(f">>>>>>>>>>>>>>>>>>> mobile_data {mobile_data}")
                 return mobile_data
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, KeyError, IndexError, TypeError):
                 return 0
                 
         except Exception as e:
