@@ -407,10 +407,6 @@ class apiCM:
             print(f">>>>>>>>>>>>>>>>>>> Erro ao obter token de acesso para API CM")
             return 0
 
-        # Gerar data atual Pequim
-        beijing_tz = pytz.timezone("Asia/Shanghai")
-        date_today = datetime.now(beijing_tz).strftime("%Y%m%d")
-
         # Gerar PasswordDigest
         nonce, created, password_digest = apiCM.generate_password_digest(apiCM.app_secret)
 
@@ -425,8 +421,8 @@ class apiCM:
         # Corpo da requisição
         payload = json.dumps({
             "accessToken": api_token,
-            # "iccid": iccid,
-            # "status": 1,
+            "iccid": iccid,
+            "status": 1,
             "language": 2,
         })
 
@@ -492,7 +488,7 @@ class apiCM:
         payload = json.dumps({
             "accessToken": api_token,
             "iccid": iccid,
-            "childOrderId": "1956854506349832930",
+            # "childOrderId": "1956854506349832930",
             "ext": {"todayFlow": 2}
         })
 
