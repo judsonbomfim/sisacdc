@@ -498,6 +498,10 @@ class apiCM:
                 print(f">>>>>>>>>>>>>>>>>>> mobile_data {mobile_data}")
                 return mobile_data
             except (json.JSONDecodeError, KeyError, IndexError, TypeError):
+                print(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso")
+                print(f">>>>>>>>>>>>>>>>>>> KeyError {KeyError}")
+                print(f">>>>>>>>>>>>>>>>>>> IndexError {IndexError}")
+                print(f">>>>>>>>>>>>>>>>>>> TypeError {TypeError}")
                 return 0
                 
         except Exception as e:
