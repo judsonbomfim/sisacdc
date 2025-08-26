@@ -425,8 +425,8 @@ class apiCM:
         # Corpo da requisição
         payload = json.dumps({
             "accessToken": api_token,
-            "iccid": iccid,
-            "status": 1,
+            # "iccid": iccid,
+            # "status": 1,
             "language": 2,
         })
 
