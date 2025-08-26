@@ -436,11 +436,10 @@ class apiCM:
             conn.request("POST", parsed_url.path, payload, headers)
             res = conn.getresponse()
 
-            print(f">>>>>>>>>>>>>>>>>>> Resposta da API: {res}")
-
             # Verificar o status da resposta
             if res.status == 200:
                 data = res.read()
+                print(f">>>>>>>>>>>>>>>>>>> Resposta da API (body): {data}")                
                 try:
                     data_dict = json.loads(data)                                        
                     # Extrair dados de uso se existirem
