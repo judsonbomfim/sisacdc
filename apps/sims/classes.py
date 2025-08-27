@@ -452,7 +452,6 @@ class ApiCM:
         parsed_url = urlparse(url_api)
         api_token = ApiCM.get_token()
         childOrderId = ApiCM.childOrderId(iccid)
-        print(f">>>>>>>>>>>>>>>>>>> childOrderId {childOrderId}")
 
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
@@ -489,15 +488,12 @@ class ApiCM:
             # Verificar o status da resposta
             data = res.read()
             data_dict = json.loads(data)
-            print(f">>>>>>>>>>>>>>>>>>> data_dict {data_dict}")
-            print(f">>>>>>>>>>>>>>>>>>> date_today {date_today}")
             
             try:
                 history_quota = data_dict["historyQuota"]
                 times_x = [entry for entry in history_quota if entry["time"] == date_today]
                 soma_qtaconsumption = sum(float(entry["qtaconsumption"]) for entry in times_x)
                 mobile_data = soma_qtaconsumption
-                print(f">>>>>>>>>>>>>>>>>>> mobile_data {mobile_data}")
                 return mobile_data
             except (KeyError, IndexError, TypeError) as e:
                 print(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso: {e}")
