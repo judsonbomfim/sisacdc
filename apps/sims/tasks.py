@@ -487,10 +487,10 @@ def simDeactivateTC(id=None):
         NotesAdd.addNote(order,f'ERRO API: {iccid} com erro na Telcon. Verificar erro.')
         error = 'error_api Result'
         return error       
-
-    print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
     
     for index, o in orders_df.iterrows():
+        
+        print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
         
         order = Orders.objects.get(pk=o['id'])
         order_id = order.order_id
@@ -507,12 +507,14 @@ def simDeactivateTC(id=None):
         # Get EndPointID / Status
         try:
             # Gerar tokem de acesso a API
+            print('>>>>>>>>>> Gerar tokem de acesso a API')
             token_api = ApiTC.get_token()
             conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             headers = ApiTC.get_headers(token_api, cookie=True)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1] 
+            print(f'endpointId: {endpointId} - simStatus: {simStatus}')
         except Exception:            
             error_api()
             continue      

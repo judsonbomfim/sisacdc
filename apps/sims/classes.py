@@ -46,6 +46,7 @@ class ApiTC:
     # Set headers
     @staticmethod    
     def get_headers(token_api, cookie=None):
+        print(">>>>>>>>>>>>>>>>>>> Classe ApiTC - get_headers iniciada")
         headers = {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
