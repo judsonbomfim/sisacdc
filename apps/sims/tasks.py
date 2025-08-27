@@ -543,6 +543,7 @@ def simDeactivateTC(id=None):
             print('>>>>>>>>>>>>>>>>>>> resultCode finalizado')
         except Exception:
             resultCode = None
+            print('>>>>>>>>>>>>>>>>>>> resultCode NONE')
             resultDescription = data
 
         if resultCode == 0:
