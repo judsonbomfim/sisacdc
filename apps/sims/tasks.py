@@ -506,15 +506,12 @@ def simDeactivateTC(id=None):
          
         # Get EndPointID / Status
         try:
-            # Gerar tokem de acesso a API
-            print('>>>>>>>>>> Gerar tokem de acesso a API')
+            # Gerar token de acesso a API
             token_api = ApiTC.get_token()
             conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             headers = ApiTC.get_headers(token_api, cookie=True)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
-            simStatus = get_iccid[1] 
-            print(f'>>>>>>>>>> endpointId: {endpointId} - simStatus: {simStatus}')
         except Exception:            
             error_api()
             continue      
@@ -537,15 +534,11 @@ def simDeactivateTC(id=None):
             
         res = conn.getresponse()
         data = json.loads(res.read())
-        print(f'>>>>>>>>>>>>>>>>>>> res {data}')
         try:
-            print('>>>>>>>>>>>>>>>>>>> resultCode iniciado')
             resultCode = int(data["Response"]["resultCode"])
             resultDescription = data["Response"]["resultParam"]["resultDescription"]
-            print('>>>>>>>>>>>>>>>>>>> resultCode finalizado')
         except Exception:
             resultCode = None
-            print('>>>>>>>>>>>>>>>>>>> resultCode NONE')
             resultDescription = data
 
         if resultCode == 0:
