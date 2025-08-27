@@ -61,14 +61,18 @@ class ApiTC:
     @staticmethod
     def get_iccid(iccid, headers):
         print(">>>>>>>>>>>>>>>>>>> get_iccid iniciado")
+        print(f'>>>>>>>>>>>>>>>>>>> iccid: {iccid}')
+        print(f'>>>>>>>>>>>>>>>>>>> headers: {headers}')
         payload_endpointId = ''
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         conn.request(
             "GET", f"/api/fetchSIM?iccid={iccid}", payload_endpointId, headers)
         res_endpointId = conn.getresponse()
         data_endpointId = json.loads(res_endpointId.read())
+        print(f'>>>>>>>>>>>>>>>>>>> data_endpointId: {data_endpointId}')
         simStatus = data_endpointId["Response"]["responseParam"]["rows"][0]['simStatus']
         endpointId = data_endpointId["Response"]["responseParam"]["rows"][0]['endPointId']
+        print(f'>>>>>>>>>>>>>>>>>>> endpointId: {endpointId} - simStatus: {simStatus}')
         conn.close()
         print(">>>>>>>>>>>>>>>>>>> get_iccid finalizado")
         return endpointId, simStatus
