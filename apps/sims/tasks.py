@@ -489,7 +489,7 @@ def simDeactivateTC(id=None):
         return error       
     
     for index, o in orders_df.iterrows():
-        
+        time.sleep(0.5)
         print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
         
         order = Orders.objects.get(pk=o['id'])
@@ -531,6 +531,7 @@ def simDeactivateTC(id=None):
             }
         })
         
+        time.sleep(0.5)
         conn.request("POST", "/api/EndPointLifeCycleChange", payload, headers)
         # Adicionar nota
             
