@@ -507,12 +507,11 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
             # Edit Voice
             if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
                 voice_d = VoiceCalls.objects.get(id_item=order_id)
-                num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)
-                
-                num_s.number_status = 'DS'
-                num_s.save()
-                
-                voice_d.delete()
+                if voice_d.id_number:
+                    num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)                
+                    num_s.number_status = 'DS'
+                    num_s.save()                
+                    voice_d.delete()
         
         # Verificar se todos os itens estão cancelados
         order_ver = Orders.objects.filter(order_id=order.order_id)
