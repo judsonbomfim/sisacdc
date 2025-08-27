@@ -514,7 +514,7 @@ def simDeactivateTC(id=None):
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1] 
-            print(f'endpointId: {endpointId} - simStatus: {simStatus}')
+            print(f'>>>>>>>>>> endpointId: {endpointId} - simStatus: {simStatus}')
         except Exception:            
             error_api()
             continue      
@@ -536,6 +536,7 @@ def simDeactivateTC(id=None):
             
         res = conn.getresponse()
         data = json.loads(res.read())
+        print(f'>>>>>>>>>>>>>>>>>>> res {data}')
         try:
             print('>>>>>>>>>>>>>>>>>>> resultCode iniciado')
             resultCode = int(data["Response"]["resultCode"])
