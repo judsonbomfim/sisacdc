@@ -11,7 +11,7 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.conf import settings
 from apps.orders.models import Orders, Notes
-from apps.sims.classes import ApiTC
+from apps.sims.classes import ApiTC, ApiCM
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
@@ -153,7 +153,7 @@ def ord_details(request, order_id):
         mobile_data = ApiTC.mobileData(sim)
     elif operator == 'CM':
         # Verificar consumo de dados CM
-        mobile_data = 568
+        mobile_data = ApiCM.mobileData(sim)
     else:
         mobile_data = ''
     
@@ -765,14 +765,6 @@ def orders_activations(request):
     }
     return render(request, 'painel/orders/activations.html', context)
 
-
-@login_required(login_url='/login/')
-def verifica_pedidos(request):
-    ... 
-  
-        
-def debugWP(request):
-    ...
 
 
 

@@ -31,6 +31,7 @@ def sims_in_orders():
         id_id_i = ord.id
         order_id_i = ord.order_id
         product_i = ord.product
+        condition_i = ord.condition
         countries_i = ord.countries
         type_sim_i = ord.type_sim
         celular_samsung = ord.celular_samsung
@@ -68,6 +69,11 @@ def sims_in_orders():
                 operator_i = 'TM'
             elif product_i == 'chip-internacional-europa-ilimitado':
                 operator_i = 'MS'
+            elif product_i == 'chip-internacional-eua-canada-e-mexico':
+                if condition_i == 'novo-sim':
+                    operator_i = 'TI'
+                else:
+                    operator_i = 'CM'
             else: operator_i = 'CM'
             
             # Select SIM
@@ -451,7 +457,7 @@ def simDeactivateTC(id=None):
             return
         else:
             # Se for depois da hora mínima, execute a tarefa
-            orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC')
+            orders_all = Orders.objects.filter(order_status='AT', id_sim__operator__in=['TC', 'TI'])
     else:
         orders_all = Orders.objects.filter(pk=id)
         
@@ -552,133 +558,6 @@ def simDeactivateTC(id=None):
                 UpdateOrder.upStatus(id_item,'ED')
             # Adicionar nota
             NotesAdd.addNote(order,f'ERRO DESATIVADO: {iccid} com erro na Telcon. Verificar erro. TC: {resultDescription}')
-        
-        # Fecha a conexão
-        conn.close()
-                
-    print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
-
-
-@shared_task
-def simDeactivateTI(id=None):
-       
-    timezone = pytz.timezone('America/Sao_Paulo')
-    min_hour = 23  # hora
-    min_minute = 53  # minutos
-
-    current_hour = datetime.now(timezone).hour
-    current_minute = datetime.now(timezone).minute
-            
-    # Timezone / Hoje
-    today = pd.Timestamp.now(tz=timezone).date()
-
-    # Selecionar pedidos
-    if id is None:
-        if current_hour < min_hour or (current_hour == min_hour and current_minute < min_minute):
-            return
-        else:
-            # Se for depois da hora mínima, execute a tarefa
-            orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TI')
-    else:
-        orders_all = Orders.objects.filter(pk=id)
-        
-    # Se não houver pedidos, encerre a execução
-    if not orders_all.exists():
-        print('Não há pedidos que correspondam aos critérios de filtro.')
-        return
-    
-    fields_df = ['id', 'order_id', 'id_sim__sim', 'days', 'activation_date']
-    orders_df = pd.DataFrame((orders_all.values(*fields_df)))
-    orders_df['activation_date'] = pd.to_datetime(orders_df['activation_date'])
-    orders_df['return_date'] = orders_df['activation_date'] + pd.to_timedelta(orders_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
-
-    if id is None:
-        orders_df = orders_df.loc[orders_df['return_date'].dt.date == today]
-    
-    # Verificar se há pedidos para desativar
-    if orders_df is None:
-        print('>>>>>>>>>> Nenhum pedido para desativar')
-        return
-    
-    def error_api():
-        print('>>>>>>>>>> ERRO API')
-        # Alterar status
-        UpdateOrder.upStatus(id_item,'ED')
-        # Adicionar nota
-        NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
-        error = 'error_api Result'
-        return error       
-
-    print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
-    
-    for index, o in orders_df.iterrows():
-        
-        order = Orders.objects.get(pk=o['id'])
-        order_id = order.order_id
-        id_item = order.id
-        iccid = order.id_sim.sim
-        
-        note = ''
-        resultCode = None
-        resultDescription = None        
-        endpointId = None
-        simStatus = None
-        token_api = None    
-         
-        # Get EndPointID / Status
-        try:
-            # Gerar tokem de acesso a API
-            token_api = ApiTI.get_token()
-            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
-            headers = ApiTI.get_headers(token_api, cookie=True)
-            get_iccid = ApiTI.get_iccid(iccid, headers)
-            endpointId = get_iccid[0]
-            simStatus = get_iccid[1] 
-        except Exception:            
-            error_api()
-            continue      
-        ##
-
-        # Variaveis globais
-        payload = json.dumps({
-            "Request": {
-                "endPointId": f"{endpointId}",
-                "requestParam": {
-                    "lifeCycle": "S",
-                    "reason": "1"
-                }
-            }
-        })
-        
-        conn.request("POST", "/api/EndPointLifeCycleChange", payload, headers)
-        # Adicionar nota
-            
-        res = conn.getresponse()
-        data = json.loads(res.read())
-        try:
-            resultCode = int(data["Response"]["resultCode"])
-            resultDescription = data["Response"]["resultParam"]["resultDescription"]
-        except Exception:
-            resultCode = None
-            resultDescription = data
-
-        if resultCode == 0:
-            if id is None:
-                print('>>>>>>>>>> Alterar status')
-                # Alterar status                
-                UpdateOrder.upStatus(id_item,'DE')
-                sim_put = Sims.objects.get(pk=order.id_sim.id)
-                sim_put.sim_status = 'DE'
-                sim_put.save()
-            # Adicionar nota
-            NotesAdd.addNote(order,f'{iccid} desativado com sucesso na Telcon. TI: {resultDescription}')
-        else:
-            print('>>>>>>>>>> ERRO DESATIVADO')
-            if id is None:
-                # Alterar status
-                UpdateOrder.upStatus(id_item,'ED')
-            # Adicionar nota
-            NotesAdd.addNote(order,f'ERRO DESATIVADO: {iccid} com erro na Telcon. Verificar erro. TI: {resultDescription}')
         
         # Fecha a conexão
         conn.close()
