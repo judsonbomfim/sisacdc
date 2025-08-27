@@ -46,7 +46,6 @@ class ApiTC:
     # Set headers
     @staticmethod    
     def get_headers(token_api, cookie=None):
-        print(">>>>>>>>>>>>>>>>>>> Classe ApiTC - get_headers iniciada")
         headers = {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
@@ -54,12 +53,14 @@ class ApiTC:
         }
         if cookie is None:
             headers['Cookie'] = 'Encrypt_cookies=rd20o00000000000000000000ffff0af30e15o12021'
+        print(">>>>>>>>>>>>>>>>>>> get_headers finalizado")
         return headers
 
 
     # Get EndPointID / Status
     @staticmethod
     def get_iccid(iccid, headers):
+        print(">>>>>>>>>>>>>>>>>>> get_iccid iniciado")
         payload_endpointId = ''
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         conn.request(
@@ -69,6 +70,7 @@ class ApiTC:
         simStatus = data_endpointId["Response"]["responseParam"]["rows"][0]['simStatus']
         endpointId = data_endpointId["Response"]["responseParam"]["rows"][0]['endPointId']
         conn.close()
+        print(">>>>>>>>>>>>>>>>>>> get_iccid finalizado")
         return endpointId, simStatus
 
 

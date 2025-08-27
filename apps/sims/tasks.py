@@ -537,8 +537,10 @@ def simDeactivateTC(id=None):
         res = conn.getresponse()
         data = json.loads(res.read())
         try:
+            print('>>>>>>>>>>>>>>>>>>> resultCode iniciado')
             resultCode = int(data["Response"]["resultCode"])
             resultDescription = data["Response"]["resultParam"]["resultDescription"]
+            print('>>>>>>>>>>>>>>>>>>> resultCode finalizado')
         except Exception:
             resultCode = None
             resultDescription = data
