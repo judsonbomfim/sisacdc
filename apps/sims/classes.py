@@ -112,6 +112,12 @@ class ApiTC:
                 '1gb': '640434',
                 '2gb': '640437',
             }
+        elif product == 'chip-internacional-eua-canada-e-mexico':
+            planList = {
+                '500mb-dia': '866488',
+                '1gb': '866490',
+                '2gb': '866493',
+            }
         else:
             planList = {
                 '500mb-dia': '572960',
