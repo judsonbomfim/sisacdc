@@ -18,8 +18,8 @@ PRODUCT = [
     ('chip-internacional-marrocos-premium', 'Marrocos Premium'),
     ('chip-internacional-egito-premium', 'Egito Premium'),
     ('chip-internacional-indonesia-premium', 'Indonésia Premium'),    
+    ('chip-internacional-eua-premium', 'EUA Premium'),    
     ('chip-internacional-europa-ilimitado', 'Europa Ilimitado'),
-    ('chamada-de-voz', 'Plano de Voz'),
     ('chamada-de-voz', 'Plano de Voz'),
 ]
 

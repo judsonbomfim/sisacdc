@@ -62,6 +62,7 @@ def sims_in_orders():
                 'chip-internacional-marrocos-premium',
                 'chip-internacional-egito-premium',
                 'chip-internacional-indonesia-premium',
+                'chip-internacional-eua-premium',
             }
             if product_i in planos:
                 operator_i = 'TI'

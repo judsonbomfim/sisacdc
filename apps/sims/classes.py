@@ -114,11 +114,11 @@ class ApiTC:
             }
         elif product == 'chip-internacional-eua-canada-e-mexico':
             planList = {
-                '500mb-dia': '866488',
-                '1gb': '866490',
-                '2gb': '866493',
+                '500mb-dia': '885543',
+                '1gb': '885544',
+                '2gb': '885545',
             }
-        else:
+        elif product == 'chip-internacional-europa-premium':
             planList = {
                 '500mb-dia': '572960',
                 '1gb': '572961',
@@ -274,7 +274,19 @@ class ApiTI:
                 '1gb': '640434',
                 '2gb': '640437',
             }
-        else:
+        elif product == 'chip-internacional-eua-canada-e-mexico':
+            planList = {
+                '500mb-dia': '885543',
+                '1gb': '885544',
+                '2gb': '885545',
+            }
+        elif product == 'chip-internacional-eua-premium':
+            planList = {
+                '500mb-dia': '866488',
+                '1gb': '866490',
+                '2gb': '866493',
+            }
+        elif product == 'chip-internacional-europa-premium':
             planList = {
                 '500mb-dia': '865961',
                 '1gb': '864628',
