@@ -292,21 +292,24 @@ class ApiTI:
                 '1gb': '864628',
                 '2gb': '865963',
             }
-        plan_list = json.loads(planList[dataDay])       
-        payload = json.dumps({
-            "Request": {
-                "endPointId": endpointId,
-                "requestParam": {
-                    "planId": plan_list
+        try:
+            plan_list = json.loads(planList[dataDay])       
+            payload = json.dumps({
+                "Request": {
+                    "endPointId": endpointId,
+                    "requestParam": {
+                        "planId": plan_list
+                    }
                 }
-            }
-        })
+            })        
+            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
+            conn.request("POST", "/api/ChangePlan", payload, headers)
+            res_plan = conn.getresponse()
+            data_plan = res_plan.read()
+            conn.close()
+        except KeyError:
+            data_plan = 0
         
-        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
-        conn.request("POST", "/api/ChangePlan", payload, headers)
-        res_plan = conn.getresponse()
-        data_plan = res_plan.read()
-        conn.close()
         return data_plan
     
     @staticmethod

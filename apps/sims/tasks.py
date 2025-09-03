@@ -214,6 +214,9 @@ def simActivateTC(id=None):
         # Alterar plano
         time.sleep(1)
         data_plan = ApiTC.planChange(endpointId,headers,dataDay, product)
+        if data_plan == 0:
+            NotesAdd.addNote(order,f'{iccid} Plano não alterado. Verificar plano {dataDay} - TC: Plano não encontrado.')
+            continue
         NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay} - TELCOM: {json.loads(data_plan)}')    
 
         if simStatus == 'Pre-Active':
