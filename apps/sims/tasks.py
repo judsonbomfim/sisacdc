@@ -175,7 +175,7 @@ def simActivateTC(id=None):
         return error
     
     token_api = ApiTC.get_token()
-    time.sleep(1)
+    time.sleep(0.5)
     conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
     headers = ApiTC.get_headers(token_api)
         
@@ -202,7 +202,7 @@ def simActivateTC(id=None):
         
         # Verificar EndPointID / Status
         try:
-            time.sleep(1)
+            time.sleep(0.5)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
             simStatus = get_iccid[1]
@@ -212,9 +212,10 @@ def simActivateTC(id=None):
         ##
         
         # Alterar plano
-        time.sleep(1)
+        time.sleep(0.5)
         data_plan = ApiTC.planChange(endpointId,headers,dataDay, product)
         if data_plan == 0:
+            UpdateOrder.upStatus(id_item,'EA')
             NotesAdd.addNote(order,f'{iccid} Plano não alterado. Verificar plano {dataDay} - TC: Plano não encontrado.')
             continue
         NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay} - TELCOM: {json.loads(data_plan)}')    
@@ -361,7 +362,11 @@ def simActivateTI(id=None):
         
         # Alterar plano
         time.sleep(0.5)
-        ApiTI.planChange(endpointId,headers,dataDay, product)
+        data_plan = ApiTC.planChange(endpointId,headers,dataDay, product)
+        if data_plan == 0:
+            UpdateOrder.upStatus(id_item,'EA')
+            NotesAdd.addNote(order,f'{iccid} Plano não alterado. Verificar plano {dataDay} - TC: Plano não encontrado.')
+            continue
         NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay}')    
 
         if simStatus == 'Pre-Active':
@@ -1010,7 +1015,7 @@ def simActivateCM(id=None):
     for order in orders_all:
         
         # Aguardar 1 segundo
-        time.sleep(1)
+        time.sleep(0.5)
         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
