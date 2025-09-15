@@ -362,10 +362,10 @@ def simActivateTI(id=None):
         
         # Alterar plano
         time.sleep(0.5)
-        data_plan = ApiTC.planChange(endpointId,headers,dataDay, product)
+        data_plan = ApiTI.planChange(endpointId,headers,dataDay, product)
         if data_plan == 0:
             UpdateOrder.upStatus(id_item,'EA')
-            NotesAdd.addNote(order,f'{iccid} Plano não alterado. Verificar plano {dataDay} - TC: Plano não encontrado.')
+            NotesAdd.addNote(order,f'{iccid} Plano não alterado. Verificar plano {dataDay} - TI: Plano não encontrado.')
             continue
         NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay}')    
 
