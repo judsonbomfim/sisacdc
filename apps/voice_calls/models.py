@@ -26,7 +26,7 @@ class VoiceNumbers(models.Model):
     number = models.IntegerField()
     password = models.CharField(max_length=15, null=True, blank=True)
     number_qrcode = models.CharField(max_length=45, null=True, blank=True)
-    number_status = models.CharField(max_length=15, choices=NUNBER_STATUS, default='IN')
+    number_status = models.CharField(max_length=15, choices=NUNBER_STATUS, default='DS')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
