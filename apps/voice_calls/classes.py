@@ -1,3 +1,6 @@
+from apps.voice_calls.models import NotesVoice, VoiceCalls
+
+
 class NumberFormatter:
 
     @staticmethod
@@ -10,9 +13,12 @@ class NumberFormatter:
         return num_f
 
 class NoteVoiceCall:
-    @staticmethod
-    
-    def addNote(order, note):
-        order.notes = f'{order.notes}\n{note}'
-        order.save()
-        return order.notes
+    @staticmethod    
+    def addNote(id_item,note,id_user=None,type_note='S'):
+        add_note = NotesVoice( 
+            id_item = id_item,
+            id_user = id_user,
+            note = note,
+            type_note = type_note,
+        )
+        add_note.save()

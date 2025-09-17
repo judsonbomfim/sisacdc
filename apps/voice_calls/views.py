@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
-from apps.voice_calls.models import VoiceNumbers, VoiceCalls
+from apps.voice_calls.models import NotesVoice, VoiceNumbers, VoiceCalls
 from apps.voice_calls.tasks import number_up_status, voices_up_status, update_password
 from apps.orders.models import Orders
 from apps.orders.classes import DateFormats
@@ -157,6 +157,9 @@ def voice_edit(request,id):
             call_put.activation_date = call_put.activation_date
         call_put.call_status = request.POST.get('ord_st_f')
         call_put.save()
+        
+        if request.POST.get('ord_note'):
+            NotesVoice.addNote(id_item=id, note=request.POST.get('ord_note'), id_user=request.user.id, type_note='P')
         
         messages.success(request,f'Pedido {call_put.id_item} atualizado com sucesso!')
         return redirect('voice_index')
