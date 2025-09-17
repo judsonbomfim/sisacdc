@@ -193,11 +193,17 @@ def voice_import(request):
         if voice != '':
             arquivo = voice.read().decode("utf-8")
             line_h = 0            
+
             for lines in arquivo.split('\n'):
-                                
+                if not lines.strip():
+                    continue  # pula linha vazia
+
                 line = []
                 col = lines.split(',')
                 line.append(col)
+                if len(col) < 3:
+                    messages.error(request, 'Linha com dados insuficientes no arquivo CSV.')
+                    continue
                 
                 f_login = line[0][0]
                 f_extension = line[0][1]
