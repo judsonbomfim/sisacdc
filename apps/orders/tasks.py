@@ -211,6 +211,7 @@ def order_import():
                     
                     add_voice = VoiceCalls(
                         id_item = Orders.objects.get(pk=order_add.id),
+                        days = days_i,
                         activation_date = activation_date_i,
                         call_status = 'PR'
                     )
