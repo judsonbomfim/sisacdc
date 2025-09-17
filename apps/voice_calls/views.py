@@ -163,6 +163,7 @@ def voice_edit(request,id):
         if request.POST.get('ord_note'):
             NoteVoiceCall.addNote(id_item=id, note=request.POST.get('ord_note'), id_user=request.user.id, type_note='P')
         
+        NoteVoiceCall.addNote(id_item=id, note="Pedido Alterado", id_user=request.user.id, type_note='P')
         messages.success(request,f'Pedido {call_put.id_item} atualizado com sucesso!')
         return redirect('voice_index')
 
