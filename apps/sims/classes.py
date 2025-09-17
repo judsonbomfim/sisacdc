@@ -16,13 +16,12 @@ class ApiTC:
     # Get tokem de acesso a API
     @staticmethod
     def get_token():
+        time.sleep(0.5)        
         # Verificar token
         token_api = cache.get('api_tc_token')
         if token_api:
             return token_api
         
-        time.sleep(0.5)
-
         payload_token = json.dumps({
             "username": settings.APITC_USERNAME,
             "password": settings.APITC_PASSWORD
@@ -60,6 +59,7 @@ class ApiTC:
     # Get EndPointID / Status
     @staticmethod
     def get_iccid(iccid, headers):
+        time.sleep(0.5)
         payload_endpointId = ''
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         conn.request(
@@ -75,6 +75,7 @@ class ApiTC:
     # Pl0an Change
     @staticmethod
     def planChange(endpointId,headers,dataDay,product):
+        time.sleep(0.5)        
         planList = {}
         if product == 'chip-internacional-america-do-sul' or product == 'chip-internacional-america-do-sul-premium':
             planList = {
@@ -139,7 +140,7 @@ class ApiTC:
             conn.request("POST", "/api/ChangePlan", payload, headers)
             res_plan = conn.getresponse()
             data_plan = res_plan.read()
-            conn.close()
+            conn.close()       
         except KeyError:
             data_plan = 0
         return data_plan
@@ -152,12 +153,10 @@ class ApiTC:
         headers = ApiTC.get_headers(token_api)
         london_tz = pytz.timezone("Europe/London")
         dateToday = datetime.now(london_tz).strftime("%Y%m%d")
-        time.sleep(0.5)
         # Obter EndPointID
         endPointId = ApiTC.get_iccid(iccid, headers)
-        
-        time.sleep(0.5)
         # Obter dados de uso
+        time.sleep(0.5)
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)    
         conn.request("GET", f"/api/GetStatistics?endPointId={endPointId[0]}&from_date={dateToday}&to_date={dateToday}", payload, headers)
         res = conn.getresponse()
@@ -182,12 +181,11 @@ class ApiTI:
     # Get tokem de acesso a API
     @staticmethod
     def get_token():
+        time.sleep(0.5)
         # Verificar token
         token_api = cache.get('api_ti_token')
         if token_api:
             return token_api
-        
-        time.sleep(0.5)
 
         payload_token = json.dumps({
             "username": settings.APITC_USERNAME,
@@ -225,6 +223,7 @@ class ApiTI:
     # Get EndPointID / Status
     @staticmethod
     def get_iccid(iccid, headers):
+        time.sleep(0.5)
         payload_endpointId = ''
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         conn.request(
@@ -240,6 +239,7 @@ class ApiTI:
     # Pl0an Change
     @staticmethod
     def planChange(endpointId,headers,dataDay,product):
+        time.sleep(0.5)
         planList = {}
         if product == 'chip-internacional-america-do-sul' or product == 'chip-internacional-america-do-sul-premium':
             planList = {
@@ -324,10 +324,8 @@ class ApiTI:
         headers = ApiTI.get_headers(token_api)
         london_tz = pytz.timezone("Europe/London")
         dateToday = datetime.now(london_tz).strftime("%Y%m%d")
-        time.sleep(0.5)
         # Obter EndPointID
-        endPointId = ApiTI.get_iccid(iccid, headers)
-        
+        endPointId = ApiTI.get_iccid(iccid, headers)        
         time.sleep(0.5)
         # Obter dados de uso
         conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)    
