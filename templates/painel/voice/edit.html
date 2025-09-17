@@ -89,13 +89,28 @@
               <h6 class="text-uppercase fw-normal color-gray">Notas do pedido</h6>
             </div>
             <div class="card-body">
-              {% for note in vox.order_notes.all %}
+              {% for note in notes %}
                 <div class="card border-left-secondary"
-                  style="background-color: {% if note.type_note == 'S' %}
-                    
-                    
-                    
-                    
+                  style="background-color: {% if note.type_note == 'S' %}#f4ebeb{% else %}#F3F3F3{% endif %};">
+                  <div class="card-body">{{ note.note }}</div>
+                </div>
+                <div class="mb-2">
+                  <span class="fw-light fst-italic">{{ note.created_at|date:'d/m/Y H:i' }}h - <strong>{{ note.id_user.first_name }} {{ note.id_user.last_name }}</strong></span>
+                </div>
+              {% empty %}
+                <div class="mb-2">
+                  <span class="fw-light fst-italic">Não há notas neste pedido</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ends: .row -->
+    </div>
+  </div>
+{% endblock %}
+
                     
                     
                     
@@ -114,6 +129,7 @@
                     
                     
                     #f4ebeb
+
 
 
 
@@ -157,7 +173,9 @@
                     
                     
                     
+                    
                     #F3F3F3
+
 
 
 

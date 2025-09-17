@@ -137,18 +137,18 @@ def voice_edit(request,id):
         vox = VoiceCalls.objects.get(pk=id)
         vox_status = VoiceCalls.call_status.field.choices
         vox_days = list(range(5, 31))
+        notes = vox.order_voice_notes.all()
         
         context = {
             'vox': vox,
             'vox_status': vox_status,
             'vox_days': vox_days,
+            'notes': notes,
         }
         return render(request, 'painel/voice/edit.html', context)
     
     if request.method == 'POST':
-        
-        print('>>>>>>>>>> EDITAR PEDIDO')
-        
+                
         call_put = VoiceCalls.objects.get(pk=id)
         call_put.days = request.POST.get('days')
         if request.POST.get('activation_date'):

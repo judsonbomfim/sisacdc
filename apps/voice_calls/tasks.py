@@ -3,6 +3,7 @@ import string
 import qrcode
 import boto3
 import time
+from django.db.models import Q
 from io import BytesIO
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -102,16 +103,25 @@ def update_password(number_id):
 @shared_task
 def number_in_voice():
     
-    # send_date = datetime.now().date() + timedelta(days=2)
+    send_date = datetime.now().date() + timedelta(days=3)
 
     # Select Voice Calls
-    # voice_s = VoiceCalls.objects.filter(call_status='PR').filter(id_item__activation_date__lte=send_date)
-    voice_s = VoiceCalls.objects.filter(call_status='PR')
-    
+    voice_s = VoiceCalls.objects.filter(call_status='PR').filter(id_item__activation_date__lte=send_date)
+    voice_s = VoiceCalls.objects.filter(
+        Q(call_status='PR', id_item__activation_date__lte=send_date) |
+        Q(call_status='SL')
+    )
+        
     # Insert Number
     for vox in voice_s:
         id_vox = vox.id
         number_s = VoiceNumbers.objects.all().order_by('id').filter(number_status='DS').first()
+        if not number_s:
+            voice_put = VoiceCalls.objects.get(pk=id_vox)
+            voice_put.call_status = 'EP'
+            voice_put.save()
+            
+            continue
         # Change Status Voice
         voice_put = VoiceCalls.objects.get(pk=id_vox)
         voice_put.call_status = 'AA'

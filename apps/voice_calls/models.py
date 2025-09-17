@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from apps.orders.models import Orders
 
 NUNBER_STATUS = [
@@ -15,8 +16,15 @@ VOICE_STATUS = [
     ('CC', 'Cancelado'),
     ('CN', 'Concluido'),
     ('DS', 'Desativado'),
+    ('EP', 'Erro ao Processar'),
     ('EE', 'Enviar E-mail'),
     ('PR', 'Processando'),
+    ('SL', 'Sel. Linha'),
+]
+
+TYPE_NOTE = [
+    ('S', 'Sistema'),
+    ('P', 'Privada'),
 ]
 
 class VoiceNumbers(models.Model):
@@ -55,3 +63,18 @@ class VoiceCalls(models.Model):
         ordering = ['id_item']
     def __str__(self):
         return self.id_item
+    
+class NotesVoice(models.Model):
+    id = models.AutoField(primary_key=True)
+    id_item = models.ForeignKey(VoiceCalls, on_delete=models.DO_NOTHING, related_name='order_voice_notes', default=None)
+    id_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_voice_notes', default=None, null=True, blank=True)
+    note = models.TextField()
+    type_note = models.CharField(max_length=1, choices=TYPE_NOTE, default='S')
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'notes_voice'  # <--- altere aqui!
+        verbose_name = 'Nota'
+        verbose_name_plural = 'Notas'
+        ordering = ['-id']
+    def __str__(self):
+        return str(self.id_item)
