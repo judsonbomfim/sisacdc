@@ -49,9 +49,10 @@ def order_import():
             status_sis = id_sis.first().order_status
             existing_order = id_sis.first()
             UpdateStore.upStore(
-                order_id=id_ord,  # ADICIONAR este parâmetro obrigatório
-                item_id_store=existing_order.item_id_store if existing_order.item_id_store else None,  # ADICIONADO
-                status_g=status_sis if status_sis else None,
+                order_id = id_ord,
+                item_id_store = existing_order.item_id_store if existing_order.item_id_store else None,
+                _status = order_status_i if order_status_i else None,
+                status_g = status_sis if status_sis else None,
             )  
             print(f'---------- Pedido {id_ord} já importado.')
             continue
@@ -233,7 +234,7 @@ def order_import():
 
                 # Atualizar site
                 UpdateStore.upStore(
-                    order_id = order_id_i if order_id_i else None,
+                    order_id = order_id_i,
                     item_id_store = item_id_store_i if item_id_store_i else None, 
                     _data_ativacao = activation_date_i if activation_date_i else None,
                     _status = order_status_i if order_status_i else None,
@@ -434,7 +435,7 @@ def order_import_voice():
                 # Status sis : Status Loja
                 if order_status_i in StatusStore.st_sis_site():
                     UpdateStore.upStore(
-                        order_id = order_id_i if order_id_i else None,
+                        order_id = order_id_i,
                         item_id_store = item_id_store_i if item_id_store_i else None,
                         _status = order_status_i if order_status_i else None,
                         status_g = order_status_i if order_status_i else None,
@@ -535,7 +536,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
             print('--------------------------- Alterar STATUS Loja')        
             if ord_s in StatusStore.st_sis_site():
                 UpdateStore.upStore(
-                    order_id = order.order_id if order.order_id else None,
+                    order_id = order.order_id,
                     item_id_store = order.item_id_store if order.item_id_store else None,
                     _status = ord_v.order_status if ord_v.order_status else None,
                     status_g = ord_s if ord_s else None,
@@ -543,7 +544,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         elif ord_s not in ['CC', 'RB', 'DE']:
             print('--------------------------- Alterar STATUS Loja')        
             UpdateStore.upStore(
-                order_id = order.order_id if order.order_id else None,
+                order_id = order.order_id,
                 item_id_store = order.item_id_store if order.item_id_store else None,
                 _status = ord_s if ord_s else None,
                 status_g = ord_s if ord_s else None,
@@ -551,10 +552,11 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         elif ord_s == 'CC':
             # Cancelar só os itens
             UpdateStore.upStore(
-                order_id = order.order_id if order.order_id else None,
+                order_id = order.order_id,
                 item_id_store = order.item_id_store if order.item_id_store else None,
                 _status = ord_s if ord_s else None,
-            )
+                status_g = ord_s if ord_s else None,
+            )  
 
         # Save Notes
         def addNote(t_note):

@@ -47,36 +47,36 @@ class UpdateStore():
     @staticmethod
     def upStore(order_id, item_id_store=None, _data_ativacao=None, _sim=None, _qrcode=None, _status=None,status_g=None):
         meta_data = []
-        if _data_ativacao:
-            meta_data.append({
-                "key": "_data_ativacao",
-                "value": _data_ativacao,
-            })
-        if _sim:
-            meta_data.append({
-                "key": "_sim",
-                "value": _sim,
-            })
-        if _qrcode:
-            meta_data.append({
-                "key": "_qrcode",
-                "value": _qrcode if _qrcode else "",
-            })
-        if _status:
-            # listaStatus = dict(Orders.order_status.field.choices)
-            status_sis_site = StatusStore.st_sis_site()
-            meta_data.append({
-                "key": "_status",
-                "value": status_sis_site[_status],
-            })
-        update_store = {
-            'line_items': [
-                {
-                    "id": int(item_id_store),
-                    "meta_data": meta_data
-                }
-            ]
-        }
+        if item_id_store != None:
+            if _data_ativacao:
+                meta_data.append({
+                    "key": "_data_ativacao",
+                    "value": _data_ativacao,
+                })
+            if _sim:
+                meta_data.append({
+                    "key": "_sim",
+                    "value": _sim,
+                })
+            if _qrcode:
+                meta_data.append({
+                    "key": "_qrcode",
+                    "value": _qrcode if _qrcode else "",
+                })
+            if _status:
+                # listaStatus = dict(Orders.order_status.field.choices)
+                status_sis_site = StatusStore.st_sis_site()
+                meta_data.append({
+                    "key": "_status",
+                    "value": status_sis_site[_status],
+                })
+            update_store = {
+                'line_items': [
+                    {
+                        "id": int(item_id_store),
+                        "meta_data": meta_data
+                    }
+                ]}
         if status_g:
             status_sis_site = StatusStore.st_sis_site()
             update_store['status'] = status_sis_site[status_g]

@@ -88,7 +88,7 @@ def send_email_sims(id=None):
                 order.save()
                 # Update Store
                 UpdateStore.upStore(
-                    order_id = order_id if order_id else None,
+                    order_id = order_id,
                     item_id_store = order.item_id_store if order.item_id_store else None,
                     _data_ativacao=str(activation_date) if activation_date else None,
                     _sim = sim if sim else None,
