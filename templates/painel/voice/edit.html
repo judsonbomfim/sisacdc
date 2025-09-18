@@ -31,13 +31,9 @@
                 <div class="col-md-6 col-xl-9">
                   <label class="form-label">Dias</label>
                   <div class="row">
-                    {% for days_l in vox_days %}
-                      {% if vox.days == days_l %}
-                        <input type="radio" class="btn-check" name="days" id="days{{ days_l }}" value="{{ days_l }}" checked />
-                      {% else %}
-                        <input type="radio" class="btn-check" name="days" id="days{{ days_l }}" value="{{ days_l }}" />
-                      {% endif %}
-                      <label class="btn btn-outline-primary m-1" for="days{{ days_l }}">{{ days_l }}</label>
+                    {% for day in ord_days %}
+                    <input type="radio" class="btn-check" name="days" id="days{{ day }}" value="{{ day }}" {% if order.days == day %}checked{% endif %}>
+                    <label class="btn btn-outline-primary m-1" for="days{{ day }}">{{ day }}</label>
                     {% endfor %}
                   </div>
                 </div>

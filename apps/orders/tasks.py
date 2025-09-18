@@ -584,8 +584,11 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
     
 #     # Importar pedidos   
 #     while True:
+#         from datetime import date
 #         try:
-#             ord = Orders.objects.filter(order_status="RE")
+#             data_inicio = date(2025, 8, 10)  # exemplo de data
+
+#             ord = Orders.objects.filter(order_date__gte=data_inicio)
 #             print('ORD >>>>>>>>>> ',ord)
             
 #             # Se não houver mais pedidos, sair do loop
@@ -605,12 +608,9 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
 #             id_sis = Orders.objects.filter(id=id_ord).first()
             
 #             if id_sis != None:
-#                 id_order = id_sis.id
+#                 order_id = id_sis.order_id
 #                 order_status = id_sis.order_status
-#                 status_sis_site = StatusStore.st_sis_site()
-#                 if order_status in status_sis_site:                    
-#                     up_order_st_store(id_sis, status_sis_site[order_status])
-                
+#                 UpdateStore.upStore(order_id, _status='AT', status_g='AT')                
 #                 total_ord += 1
 #                 print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
 
