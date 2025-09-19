@@ -113,7 +113,8 @@ def order_import():
                     if i['key'] == 'pa_dados-diarios': data_day_i = i['value']
                     if i['key'] == 'pa_dias': days_i = i['value']
                     if i['key'] == '_plano_voz': 
-                        if i['value'] == '1': calls_i = True
+                        if i['value'] == '1':
+                            calls_i = True
                     if i['key'] == '_china_hongkong_taiwan':
                         if i['display_value'] == 'Sim': countries_i = True
                         else: countries_i = False
