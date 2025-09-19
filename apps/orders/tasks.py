@@ -98,20 +98,22 @@ def order_import():
                 else: coupon_i = '-'
                 # Definir valor padrão para variáveis
                 ord_chip_nun_i = '-'
+                condition_i = 'reuso-sim'
+                calls_i = False
                 countries_i = False
+                activation_date_i = '2001-01-01'
                 cell_mod_i = False
                 celular_samsung_i = False
-                activation_date_i = '2001-01-01'
-                condition_i = 'novo-sim'
                 # Percorrer itens do pedido
                 for i in item['meta_data']:
-                    if i['key'] == 'pa_tipo-de-sim': type_sim_i = i['value']
-                    if i['key'] == 'pa_condicao-do-chip': condition_i = i['value']
+                    if i['key'] == '_tipo_chip': type_sim_i = i['value']
+                    if i['key'] == '_condicao_chip': 
+                        if i['value'] == 'novo':
+                            condition_i = 'novo-sim'
                     if i['key'] == 'pa_dados-diarios': data_day_i = i['value']
                     if i['key'] == 'pa_dias': days_i = i['value']
-                    if i['key'] == 'pa_plano-de-voz': 
-                        if i['value'] == 'sem-ligacoes': calls_i = False
-                        else: calls_i = True
+                    if i['key'] == '_plano_voz': 
+                        if i['value'] == '1': calls_i = True
                     if i['key'] == '_china_hongkong_taiwan':
                         if i['display_value'] == 'Sim': countries_i = True
                         else: countries_i = False
@@ -122,6 +124,7 @@ def order_import():
                     if i['key'] == '_numero_sim': ord_chip_nun_i = i['value']
                 shipping_i = order['shipping_lines'][0]['method_title']
                 order_date_i = DateFormats.dateHour(order['date_created'])
+                
                 # notes_i = 0
                 
                 # Definir status do pedido

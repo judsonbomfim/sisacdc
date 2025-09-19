@@ -8,10 +8,12 @@ PRODUCT = [
     ('chip-internacional-eua-e-canada', 'USA/CANADA'),
     ('chip-internacional-eua-canada-e-mexico', 'USA/CAN/MEX'),
     ('chip-internacional-europa-plus', 'Europa Plus'),
-    ('chip-internacional-europa-premium', 'Europa Premium'),
     ('chip-internacional-europa', 'Europa'),
     ('chip-internacional-global', 'Global'),
     ('chip-internacional-america-do-sul', 'América do Sul'),
+    ('chamada-de-voz', 'Plano de Voz'),
+    ('chip-internacional-europa-ilimitado', 'Europa Ilimitado'),
+    ('chip-internacional-europa-premium', 'Europa Premium'),
     ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
     ('chip-internacional-israel-premium', 'Israel Premium'),
     ('chip-internacional-tunisia-premium', 'Tunísia Premium'),
@@ -19,8 +21,10 @@ PRODUCT = [
     ('chip-internacional-egito-premium', 'Egito Premium'),
     ('chip-internacional-indonesia-premium', 'Indonésia Premium'),    
     ('chip-internacional-eua-premium', 'EUA Premium'),    
-    ('chip-internacional-europa-ilimitado', 'Europa Ilimitado'),
-    ('chamada-de-voz', 'Plano de Voz'),
+    ('chip-internacional-africa-premium', 'África Premium'),
+    ('chip-internacional-asia-premium', 'Ásia Premium'),
+    ('chip-internacional-oriente-medio-premium', 'Oriente Médio Premium'),
+    ('chip-internacional-oceania-premium', 'Oceania Premium'),
 ]
 
 DATA = [

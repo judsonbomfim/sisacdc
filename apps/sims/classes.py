@@ -295,6 +295,31 @@ class ApiTI:
                 '1gb': '864628',
                 '2gb': '865963',
             }
+        elif product == 'chip-internacional-africa-premium':
+            planList = {
+                '500mb-dia': '898805',
+                '1gb': '898806',
+                '2gb': '898807',
+            }
+        elif product == 'chip-internacional-asia-premium':
+            planList = {
+                '500mb-dia': '898801',
+                '1gb': '898802',
+                '2gb': '898803',
+            }
+        elif product == 'chip-internacional-oriente-medio-premium':
+            planList = {
+                '500mb-dia': '898797',
+                '1gb': '898799',
+                '2gb': '898800',
+            }
+        elif product == 'chip-internacional-oceania-premium':
+            planList = {
+                '500mb-dia': '898751',
+                '1gb': '898752',
+                '2gb': '898754',
+            }        
+        
         # Verificar Planos
         try:
             plan_list = json.loads(planList[dataDay])       
@@ -312,8 +337,7 @@ class ApiTI:
             data_plan = res_plan.read()
             conn.close()
         except KeyError:
-            data_plan = 0
-        
+            data_plan = 0        
         return data_plan
     
     @staticmethod
