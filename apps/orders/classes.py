@@ -26,7 +26,7 @@ class StatusStore():
             'AG': 'agencia',
             'AS': 'em-andamento',
             'AT': 'ativado',
-            'CC': 'desativado',
+            'CC': 'cancelled',
             'CN': 'completed', 
             'DE': 'desativado', 
             'DA': 'data-em-aberto',
