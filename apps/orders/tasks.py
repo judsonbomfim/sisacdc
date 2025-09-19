@@ -51,7 +51,7 @@ def order_import():
             UpdateStore.upStore(
                 order_id = id_ord,
                 item_id_store = existing_order.item_id_store if existing_order.item_id_store else None,
-                _status = order_status_i if order_status_i else None,
+                _status = status_sis if status_sis else None,
                 status_g = status_sis if status_sis else None,
             )  
             print(f'---------- Pedido {id_ord} já importado.')
@@ -148,8 +148,6 @@ def order_import():
 
                 shipping_i = shipping_i[:40]
                 
-                if condition_i == 'reuso-sim':
-                    order_status_i = 'RS'
                 if activation_date_i == '2001-01-01':
                     order_status_i = 'EI'
                 if product_i == 'chip-internacional-eua-30-dias':
@@ -235,6 +233,8 @@ def order_import():
                 # Status sis : Status Loja
                 if type_sim_i == 'esim':
                     order_status_i = 'EE'
+                
+                order_status_i = None
 
                 # Atualizar site
                 UpdateStore.upStore(
