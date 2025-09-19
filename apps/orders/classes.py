@@ -47,6 +47,7 @@ class UpdateStore():
     @staticmethod
     def upStore(order_id, item_id_store=None, _data_ativacao=None, _sim=None, _qrcode=None, _status=None,status_g=None):
         meta_data = []
+        update_store = {}
         print(f'---------- Atualizando pedido {order_id} na loja.')
         print(f'---------- status_g: {status_g}')
         if item_id_store != None:
