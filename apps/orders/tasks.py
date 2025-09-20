@@ -656,23 +656,22 @@ def update_st(*args, **kwargs):
 
         # Listar pedidos         
         for order_store in ord:
-            time.sleep(3)
-            n_item = 1
-            id_ord = order_store["id"]
-            
-            id_sis = Orders.objects.filter(order_id=id_ord).first()
-            
-            if id_sis != None:
-                id_order = id_sis.id
-                order_status = id_sis.order_status                
-
-                UpdateStore.upStore(
-                    order_id = id_ord,
-                    status_g = order_status if order_status else None,
-                )                    
-
-                total_ord += 1
-                print(f'>>>>>>>>>> Pedidos {id_ord} - {order_status} = TOTAL {total_ord}')
+            try:
+                time.sleep(3)
+                n_item = 1
+                id_ord = order_store["id"]
+                id_sis = Orders.objects.filter(order_id=id_ord).first()
+                if id_sis is not None:
+                    id_order = id_sis.id
+                    order_status = id_sis.order_status
+                    UpdateStore.upStore(
+                        order_id = id_ord,
+                        status_g = order_status if order_status else None,
+                    )
+                    total_ord += 1
+                    print(f'>>>>>>>>>> Pedidos {id_ord} - {order_status} = TOTAL {total_ord}')
+            except Exception as e:
+                print(f"Erro inesperado ao processar pedido {order_store}: {e}")
 
         n_page += 1
 
