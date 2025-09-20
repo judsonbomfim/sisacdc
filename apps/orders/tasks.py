@@ -656,7 +656,7 @@ def update_st(*args, **kwargs):
 
         # Listar pedidos         
         for order_store in ord:
-            time.sleep(1)
+            time.sleep(3)
             n_item = 1
             id_ord = order_store["id"]
             
