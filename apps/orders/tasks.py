@@ -667,12 +667,12 @@ def update_st(*args, **kwargs):
                 order_status = id_sis.order_status                
 
                 UpdateStore.upStore(
-                    order_id = id_order,
+                    order_id = id_ord,
                     status_g = order_status if order_status else None,
                 )                    
 
                 total_ord += 1
-                print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
+                print(f'>>>>>>>>>> Pedidos {id_ord} - {order_status} = TOTAL {total_ord}')
 
         n_page += 1
 
