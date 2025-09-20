@@ -621,7 +621,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
 #     print(f'Total de pedidos processados: {total_ord}')
     
     
-@shared_task
+@shared_task(time_limit=300)
 def update_st(*args, **kwargs):
     # Importar pedidos
     apiStore = ApiStore.conectApiStore()
