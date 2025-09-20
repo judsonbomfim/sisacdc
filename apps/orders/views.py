@@ -16,7 +16,7 @@ from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
 from .classes import ApiStore, NoteStore, StatusStore, DateFormats, UpdateStore
-from .tasks import order_import, orders_up_status
+from .tasks import order_import, orders_up_status, update_st
 import pandas as pd
 
 
@@ -766,7 +766,11 @@ def orders_activations(request):
     return render(request, 'painel/orders/activations.html', context)
 
 
-
+def update_status(request):
+    # Atualizar status dos pedidos
+    update_st.delay()
+    messages.success(request, 'Processando atualização de status... Aguarde alguns minutos e atualize a página de pedidos')
+    return HttpResponse('Atualizando status!')
 
 
 # def textImg(request):
