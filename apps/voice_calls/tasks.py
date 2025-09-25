@@ -102,7 +102,6 @@ def update_password(number_id):
    
 
 @shared_task
-@shared_task
 def number_in_voice():  # <- remover 'request'
     
     send_date = datetime.now().date() + timedelta(days=3)
