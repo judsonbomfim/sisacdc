@@ -19,5 +19,5 @@ def send_email_esims():
 def send_email_voices(request,id):
     send_email_voice.delay(id=id)
     voz = VoiceCalls.objects.get(id=id)    
-    NoteVoiceCall.addNote(id_item=voz, note="Pedido Alterado", id_user=request.user, type_note='P')
+    NoteVoiceCall.addNote(id_item=voz, note="E-mail enviado!", type_note='S')
     return redirect('voice_index')
