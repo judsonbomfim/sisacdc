@@ -1036,7 +1036,7 @@ def simActivateCM(id=None):
         ["30", "2gb", "D2206291911447523252"],        
     ]
         
-    tz = pytz.timezone(settings.TIME_ZONE)
+    tz = pytz.timezone("Europe/Lisbon")
     today = datetime.now(tz).date()
 
     print('>>>>>>>>>> ATIVAÇÂO CM INICIADA')
