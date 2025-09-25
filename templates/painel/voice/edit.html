@@ -28,7 +28,6 @@
               <br />
               <form action="{% url 'voice_edit' vox.id %}" method="POST">
                 {% csrf_token %}
-                {{  vox.days }}
                 <div class="col-md-6 col-xl-9">
                   <label class="form-label">Dias</label>
                   <div class="row">
