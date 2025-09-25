@@ -1,22 +1,25 @@
+import csv
+import imghdr
+import boto3
 from django.contrib.auth.decorators import login_required
 from rolepermissions.decorators import has_permission_decorator
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.urls import reverse
-import csv
-import os
-import imghdr
-from datetime import date
 from django.core.paginator import Paginator
 from django.contrib import messages
-from django.core.files.storage import FileSystemStorage
-from apps.sims.models import Sims
-from apps.orders.models import Orders
-from apps.orders.views import ApiStore, StatusStore
-import boto3
 from django.conf import settings
 from django.core.files.storage import default_storage
-from .tasks import sims_in_orders
+from django.http import JsonResponse
+from datetime import date
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from ..serializers import ConsumoSerializer
+from apps.sims.classes import ApiTC, ApiCM
+from rest_framework.permissions import IsAuthenticated
+from apps.sims.models import Sims
+from ..tasks import sims_in_orders
 
 
 # Script Upload S3
@@ -37,22 +40,18 @@ def upload_file_to_s3(file):
 @login_required(login_url='/login/')
 @has_permission_decorator('view_sims')
 def sims_list(request):
-    global sims_l
-    sims_l = ''
-    
     sims_all = Sims.objects.all().order_by('-id')
     sims_l = sims_all
     url_cdn = settings.URL_CDN
     
+    # Obter parâmetros de filtro (tanto GET quanto POST)
     if request.method == 'GET':
-        
         sim_f = request.GET.get('sim')
         sim_type_f = request.GET.get('sim_type')    
         sim_status_f = request.GET.get('sim_status')
         sim_oper_f = request.GET.get('sim_oper')
     
     if request.method == 'POST':
-        
         sim_f = request.POST.get('sim_f')
         sim_type_f = request.POST.get('sim_type_f')       
         sim_status_f = request.POST.get('sim_status_f')
@@ -71,8 +70,7 @@ def sims_list(request):
                 else:
                     messages.info(request,f'Você precisa marcar alguma opção')
     
-    # FIlters
-    
+    # Aplicar filtros
     url_filter = ''
     
     if sim_f:
@@ -80,15 +78,15 @@ def sims_list(request):
         url_filter += f"&sim={sim_f}"
 
     if sim_type_f: 
-        sims_l = sims_l.filter(type_sim__icontains=sim_type_f)        
+        sims_l = sims_l.filter(type_sim=sim_type_f)        
         url_filter += f"&sim_type={sim_type_f}"
     
     if sim_status_f: 
-        sims_l = sims_l.filter(sim_status__icontains=sim_status_f)
+        sims_l = sims_l.filter(sim_status=sim_status_f)
         url_filter += f"&sim_status={sim_status_f}"
     
     if sim_oper_f: 
-        sims_l = sims_l.filter(operator__icontains=sim_oper_f)
+        sims_l = sims_l.filter(operator=sim_oper_f)
         url_filter += f"&sim_oper={sim_oper_f}"
         
     
@@ -107,6 +105,10 @@ def sims_list(request):
     esim_cm = sims_all.filter(sim_status='DS',operator='CM', type_sim='esim').count()
     sim_tc = sims_all.filter(sim_status='DS',operator='TC', type_sim='sim').count()
     esim_tc = sims_all.filter(sim_status='DS',operator='TC', type_sim='esim').count()
+    sim_ti = sims_all.filter(sim_status='DS',operator='TI', type_sim='sim').count()
+    esim_ti = sims_all.filter(sim_status='DS',operator='TI', type_sim='esim').count()
+    sim_ms = sims_all.filter(sim_status='DS',operator='MS', type_sim='sim').count()
+    esim_ms = sims_all.filter(sim_status='DS',operator='MS', type_sim='esim').count()
     
     url = reverse('sims_index')
     
@@ -123,7 +125,15 @@ def sims_list(request):
         'esim_cm': esim_cm,
         'sim_tc': sim_tc,
         'esim_tc': esim_tc,
+        'sim_ti': sim_ti,
+        'esim_ti': esim_ti,
+        'sim_ms': sim_ms,
+        'esim_ms': esim_ms,
         'url_filter': url_filter,
+        'sim_f': sim_f,
+        'sim_type_f': sim_type_f,
+        'sim_status_f': sim_status_f,
+        'sim_oper_f': sim_oper_f,
     }
        
     return render(request, 'painel/sims/index.html', context)
@@ -274,3 +284,58 @@ def exportSIMs(request):
 
     return response
 
+@login_required(login_url='/login/')
+def alterarOperadora(request):
+    sims = Sims.objects.all().filter(operator='TC', type_sim='sim', sim_status='DS')
+    
+    for sim in sims:
+        sim.operator = 'TI'
+        sim.save()
+    
+    return HttpResponse('Operadora alterada com sucesso!')
+
+
+class ConsumoView(APIView):
+    permission_classes = [IsAuthenticated]  # Requer autenticação JWT
+
+    def get(self, request, iccid):
+        try:
+            # Chama o método mobileData da classe ApiTC
+            mobile_data = ApiTC.mobileData(iccid)
+            # Serializa os dados
+            serializer = ConsumoSerializer(data={
+                "iccid": iccid,
+                "mobile_data": mobile_data
+            })
+            if serializer.is_valid():
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Tratamento genérico de erros
+            return Response({"error": f"Erro ao consultar consumo: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+@login_required(login_url='/login/')
+def testeMobileData(request, iccid):
+    
+    try:
+        # Verificar se a classe foi importada corretamente
+        print(f"Classe ApiCM disponível: {ApiCM}")        
+        # Chamar método mobileData da classe ApiCM
+        mobile_data = ApiCM.mobileData(iccid)        
+        # Retornar resposta JSON
+        return JsonResponse({
+            'success': True,
+            'iccid': iccid,
+            'mobile_data': mobile_data,
+            'operator': 'CM'
+        })
+        
+    except Exception as e:
+        print(f"Erro em testeMobileDataCM: {e}")
+        
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'iccid': iccid
+        }, status=500)

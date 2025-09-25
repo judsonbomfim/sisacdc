@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'storages',
     'rolepermissions',
     'django_celery_beat',
+    'rest_framework',
+    'rest_framework_simplejwt',   
     'apps.orders.apps.OrdersConfig',
     'apps.sims.apps.SimsConfig',
     'apps.dashboard.apps.DashboardConfig',
@@ -213,6 +215,11 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='2-59/5'),
         # 'schedule': crontab(minute='*/1'),
     },
+    'task__5_min_activate_TI': {
+        'task': 'apps.sims.tasks.simActivateTI',
+        'schedule': crontab(minute='2-59/5'),
+        # 'schedule': crontab(minute='*/1'),
+    },
     'task__5_min_activate_TM': {
         'task': 'apps.sims.tasks.simActivateTM',
         'schedule': crontab(minute='3-59/5'),
@@ -239,3 +246,18 @@ APITC_HTTPCONN = str(os.getenv('APITC_HTTPCONN'))
 APICM_KEY = str(os.getenv('APICM_KEY'))
 APICM_SECRET = str(os.getenv('APICM_SECRET'))
 APICM_URL = str(os.getenv('APICM_URL'))
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # Requer autenticação por padrão
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Tempo de validade do token de acesso
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Tempo de validade do token de refresh
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}

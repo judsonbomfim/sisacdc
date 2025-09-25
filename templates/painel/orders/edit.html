@@ -19,8 +19,14 @@
                     <div class="card-body">
                         <div class="card">
                             <div class="card-body">
-                                <span>NOME - {{ order.client }}</span><br>
+                                <span class="fs-3"><b>{{ order.client }}</b></span><br>
                                 <span>E-MAIL - {{ order.email }}</span><br>
+                                {% if order.ord_chip_nun %}
+                                    <span>Ped/SIM - {{ order.ord_chip_nun }}</span><br>
+                                {% endif %}
+                                {% if order.cell_mod %}
+                                    <span>Modelo de celular - {{ order.cell_mod }}</span><br>
+                                {% endif %}
                             </div>
                         </div>
                         <br>
@@ -87,10 +93,10 @@
                                 <label class="form-label" for="type_sim1">SIM/(e)SIM</label>
                                 <br>
                                 <div class="input-group flex-nowrap">
-                                    <span class="input-group-text" id="sim"><i class="bi bi-sim"></i></span>
+                                    <span class="input-group-text" id="sim_s"><i class="bi bi-sim"></i></span>
                                     <input type="text" class="form-control" value="{{ order.id_sim.sim }}" disabled>
-                                    <span class="input-group-text ms-3" id="sim">Novo SIM</span>
-                                    <input type="text" class="form-control" name="sim" placeholder="SIM"
+                                    <label class="input-group-text ms-3" id="sim" for="new_sim">Novo SIM</label>
+                                    <input type="text" class="form-control" id="new_sim" name="sim" placeholder="SIM"
                                         aria-label="SIM">
                                 </div>
                             </div>

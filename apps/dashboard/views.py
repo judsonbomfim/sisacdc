@@ -32,6 +32,10 @@ def index(request):
     except: countActivCM = 0
     try: countActivTC = activList[activList['operator'] == 'TC']['countActiv'].values[0]
     except: countActivTC = 0
+    try: countActivTI = activList[activList['operator'] == 'TI']['countActiv'].values[0]
+    except: countActivTI = 0
+    try: countActivMS = activList[activList['operator'] == 'TI']['countActiv'].values[0]
+    except: countActivMS = 0
     
     # Queries
     simsAll = Sims.objects.all()
@@ -143,6 +147,10 @@ def index(request):
     esim_cm = simsAll.filter(sim_status='DS',operator='CM', type_sim='esim').count()
     sim_tc = simsAll.filter(sim_status='DS',operator='TC', type_sim='sim').count()
     esim_tc = simsAll.filter(sim_status='DS',operator='TC', type_sim='esim').count()
+    sim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='sim').count()
+    esim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='esim').count()
+    sim_ms = simsAll.filter(sim_status='DS',operator='MS', type_sim='sim').count()
+    esim_ms = simsAll.filter(sim_status='DS',operator='MS', type_sim='esim').count()
 
     context= {
         'sims': simsAll,
@@ -152,6 +160,10 @@ def index(request):
         'esim_cm': esim_cm,
         'sim_tc': sim_tc,
         'esim_tc': esim_tc,
+        'sim_ti': sim_ti,
+        'esim_ti': esim_ti,
+        'sim_ms': sim_ms,
+        'esim_ms': esim_ms,
         'dateDay': dateDay,
         'dateYesterday': dateYesterday,
         'dateWeek': dateWeek,
@@ -161,6 +173,8 @@ def index(request):
         'countActivTM': countActivTM,
         'countActivCM': countActivCM,
         'countActivTC': countActivTC,
+        'countActivTI': countActivTI,
+        'countActivMS': countActivMS,
         'weekSalesDates': weekSalesDays,
         'weekSalesValues': weekSalesValues,
         'weekSimsDates': weekSimsDays,

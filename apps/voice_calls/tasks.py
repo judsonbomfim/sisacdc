@@ -3,11 +3,13 @@ import string
 import qrcode
 import boto3
 import time
+from django.db.models import Q
 from io import BytesIO
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.files.storage import default_storage
 from celery import shared_task
+from apps.voice_calls.classes import NoteVoiceCall
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 from apps.send_email.tasks import send_email_voice
 
@@ -100,18 +102,27 @@ def update_password(number_id):
    
 
 @shared_task
-def number_in_voice():
+def number_in_voice(request):
     
-    # send_date = datetime.now().date() + timedelta(days=2)
+    send_date = datetime.now().date() + timedelta(days=3)
 
     # Select Voice Calls
-    # voice_s = VoiceCalls.objects.filter(call_status='PR').filter(id_item__activation_date__lte=send_date)
-    voice_s = VoiceCalls.objects.filter(call_status='PR')
-    
+    voice_s = VoiceCalls.objects.filter(call_status='PR').filter(id_item__activation_date__lte=send_date)
+    voice_s = VoiceCalls.objects.filter(
+        Q(call_status='PR', id_item__activation_date__lte=send_date) |
+        Q(call_status='SL')
+    )
+        
     # Insert Number
     for vox in voice_s:
         id_vox = vox.id
         number_s = VoiceNumbers.objects.all().order_by('id').filter(number_status='DS').first()
+        if not number_s:
+            voice_put = VoiceCalls.objects.get(pk=id_vox)
+            voice_put.call_status = 'EP'
+            voice_put.save()
+            
+            continue
         # Change Status Voice
         voice_put = VoiceCalls.objects.get(pk=id_vox)
         voice_put.call_status = 'AA'
@@ -121,6 +132,8 @@ def number_in_voice():
         number_s.number_status = 'AT'
         number_s.save()
         update_password.delay(number_id=[number_s.id])
+        #ADicionar nota
+        NoteVoiceCall.addNote(id_item=voice_put, note=f"Ramal alterado - {number_s.extension}", id_user=request.user, type_note='P')
         time.sleep(2)
         #send email
         # send_email_voice.delay(id_vox)

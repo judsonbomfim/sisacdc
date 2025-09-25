@@ -7,13 +7,24 @@ PRODUCT = [
     ('chip-internacional-eua-30-dias', 'USA 30 Dias'),
     ('chip-internacional-eua-e-canada', 'USA/CANADA'),
     ('chip-internacional-eua-canada-e-mexico', 'USA/CAN/MEX'),
-    ('chip-internacional-europa-plus', 'EUROPA PLUS'),
-    ('chip-internacional-europa-premium', 'EUROPA PREMIUM'),
-    ('chip-internacional-europa', 'EUROPA'),
-    ('chip-internacional-global', 'GLOBAL'),
+    ('chip-internacional-europa-plus', 'Europa Plus'),
+    ('chip-internacional-europa', 'Europa'),
+    ('chip-internacional-global', 'Global'),
     ('chip-internacional-america-do-sul', 'América do Sul'),
-    ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
     ('chamada-de-voz', 'Plano de Voz'),
+    ('chip-internacional-europa-ilimitado', 'Europa Ilimitado'),
+    ('chip-internacional-europa-premium', 'Europa Premium'),
+    ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
+    ('chip-internacional-israel-premium', 'Israel Premium'),
+    ('chip-internacional-tunisia-premium', 'Tunísia Premium'),
+    ('chip-internacional-marrocos-premium', 'Marrocos Premium'),
+    ('chip-internacional-egito-premium', 'Egito Premium'),
+    ('chip-internacional-indonesia-premium', 'Indonésia Premium'),    
+    ('chip-internacional-eua-premium', 'EUA Premium'),    
+    ('chip-internacional-africa-premium', 'África Premium'),
+    ('chip-internacional-asia-premium', 'Ásia Premium'),
+    ('chip-internacional-oriente-medio-premium', 'Oriente Médio Premium'),
+    ('chip-internacional-oceania-premium', 'Oceania Premium'),
 ]
 
 DATA = [
@@ -49,6 +60,7 @@ ORDER_STATUS = [
     ('RT', 'Retirada'),
     ('VS', 'Verificar SIM'),
 ]
+
 CONDITION = [
     ('novo-sim', 'Novo SIM'),
     ('reuso-sim', 'Reutilizar')
@@ -58,6 +70,7 @@ class Orders(models.Model):
     id = models.AutoField(primary_key=True)
     order_id = models.IntegerField()
     item_id = models.CharField(max_length=15)
+    item_id_store = models.CharField(max_length=15, null=True, blank=True)
     client = models.CharField(max_length=70)
     email = models.CharField(max_length=70, null=True, blank=True)
     product = models.CharField(max_length=50, choices=PRODUCT)
@@ -79,6 +92,7 @@ class Orders(models.Model):
     id_sim = models.ForeignKey(Sims, on_delete=models.DO_NOTHING, null=True, blank=True)
     condition = models.CharField(max_length=15, choices=CONDITION, default='novo-sim')
     tracking = models.CharField(max_length=25, null=True, blank=True)
+    celular_samsung = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
@@ -87,7 +101,7 @@ class Orders(models.Model):
         verbose_name_plural = 'Pedidos'
         ordering = ['order_id']
     def __str__(self):
-        return str(self.order_id)
+        return f"Pedido #{self.id}"
 
 TYPE_NOTE = [
     ('S', 'Sistema'),
@@ -107,4 +121,4 @@ class Notes(models.Model):
         verbose_name_plural = 'Notas'
         ordering = ['-id']
     def __str__(self):
-        return str(self.id_item)
+        return f"Nota #{self.id}"

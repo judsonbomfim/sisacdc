@@ -5,9 +5,9 @@ import http.client
 import json
 import time
 from django.conf import settings
-from .classes import ApiTC, apiCM
+from .classes import ApiTC, ApiTI, ApiCM
 from apps.orders.models import Orders, Notes
-from apps.orders.classes import ApiStore, StatusStore, NotesAdd, UpdateOrder
+from apps.orders.classes import ApiStore, StatusStore, NotesAdd, UpdateOrder, UpdateStore
 from apps.send_email.tasks import send_email_sims
 from apps.sims.models import Sims
 from datetime import datetime, timedelta
@@ -31,8 +31,10 @@ def sims_in_orders():
         id_id_i = ord.id
         order_id_i = ord.order_id
         product_i = ord.product
+        condition_i = ord.condition
         countries_i = ord.countries
         type_sim_i = ord.type_sim
+        celular_samsung = ord.celular_samsung
         update_store = {}
         esim_eua = type_sim_i == 'esim' and (product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias')
         esim_ok = type_sim_i == 'esim' and (product_i != 'chip-internacional-eua' or product_i != 'chip-internacional-eua-30-dias')
@@ -51,10 +53,32 @@ def sims_in_orders():
                 add_sim.save()
 
             # ESCOLHER OPERADORA
-            if product_i == 'chip-internacional-europa-premium' or product_i == 'chip-internacional-america-do-sul' or product_i == 'chip-internacional-america-do-sul-premium':
-                operator_i = 'TC'
+            planos = {
+                'chip-internacional-europa-premium',
+                'chip-internacional-america-do-sul',
+                'chip-internacional-america-do-sul-premium',
+                'chip-internacional-israel-premium',
+                'chip-internacional-tunisia-premium',
+                'chip-internacional-marrocos-premium',
+                'chip-internacional-egito-premium',
+                'chip-internacional-indonesia-premium',
+                'chip-internacional-eua-premium',
+                'chip-internacional-africa-premium',
+                'chip-internacional-asia-premium',
+                'chip-internacional-oriente-medio-premium',
+                'chip-internacional-oceania-premium',
+            }
+            if product_i in planos:
+                operator_i = 'TI'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
+            elif product_i == 'chip-internacional-europa-ilimitado':
+                operator_i = 'MS'
+            elif product_i == 'chip-internacional-eua-canada-e-mexico':
+                if condition_i == 'novo-sim':
+                    operator_i = 'TI'
+                else:
+                    operator_i = 'CM'
             else: operator_i = 'CM'
             
             # Select SIM
@@ -91,37 +115,58 @@ def sims_in_orders():
             sim_put = Sims.objects.get(pk=sim_ds.id)
             sim_put.sim_status = 'AT'
             sim_put.save()
-            sim_e = sim_put.sim 
-            
-            addNote(f'(e)SIM {sim_e} adicionado')
-            
+            _sim = sim_put.sim
+            _qrcode = sim_put.link  # Usando o campo link que contém a URL do QR code
+
+            addNote(f'(e)SIM {_sim} adicionado')
+
+            # Atualizar pedido no site
             status_sis_site = StatusStore.st_sis_site()
             if status_ord in status_sis_site:
                 update_store = {
                     'status': status_sis_site[status_ord]
                 }
-    
-            apiStore = ApiStore.conectApiStore()                    
-            apiStore.put(f'orders/{order_id_i}', update_store).json()
             
+            # Gravar SIM e QRCode no site
+            if ord.item_id_store:
+                update_store['line_items'] = [
+                    {
+                        "id": int(ord.item_id_store),
+                        "meta_data": [
+                            {
+                                "key": "_sim",
+                                "value": _sim,
+                            },
+                            {
+                                "key": "_qrcode",
+                                "value": _qrcode if _qrcode else "",
+                            }
+                        ]
+                    }
+                ]
+    
+            apiStore = ApiStore.conectApiStore()
+            apiStore.put(f'orders/{order_id_i}', update_store)
+                             
             msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
             
             n_item_total += 1
     
         print('>>>>>>>>>>>>>>>>>>>>>>> SIMs atribuidos!')
     
+
 @shared_task
 def simActivateTC(id=None):
     
-    from apps.orders.tasks import up_order_st_store
-        
+    # dia anterior
     today = datetime.now().date()
+    yesterday = datetime.now().date() - timedelta(days=1)
 
     print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=today)
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=yesterday)
     else:
         orders_all = Orders.objects.filter(pk=id)
             
@@ -131,20 +176,20 @@ def simActivateTC(id=None):
         # Checar Status
         UpdateOrder.upStatus(id_item,'EA')
         # Adicionar nota
-        NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
+        NotesAdd.addNote(order,f'ERRO API: {iccid} com erro na Telcon. Verificar erro.')
         error = 'error_apiResult'
         return error
     
     token_api = ApiTC.get_token()
     time.sleep(0.5)
     conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
-    time.sleep(0.5)
     headers = ApiTC.get_headers(token_api)
         
     for order in orders_all:
                         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
+        print(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
         id_item = order.id
         try:
             iccid = order.id_sim.sim
@@ -174,7 +219,173 @@ def simActivateTC(id=None):
         
         # Alterar plano
         time.sleep(0.5)
-        ApiTC.planChange(endpointId,headers,dataDay, product)
+        data_plan = ApiTC.planChange(endpointId,headers,dataDay, product)
+        if data_plan == 0:
+            UpdateOrder.upStatus(id_item,'EA')
+            NotesAdd.addNote(order,f'{iccid} Plano não alterado. Verificar plano {dataDay} - TC: Plano não encontrado.')
+            continue
+        NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay} - TELCOM: {json.loads(data_plan)}')    
+
+        if simStatus == 'Pre-Active':
+            # Ativar SIM na operadora
+            payload = json.dumps({
+                "Request": {
+                    "endPointId": f"{endpointId}"
+                }
+            })
+            conn.request("POST", "/api/EndPointActivation", payload, headers)
+            # Adicionar nota
+            note = f'{iccid} ativado com sucesso na Telcon'
+            
+            process = True
+            
+        else:
+            # Alterar SIM na operadora
+            if simStatus == 'Active':
+                print('simStatus == Active')
+                # Adicionar nota
+                NotesAdd.addNote(order,f'{iccid} já estava ativado na Telcon')
+                # Alterar Status
+                UpdateOrder.upStatus(id_item,'AT')
+                UpdateStore.upStore(
+                    order_id = order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status = 'AT',
+                    status_g = 'AT',
+                )               
+                continue
+            
+            elif simStatus == 'Suspended':
+                print('simStatus == Suspended')
+                payload = json.dumps({
+                    "Request": {
+                        "endPointId": f"{endpointId}",
+                        "requestParam": {
+                            "lifeCycle": "A",
+                            "reason": "1"
+                        }
+                    }
+                })
+                time.sleep(0.5)
+                conn.request("POST", "/api/EndPointLifeCycleChange", payload, headers)
+                # Adicionar nota
+                note = f'{iccid} reativado com sucesso na Telcon'
+                
+                process = True
+                
+            else:
+                print('simStatus == Other')
+                # Alterar status
+                UpdateOrder.upStatus(id_item,'EA')
+                NotesAdd.addNote(order,f'{iccid} com erro de ativação na Telcon. Verificar erro.')
+                continue
+        
+        if process == True:            
+            
+            time.sleep(0.5)            
+            res = conn.getresponse()
+            data = json.loads(res.read())
+            resultCode = int(data["Response"]["resultCode"])
+            resultDescription = data["Response"]["resultParam"]["resultDescription"]
+            try:
+                resultCode = int(data["Response"]["resultCode"])
+                resultDescription = data["Response"]["resultParam"]["resultDescription"]
+            except Exception:
+                resultCode = None
+                resultDescription = None
+            
+            if resultCode == 0:
+                # Alterar status
+                UpdateOrder.upStatus(id_item,'AT')
+                UpdateStore.upStore(
+                    order_id = order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status = 'AT',
+                    status_g = 'AT',
+                )
+                # Adicionar nota
+                NotesAdd.addNote(order,f'{note} TC: {resultDescription}')
+            else:
+                # Alterar status
+                UpdateOrder.upStatus(id_item,'EA')
+                # Adicionar nota
+                NotesAdd.addNote(order,f'TC: {resultDescription}')
+        
+        # Fecha a conexão
+        conn.close()
+                
+    print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
+
+
+@shared_task
+def simActivateTI(id=None):
+    
+    today = datetime.now().date()
+    yesterday = datetime.now().date() - timedelta(days=1)
+
+    print('>>>>>>>>>> ATIVAÇÂO TI INICIADA')
+    
+    # Selecionar pedidos
+    if id is None:
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TI', activation_date__lte=yesterday)
+    else:
+        orders_all = Orders.objects.filter(pk=id)
+            
+    # Checar conexão com API
+    def error_api():
+        print('>>>>>>>>>> ERRO API')
+        # Checar Status
+        UpdateOrder.upStatus(id_item,'EA')
+        # Adicionar nota
+        NotesAdd.addNote(order,f'ERRO API: {iccid} com erro na Telcon. Verificar erro.')
+        error = 'error_apiResult'
+        return error
+    
+    token_api = ApiTI.get_token()
+    time.sleep(0.5)
+    conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
+    time.sleep(0.5)
+    headers = ApiTI.get_headers(token_api)
+        
+    for order in orders_all:
+                        
+        order = Orders.objects.get(pk=order.id)
+        order_id = order.order_id
+        print(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
+        id_item = order.id
+        try:
+            iccid = order.id_sim.sim
+        except Exception:
+            iccid = None
+            continue
+        dataDay = order.data_day
+        product = order.product
+        
+        # Variaveis globais        
+        endpointId = None
+        simStatus = None
+        note = ''
+        process = False
+        token_api = None  
+        
+        # Verificar EndPointID / Status
+        try:
+            time.sleep(0.5)
+            get_iccid = ApiTI.get_iccid(iccid, headers)
+            endpointId = get_iccid[0]
+            simStatus = get_iccid[1]
+        except Exception:            
+            error_api()
+            continue
+        ##
+        
+        # Alterar plano
+        time.sleep(0.5)
+        data_plan = ApiTI.planChange(endpointId,headers,dataDay, product)
+        if data_plan == 0:
+            UpdateOrder.upStatus(id_item,'EA')
+            NotesAdd.addNote(order,f'{iccid} Plano não alterado. Verificar plano {dataDay} - TI: Plano não encontrado.')
+            continue
         NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay}')    
 
         if simStatus == 'Pre-Active':
@@ -198,6 +409,12 @@ def simActivateTC(id=None):
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{iccid} já estava ativado na Telcon')
                 # Alterar Status
+                UpdateStore.upStore(
+                    order_id = order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status = 'AT',
+                    status_g = 'AT',
+                )             
                 UpdateOrder.upStatus(id_item,'AT')
                 continue
             
@@ -223,7 +440,7 @@ def simActivateTC(id=None):
                 print('simStatus == Other')
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
-                NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
+                NotesAdd.addNote(order,f'{iccid} com erro na ativação da Telcon. Verificar erro.')
                 continue
         
         if process == True:            
@@ -243,25 +460,28 @@ def simActivateTC(id=None):
             if resultCode == 0:
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'AT')
-                up_order_st_store.delay(order_id,'ativado')
+                UpdateStore.upStore(
+                    order_id = order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status = 'AT',
+                    status_g = 'AT',
+                )            
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{note} TC: {resultDescription}')
             else:
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
                 # Adicionar nota
-                NotesAdd.addNote(order,f'TC: {resultDescription}')
+                NotesAdd.addNote(order,f'TI: {resultDescription}')
         
         # Fecha a conexão
         conn.close()
-                
-    print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
+
+    print('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
 
 
 @shared_task
 def simDeactivateTC(id=None):
-    
-    from apps.orders.tasks import up_order_st_store    
     
     timezone = pytz.timezone('America/Sao_Paulo')
     min_hour = 23  # hora
@@ -279,7 +499,7 @@ def simDeactivateTC(id=None):
             return
         else:
             # Se for depois da hora mínima, execute a tarefa
-            orders_all = Orders.objects.filter(order_status='AT', id_sim__operator='TC')
+            orders_all = Orders.objects.filter(order_status='AT', id_sim__operator__in=['TC', 'TI'])
     else:
         orders_all = Orders.objects.filter(pk=id)
         
@@ -306,13 +526,13 @@ def simDeactivateTC(id=None):
         # Alterar status
         UpdateOrder.upStatus(id_item,'ED')
         # Adicionar nota
-        NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro.')
+        NotesAdd.addNote(order,f'ERRO API: {iccid} com erro na Telcon. Verificar erro.')
         error = 'error_api Result'
         return error       
-
-    print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
     
     for index, o in orders_df.iterrows():
+        time.sleep(0.5)
+        print('>>>>>>>>>> DESATIVAÇÂO INICIADA')
         
         order = Orders.objects.get(pk=o['id'])
         order_id = order.order_id
@@ -328,13 +548,12 @@ def simDeactivateTC(id=None):
          
         # Get EndPointID / Status
         try:
-            # Gerar tokem de acesso a API
+            # Gerar token de acesso a API
             token_api = ApiTC.get_token()
             conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             headers = ApiTC.get_headers(token_api, cookie=True)
             get_iccid = ApiTC.get_iccid(iccid, headers)
             endpointId = get_iccid[0]
-            simStatus = get_iccid[1] 
         except Exception:            
             error_api()
             continue      
@@ -351,6 +570,7 @@ def simDeactivateTC(id=None):
             }
         })
         
+        time.sleep(0.5)
         conn.request("POST", "/api/EndPointLifeCycleChange", payload, headers)
         # Adicionar nota
             
@@ -361,14 +581,19 @@ def simDeactivateTC(id=None):
             resultDescription = data["Response"]["resultParam"]["resultDescription"]
         except Exception:
             resultCode = None
-            resultDescription = None
+            resultDescription = data
 
         if resultCode == 0:
             if id is None:
                 print('>>>>>>>>>> Alterar status')                
                 # Alterar status                
                 UpdateOrder.upStatus(id_item,'DE')
-                up_order_st_store.delay(order_id,'desativado')
+                UpdateStore.upStore(
+                    order_id = order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status = 'DE',
+                    status_g = 'DE',
+                )  
                 sim_put = Sims.objects.get(pk=order.id_sim.id)
                 sim_put.sim_status = 'DE'
                 sim_put.save()
@@ -380,7 +605,7 @@ def simDeactivateTC(id=None):
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'ED')
             # Adicionar nota
-            NotesAdd.addNote(order,f'{iccid} com erro na Telcon. Verificar erro. TC: {resultDescription}')
+            NotesAdd.addNote(order,f'ERRO DESATIVADO: {iccid} com erro na Telcon. Verificar erro. TC: {resultDescription}')
         
         # Fecha a conexão
         conn.close()
@@ -390,9 +615,7 @@ def simDeactivateTC(id=None):
 
 @shared_task
 def simActivateTM(id=None):
-    
-    from apps.orders.tasks import up_order_st_store    
-        
+          
     london_tz = pytz.timezone('Europe/London')
     today = datetime.now(london_tz).date()
     tomorrow = today + timedelta(days=1)
@@ -453,19 +676,24 @@ def simActivateTM(id=None):
             if response_data['code'] == 0:
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'AT')
-                up_order_st_store.delay(order_id,'ativado')
+                UpdateStore.upStore(
+                    order_id = order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status = 'AT',
+                    status_g = 'AT',
+                )
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{iccid} Enviado para ativação na T-Mobile')
             else:
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
                 # Adicionar nota
-                NotesAdd.addNote(order,f'Houve um erro ao ativar o SIM {iccid}. Verificar manualmente.')
+                NotesAdd.addNote(order,f'Houve um erro ao ativar o SIM {iccid}. Verificar manualmente. {response_data}')
         else:
             # Alterar status
             UpdateOrder.upStatus(id_item,'EA')
             # Adicionar nota
-            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.')
+            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.{response_data}')
 
         # Fecha a conexão
         conn.close()
@@ -477,7 +705,6 @@ def simActivateTM(id=None):
 @shared_task
 def simActivateCM(id=None):
     
-    from apps.orders.tasks import up_order_st_store
     import base64
     import hashlib
     import json
@@ -822,7 +1049,7 @@ def simActivateCM(id=None):
     
     if orders_all != None:
         # Gerar Token
-        api_token = apiCM.get_token()
+        api_token = ApiCM.get_token()
         
         if api_token == "error":
             print('>>>>>>>>>> ERRO DE TOKEN')
@@ -831,7 +1058,7 @@ def simActivateCM(id=None):
     for order in orders_all:
         
         # Aguardar 1 segundo
-        time.sleep(1)
+        time.sleep(0.5)
         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
@@ -845,12 +1072,12 @@ def simActivateCM(id=None):
         
         print(f'>>>>>>>>>> ATIVANDO SIM {order_sim} - {order_id}')
         
-        def errorData():
+        def errorData(data_dict=None):
             # Adicionar Nota
             note = f'Erro ao ativar o SIM {order_sim}. Verificar manualmente. ERRO: {data_dict}'
-            NotesAdd.addNote(order,note)
-            # ALterar status do sistema
-            UpdateOrder.upStatus(order_item,'EA')
+            NotesAdd.addNote(order, note)
+            # Alterar status do sistema
+            UpdateOrder.upStatus(order_item, 'EA')
         
         def generate_password_digest(app_secret):
             nonce = str(int(time.time() * 1000))
@@ -881,7 +1108,7 @@ def simActivateCM(id=None):
         # Verificar se plan_code foi definido
         if plan_code is None:
             # Inserir nota e alterar status do sistema
-            NotesAdd.addNote("Nenhum plano correspondente encontrado para order_day e order_data.",note)
+            NotesAdd.addNote(order, "Nenhum plano correspondente encontrado para order_day e order_data.")
             errorData()
             continue
 
@@ -921,21 +1148,25 @@ def simActivateCM(id=None):
         # Verificar o status da resposta
         data = res.read()
         
-        
         if res.status != 200:
-            errorData()
+            errorData(data.decode("utf-8"))
         else:
             data_dict = json.loads(data)
             result_data = data_dict.get('description')
             if result_data != 'Success':
-                errorData()
+                errorData(data_dict)
             else:
                 # Adicionar Nota
                 note = f'SIM {order_sim} ativado na China Mobile.'
-                NotesAdd.addNote(order,note)
-                # ALterar status do sistema
-                UpdateOrder.upStatus(order_item,'AT')
-                up_order_st_store.delay(order_id,'ativado')
+                NotesAdd.addNote(order, note)
+                # Alterar status do sistema
+                UpdateOrder.upStatus(order_item, 'AT')
+                UpdateStore.upStore(
+                    order_id = order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status = 'AT',
+                    status_g = 'AT',
+                )
 
         conn.close()
 

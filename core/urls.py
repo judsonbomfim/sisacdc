@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.urls import path, include
-
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 from django.conf import settings
 from django.conf.urls.static import static
 from apps.dashboard.views import index, clear_cache
@@ -14,7 +17,12 @@ urlpatterns = [
     path('email/', include('apps.send_email.urls')),
     path('voz/', include('apps.voice_calls.urls')),
     path('clear_cache/', clear_cache, name='clear_cache'),
-
+    
+    # API URLs
+    path('api/', include('rest_framework.urls')),  # Interface de navegação do DRF (opcional)
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Obter token
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Renovar token   
+    path('api/sims/', include('apps.sims.urls_api')),
 ]
 
 if settings.DEBUG:

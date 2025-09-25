@@ -17,30 +17,6 @@ class ApiStore():
         )
         return wcapi
 
-    @staticmethod
-    def updateEsimStore(order_id):
-        url_painel = str(os.getenv('URL_PAINEL'))
-        esims_order = Orders.objects.filter(order_id=order_id).filter(id_sim__link__isnull=False)
-        esims_list = ''
-        update_store = {"meta_data":[{"key": "campo_esims","value": ''}]}
-        if esims_order:
-            for esims_o in esims_order:
-                link_sim = esims_o.id_sim.link              
-                esims_list = esims_list + f"<img src='{url_painel}{link_sim}' style='width: 300px; margin:40px;'>"
-                update_store = {
-                    "meta_data": [
-                        {
-                            "key": "campo_esims",
-                            "value": esims_list
-                        }
-                    ]
-                }
-        else:
-            pass
-        # Conect Store
-        apiStore = ApiStore.conectApiStore()
-        apiStore.put(f'orders/{order_id}', update_store).json() 
-
 class StatusStore():
     @staticmethod
     def st_sis_site():
@@ -50,12 +26,15 @@ class StatusStore():
             'AG': 'agencia',
             'AS': 'em-andamento',
             'AT': 'ativado',
-            'CC': 'desativado',
+            'CC': 'cancelled',
             'CN': 'completed', 
             'DE': 'desativado', 
             'DA': 'data-em-aberto',
             'DS': 'desativado', 
+            'EI': 'em-andamento',
+            'EE': 'em-andamento',
             'ES': 'em-separacao',
+            'MB': 'motoboy',
             'PV': 'agd-ativacao',
             'RE': 'reembolsar',
             'RB': 'reembolsado',
@@ -63,14 +42,48 @@ class StatusStore():
             'RT': 'retirada',
         }
         return status_sis_site
-    
+
+class UpdateStore():
     @staticmethod
-    def upStatus(order_id,order_st):
-        apiStore = ApiStore.conectApiStore()
-        update_store = {
-                'status': order_st
-            }
-        apiStore.put(f'orders/{order_id}', update_store).json()
+    def upStore(order_id, item_id_store=None, _data_ativacao=None, _sim=None, _qrcode=None, _status=None,status_g=None):
+        meta_data = []
+        update_store = {}
+        if item_id_store != None:
+            if _data_ativacao:
+                meta_data.append({
+                    "key": "_data_ativacao",
+                    "value": _data_ativacao,
+                })
+            if _sim:
+                meta_data.append({
+                    "key": "_sim",
+                    "value": _sim,
+                })
+            if _qrcode:
+                meta_data.append({
+                    "key": "_qrcode",
+                    "value": _qrcode if _qrcode else "",
+                })
+            if _status:
+                # listaStatus = dict(Orders.order_status.field.choices)
+                status_sis_site = StatusStore.st_sis_site()
+                meta_data.append({
+                    "key": "_status",
+                    "value": status_sis_site[_status],
+                })
+            update_store = {
+                'line_items': [
+                    {
+                        "id": int(item_id_store),
+                        "meta_data": meta_data
+                    }
+                ]}
+        if status_g:
+            status_sis_site = StatusStore.st_sis_site()
+            update_store['status'] = status_sis_site[status_g]
+        if update_store:
+            apiStore = ApiStore.conectApiStore()
+            apiStore.put(f'orders/{order_id}', update_store)
 
 class NoteStore():
     @staticmethod

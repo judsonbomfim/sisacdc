@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
+from apps.voice_calls.classes import NoteVoiceCall
 from apps.voice_calls.models import VoiceNumbers, VoiceCalls
 from apps.voice_calls.tasks import number_up_status, voices_up_status, update_password
 from apps.orders.models import Orders
@@ -146,11 +147,10 @@ def voice_edit(request,id):
         return render(request, 'painel/voice/edit.html', context)
     
     if request.method == 'POST':
-        
-        print('>>>>>>>>>> EDITAR PEDIDO')
-        
+                
         call_put = VoiceCalls.objects.get(pk=id)
-        call_put.days = request.POST.get('days')
+        if request.POST.get('days'):
+            call_put.days = request.POST.get('days')
         if request.POST.get('activation_date'):
             call_put.activation_date = request.POST.get('activation_date')
         else:
@@ -158,6 +158,12 @@ def voice_edit(request,id):
         call_put.call_status = request.POST.get('ord_st_f')
         call_put.save()
         
+        note_text = request.POST.get('ord_note')
+        print(f"Nota recebida: '{note_text}'")
+        if note_text:
+            NoteVoiceCall.addNote(id_item=call_put, note=note_text, id_user=request.user, type_note='P')
+        
+        NoteVoiceCall.addNote(id_item=call_put, note="Pedido Alterado", id_user=request.user, type_note='P')            
         messages.success(request,f'Pedido {call_put.id_item} atualizado com sucesso!')
         return redirect('voice_index')
 
@@ -193,11 +199,17 @@ def voice_import(request):
         if voice != '':
             arquivo = voice.read().decode("utf-8")
             line_h = 0            
+
             for lines in arquivo.split('\n'):
-                                
+                if not lines.strip():
+                    continue  # pula linha vazia
+
                 line = []
                 col = lines.split(',')
                 line.append(col)
+                if len(col) < 3:
+                    messages.error(request, 'Linha com dados insuficientes no arquivo CSV.')
+                    continue
                 
                 f_login = line[0][0]
                 f_extension = line[0][1]
@@ -327,3 +339,20 @@ def up_password(request,id):
     messages.success(request,f'Senha e QrCode redefinidos com sucesso!')
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required(login_url='/login/')
+def atualizarDataVoz(request):
+    voxs = VoiceCalls.objects.all()
+
+    for vox in voxs:
+        # if str(vox.activation_date) in ['0001-01-01', '1-01-01']:
+        if str(vox.days) == '1':
+            order = Orders.objects.get(pk=vox.id_item.id)
+            vox.days = order.days
+            # vox.activation_date = order.activation_date
+            vox.save()
+            print(f"Voz {vox.id} atualizada com sucesso!")
+    print("----------------- Dados de voz atualizados com sucesso!")
+    # mensagem de retorno
+    messages.success(request, "Dados de voz atualizados com sucesso!")
+    return redirect('voice_index')
