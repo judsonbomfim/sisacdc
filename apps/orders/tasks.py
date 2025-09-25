@@ -79,6 +79,7 @@ def order_import():
             while q_i <= qtd:
 
                 order_id_i = order['id']
+                print(f'>>>>>>>>>> Importando pedido {order_id_i}')
                 item_id_i = f'{order_id_i}-{n_item}'
                 item_id_store_i = item['id']
                 client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'

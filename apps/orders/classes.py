@@ -25,6 +25,7 @@ class StatusStore():
             'AE': 'agd-envio',
             'AG': 'agencia',
             'AS': 'em-andamento',
+            'AI': 'em-andamento',
             'AT': 'ativado',
             'CC': 'cancelled',
             'CN': 'completed', 
