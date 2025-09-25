@@ -616,8 +616,8 @@ def simDeactivateTC(id=None):
 @shared_task
 def simActivateTM(id=None):
           
-    london_tz = pytz.timezone('Europe/London')
-    today = datetime.now(london_tz).date()
+    tz = pytz.timezone(settings.TIME_ZONE)
+    today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
     
     print('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
@@ -1036,8 +1036,8 @@ def simActivateCM(id=None):
         ["30", "2gb", "D2206291911447523252"],        
     ]
         
-    london_tz = pytz.timezone('Europe/London')
-    today = datetime.now(london_tz).date()
+    tz = pytz.timezone(settings.TIME_ZONE)
+    today = datetime.now(tz).date()
 
     print('>>>>>>>>>> ATIVAÇÂO CM INICIADA')
     

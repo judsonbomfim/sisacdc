@@ -151,8 +151,8 @@ class ApiTC:
         token_api = ApiTC.get_token()
         payload = ''
         headers = ApiTC.get_headers(token_api)
-        london_tz = pytz.timezone("Europe/London")
-        dateToday = datetime.now(london_tz).strftime("%Y%m%d")
+        tz = pytz.timezone(settings.TIME_ZONE)
+        dateToday = datetime.now(tz).strftime("%Y%m%d")
         # Obter EndPointID
         endPointId = ApiTC.get_iccid(iccid, headers)
         # Obter dados de uso
@@ -346,8 +346,8 @@ class ApiTI:
         token_api = ApiTI.get_token()
         payload = ''
         headers = ApiTI.get_headers(token_api)
-        london_tz = pytz.timezone("Europe/London")
-        dateToday = datetime.now(london_tz).strftime("%Y%m%d")
+        tz = pytz.timezone(settings.TIME_ZONE)
+        dateToday = datetime.now(tz).strftime("%Y%m%d")
         # Obter EndPointID
         endPointId = ApiTI.get_iccid(iccid, headers)        
         time.sleep(0.5)
