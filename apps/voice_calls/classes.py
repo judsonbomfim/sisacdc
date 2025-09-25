@@ -1,4 +1,4 @@
-from apps.voice_calls.models import NotesVoice, VoiceCalls
+from .models import NotesVoice
 
 
 class NumberFormatter:
@@ -13,12 +13,20 @@ class NumberFormatter:
         return num_f
 
 class NoteVoiceCall:
-    @staticmethod    
-    def addNote(id_item,note,id_user=None,type_note='S'):
-        add_note = NotesVoice( 
-            id_item = id_item,
-            id_user = id_user,
-            note = note,
-            type_note = type_note,
-        )
-        add_note.save()
+    @staticmethod
+    def addNote(id_item, note, id_user=None, type_note='S'):
+        try:           
+            # Criar e salvar a nota
+            nota = NotesVoice.objects.create(
+                id_item=id_item,
+                note=note,
+                id_user=id_user,
+                type_note=type_note
+            )
+            
+            print(f"  Nota criada com ID: {nota.id}")
+            return nota
+            
+        except Exception as e:
+            print(f"  ERRO ao criar nota: {e}")
+            return None

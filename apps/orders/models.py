@@ -101,7 +101,7 @@ class Orders(models.Model):
         verbose_name_plural = 'Pedidos'
         ordering = ['order_id']
     def __str__(self):
-        return str(self.order_id)
+        return f"Pedido #{self.id}"
 
 TYPE_NOTE = [
     ('S', 'Sistema'),
@@ -121,4 +121,4 @@ class Notes(models.Model):
         verbose_name_plural = 'Notas'
         ordering = ['-id']
     def __str__(self):
-        return str(self.id_item)
+        return f"Nota #{self.id}"

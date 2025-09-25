@@ -85,7 +85,7 @@
               <h6 class="text-uppercase fw-normal color-gray">Notas do pedido</h6>
             </div>
             <div class="card-body">
-              {% for note in notes %}
+              {% for note in vox.order_voice_notes.all %}
                 <div class="card border-left-secondary"
                   style="background-color: {% if note.type_note == 'S' %}#f4ebeb{% else %}#F3F3F3{% endif %};">
                   <div class="card-body">{{ note.note }}</div>

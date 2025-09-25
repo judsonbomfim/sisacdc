@@ -157,14 +157,16 @@ def sims_in_orders():
 
 @shared_task
 def simActivateTC(id=None):
-           
+    
+    # dia anterior
     today = datetime.now().date()
+    yesterday = datetime.now().date() - timedelta(days=1)
 
     print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=today)
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=yesterday)
     else:
         orders_all = Orders.objects.filter(pk=id)
             
@@ -319,12 +321,13 @@ def simActivateTC(id=None):
 def simActivateTI(id=None):
     
     today = datetime.now().date()
+    yesterday = datetime.now().date() - timedelta(days=1)
 
     print('>>>>>>>>>> ATIVAÇÂO TI INICIADA')
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TI', activation_date__lte=today)
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TI', activation_date__lte=yesterday)
     else:
         orders_all = Orders.objects.filter(pk=id)
             

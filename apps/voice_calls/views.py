@@ -138,13 +138,11 @@ def voice_edit(request,id):
         vox = VoiceCalls.objects.get(pk=id)
         vox_status = VoiceCalls.call_status.field.choices
         vox_days = list(range(5, 31))
-        notes = vox.order_voice_notes.all()
         
         context = {
             'vox': vox,
             'vox_status': vox_status,
             'vox_days': vox_days,
-            'notes': notes,
         }
         return render(request, 'painel/voice/edit.html', context)
     
@@ -160,9 +158,12 @@ def voice_edit(request,id):
         call_put.call_status = request.POST.get('ord_st_f')
         call_put.save()
         
-        if request.POST.get('ord_note'):
-            NoteVoiceCall.addNote(id_item=call_put, note=request.POST.get('ord_note'), id_user=request.user, type_note='P')        
-        NoteVoiceCall.addNote(id_item=call_put, note="Pedido Alterado", id_user=request.user, type_note='P')
+        note_text = request.POST.get('ord_note')
+        print(f"Nota recebida: '{note_text}'")
+        if note_text:
+            NoteVoiceCall.addNote(id_item=call_put, note=note_text, id_user=request.user, type_note='P')
+        
+        NoteVoiceCall.addNote(id_item=call_put, note="Pedido Alterado", id_user=request.user, type_note='P')            
         messages.success(request,f'Pedido {call_put.id_item} atualizado com sucesso!')
         return redirect('voice_index')
 

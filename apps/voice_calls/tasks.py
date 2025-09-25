@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.files.storage import default_storage
 from celery import shared_task
+from apps.voice_calls.classes import NoteVoiceCall
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 from apps.send_email.tasks import send_email_voice
 
@@ -101,7 +102,7 @@ def update_password(number_id):
    
 
 @shared_task
-def number_in_voice():
+def number_in_voice(request):
     
     send_date = datetime.now().date() + timedelta(days=3)
 
@@ -131,6 +132,8 @@ def number_in_voice():
         number_s.number_status = 'AT'
         number_s.save()
         update_password.delay(number_id=[number_s.id])
+        #ADicionar nota
+        NoteVoiceCall.addNote(id_item=voice_put, note=f"Ramal alterado - {number_s.extension}", id_user=request.user, type_note='P')
         time.sleep(2)
         #send email
         # send_email_voice.delay(id_vox)

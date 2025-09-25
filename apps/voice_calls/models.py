@@ -62,7 +62,7 @@ class VoiceCalls(models.Model):
         verbose_name_plural = 'Chamadas de Voz'
         ordering = ['id_item']
     def __str__(self):
-        return self.id_item
+        return f"Chamada #{self.id}"
     
 class NotesVoice(models.Model):
     id = models.AutoField(primary_key=True)
@@ -77,4 +77,4 @@ class NotesVoice(models.Model):
         verbose_name_plural = 'Notas'
         ordering = ['-id']
     def __str__(self):
-        return str(self.id_item)
+        return f"Nota #{self.id}"
