@@ -18,6 +18,6 @@ def send_email_esims():
 @login_required(login_url='/login/')
 def send_email_voices(request,id):
     send_email_voice.delay(id=id)
-    voz = VoiceCalls.objects.get(id_item=id)    
+    voz = VoiceCalls.objects.get(id=id)    
     NoteVoiceCall.addNote(id_item=voz, note="Pedido Alterado", id_user=request.user, type_note='P')
     return redirect('voice_index')
