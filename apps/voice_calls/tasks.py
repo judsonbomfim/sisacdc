@@ -102,12 +102,12 @@ def update_password(number_id):
    
 
 @shared_task
-def number_in_voice(request):
+@shared_task
+def number_in_voice():  # <- remover 'request'
     
     send_date = datetime.now().date() + timedelta(days=3)
 
     # Select Voice Calls
-    voice_s = VoiceCalls.objects.filter(call_status='PR').filter(id_item__activation_date__lte=send_date)
     voice_s = VoiceCalls.objects.filter(
         Q(call_status='PR', id_item__activation_date__lte=send_date) |
         Q(call_status='SL')
@@ -121,19 +121,30 @@ def number_in_voice(request):
             voice_put = VoiceCalls.objects.get(pk=id_vox)
             voice_put.call_status = 'EP'
             voice_put.save()
-            
             continue
+            
         # Change Status Voice
         voice_put = VoiceCalls.objects.get(pk=id_vox)
         voice_put.call_status = 'AA'
         voice_put.id_number = number_s
         voice_put.save()
+        
         # Change Status Number
         number_s.number_status = 'AT'
         number_s.save()
         update_password.delay(number_id=[number_s.id])
-        #ADicionar nota
-        NoteVoiceCall.addNote(id_item=voice_put, note=f"Ramal alterado - {number_s.extension}", id_user=request.user, type_note='P')
+        
+        # Adicionar nota SEM request.user
+        # Use um usuário padrão ou None
+        from django.contrib.auth.models import User
+        admin_user = User.objects.filter(is_superuser=True).first()  # pega um admin
+        
+        NoteVoiceCall.addNote(
+            id_item=voice_put, 
+            note=f"Ramal alterado - {number_s.extension}", 
+            id_user=admin_user,  # <- use admin ou None
+            type_note='P'
+        )
         time.sleep(2)
         #send email
         # send_email_voice.delay(id_vox)
