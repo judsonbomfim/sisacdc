@@ -159,8 +159,9 @@ def sims_in_orders():
 def simActivateTC(id=None):
     
     # dia anterior
-    today = datetime.now().date()
-    yesterday = datetime.now().date() - timedelta(days=1)
+    tz = pytz.timezone(settings.TIME_ZONE)
+    today = datetime.now(tz).date()
+    yesterday = today - timedelta(days=1)
 
     print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
     
@@ -320,10 +321,11 @@ def simActivateTC(id=None):
 @shared_task
 def simActivateTI(id=None):
     
-    today = datetime.now().date()
-    yesterday = datetime.now().date() - timedelta(days=1)
+    tz = pytz.timezone(settings.TIME_ZONE)
+    today = datetime.now(tz).date()
+    yesterday = today - timedelta(days=1)
 
-    print('>>>>>>>>>> ATIVAÇÂO TI INICIADA')
+    print(f'>>>>>>>>>> ATIVAÇÂO TI INICIADA - {yesterday}')
     
     # Selecionar pedidos
     if id is None:
