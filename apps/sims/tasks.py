@@ -161,13 +161,13 @@ def simActivateTC(id=None):
     # dia anterior
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
-    tomorrow = today + timedelta(days=1)
+    tomorrow = today +timedelta(days=1)
 
     print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=tomorrow
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=tomorrow)
     else:
         orders_all = Orders.objects.filter(pk=id)
             
