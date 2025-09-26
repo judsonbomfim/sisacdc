@@ -329,7 +329,7 @@ def simActivateTI(id=None):
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TI', activation_date__lte=tomorrow
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TI', activation_date__lte=tomorrow)
     else:
         orders_all = Orders.objects.filter(pk=id)
             
