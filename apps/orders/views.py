@@ -436,7 +436,7 @@ def ord_edit(request,id):
             simDeactivateTC(id=order.id)
 
         # Atualizar site
-        if order.item_id_store:
+        try:
             UpdateStore.upStore(
                 order_id = order_id,
                 item_id_store = order.item_id_store if order.item_id_store else None,
@@ -446,6 +446,8 @@ def ord_edit(request,id):
                 _status = ord_st if ord_st else None,
                 status_g = ord_st if ord_st else None,
             )
+        except Exception as e:
+            print(f">>>>>>>>>> ERRO ao atualizar site: {e}")
                 
         for msg_e in msg_error:
             messages.error(request,msg_e)
