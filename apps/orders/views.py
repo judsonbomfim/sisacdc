@@ -355,12 +355,15 @@ def ord_edit(request,id):
                 up_plan = True # verificação para nota
             
             # Gravar SIM e QRCode no site
-            if order.item_id_store:
+            try:
                 sim = order.id_sim.sim
                 qrcode = order.id_sim.link if order.id_sim.link else None
+            except:
+                sim = ''
+                qrcode = None
             
             # SIM Notes
-            if sim:
+            if sim != '':
                 addNote(f'Alteração de {order_sim} para {sim}')
             
         else:
