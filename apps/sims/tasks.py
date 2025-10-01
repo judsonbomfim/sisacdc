@@ -1234,7 +1234,8 @@ def simActivateMS(id=None):
                 "province": 32,
                 "sex": "M"
             }    
-        })   
+        }) 
+        print(f'>>>>>>>>>>>>>>>>>>> PAYLOAD {payload}')
         
         # Cabeçalhos da solicitação
         headers = {
