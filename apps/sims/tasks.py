@@ -650,7 +650,7 @@ def simActivateTM(id=None):
         print(f'>>>>>>>>>>>>>>>>>>> URL {url}')
         parsed_url = urlparse(url)
         payload = json.dumps({
-            "active_time": activation_date.strftime("%Y-%m-%d"),
+            "active_time": str(activation_date.strftime("%Y-%m-%d")),
             "sim": iccid,
             "plan": "$50",
             "day": days,
@@ -659,8 +659,9 @@ def simActivateTM(id=None):
             "customer_email": "",
             "comment": "",
             "carrier": "T-Mobile",
-            "token": settings.APITM_TOKEN,
-        })       
+            "token": str(settings.APITM_TOKEN),
+        })
+        print(f'>>>>>>>>>>>>>>>>>>> Payload {payload}')
         
         # Cabeçalhos da solicitação
         headers = {
