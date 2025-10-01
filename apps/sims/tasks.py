@@ -647,6 +647,7 @@ def simActivateTM(id=None):
                 
         # Dados para a solicitação
         url = f"{settings.APITM_URL}/activation/index/submit"
+        print(f'>>>>>>>>>>>>>>>>>>> URL {url}')
         parsed_url = urlparse(url)
         payload = json.dumps({
             "active_time": activation_date.strftime("%Y-%m-%d"),
@@ -1205,6 +1206,7 @@ def simActivateMS(id=None):
                 
         # Dados para a solicitação
         url = f"{settings.APIMS_URL}/api/activations/new?token={settings.APIMS_TOKEN}"
+        print(f'>>>>>>>>>>>>>>>>>>> URL {url}')
         parsed_url = urlparse(url)
         passaporte = ''.join([str(random.randint(0, 9)) for _ in range(11)])
         nome_completo = cliente
