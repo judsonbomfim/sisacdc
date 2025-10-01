@@ -659,7 +659,7 @@ def simActivateTM(id=None):
             "customer_email": "",
             "comment": "",
             "carrier": "T-Mobile",
-            "token": settings.APITM_URL
+            "token": settings.APITM_TOKEN,
         })       
         
         # Cabeçalhos da solicitação
