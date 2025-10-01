@@ -1179,6 +1179,7 @@ def simActivateCM(id=None):
 @shared_task
 def simActivateMS(id=None):
     
+    
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=2)
