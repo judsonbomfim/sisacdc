@@ -33,6 +33,7 @@ def send_email_sims(id=None):
         except: qrcode = None
         activation_date = order.activation_date
         product = f'{order.get_product_display()} {order.get_data_day_display()}'
+        operator = order.id_sim.operator if order.id_sim else None
         days = order.days     
         product_plan = order.get_product_display()
         try: type_sim = order.id_sim.type_sim
@@ -48,6 +49,7 @@ def send_email_sims(id=None):
             'order_id': order_id,
             'qrcode': qrcode,
             'activation_date': activation_date,
+            'operator': operator,
             'product': product,
             'days': days,
             'product_plan': product_plan,
