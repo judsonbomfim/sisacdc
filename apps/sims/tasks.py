@@ -1230,7 +1230,8 @@ def simActivateMS(id=None):
         
         # Cabeçalhos da solicitação
         headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            "Accept": "application/json",
         }
         # Estabelece a conexão HTTPS
         conn = http.client.HTTPSConnection(parsed_url.netloc)
@@ -1242,28 +1243,22 @@ def simActivateMS(id=None):
         # Decodifica a resposta
         response_data = json.loads(data.decode("utf-8"))
         # Verifica o código de resposta
-        if 'code' in response_data:
-            if response_data['code'] == 0:
-                # Alterar status
-                UpdateOrder.upStatus(id_item,'AT')
-                UpdateStore.upStore(
-                    order_id = order_id,
-                    item_id_store = order.item_id_store if order.item_id_store else None,
-                    _status = 'AT',
-                    status_g = 'AT',
-                )
-                # Adicionar nota
-                NotesAdd.addNote(order,f'{iccid} Enviado para ativação na T-Mobile')
-            else:
-                # Alterar status
-                UpdateOrder.upStatus(id_item,'EA')
-                # Adicionar nota
-                NotesAdd.addNote(order,f'Houve um erro ao ativar o SIM {iccid}. Verificar manualmente. {response_data}')
+        if 'hash' in response_data:
+            # Alterar status
+            UpdateOrder.upStatus(id_item,'AT')
+            UpdateStore.upStore(
+                order_id = order_id,
+                item_id_store = order.item_id_store if order.item_id_store else None,
+                _status = 'AT',
+                status_g = 'AT',
+            )
+            # Adicionar nota
+            NotesAdd.addNote(order,f'{iccid} Enviado para ativação na Movistar. HASH: {response_data["hash"]}')
         else:
             # Alterar status
             UpdateOrder.upStatus(id_item,'EA')
             # Adicionar nota
-            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.{response_data}')
+            NotesAdd.addNote(order,f'Erro ao ativar o SIM {iccid}. Verificar manualmente. ERRO: {response_data}')
 
         # Fecha a conexão
         conn.close()
