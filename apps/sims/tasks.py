@@ -1,3 +1,4 @@
+import random
 from urllib.parse import urlparse
 from celery import shared_task
 import os
@@ -645,7 +646,7 @@ def simActivateTM(id=None):
         days = order.days
                 
         # Dados para a solicitação
-        url = "https://usasimactivation.com/activation/index/submit"
+        url = f"{settings.APITM_URL}/activation/index/submit"
         parsed_url = urlparse(url)
         payload = json.dumps({
             "active_time": activation_date.strftime("%Y-%m-%d"),
@@ -657,8 +658,8 @@ def simActivateTM(id=None):
             "customer_email": "",
             "comment": "",
             "carrier": "T-Mobile",
-            "token": "ba8cbf5fd3c288c21d6725b532f04d73"
-        })        
+            "token": settings.APITM_URL
+        })       
         
         # Cabeçalhos da solicitação
         headers = {
@@ -1174,3 +1175,97 @@ def simActivateCM(id=None):
 
     print('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
 
+
+def simActivateMS(id=None):
+    
+    tz = pytz.timezone(settings.TIME_ZONE)
+    today = datetime.now(tz).date()
+    tomorrow = today + timedelta(days=2)
+
+    # Selecionar pedidos
+    if id is None:
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='MS', activation_date__lte=tomorrow)
+    else:
+        orders_all = Orders.objects.filter(pk=id)        
+    
+    for order in orders_all:
+        
+        order = Orders.objects.get(pk=order.id)
+        order_id = order.order_id
+        id_item = order.id
+        cliente = order.client
+        iccid = order.id_sim.sim
+        activation_date = order.activation_date
+                
+        # Dados para a solicitação
+        url = f"{settings.APIMS_URL}/api/activations/new?token={settings.APIMS_TOKEN}"
+        parsed_url = urlparse(url)
+        passaporte = ''.join([str(random.randint(0, 9)) for _ in range(11)])
+        nome_completo = cliente
+        nome = nome_completo.split()[0]
+        sobrenome = ' '.join(nome_completo.split()[1:])
+        payload = json.dumps({
+            "operator": 15,
+            "product": 694,
+            "phone_number": iccid,
+            "extra_line": 0,
+            "custom_email": True,
+            "kyc": True,
+            "activate_at": str(activation_date),
+            "client": {
+                "cp": "02401-000",
+                "date_birth": "1985-01-01",
+                "document_type": 4,
+                "document_value": str(passaporte),
+                "email": "chip@acasadochip.com",
+                "last_name_1": str(nome),
+                "last_name_2": str(sobrenome),
+                "locality": "locality",
+                "name": "Name",
+                "nationality": 76,
+                "province": 32,
+                "sex": "M"
+            }    
+        })       
+        
+        # Cabeçalhos da solicitação
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        # Estabelece a conexão HTTPS
+        conn = http.client.HTTPSConnection(parsed_url.netloc)
+        # Envia a solicitação POST
+        conn.request("POST", parsed_url.path, payload, headers)
+        # Obtém a resposta
+        res = conn.getresponse()
+        data = res.read()
+        # Decodifica a resposta
+        response_data = json.loads(data.decode("utf-8"))
+        # Verifica o código de resposta
+        if 'code' in response_data:
+            if response_data['code'] == 0:
+                # Alterar status
+                UpdateOrder.upStatus(id_item,'AT')
+                UpdateStore.upStore(
+                    order_id = order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status = 'AT',
+                    status_g = 'AT',
+                )
+                # Adicionar nota
+                NotesAdd.addNote(order,f'{iccid} Enviado para ativação na T-Mobile')
+            else:
+                # Alterar status
+                UpdateOrder.upStatus(id_item,'EA')
+                # Adicionar nota
+                NotesAdd.addNote(order,f'Houve um erro ao ativar o SIM {iccid}. Verificar manualmente. {response_data}')
+        else:
+            # Alterar status
+            UpdateOrder.upStatus(id_item,'EA')
+            # Adicionar nota
+            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.{response_data}')
+
+        # Fecha a conexão
+        conn.close()
+
+    print('>>>>>>>>>> ATIVAÇÂO MS FINALIZADA')

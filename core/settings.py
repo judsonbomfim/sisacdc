@@ -208,22 +208,18 @@ CELERY_BEAT_SCHEDULE = {
     'task__5_min_orders_auto': {
         'task': 'apps.orders.tasks.orders_auto',
         'schedule': crontab(minute='*/5'),
-        # 'schedule': crontab(minute='*/1'),
     },
     'task__5_min_activate_TC': {
         'task': 'apps.sims.tasks.simActivateTC',
         'schedule': crontab(minute='2-59/5'),
-        # 'schedule': crontab(minute='*/1'),
     },
     'task__5_min_activate_TI': {
         'task': 'apps.sims.tasks.simActivateTI',
         'schedule': crontab(minute='2-59/5'),
-        # 'schedule': crontab(minute='*/1'),
     },
     'task__5_min_activate_TM': {
         'task': 'apps.sims.tasks.simActivateTM',
         'schedule': crontab(minute='3-59/5'),
-        # 'schedule': crontab(minute='*/1'),
     },
     'task__deactivate_TC': {
         'task': 'apps.sims.tasks.simDeactivateTC',
@@ -232,12 +228,14 @@ CELERY_BEAT_SCHEDULE = {
     'task__5_min_activate_CM': {
         'task': 'apps.sims.tasks.simActivateCM',
         'schedule': crontab(minute='4-59/5'),
-        # 'schedule': crontab(minute='*/1'),
+    },
+    'task__5_min_activate_CM': {
+        'task': 'apps.sims.tasks.simActivateSM',
+        'schedule': crontab(minute='4-59/5'),
     },
 }
 
 # API TELCON
-
 APITC_USERNAME = str(os.getenv('APITC_USERNAME'))
 APITC_PASSWORD = str(os.getenv('APITC_PASSWORD'))
 APITC_HTTPCONN = str(os.getenv('APITC_HTTPCONN'))
@@ -246,6 +244,14 @@ APITC_HTTPCONN = str(os.getenv('APITC_HTTPCONN'))
 APICM_KEY = str(os.getenv('APICM_KEY'))
 APICM_SECRET = str(os.getenv('APICM_SECRET'))
 APICM_URL = str(os.getenv('APICM_URL'))
+
+# API TM
+APITM_TOKEN = str(os.getenv('APITM_TOKEN'))
+APITM_URL = str(os.getenv('APITM_URL'))
+
+# API MS
+APIMS_TOKEN = str(os.getenv('APIMS_TOKEN'))
+APIMS_URL = str(os.getenv('APIMS_URL'))
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
