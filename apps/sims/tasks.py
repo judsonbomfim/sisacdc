@@ -1213,26 +1213,26 @@ def simActivateMS(id=None):
         payload = json.dumps({
             "operator": 15,
             "product": 694,
-            "phone_number": iccid,
+            "phone_number": str(iccid),
             "extra_line": 0,
             "custom_email": True,
             "kyc": True,
             "activate_at": str(activation_date),
             "client": {
-                "cp": "02401-000",
+                "cp": "02401000",
                 "date_birth": "1985-01-01",
                 "document_type": 4,
                 "document_value": str(passaporte),
                 "email": "chip@acasadochip.com",
-                "last_name_1": str(nome),
-                "last_name_2": str(sobrenome),
+                "last_name_1": str(nome)[:50],  # limita tamanho
+                "last_name_2": str(sobrenome)[:50],  # limita tamanho
                 "locality": "locality",
                 "name": "Name",
                 "nationality": 76,
                 "province": 32,
                 "sex": "M"
             }    
-        })       
+        })   
         
         # Cabeçalhos da solicitação
         headers = {
