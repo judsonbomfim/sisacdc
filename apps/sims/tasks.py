@@ -1182,6 +1182,8 @@ def simActivateMS(id=None):
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=2)
+    
+    print('>>>>>>>>>> ATIVAÇÂO MS INICIADA')
 
     # Selecionar pedidos
     if id is None:
