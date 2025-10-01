@@ -95,7 +95,7 @@ def order_import():
                 else: coupon_i = '-'
                 # Definir valor padrão para variáveis
                 ord_chip_nun_i = '-'
-                condition_i = 'reuso-sim'
+                condition_i = 'novo-sim'
                 calls_i = False
                 countries_i = False
                 activation_date_i = '2001-01-01'
@@ -107,6 +107,12 @@ def order_import():
                     if i['key'] == '_condicao_chip': 
                         if i['value'] == 'novo':
                             condition_i = 'novo-sim'
+                        else:
+                            condition_i = 'reuso-sim'
+                    if i['key'] == '_agencia_cadastrada': 
+                        condition_i = 'reuso-sim'
+                    if i['key'] == '_numero_sim':
+                        ord_chip_nun_i = i['value']
                     if i['key'] == 'pa_dados-diarios': data_day_i = i['value']
                     if i['key'] == 'pa_dias': days_i = i['value']
                     if i['key'] == '_plano_voz': 
@@ -119,7 +125,6 @@ def order_import():
                         activation_date_i = i['value']
                     if i['key'] == '_celular_samsung': 
                         celular_samsung_i = True
-                    if i['key'] == '_numero_sim': ord_chip_nun_i = i['value']
                 shipping_i = order['shipping_lines'][0]['method_title']
                 order_date_i = DateFormats.dateHour(order['date_created'])
                 
@@ -466,6 +471,7 @@ def orders_auto():
     number_in_voice.delay()
     time.sleep(10)
     send_email_sims.delay()
+
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
