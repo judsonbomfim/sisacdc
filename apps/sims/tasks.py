@@ -1176,6 +1176,7 @@ def simActivateCM(id=None):
     print('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
 
 
+@shared_task
 def simActivateMS(id=None):
     
     tz = pytz.timezone(settings.TIME_ZONE)
@@ -1189,6 +1190,8 @@ def simActivateMS(id=None):
         orders_all = Orders.objects.filter(pk=id)        
     
     for order in orders_all:
+        
+        print(f'>>>>>>>>>> ATIVANDO SIM {order.id_sim.sim} - {order.order_id}')
         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
