@@ -616,6 +616,12 @@ def simDeactivateTC(id=None):
     print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
 
 
+
+@shared_task
+def simDeactivateTC(id=None):
+    print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
+
+
 @shared_task
 def simActivateTM(id=None):
           
@@ -646,11 +652,10 @@ def simActivateTM(id=None):
         days = order.days
                 
         # Dados para a solicitação
-        url = f"{settings.APITM_URL}/activation/index/submit"
-        print(f'>>>>>>>>>>>>>>>>>>> URL {url}')
+        url = "https://usasimactivation.com/activation/index/submit"
         parsed_url = urlparse(url)
         payload = json.dumps({
-            "active_time": f"{activation_date.strftime("%Y-%m-%d")}",
+            "active_time": activation_date.strftime("%Y-%m-%d"),
             "sim": iccid,
             "plan": "$50",
             "day": days,
@@ -659,9 +664,8 @@ def simActivateTM(id=None):
             "customer_email": "",
             "comment": "",
             "carrier": "T-Mobile",
-            "token": f"{settings.APITM_TOKEN}",
-        })
-        print(f'>>>>>>>>>>>>>>>>>>> Payload {payload}')
+            "token": "ba8cbf5fd3c288c21d6725b532f04d73"
+        })        
         
         # Cabeçalhos da solicitação
         headers = {
