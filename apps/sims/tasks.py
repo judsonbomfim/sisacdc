@@ -616,7 +616,6 @@ def simDeactivateTC(id=None):
     print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
 
 
-
 @shared_task
 def simDeactivateTC(id=None):
     print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
