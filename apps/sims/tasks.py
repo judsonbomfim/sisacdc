@@ -1264,31 +1264,63 @@ def simActivateMS(id=None):
             logger.info(f"Resposta da API para o pedido {order.order_id}: {response_data}")
 
             if 'hash' in response_data and response_data['hash']:
-                UpdateOrder.upStatus(order.id, 'AT')
-                UpdateStore.upStore(
-                    order_id=order.order_id,
-                    item_id_store=order.item_id_store,
-                    _status='AT',
-                    status_g='AT',
-                )
-                note_content = f'SIM {order.id_sim.sim} enviado para ativação na Movistar. HASH: {response_data["hash"]}'
-                NotesAdd.addNote(order, note_content)
-                logger.info(f"Sucesso na ativação do pedido {order.order_id}.")
+                order.get_sim = response_data['hash']
+                order.status = 'C'
+                order.save()
+                logger.info(f'Pedido {order.order_id} ativado com sucesso. Hash: {order.get_sim}')
             else:
-                error_message = response_data.get('message', str(response_data))
-                UpdateOrder.upStatus(order.id, 'EA')
-                note_content = f'Erro ao tentar ativar o SIM {order.id_sim.sim}. Resposta da API: {error_message}'
-                NotesAdd.addNote(order, note_content)
-                logger.error(f"Falha na ativação do pedido {order.order_id}: {note_content}")
+                error_message = "Resposta da API não contém um 'hash' válido."
+                logger.error(f'Erro na resposta da API para o pedido {order.order_id}: {error_message}')
+                order.get_sim = error_message
+                order.status = 'A'
+                order.save()
+
+        except requests.exceptions.HTTPError as e:
+            # CORREÇÃO: Captura o erro HTTP para extrair a mensagem da API.
+            error_to_save = f"Erro HTTP {e.response.status_code}"
+            log_message = f"Erro na API ao ativar o pedido {order.order_id}: {error_to_save}"
+            
+            try:
+                # Tenta decodificar a resposta JSON da API
+                error_details = e.response.json()
+                log_message += f" Detalhes: {json.dumps(error_details)}"
+                
+                # Extrai a mensagem de erro específica para salvar no pedido
+                api_message_str = error_details.get('message')
+                if api_message_str:
+                    try:
+                        # A API retorna uma string JSON dentro do campo 'message'
+                        parsed_message = json.loads(api_message_str)
+                        error_to_save = ', '.join(parsed_message) if isinstance(parsed_message, list) else str(parsed_message)
+                    except (json.JSONDecodeError, TypeError):
+                        error_to_save = str(api_message_str)
+                else:
+                    error_to_save = json.dumps(error_details)
+
+            except json.JSONDecodeError:
+                # Se a resposta não for JSON, salva o texto bruto
+                error_to_save = e.response.text
+                log_message += f" Resposta não-JSON: {error_to_save}"
+
+            logger.error(log_message)
+            order.get_sim = error_to_save[:499]  # Garante que não exceda o limite do campo
+            order.status = 'A'
+            order.save()
 
         except requests.exceptions.RequestException as e:
-            logger.error(f"Erro de conexão/HTTP ao ativar o pedido {order.order_id}: {e}")
-            UpdateOrder.upStatus(order.id, 'EA')
-            NotesAdd.addNote(order, f'Erro de comunicação com a API da Movistar ao tentar ativar o SIM {order.id_sim.sim}.')
+            # Captura outros erros de conexão (timeout, DNS, etc.)
+            error_message = f"Erro de conexão: {e}"
+            logger.error(f'{error_message} ao ativar o pedido {order.order_id}')
+            order.get_sim = error_message
+            order.status = 'A'
+            order.save()
         
         except Exception as e:
-            logger.error(f"Erro inesperado ao processar o pedido {order.order_id}: {e}", exc_info=True)
-            UpdateOrder.upStatus(order.id, 'EA')
-            NotesAdd.addNote(order, f'Ocorreu um erro interno no sistema ao tentar ativar o SIM {order.id_sim.sim}.')
+            # Captura qualquer outro erro inesperado
+            error_message = f"Erro inesperado: {e}"
+            logger.error(f'{error_message} ao ativar o pedido {order.order_id}')
+            order.get_sim = error_message
+            order.status = 'A'
+            order.save()
 
     logger.info('Tarefa de ativação de SIMs da Movistar (MS) finalizada.')
