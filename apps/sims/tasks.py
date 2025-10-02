@@ -1265,7 +1265,7 @@ def simActivateMS(id=None):
             response_data = response.json()
             logger.info(f"Resposta da API para o pedido {order.order_id}: {response_data}")
 
-            if 'hash' in response_data and response_data['hash']:
+            if 'hash' in response_data:
                 order.get_sim = response_data['hash']
                 order.save()
                 logger.info(f'Pedido {order.order_id} ativado com sucesso na MS. Hash: {order.get_sim}')
