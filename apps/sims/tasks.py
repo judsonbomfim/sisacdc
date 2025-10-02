@@ -1214,17 +1214,12 @@ def simActivateMS(id=None):
         try:
             logger.info(f'Processando ativação para o pedido {order.order_id} (SIM: {order.id_sim.sim})')
 
-            # --- Preparação dos dados do cliente ---
-            # Lógica para dividir nome completo em nome e sobrenome de forma segura
             client_name_parts = order.client.split()
-            first_name = client_name_parts[0] if client_name_parts else ''
-            last_name = ' '.join(client_name_parts[1:]) if len(client_name_parts) > 1 else ''
+            last_name_1 = client_name_parts[0] if len(client_name_parts) > 0 else ''
+            last_name_2 = client_name_parts[1] if len(client_name_parts) > 1 else ''
             
-            # Gerar um passaporte aleatório - ISSO É CORRETO?
             passport_number = ''.join([str(random.randint(0, 9)) for _ in range(11)])
-            
-            # O email está fixo. O ideal seria usar o email do cliente.
-            # Ex: client_email = order.client_email_field or 'default@email.com'
+
             client_email = "chip@acasadochip.com"
 
             payload = {
@@ -1237,8 +1232,8 @@ def simActivateMS(id=None):
                 "activate_at": str(order.activation_date),
                 "client": {
                     "name": "Name",
-                    "last_name_1": str(first_name)[:50],
-                    "last_name_2": str(last_name)[:50],
+                    "last_name_1": str(last_name_1)[:50],
+                    "last_name_2": str(last_name_2)[:50],
                     "email": client_email,
                     "document_type": 4,
                     "document_value": passport_number,
