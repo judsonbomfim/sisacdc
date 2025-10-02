@@ -1267,15 +1267,21 @@ def simActivateMS(id=None):
 
             if 'hash' in response_data and response_data['hash']:
                 order.get_sim = response_data['hash']
-                order.status = 'C'
                 order.save()
-                logger.info(f'Pedido {order.order_id} ativado com sucesso. Hash: {order.get_sim}')
+                logger.info(f'Pedido {order.order_id} ativado com sucesso na MS. Hash: {order.get_sim}')
+                UpdateStore.upStore(
+                    order_id = order.order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status='AT',
+                    status_g = 'AT',
+                )  
+                NotesAdd.addNote(order, f'Pedido {order.order_id} ativado com sucesso na MS. Hash: {order.get_sim}')
+
             else:
-                error_message = "Resposta da API não contém um 'hash' válido."
-                logger.error(f'Erro na resposta da API para o pedido {order.order_id}: {error_message}')
-                order.get_sim = error_message
-                order.status = 'A'
-                order.save()
+                logger.error(f'Erro na resposta da API para o pedido {order.order_id}: {response_data}')
+                UpdateOrder.upStatus(order.id, 'EA')
+                NotesAdd.addNote(order, f'Erro na resposta da API para o pedido {order.order_id}')
+
 
         except requests.exceptions.HTTPError as e:
             # CORREÇÃO: Captura o erro HTTP para extrair a mensagem da API.
