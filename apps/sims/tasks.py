@@ -1303,14 +1303,13 @@ def simActivateMS(id=None):
                 log_message += f" Resposta não-JSON: {error_to_save}"
 
             logger.error(log_message)
-            order.get_sim = error_to_save[:499]  # Garante que não exceda o limite do campo
-            order.status = 'A'
-            order.save()
+            UpdateOrder.upStatus(order.id, 'EA')
+            NotesAdd.addNote(order, f"{log_message}")
             
         except requests.exceptions.RequestException as e:
             logger.error(f"Erro de conexão/HTTP ao ativar o pedido {order.order_id}: {e}")
             UpdateOrder.upStatus(order.id, 'EA')
-            NotesAdd.addNote(order, f'Erro de comunicação com a API da Movistar ao tentar ativar o SIM {order.id_sim.sim}: {e}"')
+            NotesAdd.addNote(order, f"Erro de comunicação com a API da Movistar ao tentar ativar o SIM {order.id_sim.sim}: {e}")
         
         except Exception as e:
             logger.error(f"Erro inesperado ao processar o pedido {order.order_id}: {e}", exc_info=True)
