@@ -14,6 +14,11 @@ from apps.sims.models import Sims
 from datetime import datetime, timedelta
 import pytz
 import pandas as pd
+import requests
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @shared_task
 def sims_in_orders():
@@ -1183,97 +1188,116 @@ def simActivateCM(id=None):
 
 @shared_task
 def simActivateMS(id=None):
-    
-    
+
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
-    tomorrow = today + timedelta(days=2)
+    # A lógica original busca até 2 dias no futuro, mantendo isso.
+    activation_limit_date = today + timedelta(days=2)
     
-    print('>>>>>>>>>> ATIVAÇÂO MS INICIADA')
+    logger.info('Iniciando a tarefa de ativação de SIMs da Movistar (MS).')
 
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='MS', activation_date__lte=tomorrow)
+        orders_to_process = Orders.objects.filter(
+            order_status='AA', 
+            id_sim__operator='MS', 
+            activation_date__lte=activation_limit_date
+        )
     else:
-        orders_all = Orders.objects.filter(pk=id)        
+        orders_to_process = Orders.objects.filter(pk=id)
     
-    for order in orders_all:
-        
-        print(f'>>>>>>>>>> ATIVANDO SIM {order.id_sim.sim} - {order.order_id}')
-        
-        order = Orders.objects.get(pk=order.id)
-        order_id = order.order_id
-        id_item = order.id
-        cliente = order.client
-        iccid = order.id_sim.sim
-        activation_date = order.activation_date
-                
-        # Dados para a solicitação
-        url = f"{settings.APIMS_URL}/api/activations/new?token={settings.APIMS_TOKEN}"
-        print(f'>>>>>>>>>>>>>>>>>>> URL {url}')
-        parsed_url = urlparse(url)
-        passaporte = ''.join([str(random.randint(0, 9)) for _ in range(11)])
-        nome_completo = cliente
-        nome = nome_completo.split()[0]
-        sobrenome = ' '.join(nome_completo.split()[1:])
-        payload = json.dumps({
-            "operator": 15,
-            "product": 694,
-            "phone_number": str(iccid),
-            "extra_line": 0,
-            "custom_email": True,
-            "kyc": True,
-            "activate_at": str(activation_date),
-            "client": {
-                "cp": "02401000",
-                "date_birth": "1985-01-01",
-                "document_type": 4,
-                "document_value": str(passaporte),
-                "email": "chip@acasadochip.com",
-                "last_name_1": str(nome)[:50],  # limita tamanho
-                "last_name_2": str(sobrenome)[:50],  # limita tamanho
-                "locality": "locality",
-                "name": "Name",
-                "nationality": 76,
-                "province": 32,
-                "sex": "M"
-            }    
-        }) 
-        print(f'>>>>>>>>>>>>>>>>>>> PAYLOAD {payload}')
-        
-        # Cabeçalhos da solicitação
-        headers = {
-            'Content-Type': 'application/json',
-            "Accept": "application/json",
-        }
-        # Estabelece a conexão HTTPS
-        conn = http.client.HTTPSConnection(parsed_url.netloc)
-        # Envia a solicitação POST
-        conn.request("POST", parsed_url.path, payload, headers)
-        # Obtém a resposta
-        res = conn.getresponse()
-        data = res.read()
-        # Decodifica a resposta
-        response_data = json.loads(data.decode("utf-8"))
-        # Verifica o código de resposta
-        if 'hash' in response_data:
-            # Alterar status
-            UpdateOrder.upStatus(id_item,'AT')
-            UpdateStore.upStore(
-                order_id = order_id,
-                item_id_store = order.item_id_store if order.item_id_store else None,
-                _status = 'AT',
-                status_g = 'AT',
-            )
-            # Adicionar nota
-            NotesAdd.addNote(order,f'{iccid} Enviado para ativação na Movistar. HASH: {response_data["hash"]}')
-        else:
-            # Alterar status
-            UpdateOrder.upStatus(id_item,'EA')
-            # Adicionar nota
-            NotesAdd.addNote(order,f'Erro ao ativar o SIM {iccid}. Verificar manualmente. ERRO: {response_data}')
+    if not orders_to_process.exists():
+        logger.info('Nenhum pedido encontrado para ativação da MS.')
+        return
 
-        # Fecha a conexão
-        conn.close()
+    for order in orders_to_process:
+        try:
+            logger.info(f'Processando ativação para o pedido {order.order_id} (SIM: {order.id_sim.sim})')
 
-    print('>>>>>>>>>> ATIVAÇÂO MS FINALIZADA')
+            # --- Preparação dos dados do cliente ---
+            # Lógica para dividir nome completo em nome e sobrenome de forma segura
+            client_name_parts = order.client.split()
+            first_name = client_name_parts[0] if client_name_parts else ''
+            last_name = ' '.join(client_name_parts[1:]) if len(client_name_parts) > 1 else ''
+
+            # !!! ATENÇÃO: DADOS FIXOS (HARDCODED) !!!
+            # Os dados a seguir são fixos ou aleatórios e provavelmente precisam ser
+            # substituídos por dados reais do cliente ou do pedido.
+            # Verifique a documentação da API da Movistar.
+            
+            # Gerar um passaporte aleatório - ISSO É CORRETO?
+            passport_number = ''.join([str(random.randint(0, 9)) for _ in range(11)])
+            
+            # O email está fixo. O ideal seria usar o email do cliente.
+            # Ex: client_email = order.client_email_field or 'default@email.com'
+            client_email = "chip@acasadochip.com"
+
+            payload = {
+                "operator": 15,
+                "product": 694,
+                "phone_number": str(order.id_sim.sim),
+                "extra_line": 0,
+                "custom_email": True,
+                "kyc": True,
+                "activate_at": str(order.activation_date),
+                "client": {
+                    "name": str(first_name)[:50],
+                    "last_name_1": str(last_name)[:50],
+                    "last_name_2": "", 
+                    "email": client_email,
+                    "document_type": 4,
+                    "document_value": passport_number,
+                    "date_birth": "1985-01-01",
+                    "nationality": 76,
+                    "sex": "M",
+                    "cp": "02401000",
+                    "province": 32,
+                    "locality": "locality",
+                }
+            }
+            
+            url = f"{settings.APIMS_URL}/api/activations/new"
+            params = {'token': settings.APIMS_TOKEN}
+            headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            }
+
+            logger.debug(f"URL: {url}")
+            logger.debug(f"Payload: {json.dumps(payload, indent=2)}")
+
+            response = requests.post(url, params=params, headers=headers, json=payload, timeout=30)
+            response.raise_for_status()  # Lança uma exceção para respostas de erro (4xx ou 5xx)
+            
+            response_data = response.json()
+            logger.info(f"Resposta da API para o pedido {order.order_id}: {response_data}")
+
+            if 'hash' in response_data and response_data['hash']:
+                UpdateOrder.upStatus(order.id, 'AT')
+                UpdateStore.upStore(
+                    order_id=order.order_id,
+                    item_id_store=order.item_id_store,
+                    _status='AT',
+                    status_g='AT',
+                )
+                note_content = f'SIM {order.id_sim.sim} enviado para ativação na Movistar. HASH: {response_data["hash"]}'
+                NotesAdd.addNote(order, note_content)
+                logger.info(f"Sucesso na ativação do pedido {order.order_id}.")
+            else:
+                error_message = response_data.get('message', str(response_data))
+                UpdateOrder.upStatus(order.id, 'EA')
+                note_content = f'Erro ao tentar ativar o SIM {order.id_sim.sim}. Resposta da API: {error_message}'
+                NotesAdd.addNote(order, note_content)
+                logger.error(f"Falha na ativação do pedido {order.order_id}: {note_content}")
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Erro de conexão/HTTP ao ativar o pedido {order.order_id}: {e}")
+            UpdateOrder.upStatus(order.id, 'EA')
+            NotesAdd.addNote(order, f'Erro de comunicação com a API da Movistar ao tentar ativar o SIM {order.id_sim.sim}.')
+        
+        except Exception as e:
+            logger.error(f"Erro inesperado ao processar o pedido {order.order_id}: {e}", exc_info=True)
+            UpdateOrder.upStatus(order.id, 'EA')
+            NotesAdd.addNote(order, f'Ocorreu um erro interno no sistema ao tentar ativar o SIM {order.id_sim.sim}.')
+
+    logger.info('Tarefa de ativação de SIMs da Movistar (MS) finalizada.')
