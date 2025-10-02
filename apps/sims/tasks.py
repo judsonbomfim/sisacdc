@@ -1219,11 +1219,6 @@ def simActivateMS(id=None):
             client_name_parts = order.client.split()
             first_name = client_name_parts[0] if client_name_parts else ''
             last_name = ' '.join(client_name_parts[1:]) if len(client_name_parts) > 1 else ''
-
-            # !!! ATENÇÃO: DADOS FIXOS (HARDCODED) !!!
-            # Os dados a seguir são fixos ou aleatórios e provavelmente precisam ser
-            # substituídos por dados reais do cliente ou do pedido.
-            # Verifique a documentação da API da Movistar.
             
             # Gerar um passaporte aleatório - ISSO É CORRETO?
             passport_number = ''.join([str(random.randint(0, 9)) for _ in range(11)])
@@ -1241,16 +1236,16 @@ def simActivateMS(id=None):
                 "kyc": True,
                 "activate_at": str(order.activation_date),
                 "client": {
-                    "name": "Name", 
+                    "name": "Name",
                     "last_name_1": str(first_name)[:50],
                     "last_name_2": str(last_name)[:50],
                     "email": client_email,
                     "document_type": 4,
                     "document_value": passport_number,
                     "date_birth": "1985-01-01",
-                    "nationality": 76,
                     "sex": "M",
-                    "cp": "02401000",
+                    "nationality": 170,
+                    "cp": "28001",
                     "province": 32,
                     "locality": "locality",
                 }
@@ -1264,10 +1259,11 @@ def simActivateMS(id=None):
             }
 
             logger.debug(f"URL: {url}")
+            logger.debug(f"Params: {params}")
             logger.debug(f"Payload: {json.dumps(payload, indent=2)}")
 
             response = requests.post(url, params=params, headers=headers, json=payload, timeout=30)
-            response.raise_for_status()  # Lança uma exceção para respostas de erro (4xx ou 5xx)
+            response.raise_for_status()
             
             response_data = response.json()
             logger.info(f"Resposta da API para o pedido {order.order_id}: {response_data}")
