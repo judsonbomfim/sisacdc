@@ -1241,9 +1241,9 @@ def simActivateMS(id=None):
                 "kyc": True,
                 "activate_at": str(order.activation_date),
                 "client": {
-                    "name": str(first_name)[:50],
-                    "last_name_1": str(last_name)[:50],
-                    "last_name_2": "", 
+                    "name": "Name", 
+                    "last_name_1": str(first_name)[:50],
+                    "last_name_2": str(last_name)[:50],
                     "email": client_email,
                     "document_type": 4,
                     "document_value": passport_number,
