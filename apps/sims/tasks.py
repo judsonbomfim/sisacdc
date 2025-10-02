@@ -1315,7 +1315,6 @@ def simActivateMS(id=None):
         except Exception as e:
             logger.error(f"Erro inesperado ao processar o pedido {order.order_id}: {e}", exc_info=True)
             UpdateOrder.upStatus(order.id, 'EA')
-            NotesAdd.addNote(order, f"Ocorreu um erro interno no sistema ao tentar ativar o SIM {order.id_sim.sim}: {e}", exc_info=True)
-
+            NotesAdd.addNote(order, f"Ocorreu um erro interno no sistema ao tentar ativar o SIM {order.id_sim.sim}: {e}")
 
     logger.info('Tarefa de ativação de SIMs da Movistar (MS) finalizada.')
