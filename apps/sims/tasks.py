@@ -1306,22 +1306,6 @@ def simActivateMS(id=None):
             order.get_sim = error_to_save[:499]  # Garante que não exceda o limite do campo
             order.status = 'A'
             order.save()
-
-        except requests.exceptions.RequestException as e:
-            # Captura outros erros de conexão (timeout, DNS, etc.)
-            error_message = f"Erro de conexão: {e}"
-            logger.error(f'{error_message} ao ativar o pedido {order.order_id}')
-            order.get_sim = error_message
-            order.status = 'A'
-            order.save()
-        
-        except Exception as e:
-            # Captura qualquer outro erro inesperado
-            error_message = f"Erro inesperado: {e}"
-            logger.error(f'{error_message} ao ativar o pedido {order.order_id}')
-            order.get_sim = error_message
-            order.status = 'A'
-            order.save()
             
         except requests.exceptions.RequestException as e:
             logger.error(f"Erro de conexão/HTTP ao ativar o pedido {order.order_id}: {e}")
