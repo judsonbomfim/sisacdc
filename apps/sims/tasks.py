@@ -1220,7 +1220,7 @@ def simActivateMS(id=None):
             
             passport_number = ''.join([str(random.randint(0, 9)) for _ in range(8)])
 
-            client_email = order.client_email if order.client_email else "chip@acasadochip.com"
+            client_email = order.email if order.email else "chip@acasadochip.com"
 
             payload = {
                 "operator": 15,
