@@ -1221,6 +1221,8 @@ def simActivateMS(id=None):
             passport_number = ''.join([str(random.randint(0, 9)) for _ in range(8)])
 
             client_email = order.email if order.email else "chip@acasadochip.com"
+            
+            print(f'>>>>>>>>>> Data de ativação {order.activation_date} para o pedido {order.order_id}')
 
             payload = {
                 "operator": 15,
