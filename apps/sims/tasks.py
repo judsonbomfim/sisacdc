@@ -1233,7 +1233,7 @@ def simActivateMS(id=None):
                 "kyc": True,
                 "activate_at": str(order.activation_date),
                 "client": {
-                    "last_name_1": str(last_name_1)[:50],
+                    "name": str(last_name_1)[:50],
                     "last_name_1": str(last_name_2)[:50],
                     "last_name_2": "",
                     "email": client_email,
