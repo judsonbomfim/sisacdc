@@ -1188,8 +1188,8 @@ def simActivateCM(id=None):
 
 @shared_task
 def simActivateMS(id=None):
-
-    tz = pytz.timezone(settings.TIME_ZONE)
+    # Timezone UTC+2h
+    tz = pytz.timezone("Europe/Madrid")
     today = datetime.now(tz).date()
     # A lógica original busca até 2 dias no futuro, mantendo isso.
     activation_limit_date = today + timedelta(days=2)
