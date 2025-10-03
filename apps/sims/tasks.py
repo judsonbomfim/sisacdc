@@ -1273,7 +1273,7 @@ def simActivateMS(id=None):
                 _status='AT',
                 status_g = 'AT',
             )  
-            NotesAdd.addNote(order, f'Pedido {order.order_id} ativado com sucesso na MS. Hash: {order.get_sim}')_id.sim}')
+            NotesAdd.addNote(order, f'Pedido {order.order_id} ativado com sucesso na MS.) Hash: {response_data[0]["hash"]}')
 
         except requests.exceptions.HTTPError as e:
             # CORREÇÃO: Captura o erro HTTP para extrair a mensagem da API.
