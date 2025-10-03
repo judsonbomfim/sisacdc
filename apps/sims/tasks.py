@@ -1265,24 +1265,15 @@ def simActivateMS(id=None):
             response_data = response.json()
             logger.info(f"Resposta da API para o pedido {order.order_id}: {response_data}")
 
-            if response_data[0]['hash']:
-                order.get_sim = response_data['hash']
-                order.save()
-                logger.info(f'Pedido {order.order_id} ativado com sucesso na MS. Hash: {order.get_sim}')
-                UpdateOrder.upStatus(order.id, 'AT')
-                UpdateStore.upStore(
-                    order_id = order.order_id,
-                    item_id_store = order.item_id_store if order.item_id_store else None,
-                    _status='AT',
-                    status_g = 'AT',
-                )  
-                NotesAdd.addNote(order, f'Pedido {order.order_id} ativado com sucesso na MS. Hash: {order.get_sim}')
-
-            else:
-                logger.error(f'Erro na resposta da API para o pedido {order.order_id}: {response_data}')
-                UpdateOrder.upStatus(order.id, 'EA')
-                NotesAdd.addNote(order, f'Erro na resposta da API para o pedido {order.order_id}')
-
+            logger.info(f'Pedido {order.order_id} ativado com sucesso na MS. Hash: {response_data[0]["hash"]}')
+            UpdateOrder.upStatus(order.id, 'AT')
+            UpdateStore.upStore(
+                order_id = order.order_id,
+                item_id_store = order.item_id_store if order.item_id_store else None,
+                _status='AT',
+                status_g = 'AT',
+            )  
+            NotesAdd.addNote(order, f'Pedido {order.order_id} ativado com sucesso na MS. Hash: {order.get_sim}')_id.sim}')
 
         except requests.exceptions.HTTPError as e:
             # CORREÇÃO: Captura o erro HTTP para extrair a mensagem da API.
