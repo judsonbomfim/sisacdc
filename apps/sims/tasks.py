@@ -1215,16 +1215,16 @@ def simActivateMS(id=None):
             logger.info(f'Processando ativação para o pedido {order.order_id} (SIM: {order.id_sim.sim})')
 
             client_name_parts = order.client.split()
-            last_name_1 = client_name_parts[0] if len(client_name_parts) > 0 else ''
-            last_name_2 = client_name_parts[1] if len(client_name_parts) > 1 else ''
+            nome = client_name_parts[0] if len(client_name_parts) > 0 else ''
+            sobrenome = client_name_parts[1] if len(client_name_parts) > 1 else ''
             
             passport_number = ''.join([str(random.randint(0, 9)) for _ in range(8)])
 
             client_email = order.email if order.email else "chip@acasadochip.com"
             
             print(f'>>>>>>>>>> Data de ativação {order.activation_date} para o pedido {order.order_id}')
-
-            payload = {
+            
+            payload = json.dumps({
                 "operator": 15,
                 "product": 694,
                 "phone_number": str(order.id_sim.sim),
@@ -1233,20 +1233,20 @@ def simActivateMS(id=None):
                 "kyc": True,
                 "activate_at": str(order.activation_date),
                 "client": {
-                    "name": "Name",
-                    "last_name_1": str(last_name_1)[:50],
-                    "last_name_2": str(last_name_2)[:50],
-                    "email": client_email,
-                    "document_type": 4,
-                    "document_value": passport_number,
-                    "date_birth": "1985-01-01",
-                    "sex": "M",
-                    "nationality": 170,
                     "cp": "28001",
-                    "province": 32,
+                    "date_birth": "1985-01-01",
+                    "document_type": 4,
+                    "document_value": str(passport_number),
+                    "email": client_email,
+                    "name": str(nome)[:50],
+                    "last_name_1": str(sobrenome)[:50],
+                    "last_name_2": "",
                     "locality": "locality",
-                }
-            }
+                    "nationality": 76,
+                    "province": 32,
+                    "sex": "M"
+                }    
+            })
             
             url = f"{settings.APIMS_URL}/api/activations/new"
             params = {'token': settings.APIMS_TOKEN}
