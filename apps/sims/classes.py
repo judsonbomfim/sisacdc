@@ -121,9 +121,39 @@ class ApiTC:
             }
         elif product == 'chip-internacional-europa-premium':
             planList = {
-                '500mb-dia': '572960',
-                '1gb': '572961',
-                '2gb': '572963',
+                '500mb-dia': '902771',
+                '1gb': '902731',
+                '2gb': '902770',
+            }
+        elif product == 'chip-internacional-eua-premium':
+            planList = {
+                '500mb-dia': '866488',
+                '1gb': '866490',
+                '2gb': '866493',
+            }
+        elif product == 'chip-internacional-africa-premium':
+            planList = {
+                '500mb-dia': '898805',
+                '1gb': '898806',
+                '2gb': '898807',
+            }
+        elif product == 'chip-internacional-asia-premium':
+            planList = {
+                '500mb-dia': '898801',
+                '1gb': '898802',
+                '2gb': '898803',
+            }
+        elif product == 'chip-internacional-oceania-premium':
+            planList = {
+                '500mb-dia': '898751',
+                '1gb': '898752',
+                '2gb': '898754',
+            }
+        elif product == 'chip-internacional-oriente-medio-premium':
+            planList = {
+                '500mb-dia': '898797',
+                '1gb': '898799',
+                '2gb': '898800',
             }
         # Verificar Planos    
         try:
@@ -291,9 +321,9 @@ class ApiTI:
             }
         elif product == 'chip-internacional-europa-premium':
             planList = {
-                '500mb-dia': '865961',
-                '1gb': '864628',
-                '2gb': '865963',
+                '500mb-dia': '902771',
+                '1gb': '902731',
+                '2gb': '902770',
             }
         elif product == 'chip-internacional-africa-premium':
             planList = {

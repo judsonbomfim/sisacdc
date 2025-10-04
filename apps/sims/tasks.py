@@ -59,8 +59,7 @@ def sims_in_orders():
                 add_sim.save()
 
             # ESCOLHER OPERADORA
-            planos = {
-                'chip-internacional-europa-premium',
+            planos_ti = {
                 'chip-internacional-america-do-sul',
                 'chip-internacional-america-do-sul-premium',
                 'chip-internacional-israel-premium',
@@ -68,23 +67,28 @@ def sims_in_orders():
                 'chip-internacional-marrocos-premium',
                 'chip-internacional-egito-premium',
                 'chip-internacional-indonesia-premium',
+            }
+            planos_tc = {
+                'chip-internacional-europa-premium',
                 'chip-internacional-eua-premium',
                 'chip-internacional-africa-premium',
                 'chip-internacional-asia-premium',
-                'chip-internacional-oriente-medio-premium',
                 'chip-internacional-oceania-premium',
+                'chip-internacional-oriente-medio-premium',
             }
-            if product_i in planos:
+            if product_i in planos_ti:
                 operator_i = 'TI'
+            elif product_i in planos_tc:
+                operator_i = 'TC'
+            elif product_i == 'chip-internacional-eua-canada-e-mexico':
+                if condition_i == 'novo-sim':
+                    operator_i = 'TC'
+                else:
+                    operator_i = 'CM'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
             elif product_i == 'chip-internacional-europa-ilimitado':
                 operator_i = 'MS'
-            elif product_i == 'chip-internacional-eua-canada-e-mexico':
-                if condition_i == 'novo-sim':
-                    operator_i = 'TI'
-                else:
-                    operator_i = 'CM'
             else: operator_i = 'CM'
             
             # Select SIM
@@ -490,8 +494,8 @@ def simActivateTI(id=None):
 
 @shared_task
 def simDeactivateTC(id=None):
-    
-    timezone = pytz.timezone('America/Sao_Paulo')
+
+    timezone = pytz.timezone(settings.TIME_ZONE)
     min_hour = 23  # hora
     min_minute = 50  # minutos
 
@@ -618,11 +622,6 @@ def simDeactivateTC(id=None):
         # Fecha a conexão
         conn.close()
                 
-    print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
-
-
-@shared_task
-def simDeactivateTC(id=None):
     print('>>>>>>>>>> DESATIVAÇÂO FINALIZADA')
 
 
