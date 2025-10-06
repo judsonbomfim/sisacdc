@@ -98,6 +98,7 @@ def sims_in_orders():
                 sim_ds = Sims.objects.all().get(pk=0)
             elif reuso != None:
                 print('--------------------- SIMs por reuso!')
+                print(f'Reuso: {reuso}')
                 sim_ds = Sims.objects.filter(sim=reuso).first()
             else:
                 sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
