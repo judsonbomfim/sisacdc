@@ -35,6 +35,7 @@ def sims_in_orders():
     for ord in orders:
         
         id_id_i = ord.id
+        print(f'Processando pedido {id_id_i}')
         order_id_i = ord.order_id
         product_i = ord.product
         condition_i = ord.condition
