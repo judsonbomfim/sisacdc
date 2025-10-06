@@ -40,7 +40,8 @@ def sims_in_orders():
         condition_i = ord.condition
         countries_i = ord.countries
         type_sim_i = ord.type_sim
-        celular_samsung = ord.celular_samsung
+        # celular_samsung = ord.celular_samsung
+        reuso = ord.ord_chip_nun
         update_store = {}
         esim_eua = type_sim_i == 'esim' and (product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias')
         esim_ok = type_sim_i == 'esim' and (product_i != 'chip-internacional-eua' or product_i != 'chip-internacional-eua-30-dias')
@@ -94,6 +95,9 @@ def sims_in_orders():
             # Select SIM
             if esim_eua:
                 sim_ds = Sims.objects.all().get(pk=0)
+            elif reuso is not None:
+                print('--------------------- SIMs por reuso!')
+                sim_ds = Sims.objects.filter(sim=reuso).first()
             else:
                 sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
                 if sim_ds:
@@ -502,7 +506,7 @@ def simDeactivateTC(id=None):
 
     # Selecionar pedidos
     if id is None:       
-        orders_to_process = Orders.objects.filter(order_status='AT', id_sim__operator__in=['TC', 'TI'])
+        orders_to_process = Orders.objects.filter(order_status='AT', id_sim__operator__in=['TC', 'TI']).order_by('-id')
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
