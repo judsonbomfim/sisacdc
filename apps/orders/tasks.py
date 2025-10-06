@@ -107,8 +107,6 @@ def order_import():
                     if i['key'] == '_condicao_chip': 
                         if i['value'] == 'novo':
                             condition_i = 'novo-sim'
-                        else:
-                            condition_i = 'reuso-sim'
                     if i['key'] == '_agencia_cadastrada':
                         condition_i = 'reuso-sim'
                     if i['key'] == '_numero_sim':
