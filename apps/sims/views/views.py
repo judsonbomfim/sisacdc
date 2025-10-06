@@ -19,7 +19,7 @@ from ..serializers import ConsumoSerializer
 from apps.sims.classes import ApiTC, ApiCM
 from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
-from ..tasks import sims_in_orders
+from ..tasks import simDeactivateTC, sims_in_orders
 
 
 # Script Upload S3
@@ -339,3 +339,8 @@ def testeMobileData(request, iccid):
             'error': str(e),
             'iccid': iccid
         }, status=500)
+
+
+def desativarTM(request):
+    simDeactivateTC.delay()
+    return HttpResponse('Processando desativações... Aguarde alguns minutos e atualize a página de pedidos')
