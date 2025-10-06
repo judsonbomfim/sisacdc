@@ -45,7 +45,6 @@ def sims_in_orders():
         reuso_sim = ord.ord_chip_nun
         update_store = {}
         esim_eua = type_sim_i == 'esim' and (product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias')
-        esim_ok = type_sim_i == 'esim' and (product_i != 'chip-internacional-eua' or product_i != 'chip-internacional-eua-30-dias')
         
         # Se já houver SIM   
         if ord.id_sim != None:
