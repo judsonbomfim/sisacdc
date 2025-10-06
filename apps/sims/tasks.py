@@ -42,7 +42,7 @@ def sims_in_orders():
         countries_i = ord.countries
         type_sim_i = ord.type_sim
         # celular_samsung = ord.celular_samsung
-        reuso = ord.ord_chip_nun
+        reuso_sim = ord.ord_chip_nun
         update_store = {}
         esim_eua = type_sim_i == 'esim' and (product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias')
         esim_ok = type_sim_i == 'esim' and (product_i != 'chip-internacional-eua' or product_i != 'chip-internacional-eua-30-dias')
@@ -96,10 +96,10 @@ def sims_in_orders():
             # Select SIM
             if esim_eua:
                 sim_ds = Sims.objects.all().get(pk=0)
-            elif reuso != '':
+            elif reuso_sim != '-':
                 print('--------------------- SIMs por reuso!')
-                print(f'Reuso: {reuso}')
-                sim_ds = Sims.objects.filter(sim=reuso).first()
+                print(f'Reuso: {reuso_sim}')
+                sim_ds = Sims.objects.filter(sim=reuso_sim).first()
             else:
                 sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
                 if sim_ds:
