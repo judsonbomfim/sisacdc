@@ -163,6 +163,7 @@ def index(request):
     weekOperValuesTM = json.dumps([oper_by_date_week[d].get('TM', 0) for d in all_week_dates])
     weekOperValuesCM = json.dumps([oper_by_date_week[d].get('CM', 0) for d in all_week_dates])
     weekOperValuesTC = json.dumps([oper_by_date_week[d].get('TC', 0) for d in all_week_dates])
+    weekOperValuesTI = json.dumps([oper_by_date_week[d].get('TI', 0) for d in all_week_dates])
 
     # --- Month
     oper_by_date_month = defaultdict(lambda: defaultdict(int))
@@ -173,6 +174,7 @@ def index(request):
     monthOperValuesTM = json.dumps([oper_by_date_month[d].get('TM', 0) for d in all_month_dates])
     monthOperValuesCM = json.dumps([oper_by_date_month[d].get('CM', 0) for d in all_month_dates])
     monthOperValuesTC = json.dumps([oper_by_date_month[d].get('TC', 0) for d in all_month_dates])
+    monthOperValuesTI = json.dumps([oper_by_date_month[d].get('TI', 0) for d in all_month_dates])
 
     # --- Year
     oper_by_month_year = defaultdict(lambda: defaultdict(int))
@@ -183,6 +185,7 @@ def index(request):
     yearOperValuesTM = json.dumps([oper_by_month_year[m].get('TM', 0) for m in all_year_months])
     yearOperValuesCM = json.dumps([oper_by_month_year[m].get('CM', 0) for m in all_year_months])
     yearOperValuesTC = json.dumps([oper_by_month_year[m].get('TC', 0) for m in all_year_months])
+    yearOperValuesTI = json.dumps([oper_by_month_year[m].get('TI', 0) for m in all_year_months])
 
     # Verificar estoque de operadoras
     sim_tm = simsAll.filter(sim_status='DS',operator='TM', type_sim='sim').count()
@@ -227,7 +230,8 @@ def index(request):
         'weekOperDates': weekOperDates,
         'weekOperValuesTM': weekOperValuesTM,
         'weekOperValuesCM': weekOperValuesCM,
-        'weekOperValuesTC': weekOperValuesTC,        
+        'weekOperValuesTC': weekOperValuesTC,
+        'weekOperValuesTI': weekOperValuesTI,
         'monthSalesDates': monthSalesDates,
         'monthSalesValues': monthSalesValues,
         'monthSimsDates': monthSimsDates,
@@ -237,6 +241,7 @@ def index(request):
         'monthOperValuesTM': monthOperValuesTM,
         'monthOperValuesCM': monthOperValuesCM,
         'monthOperValuesTC': monthOperValuesTC,
+        'monthOperValuesTI': monthOperValuesTI,
         'yearSalesDates': yearSalesDates,
         'yearSalesValues': yearSalesValues,
         'yearSimsDates': yearSimsDates,
@@ -245,7 +250,8 @@ def index(request):
         'yearOperDates': yearOperDates,
         'yearOperValuesTM': yearOperValuesTM,
         'yearOperValuesCM': yearOperValuesCM,
-        'yearOperValuesTC': yearOperValuesTC,        
+        'yearOperValuesTC': yearOperValuesTC,      
+        'yearOperValuesTI': yearOperValuesTI,      
     }
     
     return render(request, 'painel/dashboard/index.html', context)

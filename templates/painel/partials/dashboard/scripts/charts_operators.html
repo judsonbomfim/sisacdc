@@ -5,21 +5,24 @@ document.addEventListener("DOMContentLoaded", function() {
         const weekOperValuesTMRaw = '{{ weekOperValuesTM|escapejs|safe }}';
         const weekOperValuesCMRaw = '{{ weekOperValuesCM|escapejs|safe }}';
         const weekOperValuesTCRaw = '{{ weekOperValuesTC|escapejs|safe }}';
+        const weekOperValuesTIRaw = '{{ weekOperValuesTI|escapejs|safe }}';
         const weekOperDatesRaw = '{{ weekOperDates|escapejs|safe }}';
 
         const weekOperValuesTM = weekOperValuesTMRaw ? JSON.parse(weekOperValuesTMRaw) : [];
         const weekOperValuesCM = weekOperValuesCMRaw ? JSON.parse(weekOperValuesCMRaw) : [];
         const weekOperValuesTC = weekOperValuesTCRaw ? JSON.parse(weekOperValuesTCRaw) : [];
+        const weekOperValuesTI = weekOperValuesTIRaw ? JSON.parse(weekOperValuesTIRaw) : [];
         const weekOperDates = weekOperDatesRaw ? JSON.parse(weekOperDatesRaw) : [];
 
         var optionsOperWeek = {
             series: [
                 { name: 'T-Mobile', data: weekOperValuesTM },
                 { name: 'China Mobile', data: weekOperValuesCM },
-                { name: 'Telcom', data: weekOperValuesTC }
+                { name: 'Telcom', data: weekOperValuesTC },
+                { name: 'Telcom IMSI', data: weekOperValuesTI }
             ],
             chart: { height: 350, type: 'bar', zoom: { enabled: false } },
-            colors: ['#103652', '#5DD5D9', '#daa648'],
+            colors: ['#103652', '#5DD5D9', '#daa648', '#847457'],
             dataLabels: { enabled: false },
             stroke: { curve: 'smooth' },
             title: { text: 'Vendas de {{dateWeek|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
@@ -44,21 +47,24 @@ document.addEventListener("DOMContentLoaded", function() {
             const monthOperValuesTMRaw = '{{ monthOperValuesTM|escapejs|safe }}';
             const monthOperValuesCMRaw = '{{ monthOperValuesCM|escapejs|safe }}';
             const monthOperValuesTCRaw = '{{ monthOperValuesTC|escapejs|safe }}';
+            const monthOperValuesTIRaw = '{{ monthOperValuesTI|escapejs|safe }}';
             const monthOperDatesRaw = '{{ monthOperDates|escapejs|safe }}';
 
             const monthOperValuesTM = monthOperValuesTMRaw ? JSON.parse(monthOperValuesTMRaw) : [];
             const monthOperValuesCM = monthOperValuesCMRaw ? JSON.parse(monthOperValuesCMRaw) : [];
             const monthOperValuesTC = monthOperValuesTCRaw ? JSON.parse(monthOperValuesTCRaw) : [];
+            const monthOperValuesTI = monthOperValuesTIRaw ? JSON.parse(monthOperValuesTIRaw) : [];
             const monthOperDates = monthOperDatesRaw ? JSON.parse(monthOperDatesRaw) : [];
 
             var optionsOperMonth = {
                 series: [
                     { name: 'T-Mobile', data: monthOperValuesTM },
                     { name: 'China Mobile', data: monthOperValuesCM },
-                    { name: 'Telcom', data: monthOperValuesTC }
+                    { name: 'Telcom', data: monthOperValuesTC },
+                    { name: 'Telcom IMSI', data: monthOperValuesTI }
                 ],
                 chart: { height: 350, type: 'bar', zoom: { enabled: false } },
-                colors: ['#103652', '#5DD5D9', '#daa648'],
+                colors: ['#103652', '#5DD5D9', '#daa648', '#d9534f'],
                 dataLabels: { enabled: false },
                 stroke: { curve: 'smooth' },
                 title: { text: 'Vendas de {{dateMonth|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
@@ -85,21 +91,24 @@ document.addEventListener("DOMContentLoaded", function() {
             const yearOperValuesTMRaw = '{{ yearOperValuesTM|escapejs|safe }}';
             const yearOperValuesCMRaw = '{{ yearOperValuesCM|escapejs|safe }}';
             const yearOperValuesTCRaw = '{{ yearOperValuesTC|escapejs|safe }}';
+            const yearOperValuesTIRaw = '{{ yearOperValuesTI|escapejs|safe }}';
             const yearOperDatesRaw = '{{ yearOperDates|escapejs|safe }}';
 
             const yearOperValuesTM = yearOperValuesTMRaw ? JSON.parse(yearOperValuesTMRaw) : [];
             const yearOperValuesCM = yearOperValuesCMRaw ? JSON.parse(yearOperValuesCMRaw) : [];
             const yearOperValuesTC = yearOperValuesTCRaw ? JSON.parse(yearOperValuesTCRaw) : [];
+            const yearOperValuesTI = yearOperValuesTIRaw ? JSON.parse(yearOperValuesTIRaw) : [];
             const yearOperDates = yearOperDatesRaw ? JSON.parse(yearOperDatesRaw) : [];
 
             var optionsOperYear = {
                 series: [
                     { name: 'T-Mobile', data: yearOperValuesTM },
                     { name: 'China Mobile', data: yearOperValuesCM },
-                    { name: 'Telcom', data: yearOperValuesTC }
+                    { name: 'Telcom', data: yearOperValuesTC },
+                    { name: 'Telcom IMSI', data: yearOperValuesTI }
                 ],
                 chart: { height: 350, type: 'bar', zoom: { enabled: false } },
-                colors: ['#103652', '#5DD5D9', '#daa648'],
+                colors: ['#103652', '#5DD5D9', '#daa648', '#d9534f'],
                 dataLabels: { enabled: false },
                 stroke: { curve: 'smooth' },
                 title: { text: 'Vendas de {{dateYear|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
