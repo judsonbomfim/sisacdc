@@ -97,6 +97,32 @@ def orders_list(request):
     if ord_st_f: 
         orders_l = orders_l.filter(order_status=ord_st_f)
         url_filter += f"&ord_st={ord_st_f}"
+        
+    # Buscar planos para mapeamento
+    plans = Orders.product.field.choices
+    # Sessão: salve dados serializáveis (lista de dicts) e calcule return_date
+    qs = orders_l.values(
+        'item_id', 'client', 'id_sim__sim', 'id_sim__operator',
+        'product', 'countries', 'calls', 'days', 'activation_date', 'order_status'
+    )
+    orders_for_export = []
+    for row in qs:
+        ad = row.get('activation_date')
+        days_val = row.get('days') or 0
+        ret = (ad + timedelta(days=days_val - 1)) if (ad and days_val) else None
+
+        # Adicionar data_day a partir do mapeamento de planos
+        product_name = row.get('product')
+        row['data_day'] = row.get('data_day')
+
+        # deixe datas serializáveis (strings) para a sessão
+        orders_for_export.append({
+            **row,
+            'activation_date': ad.isoformat() if ad else None,
+            'return_date': ret.isoformat() if ret else None,
+        })
+
+    request.session['orders_listing'] = orders_for_export
 
     ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
@@ -462,18 +488,26 @@ def ord_edit(request,id):
 
 @login_required(login_url='/login/')
 @has_permission_decorator('export_orders')
-def ord_export_act(request):
+def ord_export(request):
     
     list_status = dict(Orders.order_status.field.choices)
     list_oper = dict(Sims.operator.field.choices)
-    
-    orders_all = request.session.get('orders_act')
+
+    if request.session.get('orders_listing'):
+        orders_all = request.session.get('orders_listing')
+        print(f'>>>>>>>>>>>>>>>>>>>>>< Exportando {len(orders_all)} pedidos')
+    else:
+        messages.error(request, 'Nenhum dado disponível para exportação. Por favor, aplique filtros na lista de pedidos antes de exportar.')
+        return request
     data = [
         ['Pedido', 'Cliente', '(e)SIM', 'Operadora', 'Produto', 'Países', 'Voz', 'Dias', 'Data Aivação', 'Data Término', 'Status']
     ]
     
     for ord in orders_all:
-        ord_operator = list_oper[ord['id_sim__operator']]
+        print(f'Exportando pedido {ord}')
+        if ord['id_sim__operator']:
+            ord_operator = list_oper[ord['id_sim__operator']]
+        else: ord_operator = ''
         if ord['data_day'] != 'Ilimitado': 
             ord_data = ord['data_day']
         else: ord_data = ''
@@ -749,7 +783,7 @@ def orders_activations(request):
     orders_act['activation_date'] = orders_act['activation_date'].astype(str)
     orders_act['return_date'] = orders_act['return_date'].astype(str)
     orders_act = orders_act.to_dict(orient='records')
-    request.session['orders_act'] = orders_act
+    request.session['orders_listing'] = orders_act
     # List
     orders_l = orders_l.to_dict('records')
   

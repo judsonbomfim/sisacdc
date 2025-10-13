@@ -98,7 +98,12 @@
     </div>
     <div class="col-md-1 p-2">
       <div class="application-task d-flex align-items-center">
-        <a class="btn-default btn-rounded" href="{% url 'orders_list' %}"><i class="bi bi-arrow-clockwise"></i>Limpar</a>
+        <a class="btn-default btn-rounded pe-3" href="{% url 'orders_list' %}">
+            <i class="bi bi-arrow-clockwise fs-4"></i>
+        </a>
+        <a class="btn-default btn-rounded pe-3" href="{% url 'ord_export' %}">
+            <i class="bi bi-arrow-down-circle fs-4"></i>
+        </a>
       </div>
     </div>
     <div class="table-responsive">
