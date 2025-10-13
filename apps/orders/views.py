@@ -595,6 +595,7 @@ def orders_activations(request):
     activReturn_2 = None
     oper_f = None
     ord_st_f = None
+    ord_planos_f = None
 
     fields_df = ['id', 'item_id','client', 'id_sim__sim', 'id_sim__link', 'id_sim__type_sim', 'id_sim__operator', 'product', 'data_day', 'calls', 'countries', 'days', 'cell_mod', 'cell_eid', 'cell_imei', 'activation_date', 'order_status']
 
@@ -609,6 +610,7 @@ def orders_activations(request):
     
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
     
+    orders_df['product_code'] = orders_df['product']
     orders_df['product'] = orders_df['product'].map(product_choice_dict)
     orders_df['data_day'] = orders_df['data_day'].map(data_choice_dict)
     orders_df['activation_date'] = pd.to_datetime(orders_df['activation_date'])
@@ -623,13 +625,15 @@ def orders_activations(request):
         if request.GET.get('activReturn_1'): activReturn_1 = request.GET.get('activReturn_1')
         if request.GET.get('activReturn_2'): activReturn_2 = request.GET.get('activReturn_2')
         if request.GET.get('oper'): oper_f = request.GET.get('oper')
-        if request.GET.get('ord_st'): ord_st_f = request.GET.get('ord_st')        
+        if request.GET.get('ord_st'): ord_st_f = request.GET.get('ord_st')
+        if request.GET.get('ord_planos'): ord_planos_f = request.GET.get('ord_planos')
 
     if request.method == 'POST':
         if request.POST.get('activGoing_f'): activGoing_f = request.POST.get('activGoing_f')
         if request.POST.get('activReturn_f') : activReturn_f = request.POST.get('activReturn_f')
         if request.POST.get('oper_f'): oper_f = request.POST.get('oper_f')
-        if request.POST.get('ord_st_f'): ord_st_f = request.POST.get('ord_st_f')        
+        if request.POST.get('ord_st_f'): ord_st_f = request.POST.get('ord_st_f')
+        if request.POST.get('ord_planos_f'): ord_planos_f = request.POST.get('ord_planos_f')
            
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
@@ -681,6 +685,10 @@ def orders_activations(request):
     if ord_st_f:
         orders_l = orders_l[(orders_l['order_status'] == ord_st_f)]
         url_filter += f"&ord_st={ord_st_f}"
+        
+    if ord_planos_f:
+        orders_l = orders_l[(orders_l['product_code'] == ord_planos_f)]
+        url_filter += f"&ord_planos={ord_planos_f}"
 
     # Aplicar filtros para POST (formulário)
     if request.method == 'POST':
@@ -705,10 +713,14 @@ def orders_activations(request):
             except:
                 orders_l = orders_l[(orders_l['return_date'] == activReturn_1)]
                 url_filter += f"&activReturn_1={activReturn_1}"
+        if ord_planos_f:
+            orders_l = orders_l[(orders_l['product_code'] == ord_planos_f)]
+            url_filter += f"&ord_planos={ord_planos_f}"
 
     sims = Sims.objects.all()
-    ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
+    ord_status = Orders.order_status.field.choices
+    plan_list = Orders.product.field.choices
 
     # Listar status dos pedidos
     ord_st_list = []
@@ -752,6 +764,7 @@ def orders_activations(request):
         'orders': orders,
         'sims': sims,
         'ord_st_list': ord_st_list,
+        'plan_list': plan_list,
         'oper_list': oper_list,
         'url_filter': url_filter,
         'status_choice_dict': status_choice_dict,
@@ -767,6 +780,7 @@ def orders_activations(request):
         'activReturn_2': activReturn_2,
         'oper_f': oper_f,
         'ord_st_f': ord_st_f,
+        'ord_planos_f': ord_planos_f,
     }
     return render(request, 'painel/orders/activations.html', context)
 

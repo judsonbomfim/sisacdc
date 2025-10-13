@@ -22,7 +22,11 @@ def voice_index(request):
     voice_item_f = None
     voice_number_f = None
     voice_going_f = None
+    voice_going_1 = None
+    voice_going_2 = None
     voice_return_f = None
+    voice_return_1 = None
+    voice_return_2 = None
     voice_status_f = None
     
     url_cdn = settings.URL_CDN
@@ -55,14 +59,16 @@ def voice_index(request):
         
         if request.GET.get('voice_item_f'): voice_item_f = request.GET.get('voice_item_f')
         if request.GET.get('voice_number_f'): voice_number_f = request.GET.get('voice_number_f')    
-        if request.GET.get('voice_going_f'): voice_going_f = request.GET.get('voice_going_f')       
-        if request.GET.get('voice_return_f'): voice_return_f = request.GET.get('voice_return_f')    
+        if request.GET.get('voice_going_1'): voice_going_1 = request.GET.get('voice_going_1')  
+        if request.GET.get('voice_going_2'): voice_going_2 = request.GET.get('voice_going_2')  
+        if request.GET.get('voice_return_1'): voice_return_1 = request.GET.get('voice_return_1')    
+        if request.GET.get('voice_return_2'): voice_return_2 = request.GET.get('voice_return_2')    
         if request.GET.get('voice_status_f'): voice_status_f = request.GET.get('voice_status_f')
 
     if request.method == 'POST':
         
         if request.POST.get('voice_item_f'): voice_item_f = request.POST.get('voice_item_f')
-        if request.POST.get('voice_number_f'): voice_number_f = request.POST.get('voice_number_f')    
+        if request.POST.get('voice_number_f'): voice_number_f = request.POST.get('voice_number_f')
         if request.POST.get('voice_going_f'): voice_going_f = request.POST.get('voice_going_f')
         if request.POST.get('voice_return_f'): voice_return_f = request.POST.get('voice_return_f')
         if request.POST.get('voice_status_f'): voice_status_f = request.POST.get('voice_status_f')
@@ -91,21 +97,50 @@ def voice_index(request):
         voices_l = voices_l[(voices_l['num_number'] == voice_number_f)]
         url_filter += f"&voice_number_f={voice_number_f}"    
 
-    if voice_going_f is not None:
-        voice_going_f = DateFormats.dateF(voice_going_f) 
-        voices_l = voices_l[(voices_l['activation_date'] == voice_going_f)]
-        url_filter += f"&voice_going_f={voice_going_f}"
+    if voice_going_1 and voice_going_2:
+        voices_l = voices_l[(voices_l['activation_date'] >= voice_going_1) & (voices_l['activation_date'] <= voice_going_2)]
+        url_filter += f"&voice_going_1={voice_going_1}&voice_going_2={voice_going_2}"
+    elif voice_going_1:
+        voices_l = voices_l[(voices_l['activation_date'] == voice_going_1)]
+        url_filter += f"&voice_going_1={voice_going_1}"          
 
-    if voice_return_f is not None:
-        voice_return_f = DateFormats.dateF(voice_return_f) 
-        voices_l = voices_l[(voices_l['return_date'] == voice_return_f)]
-        url_filter += f"&voice_return_f={voice_return_f}"
-        
+    if voice_return_1 and voice_return_2:
+        voices_l = voices_l[(voices_l['return_date'] >= voice_return_1) & (voices_l['return_date'] <= voice_return_2)]
+        url_filter += f"&voice_return_1={voice_return_1}&voice_return_2={voice_return_2}"
+    elif voice_return_1:
+        voices_l = voices_l[(voices_l['return_date'] == voice_return_1)]
+        url_filter += f"&voice_return_1={voice_return_1}"
+    
     if voice_status_f is not None:
         voice_status_f = voice_status_f 
         voices_l = voices_l[(voices_l['call_status'] == voice_status_f)]
         url_filter += f"&voice_status_f={voice_status_f}"   
-        
+    
+    # Aplicar filtros para POST (formulário)
+    if request.method == 'POST':
+        if voice_going_f is not None:
+            voice_going = [item.strip() for item in voice_going_f.split('-')]
+            voice_going_1 = DateFormats.dateF(voice_going[0])
+            try: 
+                voice_going_2 = DateFormats.dateF(voice_going[1])
+                voices_l = voices_l[(voices_l['activation_date'] >= voice_going_1) & (voices_l['activation_date'] <= voice_going_2)]
+                url_filter += f"&voice_going_1={voice_going_1}&voice_going_2={voice_going_2}"
+            except:
+                voices_l = voices_l[(voices_l['activation_date'] == voice_going_1)]
+                url_filter += f"&voice_going_1={voice_going_1}"  
+
+        if voice_return_f is not None:
+            voice_return = [item.strip() for item in voice_return_f.split('-')]
+            voice_return_1 = DateFormats.dateF(voice_return[0])
+            try:
+                voice_return_2 = DateFormats.dateF(voice_return[1])
+                voices_l = voices_l[(voices_l['return_date'] >= voice_return_1) & (voices_l['return_date'] <= voice_return_2)]
+                url_filter += f"&voice_return_1={voice_return_1}&voice_return_2={voice_return_2}"
+            except:
+                voices_l = voices_l[(voices_l['return_date'] == voice_return_1)]
+                url_filter += f"&voice_return_1={voice_return_1}"   
+    
+    
     voices_l = voices_l.to_dict('records')
 
     vox_st_list = []

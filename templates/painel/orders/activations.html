@@ -155,9 +155,9 @@
 
     <form action="{% url 'orders_activations' %}" method="POST">
     {% csrf_token %}
-    {% if request.user|can:'edit_orders' %}
         
     <div class="form-group row">
+        {% if request.user|can:'edit_orders' %}
         <div class="col-md-1">
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="ord_status">
@@ -174,11 +174,13 @@
         </div>
         {% endif %}
         <div class="col-md-2">
-            <div id="pageContentArea" class="pageSection">
-                <input type="text" id="activGoing_f" name="activGoing_f"
-                    class="inputField shortInputField dateRangeField form-control  ih-medium ip-gray radius-xs b-light"
-                    placeholder="Data de Ativação" data-from-field="txtDateFrom" data-to-field="txtDateTo"
-                    autocomplete="off" />
+            <div class="dm-date-picker">
+                <div class="form-group mb-0 form-group-calender">
+                    <div class="position-relative">
+                    <input type="text" class="form-control form-control-lg" id="activGoing_f" name="activGoing_f" placeholder="Ida" autocomplete="off" />
+                    <a href="#"><img class="svg" src="{% static 'painel/theme/hexadash/img/svg/calendar.svg' %}" alt="calendar" /></a>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-md-2">
@@ -192,17 +194,31 @@
         <div class="col-md-2">
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="oper_f">
-                    <option value="">Todas Operadoras</option>
+                    <option value="">Operadoras</option>
                     {% for op_s in oper_list %}
                     <option value="{{op_s.0}}" {% if oper_f == op_s.0 %}selected{% endif %}>{{op_s.1}}</option>
                     {% endfor %}
                 </select>
             </div>
         </div>
-        <div class="col-md-2">
+            <div class="col-md-1">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="ord_planos_f">
+                    <option value="">Planos</option>
+                    {% for ord_plan in plan_list %}
+                    {% if ord_plan.2 != 0 %}
+                    <option value="{{ord_plan.0}}" {% if ord_planos_f == ord_plan.0 %}selected{% endif %}>{{ord_plan.1}}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        
+        <div class="col-md-1">
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="ord_st_f">
-                    <option value="">Todos Status</option>
+                    <option value="">Status</option>
                     {% for ord_st in ord_st_list %}
                     {% if ord_st.2 != 0 %}
                     <option value="{{ord_st.0}}" {% if ord_st_f == ord_st.0 %}selected{% endif %}>{{ord_st.1}} ({{ord_st.2}})</option>
