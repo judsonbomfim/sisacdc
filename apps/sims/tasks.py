@@ -68,6 +68,7 @@ def sims_in_orders():
                 'chip-internacional-marrocos-premium',
                 'chip-internacional-egito-premium',
                 'chip-internacional-indonesia-premium',
+                'chip-internacional-europa-ilimitado',
             }
             planos_tc = {
                 'chip-internacional-europa-premium',
@@ -88,8 +89,6 @@ def sims_in_orders():
                     operator_i = 'CM'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
-            elif product_i == 'chip-internacional-europa-ilimitado':
-                operator_i = 'MS'
             else: operator_i = 'CM'
             
             # Select SIM
