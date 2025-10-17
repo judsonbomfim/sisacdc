@@ -30,7 +30,7 @@ def voice_index(request):
     voice_status_f = None
     
     url_cdn = settings.URL_CDN
-    fields_df = ['id', 'id_number__number', 'id_item__client', 'id_number__id', 'id_item__item_id', 'id_number__login', 'id_number__password', 'id_number__number_qrcode', 'id_item__days', 'id_item__activation_date', 'call_status']
+    fields_df = ['id', 'id_number__number', 'id_item__client', 'id_number__id', 'id_item__item_id', 'id_number__login', 'id_number__password', 'id_number__number_qrcode', 'id_number__days', 'id_number__activation_date', 'call_status']
     
     voices_all = VoiceCalls.objects.all().order_by('-id')
     vox_status = VoiceCalls.call_status.field.choices # Listar status dos pedidos
