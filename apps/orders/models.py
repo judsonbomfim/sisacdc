@@ -55,7 +55,7 @@ ORDER_STATUS = [
     ('PV', 'Plano de Voz'),
     ('RB', 'Reembolsado'),
     ('RE', 'Reembolsar'),
-    ('RP', 'Reembolso Parcial'),
+    ('RC', 'Reembolso Parcial'),
     ('RS', 'Reuso'),
     ('RP', 'Reprocessar'),
     ('RT', 'Retirada'),

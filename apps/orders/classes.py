@@ -39,7 +39,7 @@ class StatusStore():
             'PV': 'agd-ativacao',
             'RE': 'reembolsar',
             'RB': 'reembolsado',
-            'RP': 'reembolso-parcial',
+            'RC': 'reembolso-parcial',
             'RS': 'reuso',
             'RT': 'retirada',
         }
