@@ -99,7 +99,7 @@ def orders_list(request):
         url_filter += f"&ord_st={ord_st_f}"
         
     # Buscar planos para mapeamento
-    plans = Orders.product.field.choices
+    plans = {name: data_day for name, data_day in Orders.product.field.choices}
     # Sessão: salve dados serializáveis (lista de dicts) e calcule return_date
     qs = orders_l.values(
         'item_id', 'client', 'id_sim__sim', 'id_sim__operator',
@@ -113,7 +113,7 @@ def orders_list(request):
 
         # Adicionar data_day a partir do mapeamento de planos
         product_name = row.get('product')
-        row['data_day'] = row.get('data_day')
+        row['data_day'] = plans.get(product_name)
 
         # deixe datas serializáveis (strings) para a sessão
         orders_for_export.append({

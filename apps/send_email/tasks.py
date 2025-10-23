@@ -76,8 +76,8 @@ def send_email_sims(id=None):
         email.attach_alternative(html_content, "text/html")
         email.send()
         
-        if (order_st != 'CN' or order_st != 'AT') and type_sim == 'esim':
-            if product_plan == 'USA' or product_plan == 'USA 30 Dias':
+        if order_st != 'CN' or order_st != 'AT':
+            if (product_plan == 'USA' or product_plan == 'USA 30 Dias') and type_sim == 'esim':
                 # Update Order
                 order = Orders.objects.get(pk=id)
                 order.order_status = 'AI'
