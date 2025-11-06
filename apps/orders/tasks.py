@@ -574,10 +574,10 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
             add_sim.save()
         
         ord_status = Orders.order_status.field.choices
-        if order_st != 'ED':
+        if ord_s != 'ED':
             for st in ord_status:
-                if order_st == st[0] :
-                    addNote(f'Alterado de {st[1]} para {order.get_order_status_display()}')
+                if ord_s == st[0] :
+                    addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}')
             
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
