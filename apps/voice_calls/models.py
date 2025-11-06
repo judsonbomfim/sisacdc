@@ -66,7 +66,7 @@ class VoiceCalls(models.Model):
     
 class NotesVoice(models.Model):
     id = models.AutoField(primary_key=True)
-    id_item = models.ForeignKey(VoiceCalls, on_delete=models.DO_NOTHING, related_name='order_voice_notes', default=None)
+    id_item = models.ForeignKey(VoiceCalls, on_delete=models.CASCADE, related_name='order_voice_notes', default=None)
     id_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_voice_notes', default=None, null=True, blank=True)
     note = models.TextField()
     type_note = models.CharField(max_length=1, choices=TYPE_NOTE, default='S')

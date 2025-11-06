@@ -89,15 +89,27 @@ def send_email_sims(id=None):
                 order.order_status = 'AA'
                 order.save()
                 # Update Store
-                UpdateStore.upStore(
-                    order_id = order_id,
-                    item_id_store = order.item_id_store if order.item_id_store else None,
-                    _data_ativacao=str(activation_date) if activation_date else None,
-                    _sim = sim if sim else None,
-                    _qrcode = qrcode if qrcode else None,
-                    _status='AA',
-                    status_g = 'AA',
-                )             
+                try:
+                    UpdateStore.upStore(
+                        order_id = order_id,
+                        item_id_store = order.item_id_store,
+                        _data_ativacao=str(activation_date) if activation_date else None,
+                        _sim = sim if sim else None,
+                        _qrcode = qrcode if qrcode else None,
+                        _status='AA',
+                        status_g = 'AA',
+                    )
+                    print(f">>>>>>>>>> Status AA atualizado no site - Pedido: {order_id}")
+                except Exception as e:
+                    print(f">>>>>>>>>> ERRO ao atualizar site - Pedido {order_id}: {e}")
+                    # Add note do erro
+                    add_note = Notes( 
+                        id_item = order,
+                        id_user = None,
+                        note = f'Erro ao atualizar status no site: {str(e)}',
+                        type_note = 'E',
+                    )
+                    add_note.save()           
         
         # Add note
         add_note = Notes( 
