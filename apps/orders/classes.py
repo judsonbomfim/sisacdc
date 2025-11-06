@@ -82,6 +82,7 @@ class UpdateStore():
                 ]}
         if status_g:
             status_sis_site = StatusStore.st_sis_site()
+            print(f">>>>>>>>>> Atualizando status geral para {status_sis_site[status_g]} no site - Pedido: {order_id}")
             update_store['status'] = status_sis_site[status_g]
         if update_store:
             apiStore = ApiStore.conectApiStore()
