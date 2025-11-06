@@ -234,8 +234,6 @@ def order_import():
                 if type_sim_i == 'esim':
                     order_status_i = 'EE'
                 
-                order_status_i = None
-
                 # Atualizar site
                 UpdateStore.upStore(
                     order_id = order_id_i,

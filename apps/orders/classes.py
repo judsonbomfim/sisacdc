@@ -50,7 +50,7 @@ class UpdateStore():
     def upStore(order_id, item_id_store=None, _data_ativacao=None, _sim=None, _qrcode=None, _status=None,status_g=None):
         meta_data = []
         update_store = {}
-        if item_id_store != None:
+        if item_id_store is not None:
             if _data_ativacao:
                 meta_data.append({
                     "key": "_data_ativacao",
@@ -80,11 +80,10 @@ class UpdateStore():
                         "meta_data": meta_data
                     }
                 ]}
-        if status_g or _status:
-            print(f">>>>>>>>>> Status {_status} / {status_g}")
+
+        if status_g is not None:
             status_sis_site = StatusStore.st_sis_site()
             print(f">>>>>>>>>> Atualizando status geral para {status_sis_site[status_g]} no site - Pedido: {order_id}")
-            update_store['_status'] = status_sis_site[_status]
             update_store['status'] = status_sis_site[status_g]
         if update_store:
             apiStore = ApiStore.conectApiStore()
