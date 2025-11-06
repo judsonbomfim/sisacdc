@@ -451,7 +451,7 @@ def ord_edit(request,id):
             user_name = request.user.id
             ord_s_prev = order_status
             
-            orders_up_status(order.id, ord_st,user_name, ord_s_prev) 
+            # orders_up_status(order.id, ord_st,user_name, ord_s_prev) 
                         
             # Enviar email
             if ord_st == 'CN' and type_sim == 'sim':
