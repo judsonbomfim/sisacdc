@@ -99,6 +99,15 @@ def send_email_sims(id=None):
                         _status='AA',
                         status_g = 'AA',
                     )
+                    UpdateStore.upStore(
+                        order_id = order_id,
+                        item_id_store = order.item_id_store if order.item_id_store else None,
+                        _data_ativacao = str(activation_date) if activation_date else None,
+                        _sim = sim if sim else None,
+                        _qrcode = qrcode if qrcode else None,
+                        _status = ord_st if ord_st else None,
+                        status_g = ord_st if ord_st else None,
+                    )
                     print(f">>>>>>>>>> Status AA atualizado no site - Pedido: {order_id}")
                 except Exception as e:
                     print(f">>>>>>>>>> ERRO ao atualizar site - Pedido {order_id}: {e}")

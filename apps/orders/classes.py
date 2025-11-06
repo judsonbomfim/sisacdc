@@ -84,7 +84,7 @@ class UpdateStore():
             print(f">>>>>>>>>> Status {_status} / {status_g}")
             status_sis_site = StatusStore.st_sis_site()
             print(f">>>>>>>>>> Atualizando status geral para {status_sis_site[status_g]} no site - Pedido: {order_id}")
-            update_store['status'] = status_sis_site[_status]
+            update_store['_status'] = status_sis_site[_status]
             update_store['status'] = status_sis_site[status_g]
         if update_store:
             apiStore = ApiStore.conectApiStore()

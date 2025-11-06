@@ -466,7 +466,6 @@ def ord_edit(request,id):
 
         # Atualizar site
         try:
-            print(f'>>>>>>>>>> Atualizar site Store para status {ord_st}')
             UpdateStore.upStore(
                 order_id = order_id,
                 item_id_store = order.item_id_store if order.item_id_store else None,
