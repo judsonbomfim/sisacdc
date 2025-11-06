@@ -86,6 +86,12 @@ class UpdateStore():
             update_store['status'] = status_sis_site[status_g]
         if update_store:
             apiStore = ApiStore.conectApiStore()
+            try:
+                apiStore.put(f'orders/{order_id}', update_store)
+                print(f">>>>>>>>>> Pedido {order_id} atualizado no site com sucesso.")
+            except Exception as e:
+                print(f">>>>>>>>>> ERRO ao atualizar pedido {order_id} no site: {e}")
+            # Tentar atualizar o pedido novamente
             apiStore.put(f'orders/{order_id}', update_store)
 
 class NoteStore():
