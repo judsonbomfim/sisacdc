@@ -2,6 +2,9 @@ from woocommerce import API
 import os
 from apps.orders.models import Orders, Notes
 from django.contrib.auth.models import User
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Conect woocommerce api
 class ApiStore():
@@ -47,53 +50,102 @@ class StatusStore():
 
 class UpdateStore():
     @staticmethod
-    def upStore(order_id, item_id_store=None, _data_ativacao=None, _sim=None, _qrcode=None, _status=None,status_g=None):
+    def upStore(order_id=None, item_id_store=None, _data_ativacao=None, _sim=None, 
+                _qrcode=None, _status=None, status_g=None):
+        
+        logger.info(f">>>>>>>>>> UpdateStore.upStore INICIADO - Pedido: {order_id}")
+        logger.info(f"  - item_id_store: {item_id_store}")
+        logger.info(f"  - _status: {_status}")
+        logger.info(f"  - status_g: {status_g}")
+        
+        apiStore = ApiStore.conectApiStore()
+        
         meta_data = []
         update_store = {}
+        
+        # Preparar meta_data para item específico
         if item_id_store is not None:
+            logger.info(f"  - Preparando meta_data para item {item_id_store}")
+            
             if _data_ativacao:
-                meta_data.append({
-                    "key": "_data_ativacao",
-                    "value": _data_ativacao,
-                })
+                meta_data.append({"key": "_data_ativacao", "value": _data_ativacao})
             if _sim:
-                meta_data.append({
-                    "key": "_sim",
-                    "value": _sim,
-                })
+                meta_data.append({"key": "_sim", "value": _sim})
             if _qrcode:
-                meta_data.append({
-                    "key": "_qrcode",
-                    "value": _qrcode if _qrcode else "",
-                })
+                meta_data.append({"key": "_qrcode", "value": _qrcode if _qrcode else ""})
             if _status:
-                # listaStatus = dict(Orders.order_status.field.choices)
                 status_sis_site = StatusStore.st_sis_site()
-                meta_data.append({
-                    "key": "_status",
-                    "value": status_sis_site[_status],
-                })
+                if _status in status_sis_site:
+                    meta_data.append({"key": "_status", "value": status_sis_site[_status]})
+                    logger.info(f"  - Status mapeado: {_status} -> {status_sis_site[_status]}")
+                else:
+                    logger.warning(f"  - Status '{_status}' NÃO encontrado no mapeamento!")
+            
             update_store = {
-                'line_items': [
-                    {
-                        "id": int(item_id_store),
-                        "meta_data": meta_data
-                    }
-                ]}
+                'line_items': [{
+                    "id": int(item_id_store),
+                    "meta_data": meta_data
+                }]
+            }
+            logger.info(f"  - Meta_data preparado: {meta_data}")
 
+        # Preparar status geral
         if status_g is not None:
             status_sis_site = StatusStore.st_sis_site()
-            print(f">>>>>>>>>> Atualizando status geral para {status_sis_site[status_g]} no site - Pedido: {order_id}")
-            update_store['status'] = status_sis_site[status_g]
+            if status_g in status_sis_site:
+                update_store['status'] = status_sis_site[status_g]
+                logger.info(f"  - Status geral: {status_g} -> {status_sis_site[status_g]}")
+            else:
+                logger.warning(f"  - Status geral '{status_g}' NÃO encontrado no mapeamento!")
+        
+        logger.info(f"  - Dados finais para WooCommerce: {update_store}")
+        
+        # Fazer a requisição
         if update_store:
-            apiStore = ApiStore.conectApiStore()
             try:
-                apiStore.put(f'orders/{order_id}', update_store)
-                print(f">>>>>>>>>> Pedido {order_id} atualizado no site com sucesso.")
+                response = apiStore.put(f'orders/{order_id}', update_store)
+                
+                logger.info(f">>>>>>>>>> Resposta WooCommerce - Pedido {order_id}:")
+                logger.info(f"  - Status HTTP: {response.status_code}")
+                logger.info(f"  - Headers: {dict(response.headers)}")
+                logger.info(f"  - Resposta: {response.text}")
+                
+                if response.status_code in [200, 201]:
+                    logger.info(f">>>>>>>>>> Pedido {order_id} atualizado com SUCESSO")
+                    return True
+                else:
+                    logger.error(f">>>>>>>>>> ERRO na atualização - Pedido {order_id}")
+                    logger.error(f"  - Status: {response.status_code}")
+                    logger.error(f"  - Resposta completa: {response.text}")
+                    return False
+                    
             except Exception as e:
-                print(f">>>>>>>>>> ERRO ao atualizar pedido {order_id} no site: {e}")
-            # Tentar atualizar o pedido novamente
-            apiStore.put(f'orders/{order_id}', update_store)
+                logger.exception(f">>>>>>>>>> EXCEÇÃO ao atualizar pedido {order_id}: {e}")
+                return False
+        else:
+            logger.warning(f">>>>>>>>>> NADA para atualizar - Pedido {order_id}")
+            return False
+
+    @staticmethod
+    def check_available_status():
+        """Verificar status disponíveis no WooCommerce"""
+        apiStore = ApiStore.conectApiStore()
+        try:
+            # Buscar status do sistema
+            response = apiStore.get('system_status')
+            logger.info(f"System Status: {response.json()}")
+            
+            # Buscar um pedido para ver status possíveis
+            response_orders = apiStore.get('orders', params={'per_page': 1})
+            orders = response_orders.json()
+            if orders:
+                logger.info(f"Status de exemplo em pedido: {orders[0].get('status')}")
+                
+            return response.json(), orders
+            
+        except Exception as e:
+            logger.exception(f"Erro ao verificar status: {e}")
+            return None, None
 
 class NoteStore():
     @staticmethod
