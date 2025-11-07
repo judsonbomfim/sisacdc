@@ -9,6 +9,7 @@ from apps.orders.models import Orders, Notes
 from apps.orders.classes import ApiStore, StatusStore, UpdateStore
 from apps.voice_calls.models import VoiceCalls
 from apps.voice_calls.classes import NumberFormatter
+import time
 
 @shared_task
 def send_email_sims(id=None):
@@ -90,6 +91,7 @@ def send_email_sims(id=None):
                 order.save()
                 # Update Store
                 try:
+                    time.sleep(2)
                     UpdateStore.upStore(
                         order_id = order_id,
                         item_id_store = order.item_id_store if order.item_id_store else None,
