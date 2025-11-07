@@ -293,17 +293,17 @@ LOGGING = {
         # },
     },
     'root': {
-        'handlers': ['console', 'file'],
+        'handlers': ['console'],  # ← Remova 'file'
         'level': 'INFO',
     },
     'loggers': {
         'apps.orders': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],  # ← Remova 'file'
             'level': 'INFO',
             'propagate': False,
         },
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],  # ← Remova 'file'
             'level': 'INFO',
             'propagate': False,
         },
