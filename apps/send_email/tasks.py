@@ -95,10 +95,7 @@ def send_email_sims(id=None):
                     UpdateStore.upStore(
                         order_id = order_id,
                         item_id_store = order.item_id_store if order.item_id_store else None,
-                        _data_ativacao = str(activation_date) if activation_date else None,
-                        _sim = sim if sim else None,
-                        _qrcode = qrcode if qrcode else None,
-                        _status ='AA',
+                        _status ='AA' if order_st !='AA' else None,
                         status_g = 'AA',
                     )
                     print(f">>>>>>>>>> Status AA atualizado no site - Pedido: {order_id}")
