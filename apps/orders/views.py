@@ -16,7 +16,7 @@ from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
 from .classes import ApiStore, NoteStore, StatusStore, DateFormats, UpdateStore
-from .tasks import order_import, orders_up_status
+from .tasks import order_import, orders_up_status, update_st
 import pandas as pd
 
 

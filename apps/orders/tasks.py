@@ -583,3 +583,116 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
             send_email_sims.delay(id=order.id)
 
+@shared_task
+def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
+    
+    # Verificar se ord_id é uma lista
+    if not isinstance(ord_id, list):
+        ord_id = [ord_id]
+    
+    for o_id in ord_id:
+        
+        if o_id is None:
+            print(f"Item de pedido inválido ou sem ID: {order}")
+            continue
+               
+        order = Orders.objects.get(pk=o_id)
+        user = User.objects.get(pk=id_user)
+        order_id = order.id
+        order_st = order.order_status
+        order_plan = order.get_product_display()
+        try: type_sim = order.id_sim.type_sim
+        except: type_sim = 'esim'
+
+        # Save status System
+        order.order_status = ord_s
+        order.save()
+        
+        # Desativar (e)SIM
+        if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE'):
+            if order.id_sim:                
+                # Change TC                
+                if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_s == 'DE':
+                    print('----------------- Alterar/desativar TC/TI -----------------')
+                    simDeactivateTC(id=order.id)
+                
+                if ord_s_prev != 'ED':
+                    # Update SIM
+                    sim_put = Sims.objects.get(pk=order.id_sim.id)
+                    sim_put.sim_status = 'DE'
+                    sim_put.save()
+            
+                
+            # Edit Voice
+            if order.calls == True and VoiceCalls.objects.get(id_item=order_id).DoesNotExist:
+                voice_d = VoiceCalls.objects.get(id_item=order_id)
+                if voice_d.id_number:
+                    num_s = VoiceNumbers.objects.get(id=voice_d.id_number.id)                
+                    num_s.number_status = 'DS'
+                    num_s.save()                
+                    # voice_d.delete()
+        
+        # Verificar se todos os itens estão cancelados
+        order_ver = Orders.objects.filter(order_id=order.order_id)
+
+        order_canc = 0
+        for ord_v in order_ver:
+            if ord_v.order_status != 'CC':
+                order_canc += 1 
+        
+        order_reemb = 0
+        # Verificar se todos os itens estão reembolsados
+        for ord_v in order_ver:
+            if ord_v.order_status != 'RB':
+                order_reemb += 1 
+        
+        # Só cancelar se todos os itens estiverem cancelados / reembolsados
+        if (order_canc == 0 and ord_s == 'CC') or (order_reemb == 0 and ord_s == 'RB') or ord_s != 'DE':
+            print('--------------------------- Alterar STATUS Loja')        
+            if ord_s in StatusStore.st_sis_site():
+                UpdateStore.upStore(
+                    order_id = order.order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status = ord_v.order_status if ord_v.order_status else None,
+                    status_g = ord_s if ord_s else None,
+                ) 
+        elif ord_s not in ['CC', 'RB', 'DE']:
+            print('--------------------------- Alterar STATUS Loja')        
+            UpdateStore.upStore(
+                order_id = order.order_id,
+                item_id_store = order.item_id_store if order.item_id_store else None,
+                _status = ord_s if ord_s else None,
+                status_g = ord_s if ord_s else None,
+            )
+        elif ord_s == 'CC':
+            # Cancelar só os itens
+            UpdateStore.upStore(
+                order_id = order.order_id,
+                item_id_store = order.item_id_store if order.item_id_store else None,
+                _status = ord_s if ord_s else None,
+                status_g = ord_s if ord_s else None,
+            )  
+
+        # Save Notes
+        def addNote(t_note):
+            add_sim = Notes( 
+                id_item = Orders.objects.get(pk=order.id),
+                id_user = user,
+                note = t_note,
+                type_note = 'S',
+            )
+            add_sim.save()
+        
+        ord_status = Orders.order_status.field.choices
+        if order_st != 'ED':
+            try:
+                old_status = ord_status.get(order_st, f'Status {order_st} desconhecido')
+                new_status = ord_status.get(ord_s, f'Status {ord_s} desconhecido')
+                addNote(f'Alterado de {old_status} para {new_status}')
+                print(f"Nota gravada: Alterado de {old_status} para {new_status}")  # Log temporário
+            except Exception as e:
+                print(f"Erro ao gravar nota: {e}")  # Log do erro
+            
+        # Enviar email
+        if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
+            send_email_sims.delay(id=order.id)
