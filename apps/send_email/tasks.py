@@ -93,7 +93,7 @@ def send_email_sims(id=None):
                 try:
                     time.sleep(25)
                     UpdateStore.upStore(
-                        order_id = order_id,
+                        order_id = id,
                         item_id_store = order.item_id_store if order.item_id_store else None,
                         _status ='AA' if order_st !='AA' else None,
                         status_g = 'AA',
