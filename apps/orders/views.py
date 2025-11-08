@@ -271,6 +271,7 @@ def ord_edit(request,id):
         global update_store
         update_store = {}
         
+        order = Orders.objects.get(pk=id)
         order_id = order.order_id
         order_status = order.order_status
         try: order_sim = order.id_sim.sim
