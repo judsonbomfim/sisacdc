@@ -5,6 +5,7 @@ from .classes import ApiStore, StatusStore, DateFormats, UpdateStore
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
+from datetime import datetime, timedelta
 import time, requests
 from apps.sims.tasks import sims_in_orders, simDeactivateTC
 from apps.send_email.tasks import send_email_sims
@@ -14,6 +15,9 @@ from apps.voice_calls.tasks import number_in_voice
 def order_import():
     # Importar pedidos
     apiStore = ApiStore.conectApiStore()
+    
+    after_date = (datetime.now() - timedelta(hours=24)).isoformat()
+
     
     global n_item_total
     n_item_total = 0
@@ -29,7 +33,13 @@ def order_import():
     while True:
         try:
             # Pedidos com status 'processing' - com paginação
-            response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page})
+            response = apiStore.get('orders', params={
+                'order': 'asc', 
+                'status': 'processing', 
+                'per_page': per_page, 
+                'page': n_page,
+                'after': after_date  # ← Adicionar filtro de data
+            })
             response.raise_for_status()
             
             # Verificar se a resposta contém dados
