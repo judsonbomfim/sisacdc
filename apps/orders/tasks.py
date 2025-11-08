@@ -610,17 +610,20 @@ def import_orders_by_specific_ids(order_ids):
             order = response.json()
             
             print(f'---------- Importando pedido específico {order_id}')
+            print(f'  Status do pedido na API: {order.get("status", "N/A")}')
             
             # Verificar se order é válido (dicionário com ID)
             if not isinstance(order, dict) or 'id' not in order:
-                print(f"Pedido {order_id} inválido ou não encontrado")
+                print(f"  Pedido {order_id} inválido ou não encontrado na API")
                 continue
             
             # Verificar se já foi importado
             id_sis = Orders.objects.filter(order_id=order_id).first()
             if id_sis:
-                print(f"Pedido {order_id} já importado, pulando")
+                print(f"  Pedido {order_id} já importado no sistema (ID interno: {id_sis.id})")
                 continue
+            
+            print(f"  Pedido {order_id} será processado...")
             
             # Listar itens do pedido (lógica igual a order_import)
             for item in order['line_items']:
@@ -817,10 +820,10 @@ def import_orders_by_specific_ids(order_ids):
                     continue  # Agora vai para o próximo item do for
                     
         except requests.exceptions.RequestException as e:
-            print(f"Erro ao buscar pedido {order_id}: {e}")
+            print(f"  Erro ao buscar pedido {order_id}: {e}")
             msg_error.append(f'Erro no pedido {order_id}: {e}')
         except ValueError as e:
-            print(f"Erro ao decodificar JSON para pedido {order_id}: {e}")
+            print(f"  Erro ao decodificar JSON para pedido {order_id}: {e}")
             msg_error.append(f'Erro no pedido {order_id}: {e}')
     
     # Status 
