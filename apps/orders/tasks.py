@@ -571,7 +571,13 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         
         ord_status = Orders.order_status.field.choices
         if order_st != 'ED':
-            addNote(f'Alterado de {ord_status[order_st]} para {ord_status[ord_s]}')
+            try:
+                old_status = ord_status.get(order_st, f'Status {order_st} desconhecido')
+                new_status = ord_status.get(ord_s, f'Status {ord_s} desconhecido')
+                addNote(f'Alterado de {old_status} para {new_status}')
+                print(f"Nota gravada: Alterado de {old_status} para {new_status}")  # Log temporário
+            except Exception as e:
+                print(f"Erro ao gravar nota: {e}")  # Log do erro
             
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
