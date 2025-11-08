@@ -29,6 +29,7 @@ def send_email_sims(id=None):
         name = order.client
         client_email = order.email
         order_id = order.item_id
+        ord_id = order.order_id
         order_st = order.order_status
         try: qrcode = order.id_sim.link
         except: qrcode = None
@@ -93,7 +94,7 @@ def send_email_sims(id=None):
                 try:
                     time.sleep(25)
                     UpdateStore.upStore(
-                        order_id = id,
+                        order_id = ord_id,
                         item_id_store = order.item_id_store if order.item_id_store else None,
                         _status ='AA' if order_st !='AA' else None,
                         status_g = 'AA',
