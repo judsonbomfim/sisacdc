@@ -118,6 +118,15 @@ def send_email_sims(id=None):
             type_note = 'S',
         )
         add_note.save()
+        
+        add_note_status = Notes( 
+            id_item = order,
+            id_user = None,
+            note = f'Atualizado status para {order.get_order_status_display()}',
+            type_note = 'S',
+        )
+        add_note_status.save()
+
 
 @shared_task
 def send_email_voice(id=None):
