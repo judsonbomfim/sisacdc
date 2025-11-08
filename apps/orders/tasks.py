@@ -481,9 +481,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         if o_id is None:
             print(f"Item de pedido inválido ou sem ID: {order}")
             continue
-        
-        print(f'-----------------o_id - {o_id}')
-        
+               
         order = Orders.objects.get(pk=o_id)
         user = User.objects.get(pk=id_user)
         order_id = order.id
@@ -573,9 +571,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         
         ord_status = Orders.order_status.field.choices
         if order_st != 'ED':
-            for st in ord_status:
-                if order_st == st[0] :
-                    addNote(f'Alterado de {order.get_order_status_display()} para {st[1]}')
+            addNote(f'Alterado de {ord_status[order_st]} para {ord_status[ord_s]}')
             
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):

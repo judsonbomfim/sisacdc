@@ -271,7 +271,6 @@ def ord_edit(request,id):
         global update_store
         update_store = {}
         
-        order = Orders.objects.get(pk=id)
         order_id = order.order_id
         order_status = order.order_status
         try: order_sim = order.id_sim.sim
@@ -461,7 +460,6 @@ def ord_edit(request,id):
                 messages.success(request,'E-mail enviado com sucesso!')
 
         if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
-            print('----------------- Alterar/desativar TC/TI -----------------')
             simDeactivateTC(id=order.id)
 
         # Atualizar site
