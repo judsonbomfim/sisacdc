@@ -42,9 +42,6 @@
                   <table class="table mb-0 table-hover table-responsive">
                     <thead>
                       <tr class="userDatatable-header">
-                        <th>
-                          <input class="form-check-input" type="checkbox" id="checkAll" />
-                        </th>
                         <th class="userDatatable-title">Pedido</th>
                         <th class="userDatatable-title">Produto</th>
                         <th class="userDatatable-title text-center">Ativação</th>
@@ -65,13 +62,6 @@
                             </td>
                             <td class="text-center">
                                 <div class="userDatatable-content">{{ order.activation_date|date:'d/m/Y' }}</div>
-                            </td>
-                            <td class="text-center">
-                                <div class="userDatatable-content">
-                                {% with a=order.activation_date b=order.days %}
-                                    {% dateaddday a b %}
-                                {% endwith %}
-                                </div>
                             </td>
                             <td class="text-center">
                                 <div class="userDatatable-content">{{ order.get_order_status_display }}</div>
