@@ -19,7 +19,14 @@ def index(request):
     dateYesterday = dateDay - timedelta(days=1)
     dateWeek = dateDay - timedelta(days=7)
     dateMonth = dateDay - timedelta(days=30)
-    dateYear = dateDay - timedelta(days=365)   
+    dateYear = dateDay - timedelta(days=365)
+    
+    # Ativações pendentes
+    orders_pending = Orders.objects.filter(
+        activation_date__lte=dateDay
+    ).exclude(
+        order_status__in=['AT', 'CC', 'CN', 'DE', 'DA', 'ED', 'PV', 'RB', 'RE', 'RC']
+    ).order_by('activation_date') 
     
     # ACTIVATIONS
     activationOrders = Orders.objects.filter(activation_date=dateTomorrow)
@@ -216,6 +223,7 @@ def index(request):
         'dateWeek': dateWeek,
         'dateMonth': dateMonth,
         'dateYear': dateYear,
+        'orders_pending': orders_pending,
         'activationTomorrow': activationTomorrow,
         'countActivTM': countActivTM,
         'countActivCM': countActivCM,
