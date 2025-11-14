@@ -3,6 +3,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from apps.sims.models import Sims
 from apps.orders.models import Orders
+from apps.voice_calls.models import VoiceCalls
 import json
 from datetime import datetime, timedelta
 from collections import Counter, defaultdict
@@ -26,6 +27,12 @@ def index(request):
         activation_date__lte=dateDay
     ).exclude(
         order_status__in=['AT', 'CC', 'CN', 'DE', 'DA', 'ED', 'PV', 'RB', 'RE', 'RC']
+    ).order_by('activation_date') 
+    
+    voices_pending = VoiceCalls.objects.filter(
+        activation_date__lte=dateDay
+    ).exclude(
+        order_status__in=['AT', 'CC', 'CN', 'DS']
     ).order_by('activation_date') 
     
     # ACTIVATIONS
@@ -224,6 +231,7 @@ def index(request):
         'dateMonth': dateMonth,
         'dateYear': dateYear,
         'orders_pending': orders_pending,
+        'voices_pending': voices_pending,
         'activationTomorrow': activationTomorrow,
         'countActivTM': countActivTM,
         'countActivCM': countActivCM,

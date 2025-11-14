@@ -47,7 +47,7 @@
                         <th class="userDatatable-title text-center">Ativação</th>
                         <th class="userDatatable-title text-center">Status</th>
                         <th class="userDatatable-title">
-                          {% if request.user|can:'edit_orders' %}E{% endif %}
+                          {% if request.user|can:'edit_orders' %}{% endif %}
                         </th>
                       </tr>
                     </thead>
@@ -70,6 +70,60 @@
                                 <div class="userDatatable-content">
                                 {% if request.user|can:'edit_orders' %}
                                     <a href="{% url 'ord_edit' order.id %}"><i class="bi bi-pencil-square pe-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Editar Pedido"></i></a>
+                                {% endif %}
+                                </div>
+                            </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!-- ends: .card-body -->
+          </div>
+          <!-- ends: .card-body -->
+        </div>
+        {% endif %}
+
+        <!-- Voz Pendentes -->
+        {% if voices_pending %}
+        <div class="col-xxl-6 mb-25">
+          <div class="card shadow-sm revenueChartTwo border-1">
+            <div class="card-header border-0">
+              <h6 class="p-3">Planos de Voz Pendentes</h6>
+            </div>
+            <!-- ends: .card-header -->
+            <div class="card-body pt-0 px-20">
+              <div class="tab-content">
+                <div class="table-responsive">
+                  <table class="table mb-0 table-hover table-responsive">
+                    <thead>
+                      <tr class="userDatatable-header">
+                        <th class="userDatatable-title">Pedido</th>
+                        <th class="userDatatable-title text-center">Ativação</th>
+                        <th class="userDatatable-title text-center">Status</th>
+                        <th class="userDatatable-title">
+                          {% if request.user|can:'edit_orders' %}{% endif %}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for voice in voices_pending %}
+                            <tr class="table-tr">
+                            <td>
+                                <div class="userDatatable-content">{{ voice.item_id }}</div>
+                            </td>
+                            <td class="text-center">
+                                <div class="userDatatable-content">{{ voice.activation_date|date:'d/m/Y' }}</div>
+                            </td>
+                            <td class="text-center">
+                                <div class="userDatatable-content">{{ voice.get_call_status_display }}</div>
+                            </td>
+                            <td>
+                                <div class="userDatatable-content">
+                                {% if request.user|can:'edit_orders' %}
+                                    <a href="{% url 'voice_edit' voice.id %}"><i class="bi bi-pencil-square pe-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Editar Pedido"></i></a>
                                 {% endif %}
                                 </div>
                             </td>
