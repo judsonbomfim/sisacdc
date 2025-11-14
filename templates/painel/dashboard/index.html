@@ -55,7 +55,7 @@
                         {% for order in orders_pending %}
                             <tr class="table-tr">
                             <td>
-                                <div class="userDatatable-content">{{ order.item_id }}</div>
+                                <div class="userDatatable-content">{{ order.id_item }}</div>
                             </td>
                             <td>
                                 <div class="userDatatable-content text-center">{{ order.get_product_display }} {{ order.get_data_day_display }}</div>
