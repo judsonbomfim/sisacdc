@@ -32,7 +32,7 @@ def index(request):
     voices_pending = VoiceCalls.objects.filter(
         activation_date__lte=dateDay
     ).exclude(
-        order_status__in=['AT', 'CC', 'CN', 'DS']
+        call_status__in=['AT', 'CC', 'CN', 'DS']
     ).order_by('activation_date') 
     
     # ACTIVATIONS
