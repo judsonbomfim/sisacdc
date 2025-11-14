@@ -55,7 +55,7 @@
                         {% for order in orders_pending %}
                             <tr class="table-tr">
                             <td>
-                                <div class="userDatatable-content">{{ order.id_item }}</div>
+                                <div class="userDatatable-content">{{ order.item_id }}</div>
                             </td>
                             <td>
                                 <div class="userDatatable-content text-center">{{ order.get_product_display }} {{ order.get_data_day_display }}</div>
@@ -112,7 +112,7 @@
                         {% for voice in voices_pending %}
                             <tr class="table-tr">
                             <td>
-                                <div class="userDatatable-content">{{ voice.item_id }}</div>
+                                <div class="userDatatable-content">{{ voice.id_item }}</div>
                             </td>
                             <td class="text-center">
                                 <div class="userDatatable-content">{{ voice.activation_date|date:'d/m/Y' }}</div>
