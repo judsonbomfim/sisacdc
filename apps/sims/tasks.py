@@ -214,13 +214,22 @@ def simActivateTC(id=None):
             continue
         dataDay = order.data_day
         product = order.product
+        condition = order.condition
         
         # Variaveis globais        
         endpointId = None
         simStatus = None
         note = ''
         process = False
-        token_api = None  
+        token_api = None
+        
+        # Desativar Plano Anterior
+        if condition == 'reuso-sim' and product == 'chip-internacional-europa-1gb-total':
+            # Encontrar ultimo pedido com o SIM de reuso
+            last_order = Orders.objects.filter(id_sim=order.id_sim.sim).exclude(id=order.id).order_by('-activation_date').first()
+            if last_order.order_status == 'AT':
+                time.sleep(0.5)
+                simDeactivateTC(last_order.id)
         
         # Verificar EndPointID / Status
         try:
