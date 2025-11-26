@@ -163,7 +163,7 @@ class ApiTC:
         # Alterar plano provisoriamente
         if product == 'chip-internacional-europa-1gb-total':
             try:
-                planList = '902771'            
+                plan_list = '902771'            
                 payload = json.dumps({
                     "Request": {
                         "endPointId": endpointId,
