@@ -125,7 +125,7 @@ class ApiTC:
                 '1gb': '902731',
                 '2gb': '902770',
             }
-        elif product == 'chip-internacional-europa-1gb-total':
+        elif product == 'chip-internacional-europa-1gb-total-05':
             planList = {
                 '1gb': '925331',
             }
@@ -161,7 +161,7 @@ class ApiTC:
             }
         
         # Alterar plano provisoriamente
-        # if product == 'chip-internacional-europa-1gb-total':
+        # if product == 'chip-internacional-europa-1gb-total-05':
         #     try:
         #         plan_list = '902771'            
         #         payload = json.dumps({

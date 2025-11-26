@@ -72,7 +72,7 @@ def sims_in_orders():
             }
             planos_tc = {
                 'chip-internacional-europa-premium',
-                'chip-internacional-europa-1gb-total',
+                'chip-internacional-europa-1gb-total-05',
                 'chip-internacional-eua-premium',
                 'chip-internacional-africa-premium',
                 'chip-internacional-asia-premium',
@@ -224,12 +224,12 @@ def simActivateTC(id=None):
         token_api = None
         
         # Desativar Plano Anterior
-        if condition == 'reuso-sim' and product == 'chip-internacional-europa-1gb-total':
-            # Encontrar ultimo pedido com o SIM de reuso
-            last_order = Orders.objects.filter(id_sim=order.id_sim.sim).exclude(id=order.id).order_by('-activation_date').first()
-            if last_order.order_status == 'AT':
-                time.sleep(0.5)
-                simDeactivateTC(last_order.id)
+        # if condition == 'reuso-sim' and product == 'chip-internacional-europa-1gb-total-05':
+        #     # Encontrar ultimo pedido com o SIM de reuso
+        #     last_order = Orders.objects.filter(id_sim=order.id_sim.sim).exclude(id=order.id).order_by('-activation_date').first()
+        #     if last_order.order_status == 'AT':
+        #         time.sleep(0.5)
+        #         simDeactivateTC(last_order.id)
         
         # Verificar EndPointID / Status
         try:
