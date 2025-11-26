@@ -14,6 +14,7 @@ PRODUCT = [
     ('chamada-de-voz', 'Plano de Voz'),
     ('chip-internacional-europa-ilimitado', 'Europa Ilimitado'),
     ('chip-internacional-europa-premium', 'Europa Premium'),
+    ('chip-internacional-europa-1gb-total', 'Europa Total'),
     ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
     ('chip-internacional-israel-premium', 'Israel Premium'),
     ('chip-internacional-tunisia-premium', 'Tunísia Premium'),

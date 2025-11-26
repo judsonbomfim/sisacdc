@@ -125,6 +125,10 @@ class ApiTC:
                 '1gb': '902731',
                 '2gb': '902770',
             }
+        elif product == 'chip-internacional-europa-1gb-total':
+            planList = {
+                '1gb': '925331',
+            }
         elif product == 'chip-internacional-eua-premium':
             planList = {
                 '500mb-dia': '866488',

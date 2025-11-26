@@ -99,6 +99,7 @@ def order_import():
                 calls_i = False
                 countries_i = False
                 activation_date_i = '2001-01-01'
+                data_day_i = '1gb'
                 cell_mod_i = False
                 celular_samsung_i = False
                 # Percorrer itens do pedido
