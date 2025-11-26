@@ -159,6 +159,29 @@ class ApiTC:
                 '1gb': '898799',
                 '2gb': '898800',
             }
+        
+        # Alterar plano provisoriamente
+        if product == 'chip-internacional-europa-1gb-total':
+            try:
+                planList = '902771'            
+                payload = json.dumps({
+                    "Request": {
+                        "endPointId": endpointId,
+                        "requestParam": {
+                            "planId": plan_list
+                        }
+                    }
+                })
+                conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
+                conn.request("POST", "/api/ChangePlan", payload, headers)
+                res_plan = conn.getresponse()
+                data_plan = res_plan.read()
+                conn.close()
+            except KeyError:
+                data_plan = 0
+                
+            time.sleep(1)
+            
         # Verificar Planos    
         try:
             plan_list = json.loads(planList[dataDay])       
@@ -169,7 +192,7 @@ class ApiTC:
                         "planId": plan_list
                     }
                 }
-            })        
+            })    
             conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             conn.request("POST", "/api/ChangePlan", payload, headers)
             res_plan = conn.getresponse()
