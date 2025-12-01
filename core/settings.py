@@ -205,34 +205,38 @@ CELERY_BEAT_SYNC_EVERY = None
 CELERY_TIMEZONE = TIME_ZONE
 
 CELERY_BEAT_SCHEDULE = {
-    'task__5_min_orders_auto': {
+    'task__2_min_orders_auto': {
         'task': 'apps.orders.tasks.orders_auto',
         'schedule': crontab(minute='*/2'),
     },
-    'task__5_min_activate_TC': {
+    'task__2_min_activate_TC': {
         'task': 'apps.sims.tasks.simActivateTC',
         'schedule': crontab(minute='2-59/2'),
     },
-    'task__5_min_activate_TI': {
+    'task__2_min_activate_TI': {
         'task': 'apps.sims.tasks.simActivateTI',
         'schedule': crontab(minute='2-59/2'),
     },
-    'task__5_min_activate_TM': {
+    'task__2_min_activate_TM': {
         'task': 'apps.sims.tasks.simActivateTM',
         'schedule': crontab(minute='3-59/2'),
     },
     'task__deactivate_TC': {
         'task': 'apps.sims.tasks.simDeactivateTC',
-        'schedule': crontab( hour=00, minute=10),
+        'schedule': crontab( hour=00, minute=00),
     },
-    'task__5_min_activate_CM': {
+    'task__deactivate_all': {
+        'task': 'apps.sims.tasks.simDeactivateAll',
+        'schedule': crontab( hour=00, minute=00),
+    },
+    'task__2_min_activate_CM': {
         'task': 'apps.sims.tasks.simActivateCM',
         'schedule': crontab(minute='4-59/2'),
     },
-    'task__5_min_activate_MS': {
-        'task': 'apps.sims.tasks.simActivateMS',
-        'schedule': crontab(minute='1-59/1'),
-    },
+    # 'task__2_min_activate_MS': {
+    #     'task': 'apps.sims.tasks.simActivateMS',
+    #     'schedule': crontab(minute='1-59/1'),
+    # },
 }
 
 # API TELCON

@@ -611,6 +611,63 @@ def simDeactivateTC(id=None):
     print('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
 
 
+def simDeactivateAll(id=None):
+
+    timezone = pytz.timezone(settings.TIME_ZONE)
+
+    now = datetime.now(timezone)
+    yesterday = now.date() - timedelta(days=1)
+
+    # Selecionar pedidos
+    if id is None:       
+        orders_to_process = Orders.objects.exclude(order_status='AT', id_sim__operator__in=['TC', 'TI']).order_by('-id')
+    else:
+        orders_to_process = Orders.objects.filter(pk=id)
+
+    if not orders_to_process.exists():
+        print('Não há pedidos que correspondam aos critérios de filtro.')
+        return
+    
+    print('>>>>>>>>>> INICIANDO VERIFICAÇÃO DE DESATIVAÇÃO ALL <<<<<<<<<<')
+
+    for order in orders_to_process:
+        # Garante que activation_date e days não são nulos
+        if order.activation_date is None or order.days is None:
+            continue
+
+        # Calcula a data de desativação
+        # A lógica é: data de ativação + (duração do plano - 1 dia)
+        deactivation_date = order.activation_date + timedelta(days=order.days - 1)
+
+        # Se um ID específico não foi passado, só desativa se a data for ontem ou anterior
+        if id is None and deactivation_date > yesterday:
+            continue
+
+        print(f'Iniciando desativação para o pedido {order.order_id}')
+        
+        try:
+            iccid = order.id_sim.sim
+        except (AttributeError, ObjectDoesNotExist):
+            print(f"Pedido {order.order_id} sem SIM associado. Pulando.")
+            continue
+
+        if id is None:
+            UpdateOrder.upStatus(order.id, 'DE')
+            UpdateStore.upStore(
+                order_id=order.order_id,
+                item_id_store=order.item_id_store if order.item_id_store else None,
+                _status='DE',
+                status_g='DE',
+            )
+            sim_put = Sims.objects.get(pk=order.id_sim.id)
+            sim_put.sim_status = 'DE'
+            sim_put.save()
+        NotesAdd.addNote(order, f'{iccid} desativado com sucesso. Processo automático')
+        
+    print(f'Pedido {order.order_id} desativado com sucesso.')                
+    print('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
+
+
 @shared_task
 def simActivateTM(id=None):
           
