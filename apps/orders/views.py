@@ -99,7 +99,8 @@ def orders_list(request):
         url_filter += f"&ord_st={ord_st_f}"
         
     # Buscar planos para mapeamento
-    plans = {name: data_day for name, data_day in Orders.product.field.choices}
+    plans = {plan['name']: plan['data_day'] for plan in Orders.products.values('name', 'data_day')}
+
     # Sessão: salve dados serializáveis (lista de dicts) e calcule return_date
     qs = orders_l.values(
         'item_id', 'client', 'id_sim__sim', 'id_sim__operator',
@@ -448,17 +449,20 @@ def ord_edit(request,id):
         if ord_st != order_status:
             # Alterar status
             # Status sis : Status Loja            
-
-            addNote(f'Alterado de {order.get_order_status_display()} para {order_put.get_order_status_display()}')
-
+            user_name = request.user.id
+            ord_s_prev = order_status
+            
+            orders_up_status(order.id, ord_st,user_name, ord_s_prev) 
+                        
             # Enviar email
-            # if ord_st == 'CN' and type_sim == 'sim':
-            #     send_email_sims(id=order_id)
+            if ord_st == 'CN' and type_sim == 'sim':
+                send_email_sims(id=order_id)
                 
-            #     addNote(f'E-mail enviado com sucesso!')
-            #     messages.success(request,'E-mail enviado com sucesso!')
+                addNote(f'E-mail enviado com sucesso!')
+                messages.success(request,'E-mail enviado com sucesso!')
 
         if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
+            print('----------------- Alterar/desativar TC/TI -----------------')
             simDeactivateTC(id=order.id)
 
         # Atualizar site
