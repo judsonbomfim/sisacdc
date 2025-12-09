@@ -19,7 +19,6 @@ from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
-
 @shared_task
 def sims_in_orders():
     
@@ -571,7 +570,7 @@ def simDeactivateTC(id=None):
                 }
             })
             
-            time.sleep(0.5)
+            time.sleep(0.7)
             conn.request("POST", "/api/EndPointLifeCycleChange", payload, headers)
             
             res = conn.getresponse()

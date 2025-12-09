@@ -303,6 +303,7 @@ class ApiTI:
                 '500mb-dia': '866503',
                 '1gb': '866507',
                 '2gb': '866509',
+                'ilimitado': '905625',
             }
         elif product == 'chip-internacional-israel-premium':
             planList = {
