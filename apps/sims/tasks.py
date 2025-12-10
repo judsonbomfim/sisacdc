@@ -553,6 +553,7 @@ def simDeactivateTC(id=None):
 
         try:
             # Gerar token de acesso a API
+            time.sleep(0.5)
             token_api = ApiTC.get_token()
             conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             headers = ApiTC.get_headers(token_api, cookie=True)
@@ -570,7 +571,7 @@ def simDeactivateTC(id=None):
                 }
             })
             
-            time.sleep(0.7)
+            time.sleep(0.5)
             conn.request("POST", "/api/EndPointLifeCycleChange", payload, headers)
             
             res = conn.getresponse()
