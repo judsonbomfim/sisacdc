@@ -71,7 +71,7 @@ CONDITION = [
 class Orders(models.Model):
     id = models.AutoField(primary_key=True)
     order_id = models.IntegerField()
-    item_id = models.CharField(max_length=15)
+    item_id = models.CharField(max_length=64, unique=True)
     item_id_store = models.CharField(max_length=15, null=True, blank=True)
     client = models.CharField(max_length=70)
     email = models.CharField(max_length=70, null=True, blank=True)
