@@ -200,75 +200,70 @@ def order_import():
                     )
                     if not created:
                         print(f'Pedido/item já importado: {item_id_i}, pulando')
-                        # opcional: atualizar campos se necessário
+                        q_i += 1
+                        n_item += 1
                         continue
-
-                    # id_user = None
-                    # if getpass.getuser():
-                    #     id_user = getpass.getuser()
-                    
-                    # Save Notes
+                
+                # Save Notes
+                add_sim = Notes( 
+                    id_item = obj,
+                    id_user = None,
+                    note = 'Pedido importado para o sistema',
+                    type_note = 'S',
+                )
+                add_sim.save()
+                
+                if activation_date_i == '2001-01-01':
                     add_sim = Notes( 
-                        id_item = Orders.objects.get(pk=order_add.id),
+                        id_item = obj,
                         id_user = None,
-                        note = f'Pedido importado para o sistema',
+                        note = 'Pedido sem data de ativação. Verificar com cliente.',
                         type_note = 'S',
                     )
                     add_sim.save()
-                    
-                    if activation_date_i == '2001-01-01':
-                        add_sim = Notes( 
-                            id_item = Orders.objects.get(pk=order_add.id),
-                            id_user = None,
-                            note = f'Pedido sem data de ativação. Verificar com cliente.',
-                            type_note = 'S',
-                        )
-                        add_sim.save()
-                    
-                    # Insert Voice Calls
-                    if calls_i == True:
+                
+                # Insert Voice Calls
+                if calls_i == True:
+                    add_voice = VoiceCalls(
+                        id_item = obj,
+                        days = days_i,
+                        activation_date = activation_date_i,
+                        call_status = 'PR'
+                    )
+                    add_voice.save()
+                
+                    add_sim = Notes( 
+                        id_item = obj,
+                        id_user = None,
+                        note = 'Chamada de Voz Criada',
+                        type_note = 'S',
+                    )
+                    add_sim.save()
+                
+                # Alterar status
+                # Status sis : Status Loja
+                if type_sim_i == 'esim':
+                    order_status_i = 'EE'
+                
+                # Atualizar site
+                UpdateStore.upStore(
+                    order_id = order_id_i,
+                    item_id_store = item_id_store_i if item_id_store_i else None, 
+                    _data_ativacao = activation_date_i if activation_date_i else None,
+                    _status = order_status_i if order_status_i else None,
+                    status_g = order_status_i if order_status_i else None,
+                )                
+                
+                # Definir variáveis
+                q_i += 1 
+                n_item += 1
+                n_item_total += 1
+                
+                msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
                         
-                        add_voice = VoiceCalls(
-                            id_item = Orders.objects.get(pk=order_add.id),
-                            days = days_i,
-                            activation_date = activation_date_i,
-                            call_status = 'PR'
-                        )
-                        add_voice.save()
-                    
-                        # Save Notes
-                        add_sim = Notes( 
-                            id_item = Orders.objects.get(pk=order_add.id),
-                            id_user = None,
-                            note = f'Chamada de Voz Criada',
-                            type_note = 'S',
-                        )
-                        add_sim.save()
-                    
-                    # Alterar status
-                    # Status sis : Status Loja
-                    if type_sim_i == 'esim':
-                        order_status_i = 'EE'
-                    
-                    # Atualizar site
-                    UpdateStore.upStore(
-                        order_id = order_id_i,
-                        item_id_store = item_id_store_i if item_id_store_i else None, 
-                        _data_ativacao = activation_date_i if activation_date_i else None,
-                        _status = order_status_i if order_status_i else None,
-                        status_g = order_status_i if order_status_i else None,
-                    )                
-                    
-                    # Definir variáveis
-                    q_i += 1 
-                    n_item += 1
-                    n_item_total += 1
-                    
-                    msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
-                            
-                if item_error:
-                    print(f'>>>>>>>>>>> Pulando item devido a erro no pedido {order_id_i}')
-                    continue  # Agora vai para o próximo item do for
+            if item_error:
+                print(f'>>>>>>>>>>> Pulando item devido a erro no pedido {order_id_i}')
+                continue  # Agora vai para o próximo item do for
         
         #finalizar loop de pedidos        
         finally:
@@ -356,8 +351,8 @@ def order_import_voice():
                 activation_date_i = '2001-01-01'
                 data_day_i = 'ilimitado'                
                 # Percorrer itens do pedido
+                type_sim_i = 'sim'
                 for i in item['meta_data']:
-                    type_sim_i = 'sim'
                     if i['key'] == 'pa_dias': days_i = i['value']
                     calls_i = True
                     countries_i = False
