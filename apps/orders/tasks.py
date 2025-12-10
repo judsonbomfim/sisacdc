@@ -29,30 +29,23 @@ def order_import():
     except Exception as e:
         print(f"Erro ao decodificar JSON da resposta da API: {e}")
         print(f"Status code: {response.status_code}, Conteúdo: {response.text}")
-        return  # ou continue, dependendo do fluxo desejado    
+        return
     
     # Listar pedidos         
     for order in ord:
         
         # Verificar se order é válido (dicionário com ID)
         if not isinstance(order, dict) or 'id' not in order:
-            print(f"Sem intens para importar")
+            print(f"Sem itens para importar")
             continue
             
         n_item = 1
         id_ord = order["id"]
                 
-        # Verificar pedido repetido
-        id_sis = Orders.objects.filter(order_id=id_ord).first()
-        if id_sis:
-            # Se o pedido já foi importado, atualizar status
-            status_sis = id_sis.order_status
-            UpdateStore.upStore(
-                order_id = id_ord,
-                status_g = status_sis if status_sis else None,
-            )  
+        # Verificar pedido repetido - se order_id já existe, pula
+        if Orders.objects.filter(order_id=id_ord).exists():
+            print(f'Pedido {id_ord} já importado, pulando')
             continue
-        else: pass
         
         # Listar itens do pedido
         for item in order['line_items']:
@@ -73,13 +66,8 @@ def order_import():
             
             print(f'---------- Importando pedido {id_ord}')            
             
-            # ADICIONAR FLAG para controlar erro
-            item_error = False
-            
             while q_i <= qtd:
-
                 order_id_i = order['id']
-                print(f'>>>>>>>>>> Importando pedido {order_id_i}')
                 item_id_i = f'{order_id_i}-{n_item}'
                 item_id_store_i = item['id']
                 client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
@@ -92,7 +80,9 @@ def order_import():
                 qty_i = 1
                 if order['coupon_lines']:
                     coupon_i = order['coupon_lines'][0]['code']
-                else: coupon_i = '-'
+                else: 
+                    coupon_i = '-'
+                
                 # Definir valor padrão para variáveis
                 ord_chip_nun_i = '-'
                 condition_i = 'novo-sim'
@@ -102,9 +92,13 @@ def order_import():
                 data_day_i = '1gb'
                 cell_mod_i = False
                 celular_samsung_i = False
+                type_sim_i = 'sim'
+                days_i = '0'
+                
                 # Percorrer itens do pedido
                 for i in item['meta_data']:
-                    if i['key'] == '_tipo_chip': type_sim_i = i['value']
+                    if i['key'] == '_tipo_chip': 
+                        type_sim_i = i['value']
                     if i['key'] == '_condicao_chip': 
                         if i['value'] == 'novo':
                             condition_i = 'novo-sim'
@@ -112,28 +106,24 @@ def order_import():
                         condition_i = 'reuso-sim'
                     if i['key'] == '_numero_sim':
                         ord_chip_nun_i = i['value']
-                    if i['key'] == 'pa_dados-diarios': data_day_i = i['value']
-                    if i['key'] == 'pa_dias': days_i = i['value']
+                    if i['key'] == 'pa_dados-diarios': 
+                        data_day_i = i['value']
+                    if i['key'] == 'pa_dias': 
+                        days_i = i['value']
                     if i['key'] == '_plano_voz': 
                         if i['value'] == '1':
                             calls_i = True
                     if i['key'] == '_china_hongkong_taiwan':
-                        if i['display_value'] == 'Sim': countries_i = True
-                        else: countries_i = False
+                        countries_i = True if i['display_value'] == 'Sim' else False
                     if i['key'] == '_data_ativacao': 
                         activation_date_i = i['value']
                     if i['key'] == '_celular_samsung': 
                         celular_samsung_i = True
+                
                 shipping_i = order['shipping_lines'][0]['method_title']
                 order_date_i = DateFormats.dateHour(order['date_created'])
                 
-                # notes_i = 0
-                
                 # Definir status do pedido
-                # 'RT', 'Retirada'
-                # 'MB', 'Motoboy'
-                # 'RS', 'Reuso'
-                # 'AS', 'Atribuir SIM'
                 if 'RETIRADA' in shipping_i.upper():
                     shipping_i = 'Retirada SP'
                     order_status_i = 'RT'
@@ -146,114 +136,94 @@ def order_import():
                     order_status_i = 'RS'
                 else:
                     order_status_i = 'AS'
-
-                shipping_i = shipping_i[:40]
                 
                 if activation_date_i == '2001-01-01':
                     order_status_i = 'EI'
                 if product_i == 'chip-internacional-eua-30-dias':
                     calls_i = False
-
-                # Definir variáveis para salvar no banco de dados
-                order_add = Orders(
-                    order_id = order_id_i,
-                    item_id = item_id_i,
-                    item_id_store = item_id_store_i,
-                    client = client_i,
-                    email = email_i,
-                    product = product_i,
-                    data_day = data_day_i,
-                    qty = qty_i,
-                    coupon = coupon_i,
-                    condition = condition_i,
-                    days = days_i,
-                    calls = calls_i,
-                    countries = countries_i,
-                    cell_mod = cell_mod_i,
-                    ord_chip_nun = ord_chip_nun_i,
-                    shipping = shipping_i,
-                    order_date = order_date_i,
-                    activation_date = activation_date_i,
-                    order_status = order_status_i,
-                    type_sim = type_sim_i,
-                    celular_samsung = celular_samsung_i,
-                    # notes = notes_i
-                )                
-
-                try:
-                    register = order_add.save()
-                    register
-                except Exception as e:
-                    print(f'Pedido {order_id_i} deu um erro ao importar: {e}')
-                    item_error = True
-                    break  # Sai do while                
-                
-                # id_user = None
-                # if getpass.getuser():
-                #     id_user = getpass.getuser()
-                
-                # Save Notes
-                add_sim = Notes( 
-                    id_item = Orders.objects.get(pk=order_add.id),
-                    id_user = None,
-                    note = f'Pedido importado para o sistema',
-                    type_note = 'S',
-                )
-                add_sim.save()
-                
-                if activation_date_i == '2001-01-01':
-                    add_sim = Notes( 
-                        id_item = Orders.objects.get(pk=order_add.id),
-                        id_user = None,
-                        note = f'Pedido sem data de ativação. Verificar com cliente.',
-                        type_note = 'S',
-                    )
-                    add_sim.save()
-                
-                # Insert Voice Calls
-                if calls_i == True:
                     
-                    add_voice = VoiceCalls(
-                        id_item = Orders.objects.get(pk=order_add.id),
-                        days = days_i,
-                        activation_date = activation_date_i,
-                        call_status = 'PR'
-                    )
-                    add_voice.save()
+                shipping_i = shipping_i[:40]
+
+                # USO DE get_or_create - EVITA DUPLICAÇÃO
+                obj, created = Orders.objects.get_or_create(
+                    item_id=item_id_i,
+                    defaults={
+                        'order_id': order_id_i,
+                        'item_id_store': item_id_store_i,
+                        'client': client_i,
+                        'email': email_i,
+                        'product': product_i,
+                        'data_day': data_day_i,
+                        'qty': qty_i,
+                        'coupon': coupon_i,
+                        'condition': condition_i,
+                        'days': days_i,
+                        'calls': calls_i,
+                        'countries': countries_i,
+                        'cell_mod': cell_mod_i,
+                        'ord_chip_nun': ord_chip_nun_i,
+                        'shipping': shipping_i,
+                        'order_date': order_date_i,
+                        'activation_date': activation_date_i,
+                        'order_status': order_status_i,
+                        'type_sim': type_sim_i,
+                        'celular_samsung': celular_samsung_i,
+                    }
+                )
                 
+                # SÓ PROCESSA SE FOR NOVO
+                if created:
+                    print(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
+                    
                     # Save Notes
-                    add_sim = Notes( 
-                        id_item = Orders.objects.get(pk=order_add.id),
-                        id_user = None,
-                        note = f'Chamada de Voz Criada',
-                        type_note = 'S',
+                    Notes.objects.create(
+                        id_item=obj,
+                        id_user=None,
+                        note='Pedido importado para o sistema',
+                        type_note='S',
                     )
-                    add_sim.save()
-                
-                # Alterar status
-                # Status sis : Status Loja
-                if type_sim_i == 'esim':
-                    order_status_i = 'EE'
-                
-                # Atualizar site
-                UpdateStore.upStore(
-                    order_id = order_id_i,
-                    item_id_store = item_id_store_i if item_id_store_i else None, 
-                    _data_ativacao = activation_date_i if activation_date_i else None,
-                    _status = order_status_i if order_status_i else None,
-                    status_g = order_status_i if order_status_i else None,
-                )                
+                    
+                    if activation_date_i == '2001-01-01':
+                        Notes.objects.create(
+                            id_item=obj,
+                            id_user=None,
+                            note='Pedido sem data de ativação. Verificar com cliente.',
+                            type_note='S',
+                        )
+                    
+                    # Insert Voice Calls
+                    if calls_i:
+                        VoiceCalls.objects.create(
+                            id_item=obj,
+                            days=days_i,
+                            activation_date=activation_date_i,
+                            call_status='PR'
+                        )
+                        
+                        Notes.objects.create(
+                            id_item=obj,
+                            id_user=None,
+                            note='Chamada de Voz Criada',
+                            type_note='S',
+                        )
+                    
+                    # Atualizar site
+                    UpdateStore.upStore(
+                        order_id=order_id_i,
+                        item_id_store=item_id_store_i if item_id_store_i else None, 
+                        _data_ativacao=activation_date_i if activation_date_i else None,
+                        _status=order_status_i if order_status_i else None,
+                        status_g=order_status_i if order_status_i else None,
+                    )
+                    
+                    n_item_total += 1
+                    msg_info.append(f'Pedido {order_id_i} importado com sucesso')
+                else:
+                    print(f'Item já existe: {item_id_i}, pulando')
                 
                 # Definir variáveis
                 q_i += 1 
                 n_item += 1
-                n_item_total += 1
-                
-                msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
-                         
-            if item_error:
-                print(f'>>>>>>>>>>> Pulando item devido a erro no pedido {order_id_i}')
-                continue  # Agora vai para o próximo item do for
                     
     # Status 
     if n_item_total != 0:
@@ -272,8 +242,6 @@ def order_import_voice():
     global msg_error
     msg_error = []
        
-    # orders_all = Orders.objects.all()
-    
     # Pedidos com status 'processing'
     response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing'})
     try:
@@ -281,7 +249,7 @@ def order_import_voice():
     except Exception as e:
         print(f"Erro ao decodificar JSON da resposta da API: {e}")
         print(f"Status code: {response.status_code}, Conteúdo: {response.text}")
-        return  # ou continue
+        return
     
     # Listar pedidos         
     for order in ord:
@@ -294,11 +262,9 @@ def order_import_voice():
         id_ord = order["id"]
 
         # Verificar pedido repetido
-
-        id_sis = Orders.objects.filter(order_id=id_ord)
-        if id_sis:
+        if Orders.objects.filter(order_id=id_ord).exists():
+            print(f'Pedido {id_ord} já importado, pulando')
             continue
-        else: pass
         
         # Verificar se line_items existe
         if 'line_items' not in order:
@@ -323,137 +289,129 @@ def order_import_voice():
                 item_id_store_i = item['id']
                 client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
                 email_i = order['billing']['email']
-                product_i = slugify(item['name']) # Definir nome do produto                    
+                product_i = slugify(item['name'])
                 qty_i = 1
                 if order['coupon_lines']:
                     coupon_i = order['coupon_lines'][0]['code']
-                else: coupon_i = '-'
+                else: 
+                    coupon_i = '-'
+                
                 # Definir valor padrão para variáveis
                 ord_chip_nun_i = '-'
                 countries_i = False
                 cell_mod_i = False
                 condition_i = "novo-sim"
                 activation_date_i = '2001-01-01'
-                data_day_i = 'ilimitado'                
+                data_day_i = 'ilimitado'
+                type_sim_i = 'sim'  # default
+                days_i = '0'  # default
+                
                 # Percorrer itens do pedido
                 for i in item['meta_data']:
-                    type_sim_i = 'sim'
-                    if i['key'] == 'pa_dias': days_i = i['value']
-                    calls_i = True
-                    countries_i = False
+                    if i['key'] == 'pa_dias': 
+                        days_i = i['value']
                     if i['key'] == '_data_ativacao': 
                         activation_date_i = i['value']
-                    if i['key'] == '_numero_sim': ord_chip_nun_i = i['value']
+                    if i['key'] == '_numero_sim': 
+                        ord_chip_nun_i = i['value']
+                
                 shipping_i = 'Sem Frete'
                 order_date_i = DateFormats.dateHour(order['date_created'])
+                calls_i = True
          
-                # notes_i = 0
-                
                 if activation_date_i == '2001-01-01':
                     order_status_i = 'EI'
                 else:
                     order_status_i = 'PV'
                     
-                    
                 # Se for um plano EUA 30 dias
                 if product_i == 'chip-internacional-eua-30-dias':
-                    calls_i = False             
+                    calls_i = False
                 
-                # Definir variáveis para salvar no banco de dados                            
-                order_add = Orders(                    
-                    order_id = order_id_i,
-                    item_id = item_id_i,
-                    item_id_store = item_id_store_i,
-                    client = client_i,
-                    email = email_i,
-                    product = product_i,
-                    data_day = data_day_i,
-                    qty = qty_i,
-                    coupon = coupon_i,
-                    condition = condition_i,
-                    days = days_i,
-                    calls = calls_i,
-                    countries = countries_i,
-                    cell_mod = cell_mod_i,
-                    ord_chip_nun = ord_chip_nun_i,
-                    shipping = shipping_i,
-                    order_date = order_date_i,
-                    activation_date = activation_date_i,
-                    order_status = order_status_i,
-                    type_sim = type_sim_i,
-                    # notes = notes_i 
+                # USO DE get_or_create - EVITA DUPLICAÇÃO
+                obj, created = Orders.objects.get_or_create(
+                    item_id=item_id_i,
+                    defaults={
+                        'order_id': order_id_i,
+                        'item_id_store': item_id_store_i,
+                        'client': client_i,
+                        'email': email_i,
+                        'product': product_i,
+                        'data_day': data_day_i,
+                        'qty': qty_i,
+                        'coupon': coupon_i,
+                        'condition': condition_i,
+                        'days': days_i,
+                        'calls': calls_i,
+                        'countries': countries_i,
+                        'cell_mod': cell_mod_i,
+                        'ord_chip_nun': ord_chip_nun_i,
+                        'shipping': shipping_i,
+                        'order_date': order_date_i,
+                        'activation_date': activation_date_i,
+                        'order_status': order_status_i,
+                        'type_sim': type_sim_i,
+                    }
                 )
                 
-                # Salvar itens no banco de dados
-                try:
-                    register = order_add.save()
-                    register
-                except:
-                    msg_error.append(f'Pedido {order_id_i} deu um erro ao importar')
-                    continue
-                
-                # id_user = None
-                # if getpass.getuser():
-                #     id_user = getpass.getuser()
-                
-                # Save Notes
-                add_sim = Notes( 
-                    id_item = Orders.objects.get(pk=order_add.id),
-                    id_user = None,
-                    note = f'Pedido importado para o sistema',
-                    type_note = 'S',
-                )
-                add_sim.save()
-                
-                if activation_date_i == '2001-01-01':
-                    add_sim = Notes( 
-                        id_item = Orders.objects.get(pk=order_add.id),
-                        id_user = None,
-                        note = f'Pedido sem data de ativação. Verificar com cliente.',
-                        type_note = 'S',
-                    )
-                    add_sim.save()
-                
-                # Insert Voice Calls
-                if calls_i == True:
+                # SÓ PROCESSA SE FOR NOVO
+                if created:
+                    print(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
                     
-                    add_voice = VoiceCalls(
-                        id_item = Orders.objects.get(pk=order_add.id),
-                        days = days_i,
-                        activation_date = activation_date_i,
-                        call_status = 'PR'
-                    )
-                    add_voice.save()
-                
                     # Save Notes
-                    add_sim = Notes( 
-                        id_item = Orders.objects.get(pk=order_add.id),
-                        id_user = None,
-                        note = f'Chamada de Voz Criada',
-                        type_note = 'S',
+                    Notes.objects.create(
+                        id_item=obj,
+                        id_user=None,
+                        note='Pedido importado para o sistema',
+                        type_note='S',
                     )
-                    add_sim.save()
-                
-                # Alterar status
-                # Status sis : Status Loja
-                if order_status_i in StatusStore.st_sis_site():
-                    UpdateStore.upStore(
-                        order_id = order_id_i,
-                        item_id_store = item_id_store_i if item_id_store_i else None,
-                        _status = order_status_i if order_status_i else None,
-                        status_g = order_status_i if order_status_i else None,
-                    )   
+                    
+                    if activation_date_i == '2001-01-01':
+                        Notes.objects.create(
+                            id_item=obj,
+                            id_user=None,
+                            note='Pedido sem data de ativação. Verificar com cliente.',
+                            type_note='S',
+                        )
+                    
+                    # Insert Voice Calls
+                    if calls_i:
+                        VoiceCalls.objects.create(
+                            id_item=obj,
+                            days=days_i,
+                            activation_date=activation_date_i,
+                            call_status='PR'
+                        )
+                        
+                        Notes.objects.create(
+                            id_item=obj,
+                            id_user=None,
+                            note='Chamada de Voz Criada',
+                            type_note='S',
+                        )
+                    
+                    # Alterar status
+                    if order_status_i in StatusStore.st_sis_site():
+                        UpdateStore.upStore(
+                            order_id=order_id_i,
+                            item_id_store=item_id_store_i if item_id_store_i else None,
+                            _status=order_status_i if order_status_i else None,
+                            status_g=order_status_i if order_status_i else None,
+                        )
+                    
+                    n_item_total += 1
+                    msg_info.append(f'Pedido {order_id_i} importado com sucesso')
+                else:
+                    print(f'Item já existe: {item_id_i}, pulando')
 
                 # Definir variáveis
                 q_i += 1 
                 n_item += 1
-                n_item_total += 1
-                
-                msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
                     
     # Status 
     if n_item_total != 0:
         print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
+
 
 
 @shared_task
@@ -558,7 +516,18 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
                 item_id_store = order.item_id_store if order.item_id_store else None,
                 _status = ord_s if ord_s else None,
                 status_g = ord_s if ord_s else None,
-            )  
+            )
+        
+        if ord_s == 'AA':
+            send_email_sims.delay(id=order.id)
+            add_sim = Notes( 
+                id_item = Orders.objects.get(pk=order.id),
+                id_user = user,
+                note = "E-mail enviado automaticamente.",
+                type_note = 'S',
+            )
+            add_sim.save()
+            
 
         # Save Notes
         def addNote(t_note):
