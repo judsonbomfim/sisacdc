@@ -492,10 +492,10 @@ def simActivateTI(id=None):
                     status_g = 'AT',
                 )            
                 # Adicionar nota
-                NotesAdd.addNote(order,f'{note} TC: {resultDescription}')
+                NotesAdd.addNote(order,f'{note} TI: {resultDescription}')
             else:
                 # Alterar status
-                UpdateOrder.upStatus(id_item,'EA')
+                # UpdateOrder.upStatus(id_item,'EA')
                 # Adicionar nota
                 NotesAdd.addNote(order,f'TI: {resultDescription}')
         
