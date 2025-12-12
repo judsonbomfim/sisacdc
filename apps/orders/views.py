@@ -336,7 +336,7 @@ def ord_edit(request,id):
                 qrcode = sim_up.link if sim_up.link else ""
                 
                 if type_sim == 'esim': 
-                    ord_st = 'EE'
+                    ord_st = 'AA'
                 else: ord_st = ord_st
                 
                 order_put = Orders.objects.get(pk=order.id)

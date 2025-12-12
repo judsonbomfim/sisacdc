@@ -413,7 +413,6 @@ def order_import_voice():
         print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
 
-
 @shared_task
 def orders_auto():
     print('-----------------orders_auto')
@@ -518,16 +517,9 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
                 status_g = ord_s if ord_s else None,
             )
         
+        # Enviar e-mail de ativação
         if ord_s == 'AA':
-            send_email_sims.delay(id=order.id)
-            add_sim = Notes( 
-                id_item = Orders.objects.get(pk=order.id),
-                id_user = user,
-                note = "E-mail enviado automaticamente.",
-                type_note = 'S',
-            )
-            add_sim.save()
-            
+            send_email_sims.delay(id=order.id)           
 
         # Save Notes
         def addNote(t_note):
