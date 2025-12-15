@@ -522,16 +522,23 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
             send_email_sims.delay(id=order.id)           
 
         # Save Notes
+        if id_user != None:
+            user = User.objects.get(pk=id_user)
+            type_note = 'U'
+        else:   
+            user = None
+            type_note = 'S'
+            
         def addNote(t_note):
             add_sim = Notes( 
                 id_item = Orders.objects.get(pk=order.id),
                 id_user = user,
                 note = t_note,
-                type_note = 'S',
+                type_note = type_note,
             )
             add_sim.save()
         
-        ord_status = Orders.order_status.field.choices
+        ord_status = dict(Orders.order_status.field.choices)  # Converter lista de tuplas para dicionário
         if order_st != 'ED':
             try:
                 old_status = ord_status.get(order_st, f'Status {order_st} desconhecido')

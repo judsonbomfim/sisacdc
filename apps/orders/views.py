@@ -52,6 +52,12 @@ def orders_list(request):
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_status')
             
+            # Verificar Usuário
+            try:
+                id_user = User.objects.get(pk=request.user.id)
+            except:
+                id_user = None
+            
             # Validações completas
             if not ord_id or not ord_s or ord_s == '':
                 messages.error(request, 'Dados incompletos para atualização de status')
@@ -61,9 +67,7 @@ def orders_list(request):
             if not request.user.is_authenticated:
                 messages.error(request, 'Usuário não autenticado')
                 return redirect('orders_list')
-            
-            id_user = request.user.id
-            
+                        
             try:
                 # Iniciar tarefa apenas UMA vez
                 orders_up_status.delay(ord_id, ord_s, id_user)
