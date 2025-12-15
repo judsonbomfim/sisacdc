@@ -443,19 +443,13 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         order = Orders.objects.get(pk=o_id)
         user = User.objects.get(pk=id_user)
         order_id = order.id
-        order_st = order.order_status  # Status ANTIGO (antes de alterar)
         order_plan = order.get_product_display()
         try: type_sim = order.id_sim.type_sim
         except: type_sim = 'esim'
 
-        print(f"[DEBUG] Status ANTIGO capturado: {order_st}")
-        print(f"[DEBUG] Status NOVO a ser aplicado: {ord_s}")
-
         # Save status System
         order.order_status = ord_s
         order.save()
-        
-        print(f"[DEBUG] Status salvo no banco: {ord_s}")
         
         # Desativar (e)SIM
         if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE'):
@@ -543,24 +537,15 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
             )
             add_sim.save()
         
-        ord_status = dict(Orders.order_status.field.choices)  # Converter lista de tuplas para dicionário
-        if order_st != 'ED':
-            try:
-                print(f"[DEBUG] Código status antigo (order_st): {order_st}")
-                print(f"[DEBUG] Código status novo (ord_s): {ord_s}")
-                
-                old_status = ord_status.get(order_st, f'Status {order_st} desconhecido')
-                new_status = ord_status.get(ord_s, f'Status {ord_s} desconhecido')
-                
-                print(f"[DEBUG] Label status antigo: {old_status}")
-                print(f"[DEBUG] Label status novo: {new_status}")
-                
-                addNote(f'Alterado de {old_status} para {new_status}')
-                print(f"Nota gravada: Alterado de {old_status} para {new_status}")
-            except Exception as e:
-                print(f"Erro ao gravar nota: {e}")
-                import traceback
-                traceback.print_exc()
+        ord_status = Orders.order_status.field.choices
+        # if ord_s_prev != 'ED':
+        try:
+            old_status = ord_status.get(ord_s_prev, f'Status {ord_s_prev} desconhecido')
+            new_status = ord_status.get(ord_s, f'Status {ord_s} desconhecido')
+            addNote(f'Alterado de {old_status} para {new_status}')
+            print(f"Nota gravada: Alterado de {old_status} para {new_status}")  # Log temporário
+        except Exception as e:
+            print(f"Erro ao gravar nota: {e}")  # Log do erro
             
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):

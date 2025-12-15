@@ -276,13 +276,6 @@ def ord_edit(request,id):
         global update_store
         update_store = {}
         
-        # Verificar Usuário
-        try:
-            id_user = User.objects.get(pk=request.user.id)
-            type_note_i = 'U'
-        except:
-            id_user = None
-            type_note_i = 'S'
         
         order = Orders.objects.get(pk=id)
         order_id = order.order_id
@@ -322,6 +315,14 @@ def ord_edit(request,id):
                 order_put.save()
             else:
                 print("Aviso: Tentativa de atualizar SIM, mas sim_id está vazio")
+
+        # Verificar Usuário
+        try:
+            id_user = User.objects.get(pk=request.user.id)
+            type_note_i = 'U'
+        except:
+            id_user = None
+            type_note_i = 'S'
 
         # Notes
         def addNote(t_note):
