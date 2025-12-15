@@ -52,9 +52,9 @@ def orders_list(request):
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_status')
             
-            # Verificar Usuário
+            # Verificar Usuário (usar ID simples para serializar no Celery)
             try:
-                id_user = User.objects.get(pk=request.user.id)
+                id_user = request.user.id
             except:
                 id_user = None
             
