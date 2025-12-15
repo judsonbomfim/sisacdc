@@ -444,6 +444,8 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         user = User.objects.get(pk=id_user)
         order_id = order.id
         order_plan = order.get_product_display()
+        # Captura o status antigo antes de alterar
+        old_status_code = ord_s_prev if ord_s_prev is not None else order.order_status
         try: type_sim = order.id_sim.type_sim
         except: type_sim = 'esim'
 
@@ -537,15 +539,17 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
             )
             add_sim.save()
         
-        ord_status = Orders.order_status.field.choices
-        # if ord_s_prev != 'ED':
-        try:
-            old_status = ord_status.get(ord_s_prev, f'Status {ord_s_prev} desconhecido')
-            new_status = ord_status.get(ord_s, f'Status {ord_s} desconhecido')
-            addNote(f'Alterado de {old_status} para {new_status}')
-            print(f"Nota gravada: Alterado de {old_status} para {new_status}")  # Log temporário
-        except Exception as e:
-            print(f"Erro ao gravar nota: {e}")  # Log do erro
+        ord_status = dict(Orders.order_status.field.choices)
+
+        # Gravar nota somente se houve mudança de status
+        if old_status_code != ord_s:
+            try:
+                old_status = ord_status.get(old_status_code, f'Status {old_status_code} desconhecido')
+                new_status = ord_status.get(ord_s, f'Status {ord_s} desconhecido')
+                addNote(f'Alterado de {old_status} para {new_status}')
+                print(f"Nota gravada: Alterado de {old_status} para {new_status}")
+            except Exception as e:
+                print(f"Erro ao gravar nota: {e}")
             
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
