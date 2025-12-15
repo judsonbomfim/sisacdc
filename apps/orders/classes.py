@@ -3,7 +3,7 @@ import os
 from apps.orders.models import Orders, Notes
 from django.contrib.auth.models import User
 
-# Conect woocommerce api
+
 class ApiStore():
     @staticmethod
     def conectApiStore():

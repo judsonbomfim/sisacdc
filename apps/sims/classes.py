@@ -140,24 +140,28 @@ class ApiTC:
                 '500mb-dia': '898805',
                 '1gb': '898806',
                 '2gb': '898807',
+                'ilimitado': '928117',
             }
         elif product == 'chip-internacional-asia-premium':
             planList = {
                 '500mb-dia': '898801',
                 '1gb': '898802',
                 '2gb': '898803',
+                'ilimitado': '928116',
             }
         elif product == 'chip-internacional-oceania-premium':
             planList = {
                 '500mb-dia': '898751',
                 '1gb': '898752',
                 '2gb': '898754',
+                'ilimitado': '928119',
             }
         elif product == 'chip-internacional-oriente-medio-premium':
             planList = {
                 '500mb-dia': '898797',
                 '1gb': '898799',
                 '2gb': '898800',
+                'ilimitado': '928118',
             }
         
         # Alterar plano provisoriamente

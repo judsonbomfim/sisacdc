@@ -5,7 +5,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
-from apps.orders.models import Orders, Notes
+from apps.orders.models import Orders, Notes, User
 from apps.orders.classes import ApiStore, StatusStore, UpdateStore
 from apps.voice_calls.models import VoiceCalls
 from apps.voice_calls.classes import NumberFormatter
@@ -119,9 +119,14 @@ def send_email_sims(id=None):
         )
         add_note.save()
         
+        try:
+            id_user = User.objects.get(pk=request.user.id)
+        except:
+            id_user = None
+        
         add_note_status = Notes( 
             id_item = order,
-            id_user = None,
+            id_user = id_user,
             note = f'Atualizado status para {order.get_order_status_display()}',
             type_note = 'S',
         )

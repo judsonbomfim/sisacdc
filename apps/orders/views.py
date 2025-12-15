@@ -345,8 +345,7 @@ def ord_edit(request,id):
                 order_put.save()
             else:       
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
-    
-            
+
         # Se SIM preenchico
         if sim:
             if order_sim != '':
