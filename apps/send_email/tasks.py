@@ -78,59 +78,24 @@ def send_email_sims(id=None):
         email.attach_alternative(html_content, "text/html")
         email.send()
         
-        if order_st != 'CN' or order_st != 'AT':
-            if (product_plan == 'USA' or product_plan == 'USA 30 Dias') and type_sim == 'esim':
-                # Update Order
-                order = Orders.objects.get(pk=id)
-                order.order_status = 'AA'
-                order.save()
-                # Update Store
-            else:
-                # Update Order
-                order = Orders.objects.get(pk=id)
-                order.order_status = 'AA'
-                order.save()
-                # Update Store
-                try:
-                    UpdateStore.upStore(
-                        order_id = ord_id,
-                        item_id_store = order.item_id_store if order.item_id_store else None,
-                        _status ='AA' if order_st !='AA' else None,
-                        status_g = 'AA',
-                    )
-                    print(f">>>>>>>>>> Status AA atualizado no site - Pedido: {order_id}")
-                except Exception as e:
-                    print(f">>>>>>>>>> ERRO ao atualizar site - Pedido {order_id}: {e}")
-                    # Add note do erro
-                    add_note = Notes( 
-                        id_item = order,
-                        id_user = None,
-                        note = f'Erro ao atualizar status no site: {str(e)}',
-                        type_note = 'E',
-                    )
-                    add_note.save()           
-        
-        # Add note
-        add_note = Notes( 
-            id_item = order,
-            id_user = None,
-            note = 'E-mail enviado com sucesso!',
-            type_note = 'S',
-        )
-        add_note.save()
+        # if order_st != 'CN' or order_st != 'AT':
+        # ...
         
         try:
             id_user = User.objects.get(pk=request.user.id)
+            type_note = 'U'
         except:
             id_user = None
-        
-        add_note_status = Notes( 
+            type_note = 'S'
+            
+        # Add note
+        add_note = Notes( 
             id_item = order,
             id_user = id_user,
-            note = f'Atualizado status para {order.get_order_status_display()}',
-            type_note = 'S',
+            note = 'E-mail enviado com sucesso!',
+            type_note = type_note,
         )
-        add_note_status.save()
+        add_note.save()
 
 
 @shared_task

@@ -272,6 +272,14 @@ def ord_edit(request,id):
         global update_store
         update_store = {}
         
+        # Verificar Usuário
+        try:
+            id_user = User.objects.get(pk=request.user.id)
+            type_note_i = 'U'
+        except:
+            id_user = None
+            type_note_i = 'S'
+        
         order = Orders.objects.get(pk=id)
         order_id = order.order_id
         order_status = order.order_status
@@ -315,9 +323,9 @@ def ord_edit(request,id):
         def addNote(t_note):
             add_sim = Notes( 
                 id_item = Orders.objects.get(pk=order.id),
-                id_user = User.objects.get(pk=request.user.id),
+                id_user = id_user,
                 note = t_note,
-                type_note = 'S',
+                type_note = type_note_i,
             )
             add_sim.save()
             
