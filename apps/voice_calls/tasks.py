@@ -20,8 +20,10 @@ from apps.send_email.tasks import send_email_voice
 
 @shared_task
 def voices_up_status(voice_id, voice_st):
-    for v_id in voice_id:
-        UpdateVoice.upStatus(voice_id, voice_st)
+    # Accept single id or list of ids
+    ids = voice_id if isinstance(voice_id, (list, tuple)) else [voice_id]
+    for v_id in ids:
+        UpdateVoice.upStatus(v_id, voice_st)
 
 @shared_task
 def number_up_status(number_id, number_st):
