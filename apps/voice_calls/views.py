@@ -200,7 +200,7 @@ def voice_edit(request,id):
         call_put.save()
         
         if status != status_now:
-            UpdateVoice.upStatus(call_put,status)
+            UpdateVoice.upStatus(call_put.id, status)
             NoteVoiceCall.addNote(id_item=call_put, note=f"Status alterado de {status_now} para {status}", id_user=request.user, type_note='P')
             if status == 'AT':
                 voiceActivate.delay(call_put.id)
