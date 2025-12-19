@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from apps.voice_calls.classes import NoteVoiceCall, UpdateVoice
 from apps.voice_calls.models import VoiceNumbers, VoiceCalls
-from apps.voice_calls.tasks import number_up_status, voices_up_status, update_password
+from apps.voice_calls.tasks import number_up_status, voiceActivate, voiceDesactivate, voices_up_status, update_password
 from apps.orders.models import Orders
 from apps.orders.classes import DateFormats
 import pandas as pd
@@ -81,7 +81,11 @@ def voice_index(request):
                 voices_up_status.delay(voice_id, voice_st)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
-                messages.info(request,f'Você precisa marcar alguma opção')
+                messages.info(request,f'Você precisa marcar alguma opção')                
+            if voice_st == 'AT':
+                voiceActivate.delay(voice_id)
+            elif voice_st == 'DS':
+                voiceDesactivate.delay(voice_id)
 
 
     # FIlters
@@ -186,6 +190,7 @@ def voice_edit(request,id):
                 
         call_put = VoiceCalls.objects.get(pk=id)
         status_now = call_put.call_status
+        status = request.POST.get('ord_st_f')
         if request.POST.get('days'):
             call_put.days = request.POST.get('days')
         if request.POST.get('activation_date'):
@@ -194,10 +199,15 @@ def voice_edit(request,id):
             call_put.activation_date = call_put.activation_date
         call_put.save()
         
-        if request.POST.get('ord_st_f') != status_now:
-            UpdateVoice.upStatus(call_put,request.POST.get('ord_st_f'))
-            NoteVoiceCall.addNote(id_item=call_put, note=f"Status alterado de {status_now} para {request.POST.get('ord_st_f')}", id_user=request.user, type_note='P')
-        
+        if status != status_now:
+            UpdateVoice.upStatus(call_put,status)
+            NoteVoiceCall.addNote(id_item=call_put, note=f"Status alterado de {status_now} para {status}", id_user=request.user, type_note='P')
+            if status == 'AT':
+                voiceActivate.delay(call_put.id)
+            elif status == 'DS':
+                voiceDesactivate.delay(call_put.id)
+                
+            
         note_text = request.POST.get('ord_note')
         print(f"Nota recebida: '{note_text}'")
         if note_text:

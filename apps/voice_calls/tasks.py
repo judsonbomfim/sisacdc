@@ -195,7 +195,7 @@ def voiceActivate(id=None):
             # Alterar status
             UpdateVoice.upStatus(order_id,'AT')
             # Adicionar nota
-            NoteVoiceCall.addNote(order,f'ativado: "{response_data["message"]}"')
+            NoteVoiceCall.addNote(order,f'ATIVADO: "{response_data["message"]}"')
         elif response_data['status'] == "error":
             # Alterar status
             UpdateVoice.upStatus(order_id,'EA')
