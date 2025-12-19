@@ -720,7 +720,15 @@ def simActivateTM(id=None):
         res = conn.getresponse()
         data = res.read()
         # Decodifica a resposta
-        response_data = json.loads(data.decode("utf-8"))
+        try:
+            response_data = json.loads(data.decode("utf-8"))
+        except (json.JSONDecodeError, ValueError) as e:
+            # API retornou resposta vazia ou inválida
+            UpdateOrder.upStatus(id_item,'EA')
+            NotesAdd.addNote(order,f'Erro ao decodificar resposta da API para SIM {iccid}. Status HTTP: {res.status}. Erro: {str(e)}')
+            conn.close()
+            continue
+        
         # Verifica o código de resposta
         if 'code' in response_data:
             if response_data['code'] == 0:

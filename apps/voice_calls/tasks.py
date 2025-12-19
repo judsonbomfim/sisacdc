@@ -184,7 +184,15 @@ def voiceActivate(id=None):
         res = conn.getresponse()
         data = res.read()
         # Decodifica a resposta
-        response_data = json.loads(data.decode("utf-8"))
+        try:
+            response_data = json.loads(data.decode("utf-8"))
+        except (json.JSONDecodeError, ValueError) as e:
+            # API retornou resposta vazia ou inválida
+            UpdateVoice.upStatus(order_id,'EA')
+            NoteVoiceCall.addNote(order_id,f'Erro ao decodificar resposta da API. Status HTTP: {res.status}. Erro: {str(e)}')
+            conn.close()
+            continue
+        
         # Verifica o código de resposta
         if response_data['status'] == "ok":
             # Alterar status
@@ -266,7 +274,15 @@ def voiceDesactivate(id=None):
         res = conn.getresponse()
         data = res.read()
         # Decodifica a resposta
-        response_data = json.loads(data.decode("utf-8"))
+        try:
+            response_data = json.loads(data.decode("utf-8"))
+        except (json.JSONDecodeError, ValueError) as e:
+            # API retornou resposta vazia ou inválida
+            UpdateVoice.upStatus(order_id,'ED')
+            NoteVoiceCall.addNote(order_id,f'Erro ao decodificar resposta de desativação. Status HTTP: {res.status}. Erro: {str(e)}')
+            conn.close()
+            continue
+        
         # Verifica o código de resposta
         if response_data['status'] == "ok":
             # Alterar status
