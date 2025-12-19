@@ -233,10 +233,14 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.sims.tasks.simActivateCM',
         'schedule': crontab(minute='4-59/2'),
     },
-    # 'task__2_min_activate_MS': {
-    #     'task': 'apps.sims.tasks.simActivateMS',
-    #     'schedule': crontab(minute='1-59/1'),
-    # },
+    'task__2_min_activate_VC': {
+        'task': 'apps.voice_calls.tasks.simActivateVC',
+        'schedule': crontab(minute='2-59/2'),
+    },
+    'task__deactivate_VC': {
+        'task': 'apps.voice_calls.tasks.simDeactivateVC',
+        'schedule': crontab( hour=00, minute=00),
+    },
 }
 
 # API TELCON
