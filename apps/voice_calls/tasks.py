@@ -152,7 +152,7 @@ def voiceActivate(id=None):
     
     # Selecionar pedidos
     if id is None:
-        voice_all = VoiceCalls.objects.filter(order_status='AA', activation_date__lte=tomorrow)
+        voice_all = VoiceCalls.objects.filter(call_status='AA', activation_date__lte=tomorrow)
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)        
     
@@ -230,7 +230,7 @@ def voiceDesactivate(id=None):
     
     # Selecionar pedidos
     if id is None:
-        voice_all = VoiceCalls.objects.filter(order_status='AT')
+        voice_all = VoiceCalls.objects.filter(call_status='AT')
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)
     
