@@ -59,8 +59,12 @@ def orders_list(request):
             if ord_s and ord_s != '' and ord_id:
                 print(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
                 orders_up_status.delay(ord_id, ord_s, id_user)
+                messages.success(request, f'Atualizando {len(ord_id)} pedido(s) para status: {ord_s}')
             else:
-                print(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")             
+                print(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")
+                messages.error(request, 'Selecione pedidos e status antes de atualizar')
+            
+            return redirect('orders_list')             
 
     # Aplicar filtros
     url_filter = ''
