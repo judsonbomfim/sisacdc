@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
-from apps.voice_calls.classes import NoteVoiceCall
+from apps.voice_calls.classes import NoteVoiceCall, UpdateVoice
 from apps.voice_calls.models import VoiceNumbers, VoiceCalls
 from apps.voice_calls.tasks import number_up_status, voices_up_status, update_password
 from apps.orders.models import Orders
@@ -81,7 +81,8 @@ def voice_index(request):
                 voices_up_status.delay(voice_id, voice_st)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
-                messages.info(request,f'Você precisa marcar alguma opção')     
+                messages.info(request,f'Você precisa marcar alguma opção')
+
 
     # FIlters
     
@@ -184,23 +185,28 @@ def voice_edit(request,id):
     if request.method == 'POST':
                 
         call_put = VoiceCalls.objects.get(pk=id)
+        status_now = call_put.call_status
         if request.POST.get('days'):
             call_put.days = request.POST.get('days')
         if request.POST.get('activation_date'):
             call_put.activation_date = request.POST.get('activation_date')
         else:
             call_put.activation_date = call_put.activation_date
-        call_put.call_status = request.POST.get('ord_st_f')
         call_put.save()
+        
+        if request.POST.get('ord_st_f') != status_now:
+            UpdateVoice.upStatus(call_put,request.POST.get('ord_st_f'))
+            NoteVoiceCall.addNote(id_item=call_put, note=f"Status alterado de {status_now} para {request.POST.get('ord_st_f')}", id_user=request.user, type_note='P')
         
         note_text = request.POST.get('ord_note')
         print(f"Nota recebida: '{note_text}'")
         if note_text:
             NoteVoiceCall.addNote(id_item=call_put, note=note_text, id_user=request.user, type_note='P')
         
-        NoteVoiceCall.addNote(id_item=call_put, note="Pedido Alterado", id_user=request.user, type_note='S')            
+        NoteVoiceCall.addNote(id_item=call_put, note="Pedido Alterado", id_user=request.user, type_note='P')            
         messages.success(request,f'Pedido {call_put.id_item} atualizado com sucesso!')
         return redirect('voice_index')
+
 
 @login_required(login_url='/login/')
 def voice_import(request):
@@ -374,6 +380,7 @@ def up_password(request,id):
     messages.success(request,f'Senha e QrCode redefinidos com sucesso!')
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
 
 @login_required(login_url='/login/')
 def atualizarDataVoz(request):

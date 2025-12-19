@@ -52,12 +52,6 @@ def orders_list(request):
             ord_id = request.POST.getlist('ord_id')
             ord_s = request.POST.get('ord_status')
             
-            # Verificar Usuário (usar ID simples para serializar no Celery)
-            try:
-                id_user = request.user.id
-            except:
-                id_user = None
-            
             # Validações completas
             if not ord_id or not ord_s or ord_s == '':
                 messages.error(request, 'Dados incompletos para atualização de status')
@@ -67,7 +61,9 @@ def orders_list(request):
             if not request.user.is_authenticated:
                 messages.error(request, 'Usuário não autenticado')
                 return redirect('orders_list')
-                        
+            
+            id_user = request.user.id
+            
             try:
                 # Iniciar tarefa apenas UMA vez
                 orders_up_status.delay(ord_id, ord_s, id_user)
@@ -103,7 +99,7 @@ def orders_list(request):
         url_filter += f"&ord_st={ord_st_f}"
         
     # Buscar planos para mapeamento
-    plans = {name: data_day for name, data_day in Orders.product.field.choices}
+    plans = {plan['name']: plan['data_day'] for plan in Orders.products.values('name', 'data_day')}
 
     # Sessão: salve dados serializáveis (lista de dicts) e calcule return_date
     qs = orders_l.values(
@@ -276,7 +272,6 @@ def ord_edit(request,id):
         global update_store
         update_store = {}
         
-        
         order = Orders.objects.get(pk=id)
         order_id = order.order_id
         order_status = order.order_status
@@ -316,21 +311,13 @@ def ord_edit(request,id):
             else:
                 print("Aviso: Tentativa de atualizar SIM, mas sim_id está vazio")
 
-        # Verificar Usuário
-        try:
-            id_user = User.objects.get(pk=request.user.id)
-            type_note_i = 'U'
-        except:
-            id_user = None
-            type_note_i = 'S'
-
         # Notes
         def addNote(t_note):
             add_sim = Notes( 
                 id_item = Orders.objects.get(pk=order.id),
-                id_user = id_user,
+                id_user = User.objects.get(pk=request.user.id),
                 note = t_note,
-                type_note = type_note_i,
+                type_note = 'S',
             )
             add_sim.save()
             
@@ -349,7 +336,7 @@ def ord_edit(request,id):
                 qrcode = sim_up.link if sim_up.link else ""
                 
                 if type_sim == 'esim': 
-                    ord_st = 'AA'
+                    ord_st = 'EE'
                 else: ord_st = ord_st
                 
                 order_put = Orders.objects.get(pk=order.id)
@@ -358,7 +345,8 @@ def ord_edit(request,id):
                 order_put.save()
             else:       
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
-
+    
+            
         # Se SIM preenchico
         if sim:
             if order_sim != '':

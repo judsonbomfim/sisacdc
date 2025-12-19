@@ -1,5 +1,9 @@
+import http
+import json
 import random
 import string
+from urllib.parse import urlparse
+import pytz
 import qrcode
 import boto3
 import time
@@ -9,7 +13,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.files.storage import default_storage
 from celery import shared_task
-from apps.voice_calls.classes import NoteVoiceCall
+from apps.voice_calls.classes import NoteVoiceCall, UpdateVoice
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 from apps.send_email.tasks import send_email_voice
 
@@ -17,23 +21,7 @@ from apps.send_email.tasks import send_email_voice
 @shared_task
 def voices_up_status(voice_id, voice_st):
     for v_id in voice_id:
-                
-        voice_st = voice_st
-
-        # Save status System
-        voice = VoiceCalls.objects.get(pk=v_id)
-        voice.call_status = voice_st
-        voice.save()        
-        
-        if (voice_st == 'CC' or voice_st == 'DS') and voice.id_number != None:
-
-            num = VoiceNumbers.objects.get(pk=voice.id_number.id)
-            num.number_status = 'DS'
-            num.save()
-            
-            voice.id_number = None
-            voice.save()
-
+        UpdateVoice.upStatus(voice_id, voice_st)
 
 @shared_task
 def number_up_status(number_id, number_st):
@@ -147,3 +135,154 @@ def number_in_voice():  # <- remover 'request'
         time.sleep(2)
         #send email
         # send_email_voice.delay(id_vox)
+        
+@shared_task
+def voiceActivate(id=None):
+    
+    if id is None:
+        time.sleep(600) # 10 minutos
+          
+    tz = pytz.timezone(settings.TIME_ZONE)
+    today = datetime.now(tz).date()
+    tomorrow = today + timedelta(days=2)
+    
+    print('>>>>>>>>>> ATIVAÇÂO VOICE INICIADA')
+    
+    # Selecionar pedidos
+    if id is None:
+        voice_all = VoiceCalls.objects.filter(order_status='AA', activation_date__lte=tomorrow)
+    else:
+        voice_all = VoiceCalls.objects.filter(pk=id)        
+    
+    for order in voice_all:
+        
+        # order = VoiceCalls.objects.get(pk=order.id)
+        order_id = order.id
+        pedido = order.id_item.item_id
+        username = order.id
+        password = order.activation_date
+                
+        # Dados para a solicitação
+        url = f"{settings.APIVC_URL}ativar"
+        parsed_url = urlparse(url)
+        payload = json.dumps({
+            "pedido": pedido,
+            "cloud_username": username,
+            "cloud_password": password
+        })        
+        headers = {
+            'Content-Type': 'application/json',
+            'x-painel-acdc-token': settings.APIVC_KEY
+        }
+        # Estabelece a conexão HTTPS
+        conn = http.client.HTTPSConnection(parsed_url.netloc)
+        # Envia a solicitação POST
+        conn.request("POST", parsed_url.path, payload, headers)
+        # Obtém a resposta
+        res = conn.getresponse()
+        data = res.read()
+        # Decodifica a resposta
+        response_data = json.loads(data.decode("utf-8"))
+        # Verifica o código de resposta
+        if response_data['status'] == "ok":
+            # Alterar status
+            UpdateVoice.upStatus(order_id,'AT')
+            # Adicionar nota
+            NoteVoiceCall.addNote(order_id,f'ativado: "{response_data["message"]}"')
+        elif response_data['status'] == "error":
+            # Alterar status
+            UpdateVoice.upStatus(order_id,'EA')
+            # Adicionar nota
+            NoteVoiceCall.addNote(order_id,f'{response_data["error_code"]}: "{response_data["message"]}"')    
+        else:
+            # Alterar status
+            UpdateVoice.upStatus(order_id,'EA')
+            # Adicionar nota
+            NoteVoiceCall.addNote(order_id,f'ERRO: "{response_data["message"]}"')    
+
+        # Fecha a conexão
+        conn.close()
+        
+                
+    print('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
+    
+@shared_task
+def voiceDesactivate(id=None):
+    
+    if id is None:
+        time.sleep(600) # 10 minutos
+          
+    timezone = pytz.timezone(settings.TIME_ZONE)
+    now = datetime.now(timezone)
+    yesterday = now.date() - timedelta(days=1)
+    
+    print('>>>>>>>>>> ATIVAÇÂO VOICE INICIADA')
+    
+    # Selecionar pedidos
+    if id is None:
+        voice_all = VoiceCalls.objects.filter(order_status='AT')
+    else:
+        voice_all = VoiceCalls.objects.filter(pk=id)
+    
+    if not voice_all.exists():
+        print('Não há pedidos para serem desativados.')
+        return
+    
+    for order in voice_all:        
+        # Garante que activation_date e days não são nulos
+        if order.activation_date is None or order.days is None:
+            continue
+        
+        # Calcula a data de desativação
+        # A lógica é: data de ativação + (duração do plano - 1 dia)
+        deactivation_date = order.activation_date + timedelta(days=order.days - 1)
+
+        # Se um ID específico não foi passado, só desativa se a data for ontem ou anterior
+        if id is None and deactivation_date > yesterday:
+            continue
+
+        order_id = order.id
+        pedido = order.id_item.item_id
+        username = order.id
+                
+        # Dados para a solicitação
+        url = f"{settings.APIVC_URL}desativar"
+        parsed_url = urlparse(url)
+        payload = json.dumps({
+            "pedido": pedido,
+            "cloud_username": username,
+        })        
+        headers = {
+            'Content-Type': 'application/json',
+            'x-painel-acdc-token': settings.APIVC_KEY
+        }
+        # Estabelece a conexão HTTPS
+        conn = http.client.HTTPSConnection(parsed_url.netloc)
+        # Envia a solicitação POST
+        conn.request("POST", parsed_url.path, payload, headers)
+        # Obtém a resposta
+        res = conn.getresponse()
+        data = res.read()
+        # Decodifica a resposta
+        response_data = json.loads(data.decode("utf-8"))
+        # Verifica o código de resposta
+        if response_data['status'] == "ok":
+            # Alterar status
+            UpdateVoice.upStatus(order_id,'DS')
+            # Adicionar nota
+            NoteVoiceCall.addNote(order_id,f'DESATIVADO: "{response_data["message"]}"')
+        elif response_data['status'] == "error":
+            # Alterar status
+            UpdateVoice.upStatus(order_id,'ED')
+            # Adicionar nota
+            NoteVoiceCall.addNote(order_id,f'{response_data["error_code"]}: "{response_data["message"]}"')    
+        else:
+            # Alterar status
+            UpdateVoice.upStatus(order_id,'ED')
+            # Adicionar nota
+            NoteVoiceCall.addNote(order_id,f'ERRO: "{response_data["message"]}"')    
+
+        # Fecha a conexão
+        conn.close()
+                
+    print('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')

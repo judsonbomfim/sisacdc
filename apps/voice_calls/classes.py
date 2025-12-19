@@ -1,8 +1,8 @@
-from .models import NotesVoice
+from apps.voice_calls.tasks import voiceActivate, voiceDesactivate
+from .models import NotesVoice, VoiceCalls, VoiceNumbers
 
 
 class NumberFormatter:
-
     @staticmethod
     def format(num):
         num = str(num)
@@ -30,3 +30,23 @@ class NoteVoiceCall:
         except Exception as e:
             print(f"  ERRO ao criar nota: {e}")
             return None
+
+class UpdateVoice():
+    @staticmethod
+    def upStatus(order_id,order_st):
+        voice = VoiceCalls.objects.get(pk=order_id)
+        voice_id = voice.id
+
+        # Alterar status na Operadora
+        if order_st == 'AT' and voice.id_number != None:
+            voiceActivate(voice_id)
+        elif order_st == 'DS' and voice.id_number != None:
+            voiceDesactivate(voice_id)
+            # Disponibilizar número        
+            num = VoiceNumbers.objects.get(pk=voice.id_number.id)
+            num.number_status = 'DS'
+            num.save()
+            voice.id_number = None
+        
+        voice.call_status = order_st
+        voice.save()

@@ -610,7 +610,6 @@ def simDeactivateTC(id=None):
 def simDeactivateAll(id=None):
 
     timezone = pytz.timezone(settings.TIME_ZONE)
-
     now = datetime.now(timezone)
     yesterday = now.date() - timedelta(days=1)
 
@@ -694,7 +693,7 @@ def simActivateTM(id=None):
         days = order.days
                 
         # Dados para a solicitação
-        url = "https://usasimactivation.com/activation/index/submit"
+        url = settings.APITM_URL_ACTIVATE
         parsed_url = urlparse(url)
         payload = json.dumps({
             "active_time": activation_date.strftime("%Y-%m-%d"),
