@@ -83,9 +83,9 @@ def voice_index(request):
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')                
             if voice_st == 'AT':
-                voiceActivate.delay(voice_id)
+                voiceActivate.delay(id=voice_id)
             elif voice_st == 'DS':
-                voiceDesactivate.delay(voice_id)
+                voiceDesactivate.delay(id=voice_id)
 
 
     # FIlters
