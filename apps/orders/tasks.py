@@ -429,6 +429,7 @@ def orders_auto():
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
+    print(f"[orders_up_status] recebido: ord_id={ord_id}, ord_s={ord_s}, id_user={id_user}")
     
     # Verificar se ord_id é uma lista
     if not isinstance(ord_id, list):
@@ -441,6 +442,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
             continue
                
         order = Orders.objects.get(pk=o_id)
+        print(f"[orders_up_status] processando order.pk={order.pk} -> novo_status={ord_s}")
         user = User.objects.get(pk=id_user)
         order_id = order.id
         order_plan = order.get_product_display()
@@ -452,6 +454,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         # Save status System
         order.order_status = ord_s
         order.save()
+        print(f"[orders_up_status] atualizado order.pk={order.pk} para {ord_s}")
         
         # Desativar (e)SIM
         if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE'):

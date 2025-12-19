@@ -50,7 +50,7 @@ def orders_list(request):
 
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
-            ord_s = request.POST.get('ord_staus')
+            ord_s = request.POST.get('up_status')
             if request.user.is_authenticated:
                 id_user = request.user.id
             if ord_s != '':

@@ -238,7 +238,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='2-59/2'),
     },
     'task__deactivate_VC': {
-        'task': 'apps.voice_calls.tasks.voiceDeactivate',
+        'task': 'apps.voice_calls.tasks.voiceDesactivate',
         'schedule': crontab( hour=00, minute=00),
     },
 }
