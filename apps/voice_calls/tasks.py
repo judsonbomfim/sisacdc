@@ -152,6 +152,9 @@ def voiceActivate(id=None):
     
     for order in voice_all:
         
+        print(f'Processando pedido ID: {order.id}')
+
+        
         # order = VoiceCalls.objects.get(pk=order.id)
         order_id = order.id
         pedido = order.id_item.item_id
@@ -229,7 +232,10 @@ def voiceDesactivate(id=None):
         print('Não há pedidos para serem desativados.')
         return
     
-    for order in voice_all:        
+    for order in voice_all:
+        
+        print(f'Processando pedido ID: {order.id}')
+          
         # Garante que activation_date e days não são nulos
         if order.activation_date is None or order.days is None:
             continue
