@@ -1,4 +1,5 @@
 import os
+import time
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
@@ -78,14 +79,16 @@ def voice_index(request):
             voice_st = request.POST.get('voice_st')
             
             if voice_id and voice_st:
+                if voice_st == 'AT':
+                    voiceActivate.delay(id=voice_id)
+                elif voice_st == 'DS':
+                    voiceDesactivate.delay(id=voice_id)
+                time.sleep(5)
                 voices_up_status.delay(voice_id, voice_st)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
                 messages.info(request,f'Você precisa marcar alguma opção')                
-            if voice_st == 'AT':
-                voiceActivate.delay(id=voice_id)
-            elif voice_st == 'DS':
-                voiceDesactivate.delay(id=voice_id)
+
 
 
     # FIlters
@@ -200,13 +203,13 @@ def voice_edit(request,id):
         call_put.save()
         
         if status != status_now:
-            UpdateVoice.upStatus(call_put.id, status)
-            NoteVoiceCall.addNote(id_item=call_put, note=f"Status alterado de {status_now} para {status}", id_user=request.user, type_note='P')
             if status == 'AT':
                 voiceActivate.delay(call_put.id)
             elif status == 'DS':
                 voiceDesactivate.delay(call_put.id)
-                
+            time.sleep(5)
+            UpdateVoice.upStatus(call_put.id, status)
+            NoteVoiceCall.addNote(id_item=call_put, note=f"Status alterado de {status_now} para {status}", id_user=request.user, type_note='P')               
             
         note_text = request.POST.get('ord_note')
         print(f"Nota recebida: '{note_text}'")

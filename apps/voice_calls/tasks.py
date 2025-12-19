@@ -154,6 +154,12 @@ def voiceActivate(id=None):
         
         print(f'Processando pedido ID: {order.id}')
 
+        # Verifica se há número associado
+        if order.id_number is None:
+            print(f'Pedido {order.id} sem número associado, pulando ativação')
+            UpdateVoice.upStatus(order.id, 'EA')
+            NoteVoiceCall.addNote(order, 'Erro: sem número associado para ativação')
+            continue
         
         # order = VoiceCalls.objects.get(pk=order.id)
         order_id = order.id
@@ -238,6 +244,13 @@ def voiceDesactivate(id=None):
           
         # Garante que activation_date e days não são nulos
         if order.activation_date is None or order.days is None:
+            continue
+        
+        # Verifica se há número associado
+        if order.id_number is None:
+            UpdateVoice.upStatus(order.id, 'DS')
+            NoteVoiceCall.addNote(order, 'Erro: sem número associado para ativação')
+            print(f'Pedido {order.id} sem número associado, pulando desativação')
             continue
         
         # Calcula a data de desativação

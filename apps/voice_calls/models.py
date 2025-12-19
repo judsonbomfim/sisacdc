@@ -16,6 +16,8 @@ VOICE_STATUS = [
     ('CC', 'Cancelado'),
     ('CN', 'Concluido'),
     ('DS', 'Desativado'),
+    ('EA', 'Erro de Atiivação'),
+    ('ED', 'Erro de Desativação'),
     ('EP', 'Erro ao Processar'),
     ('EE', 'Enviar E-mail'),
     ('PR', 'Processando'),
