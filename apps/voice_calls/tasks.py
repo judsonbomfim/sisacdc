@@ -30,9 +30,6 @@ def number_up_status(number_id, number_st):
        
     for num_id in number_id:
        
-        number_id = number_id
-        number_st = number_st
-
         # Save status System
         number = VoiceNumbers.objects.get(pk=num_id)
         number.number_status = number_st
@@ -186,7 +183,7 @@ def voiceActivate(id=None):
         except (json.JSONDecodeError, ValueError) as e:
             # API retornou resposta vazia ou inválida
             UpdateVoice.upStatus(order_id,'EA')
-            NoteVoiceCall.addNote(order_id,f'Erro ao decodificar resposta da API. Status HTTP: {res.status}. Erro: {str(e)}')
+            NoteVoiceCall.addNote(order,f'Erro ao decodificar resposta da API. Status HTTP: {res.status}. Erro: {str(e)}')
             conn.close()
             continue
         
@@ -195,17 +192,17 @@ def voiceActivate(id=None):
             # Alterar status
             UpdateVoice.upStatus(order_id,'AT')
             # Adicionar nota
-            NoteVoiceCall.addNote(order_id,f'ativado: "{response_data["message"]}"')
+            NoteVoiceCall.addNote(order,f'ativado: "{response_data["message"]}"')
         elif response_data['status'] == "error":
             # Alterar status
             UpdateVoice.upStatus(order_id,'EA')
             # Adicionar nota
-            NoteVoiceCall.addNote(order_id,f'{response_data["error_code"]}: "{response_data["message"]}"')    
+            NoteVoiceCall.addNote(order,f'{response_data["error_code"]}: "{response_data["message"]}"')    
         else:
             # Alterar status
             UpdateVoice.upStatus(order_id,'EA')
             # Adicionar nota
-            NoteVoiceCall.addNote(order_id,f'ERRO: "{response_data["message"]}"')    
+            NoteVoiceCall.addNote(order,f'ERRO: "{response_data["message"]}"')    
 
         # Fecha a conexão
         conn.close()
@@ -220,7 +217,7 @@ def voiceDesactivate(id=None):
     now = datetime.now(timezone)
     yesterday = now.date() - timedelta(days=1)
     
-    print('>>>>>>>>>> ATIVAÇÂO VOICE INICIADA')
+    print('>>>>>>>>>> DESATIVAÇÃO VOICE INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -273,7 +270,7 @@ def voiceDesactivate(id=None):
         except (json.JSONDecodeError, ValueError) as e:
             # API retornou resposta vazia ou inválida
             UpdateVoice.upStatus(order_id,'ED')
-            NoteVoiceCall.addNote(order_id,f'Erro ao decodificar resposta de desativação. Status HTTP: {res.status}. Erro: {str(e)}')
+            NoteVoiceCall.addNote(order,f'Erro ao decodificar resposta de desativação. Status HTTP: {res.status}. Erro: {str(e)}')
             conn.close()
             continue
         
@@ -282,22 +279,22 @@ def voiceDesactivate(id=None):
             # Alterar status
             UpdateVoice.upStatus(order_id,'DS')
             # Adicionar nota
-            NoteVoiceCall.addNote(order_id,f'DESATIVADO: "{response_data["message"]}"')
+            NoteVoiceCall.addNote(order,f'DESATIVADO: "{response_data["message"]}"')
         elif response_data['status'] == "error":
             # Alterar status
             UpdateVoice.upStatus(order_id,'ED')
             # Adicionar nota
-            NoteVoiceCall.addNote(order_id,f'{response_data["error_code"]}: "{response_data["message"]}"')    
+            NoteVoiceCall.addNote(order,f'{response_data["error_code"]}: "{response_data["message"]}"')    
         else:
             # Alterar status
             UpdateVoice.upStatus(order_id,'ED')
             # Adicionar nota
-            NoteVoiceCall.addNote(order_id,f'ERRO: "{response_data["message"]}"')    
+            NoteVoiceCall.addNote(order,f'ERRO: "{response_data["message"]}"')    
 
         # Fecha a conexão
         conn.close()
                 
-    print('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
+    print('>>>>>>>>>> DESATIVAÇÃO VOICE FINALIZADA')
 
 # Aliases to match Celery Beat names configured in core.settings
 @shared_task
