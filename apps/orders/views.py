@@ -50,34 +50,11 @@ def orders_list(request):
 
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
-            ord_s = request.POST.get('ord_status')
-            
-            # Verificar Usuário (usar ID simples para serializar no Celery)
-            try:
+            ord_s = request.POST.get('ord_staus')
+            if request.user.is_authenticated:
                 id_user = request.user.id
-            except:
-                id_user = None
-            
-            # Validações completas
-            if not ord_id or not ord_s or ord_s == '':
-                messages.error(request, 'Dados incompletos para atualização de status')
-                return redirect('orders_list')
-            
-            # Verificar se usuário está autenticado
-            if not request.user.is_authenticated:
-                messages.error(request, 'Usuário não autenticado')
-                return redirect('orders_list')
-                        
-            try:
-                # Iniciar tarefa apenas UMA vez
-                orders_up_status.delay(ord_id, ord_s, id_user)
-                messages.success(request, f'Atualizando {len(ord_id)} pedidos para status: {ord_s}')
-            except Exception as e:
-                messages.error(request, f'Erro ao iniciar atualização: {str(e)}')
-                print(f">>>>>>>>>> ERRO ao iniciar tarefa: {e}")
-            
-            # IMPORTANTE: Sempre retornar redirect após POST
-            return redirect('orders_list')             
+            if ord_s != '':
+                orders_up_status.delay(ord_id, ord_s,id_user)             
 
     # Aplicar filtros
     url_filter = ''
