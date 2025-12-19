@@ -50,11 +50,17 @@ def orders_list(request):
 
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
-            ord_s = request.POST.get('up_status')
+            ord_s = request.POST.get('ord_status')  # Pega o valor do select
             if request.user.is_authenticated:
                 id_user = request.user.id
-            if ord_s != '':
-                orders_up_status.delay(ord_id, ord_s,id_user)             
+            else:
+                id_user = None
+            
+            if ord_s and ord_s != '' and ord_id:
+                print(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
+                orders_up_status.delay(ord_id, ord_s, id_user)
+            else:
+                print(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")             
 
     # Aplicar filtros
     url_filter = ''

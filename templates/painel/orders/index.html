@@ -50,7 +50,7 @@
     {% if request.user|can:'edit_orders' %}
       <div class="col-md-1">
         <div class="dm-select">
-          <select class="form-control form-control-lg ps-3 pe-5" name="up_status">
+          <select class="form-control form-control-lg ps-3 pe-5" name="ord_status" id="ord_status">
             <option value="" selected>Alterar Status</option>
             {% for ord_st in ord_st_list %}
               <option value="{{ ord_st.0 }}">{{ ord_st.1 }}</option>
