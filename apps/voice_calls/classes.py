@@ -33,17 +33,9 @@ class NoteVoiceCall:
 class UpdateVoice():
     @staticmethod
     def upStatus(order_id,order_st):
-        from apps.voice_calls.tasks import voiceActivate, voiceDesactivate
-        
         voice = VoiceCalls.objects.get(pk=order_id)
-        voice_id = voice.id
-
-        # Alterar status na Operadora
-        if order_st == 'AT' and voice.id_number != None:
-            voiceActivate(voice_id)
-        elif order_st == 'DS' and voice.id_number != None:
-            voiceDesactivate(voice_id)
-            # Disponibilizar número        
+        # Disponibilizar número quando desativado
+        if order_st == 'DS' and voice.id_number is not None:
             num = VoiceNumbers.objects.get(pk=voice.id_number.id)
             num.number_status = 'DS'
             num.save()
