@@ -1,4 +1,3 @@
-from apps.voice_calls.tasks import voiceActivate, voiceDesactivate
 from .models import NotesVoice, VoiceCalls, VoiceNumbers
 
 
@@ -34,6 +33,8 @@ class NoteVoiceCall:
 class UpdateVoice():
     @staticmethod
     def upStatus(order_id,order_st):
+        from apps.voice_calls.tasks import voiceActivate, voiceDesactivate
+        
         voice = VoiceCalls.objects.get(pk=order_id)
         voice_id = voice.id
 
