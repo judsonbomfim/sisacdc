@@ -140,10 +140,7 @@ def number_in_voice():  # <- remover 'request'
         
 @shared_task
 def voiceActivate(id=None):
-    
-    if id is None:
-        time.sleep(600) # 10 minutos
-          
+             
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=2)
@@ -218,10 +215,7 @@ def voiceActivate(id=None):
     
 @shared_task
 def voiceDesactivate(id=None):
-    
-    if id is None:
-        time.sleep(600) # 10 minutos
-          
+             
     timezone = pytz.timezone(settings.TIME_ZONE)
     now = datetime.now(timezone)
     yesterday = now.date() - timedelta(days=1)
