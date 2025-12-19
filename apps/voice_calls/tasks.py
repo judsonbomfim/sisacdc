@@ -155,8 +155,8 @@ def voiceActivate(id=None):
         # order = VoiceCalls.objects.get(pk=order.id)
         order_id = order.id
         pedido = order.id_item.item_id
-        username = order.id
-        password = order.activation_date
+        username = order.id_number.login
+        password = order.id_number.password
                 
         # Dados para a solicitação
         url = f"{settings.APIVC_URL}ativar"
@@ -244,7 +244,7 @@ def voiceDesactivate(id=None):
 
         order_id = order.id
         pedido = order.id_item.item_id
-        username = order.id
+        username = order.id_number.login
                 
         # Dados para a solicitação
         url = f"{settings.APIVC_URL}desativar"
