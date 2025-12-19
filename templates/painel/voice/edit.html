@@ -31,13 +31,9 @@
                 <div class="col-md-6 col-xl-9">
                   <label class="form-label">Dias</label>
                   <div class="row">
-                    {% for days_l in vox_days %}
-                      {% if vox.days == days_l %}
-                        <input type="radio" class="btn-check" name="days" id="days{{ days_l }}" value="{{ days_l }}" checked />
-                      {% else %}
-                        <input type="radio" class="btn-check" name="days" id="days{{ days_l }}" value="{{ days_l }}" />
-                      {% endif %}
-                      <label class="btn btn-outline-primary m-1" for="days{{ days_l }}">{{ days_l }}</label>
+                    {% for day in vox_days %}
+                    <input type="radio" class="btn-check" name="days" id="days{{ day }}" value="{{ day }}" {% if vox.days == day %}checked{% endif %}>
+                    <label class="btn btn-outline-primary m-1" for="days{{ day }}">{{ day }}</label>
                     {% endfor %}
                   </div>
                 </div>
@@ -89,97 +85,9 @@
               <h6 class="text-uppercase fw-normal color-gray">Notas do pedido</h6>
             </div>
             <div class="card-body">
-              {% for note in vox.order_notes.all %}
+              {% for note in vox.order_voice_notes.all %}
                 <div class="card border-left-secondary"
-                  style="background-color: {% if note.type_note == 'S' %}
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    #f4ebeb
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                  {% else %}
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    #F3F3F3
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                  {% endif %};">
+                  style="background-color: {% if note.type_note == 'S' %}#f4ebeb{% else %}#F3F3F3{% endif %};">
                   <div class="card-body">{{ note.note }}</div>
                 </div>
                 <div class="mb-2">

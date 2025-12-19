@@ -1,4 +1,5 @@
 import operator
+import os
 from django.contrib.auth.models import User
 from rolepermissions.decorators import has_permission_decorator
 import csv
@@ -10,12 +11,12 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.conf import settings
 from apps.orders.models import Orders, Notes
-from apps.sims.classes import ApiTC
+from apps.sims.classes import ApiTC, ApiCM
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
-from .classes import ApiStore, NoteStore, StatusStore, DateFormats
-from .tasks import order_import, orders_up_status, up_order_st_store, update_st
+from .classes import ApiStore, NoteStore, StatusStore, DateFormats, UpdateStore
+from .tasks import order_import, orders_up_status, update_st
 import pandas as pd
 
 
@@ -26,17 +27,14 @@ today = datetime.now()
 @login_required(login_url='/login/')
 @has_permission_decorator('view_orders')
 def orders_list(request):
-    global orders_l
-    orders_l = ''
-
     url_cdn = settings.URL_CDN
 
     orders_all = Orders.objects.exclude(product='chamada-de-voz').order_by('-id')
     sims = Sims.objects.all().order_by('-id')
     orders_l = orders_all
 
+    # Obter parâmetros de filtro (tanto GET quanto POST)
     if request.method == 'GET':
-
         ord_name_f = request.GET.get('ord_name')
         ord_order_f = request.GET.get('ord_order')
         ord_sim_f = request.GET.get('ord_sim')
@@ -44,7 +42,6 @@ def orders_list(request):
         ord_st_f = request.GET.get('ord_st')
 
     if request.method == 'POST':
-
         ord_name_f = request.POST.get('ord_name_f')
         ord_order_f = request.POST.get('ord_order_f')  
         ord_sim_f = request.POST.get('ord_sim_f')
@@ -53,14 +50,23 @@ def orders_list(request):
 
         if 'up_status' in request.POST:
             ord_id = request.POST.getlist('ord_id')
-            ord_s = request.POST.get('ord_staus')
+            ord_s = request.POST.get('ord_status')  # Pega o valor do select
             if request.user.is_authenticated:
                 id_user = request.user.id
-            if ord_s != '':
-                orders_up_status.delay(ord_id, ord_s,id_user)                               
+            else:
+                id_user = None
+            
+            if ord_s and ord_s != '' and ord_id:
+                print(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
+                orders_up_status.delay(ord_id, ord_s, id_user)
+                messages.success(request, f'Atualizando {len(ord_id)} pedido(s) para status: {ord_s}')
+            else:
+                print(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")
+                messages.error(request, 'Selecione pedidos e status antes de atualizar')
+            
+            return redirect('orders_list')             
 
-     # FIlters
-
+    # Aplicar filtros
     url_filter = ''
 
     if ord_name_f:
@@ -76,12 +82,39 @@ def orders_list(request):
         url_filter += f"&ord_sim={ord_sim_f}"
 
     if oper_f: 
-        orders_l = orders_l.filter(id_sim__operator__icontains=oper_f)
+        orders_l = orders_l.filter(id_sim__operator=oper_f)
         url_filter += f"&oper={oper_f}"
 
     if ord_st_f: 
-        orders_l = orders_l.filter(order_status__icontains=ord_st_f)
+        orders_l = orders_l.filter(order_status=ord_st_f)
         url_filter += f"&ord_st={ord_st_f}"
+        
+    # Buscar planos para mapeamento
+    plans = {name: data_day for name, data_day in Orders.product.field.choices}
+
+    # Sessão: salve dados serializáveis (lista de dicts) e calcule return_date
+    qs = orders_l.values(
+        'item_id', 'client', 'id_sim__sim', 'id_sim__operator',
+        'product', 'countries', 'calls', 'days', 'activation_date', 'order_status'
+    )
+    orders_for_export = []
+    for row in qs:
+        ad = row.get('activation_date')
+        days_val = row.get('days') or 0
+        ret = (ad + timedelta(days=days_val - 1)) if (ad and days_val) else None
+
+        # Adicionar data_day a partir do mapeamento de planos
+        product_name = row.get('product')
+        row['data_day'] = plans.get(product_name)
+
+        # deixe datas serializáveis (strings) para a sessão
+        orders_for_export.append({
+            **row,
+            'activation_date': ad.isoformat() if ad else None,
+            'return_date': ret.isoformat() if ret else None,
+        })
+
+    request.session['orders_listing'] = orders_for_export
 
     ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
@@ -107,6 +140,11 @@ def orders_list(request):
         'ord_st_list': ord_st_list,
         'oper_list': oper_list,
         'url_filter': url_filter,
+        'ord_name_f': ord_name_f,
+        'ord_order_f': ord_order_f,
+        'ord_sim_f': ord_sim_f,
+        'oper_f': oper_f,
+        'ord_st_f': ord_st_f,
     }
     return render(request, 'painel/orders/index.html', context)
 
@@ -128,12 +166,12 @@ def ord_details(request, order_id):
     operator = order.id_sim.operator if order.id_sim else ''
     product = order.get_product_display()
         
-    if operator == 'TC' and sim != '':
+    if (operator == 'TI' or operator == 'TC') and sim != '':
         # Verificar consumo de dados TC
         mobile_data = ApiTC.mobileData(sim)
     elif operator == 'CM':
         # Verificar consumo de dados CM
-        mobile_data = 568
+        mobile_data = ApiCM.mobileData(sim)
     else:
         mobile_data = ''
     
@@ -167,6 +205,7 @@ def ord_details(request, order_id):
         }    
     
     return JsonResponse(data)
+
 
 # Update orders
 @login_required(login_url='/login/')
@@ -224,6 +263,7 @@ def ord_edit(request,id):
         global update_store
         update_store = {}
         
+        
         order = Orders.objects.get(pk=id)
         order_id = order.order_id
         order_status = order.order_status
@@ -231,6 +271,8 @@ def ord_edit(request,id):
         except: order_sim = ''
         try: sim_id = int(order.id_sim.id)
         except: sim_id = ''
+        qrcode = ''
+        up_plan = False
         days = request.POST.get('days')
         product = request.POST.get('product')
         data_day = request.POST.get('data_day')
@@ -249,17 +291,39 @@ def ord_edit(request,id):
                 
         # Update SIM in Order and update SIM
         def updateSIM():
-            # Update SIM
-            sim_put = Sims.objects.get(pk=sim_id)            
-            sim_put.sim_status = 'TC'
-            sim_put.save()
-            # Delete SIM in Order
-            order_put = Orders.objects.get(pk=order.id)
-            order_put.id_sim_id = ''
-            order_put.save()
-        
+            if sim_id:  # ADICIONAR VERIFICAÇÃO
+                # Update SIM
+                sim_put = Sims.objects.get(pk=sim_id)            
+                sim_put.sim_status = 'TC'
+                sim_put.save()
+                # Delete SIM in Order
+                order_put = Orders.objects.get(pk=order.id)
+                order_put.id_sim_id = None  # CORRIGIR: usar None em vez de ''
+                order_put.save()
+            else:
+                print("Aviso: Tentativa de atualizar SIM, mas sim_id está vazio")
+
+        # Verificar Usuário
+        try:
+            id_user = User.objects.get(pk=request.user.id)
+            type_note_i = 'U'
+        except:
+            id_user = None
+            type_note_i = 'S'
+
+        # Notes
+        def addNote(t_note):
+            add_sim = Notes( 
+                id_item = Orders.objects.get(pk=order.id),
+                id_user = id_user,
+                note = t_note,
+                type_note = type_note_i,
+            )
+            add_sim.save()
+            
         # Insert SIM in Order
         def insertSIM(ord_st=None):
+            nonlocal qrcode
             sim_up = Sims.objects.filter(sim_status='DS', type_sim=type_sim, operator=operator).first()
             if sim_up:
                 sim_put = Sims.objects.get(pk=sim_up.id)
@@ -269,8 +333,10 @@ def ord_edit(request,id):
                 sim_put.sim_status = 'AT'
                 sim_put.save()
                 
+                qrcode = sim_up.link if sim_up.link else ""
+                
                 if type_sim == 'esim': 
-                    ord_st = 'EE'
+                    ord_st = 'AA'
                 else: ord_st = ord_st
                 
                 order_put = Orders.objects.get(pk=order.id)
@@ -279,18 +345,18 @@ def ord_edit(request,id):
                 order_put.save()
             else:       
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
-    
-            
+
         # Se SIM preenchico
         if sim:
             if order_sim != '':
-                # Alterar status no sistema e no site
+                # Alterar status do SIM no sistema e no site
                 updateSIM()
             
             sims_all = Sims.objects.all().filter(sim=sim)
             if sims_all:
                 # Update order
                 sim_id = sims_all[0].id
+                qrcode = sims_all[0].link
                 sims_put = Sims.objects.get(pk=sim_id)
                 sims_put.sim_status = 'AT'
                 sims_put.save()
@@ -313,9 +379,22 @@ def ord_edit(request,id):
                 order_put.id_sim_id = add_sim.id
                 order_put.save()
                 up_plan = True # verificação para nota
+            
+            # Gravar SIM e QRCode no site
+            try:
+                sim = order.id_sim.sim
+                qrcode = order.id_sim.link if order.id_sim.link else None
+            except:
+                sim = ''
+                qrcode = None
+            
+            # SIM Notes
+            if sim != '':
+                addNote(f'Alteração de {order_sim} para {sim}')
+            
         else:
             # Troca de SIM
-            if order_sim != '':
+            if order_sim != '' and order.id_sim:
                 if order.id_sim.operator != operator or order.id_sim.type_sim != type_sim or up_oper != None:
                     updateSIM()
                     insertSIM(ord_st)
@@ -329,6 +408,11 @@ def ord_edit(request,id):
                         insertSIM(ord_st)
                         up_plan = True # verificação para nota
             
+            # Gravar SIM e QRCode no site
+            if order.item_id_store and order.id_sim:
+                sim = order.id_sim.sim
+                qrcode = order.id_sim.link if order.id_sim.link else None
+
         # Update Order
         if activation_date == '':
             activation_date = order.activation_date
@@ -349,33 +433,17 @@ def ord_edit(request,id):
         order_put.oper_sim = operator
         order_put.save()
         
-        # Notes
-        def addNote(t_note):
-            add_sim = Notes( 
-                id_item = Orders.objects.get(pk=order.id),
-                id_user = User.objects.get(pk=request.user.id),
-                note = t_note,
-                type_note = 'S',
-            )
-            add_sim.save()
         # Save Notes
         if ord_note:
             addNote(ord_note)
         # Date Notes
         if activation_date != order.activation_date:
             addNote(f'Alteração de {DateFormats.dateDMA(str(order.activation_date))} para {DateFormats.dateDMA(str(activation_date))}')
-        # SIM Notes
-        if sim:
-            addNote(f'Alteração de {order_sim} para {sim}')
+
         # Plan Notes
-        try:
-            if up_plan:
-                addNote(f'Plano alterado')
-        except: pass
-        
-        # Conect Store
-        apiStore = ApiStore.conectApiStore() 
-            
+        if up_plan:  # Agora up_plan está inicializado
+            addNote(f'Plano alterado')
+                 
         # Status Notes
         if ord_st != order_status:
             # Alterar status
@@ -384,24 +452,32 @@ def ord_edit(request,id):
             ord_s_prev = order_status
             
             orders_up_status(order.id, ord_st,user_name, ord_s_prev) 
-            
-            # Salvar notas    
-            ord_status = Orders.order_status.field.choices
-            for st in ord_status:
-                if ord_st == st[0]:
-                    addNote(f'Alterado de {dict(Orders.order_status.field.choices).get(order_status)} para {st[1]}')
-            
+                        
             # Enviar email
             if ord_st == 'CN' and type_sim == 'sim':
                 send_email_sims(id=order_id)
                 
                 addNote(f'E-mail enviado com sucesso!')
-                messages.success(request,'E-mail enviado com sucesso!')     
-        
-        if type_sim == 'esim' or esim_v == True:
-            # Enviar eSIM para site
-            ApiStore.updateEsimStore(order_id) 
-        
+                messages.success(request,'E-mail enviado com sucesso!')
+
+        if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
+            print('----------------- Alterar/desativar TC/TI -----------------')
+            simDeactivateTC(id=order.id)
+
+        # Atualizar site
+        try:
+            UpdateStore.upStore(
+                order_id = order_id,
+                item_id_store = order.item_id_store if order.item_id_store else None,
+                _data_ativacao = str(activation_date) if activation_date else None,
+                _sim = sim if sim else None,
+                _qrcode = qrcode if qrcode else None,
+                _status = ord_st if ord_st else None,
+                status_g = ord_st if ord_st else None,
+            )
+        except Exception as e:
+            print(f">>>>>>>>>> ERRO ao atualizar site: {e}")
+                
         for msg_e in msg_error:
             messages.error(request,msg_e)
         for msg_o in msg_info:
@@ -412,18 +488,26 @@ def ord_edit(request,id):
 
 @login_required(login_url='/login/')
 @has_permission_decorator('export_orders')
-def ord_export_act(request):
+def ord_export(request):
     
     list_status = dict(Orders.order_status.field.choices)
     list_oper = dict(Sims.operator.field.choices)
-    
-    orders_all = request.session.get('orders_act')
+
+    if request.session.get('orders_listing'):
+        orders_all = request.session.get('orders_listing')
+        print(f'>>>>>>>>>>>>>>>>>>>>>< Exportando {len(orders_all)} pedidos')
+    else:
+        messages.error(request, 'Nenhum dado disponível para exportação. Por favor, aplique filtros na lista de pedidos antes de exportar.')
+        return request
     data = [
         ['Pedido', 'Cliente', '(e)SIM', 'Operadora', 'Produto', 'Países', 'Voz', 'Dias', 'Data Aivação', 'Data Término', 'Status']
     ]
     
     for ord in orders_all:
-        ord_operator = list_oper[ord['id_sim__operator']]
+        print(f'Exportando pedido {ord}')
+        if ord['id_sim__operator']:
+            ord_operator = list_oper[ord['id_sim__operator']]
+        else: ord_operator = ''
         if ord['data_day'] != 'Ilimitado': 
             ord_data = ord['data_day']
         else: ord_data = ''
@@ -536,8 +620,6 @@ def send_esims(request):
 @login_required(login_url='/login/')
 @has_permission_decorator('list_activations')
 def orders_activations(request):
-    global orders_l
-    orders_l = []
     url_filter = ''
     activGoing_f = None
     activGoing_1 = None
@@ -547,8 +629,8 @@ def orders_activations(request):
     activReturn_2 = None
     oper_f = None
     ord_st_f = None
+    ord_planos_f = None
 
-        
     fields_df = ['id', 'item_id','client', 'id_sim__sim', 'id_sim__link', 'id_sim__type_sim', 'id_sim__operator', 'product', 'data_day', 'calls', 'countries', 'days', 'cell_mod', 'cell_eid', 'cell_imei', 'activation_date', 'order_status']
 
     product_choice_dict = dict(Orders.product.field.choices)
@@ -562,30 +644,88 @@ def orders_activations(request):
     
     orders_df = pd.DataFrame((orders_all.values(*fields_df)))
     
-    
+    orders_df['product_code'] = orders_df['product']
     orders_df['product'] = orders_df['product'].map(product_choice_dict)
     orders_df['data_day'] = orders_df['data_day'].map(data_choice_dict)
     orders_df['activation_date'] = pd.to_datetime(orders_df['activation_date'])
     orders_df['return_date'] = orders_df['activation_date'] + pd.to_timedelta(orders_df['days'], unit='d') - pd.to_timedelta(1, unit='d')
     
     orders_l = orders_df
-    
+
+    # Obter parâmetros de filtro (tanto GET quanto POST)
     if request.method == 'GET':
-        
         if request.GET.get('activGoing_1'): activGoing_1 = request.GET.get('activGoing_1')
         if request.GET.get('activGoing_2'): activGoing_2 = request.GET.get('activGoing_2')
         if request.GET.get('activReturn_1'): activReturn_1 = request.GET.get('activReturn_1')
         if request.GET.get('activReturn_2'): activReturn_2 = request.GET.get('activReturn_2')
         if request.GET.get('oper'): oper_f = request.GET.get('oper')
-        if request.GET.get('ord_st'): ord_st_f = request.GET.get('ord_st')        
+        if request.GET.get('ord_st'): ord_st_f = request.GET.get('ord_st')
+        if request.GET.get('ord_planos'): ord_planos_f = request.GET.get('ord_planos')
 
     if request.method == 'POST':
-
         if request.POST.get('activGoing_f'): activGoing_f = request.POST.get('activGoing_f')
         if request.POST.get('activReturn_f') : activReturn_f = request.POST.get('activReturn_f')
         if request.POST.get('oper_f'): oper_f = request.POST.get('oper_f')
         if request.POST.get('ord_st_f'): ord_st_f = request.POST.get('ord_st_f')
+        if request.POST.get('ord_planos_f'): ord_planos_f = request.POST.get('ord_planos_f')
+           
+        if 'up_status' in request.POST:
+            ord_id = request.POST.getlist('ord_id')
+            ord_s = request.POST.get('ord_status')
+            
+            # Validações completas
+            if not ord_id or not ord_s or ord_s == '':
+                messages.error(request, 'Dados incompletos para atualização de status')
+                return redirect('orders_activations')
+            
+            # Verificar autenticação
+            if not request.user.is_authenticated:
+                messages.error(request, 'Usuário não autenticado')
+                return redirect('orders_activations')
+            
+            id_user = request.user.id
+            
+            # Log para debug
+            print(f">>>>>>>>>> ATUALIZAÇÃO EM MASSA (ACTIVATIONS)")
+            print(f"Pedidos: {ord_id}, Status: {ord_s}, Usuário: {id_user}")
+            
+            try:
+                orders_up_status.delay(ord_id, ord_s, id_user)
+                messages.success(request, f'Atualizando {len(ord_id)} pedidos para status: {ord_s}')
+            except Exception as e:
+                messages.error(request, f'Erro ao iniciar atualização: {str(e)}')
+            
+            return redirect('orders_activations')                
+
+    # Aplicar filtros baseados nos parâmetros GET (para paginação)
+    if activGoing_1 and activGoing_2:
+        orders_l = orders_l[(orders_l['activation_date'] >= activGoing_1) & (orders_l['activation_date'] <= activGoing_2)]
+        url_filter += f"&activGoing_1={activGoing_1}&activGoing_2={activGoing_2}"
+    elif activGoing_1:
+        orders_l = orders_l[(orders_l['activation_date'] == activGoing_1)]
+        url_filter += f"&activGoing_1={activGoing_1}"  
         
+    if activReturn_1 and activReturn_2:
+        orders_l = orders_l[(orders_l['return_date'] >= activReturn_1) & (orders_l['return_date'] <= activReturn_2)]
+        url_filter += f"&activReturn_1={activReturn_1}&activReturn_2={activReturn_2}"
+    elif activReturn_1:
+        orders_l = orders_l[(orders_l['return_date'] == activReturn_1)]
+        url_filter += f"&activReturn_1={activReturn_1}"
+        
+    if oper_f:
+        orders_l = orders_l[(orders_l['id_sim__operator'] == oper_f)]
+        url_filter += f"&oper={oper_f}"
+        
+    if ord_st_f:
+        orders_l = orders_l[(orders_l['order_status'] == ord_st_f)]
+        url_filter += f"&ord_st={ord_st_f}"
+        
+    if ord_planos_f:
+        orders_l = orders_l[(orders_l['product_code'] == ord_planos_f)]
+        url_filter += f"&ord_planos={ord_planos_f}"
+
+    # Aplicar filtros para POST (formulário)
+    if request.method == 'POST':
         if activGoing_f is not None:
             activGoing = [item.strip() for item in activGoing_f.split('-')]
             activGoing_1 = DateFormats.dateF(activGoing[0])
@@ -597,7 +737,6 @@ def orders_activations(request):
                 orders_l = orders_l[(orders_l['activation_date'] == activGoing_1)]
                 url_filter += f"&activGoing_1={activGoing_1}"  
                 
-        
         if activReturn_f is not None:
             activReturn = [item.strip() for item in activReturn_f.split('-')]
             activReturn_1 = DateFormats.dateF(activReturn[0])
@@ -608,30 +747,14 @@ def orders_activations(request):
             except:
                 orders_l = orders_l[(orders_l['return_date'] == activReturn_1)]
                 url_filter += f"&activReturn_1={activReturn_1}"
-            
-        if oper_f is not None:
-            orders_l = orders_l[(orders_l['id_sim__operator'] == oper_f)]
-            url_filter += f"&oper={oper_f}"
-            
-
-        if ord_st_f is not None:
-            orders_l = orders_l[(orders_l['order_status'] == ord_st_f)]
-            url_filter += f"&ord_st={ord_st_f}"
-
-
-        if 'up_status' in request.POST:
-            ord_id = request.POST.getlist('ord_id')
-            ord_s = request.POST.get('ord_staus')
-            id_user = request.user.id
-
-            orders_up_status.delay(ord_id, ord_s,id_user)                        
-
-    
-        # End up_status / POST
+        if ord_planos_f:
+            orders_l = orders_l[(orders_l['product_code'] == ord_planos_f)]
+            url_filter += f"&ord_planos={ord_planos_f}"
 
     sims = Sims.objects.all()
-    ord_status = Orders.order_status.field.choices
     oper_list = Sims.operator.field.choices
+    ord_status = Orders.order_status.field.choices
+    plan_list = Orders.product.field.choices
 
     # Listar status dos pedidos
     ord_st_list = []
@@ -650,14 +773,17 @@ def orders_activations(request):
     except: countActivCM = 0
     try: countActivTC = activList[activList['id_sim__operator'] == 'TC']['countActiv'].values[0]
     except: countActivTC = 0
-    
-    
+    try: countActivTI = activList[activList['id_sim__operator'] == 'TI']['countActiv'].values[0]
+    except: countActivTI = 0
+    try: countActivMS = activList[activList['id_sim__operator'] == 'MV']['countActiv'].values[0]
+    except: countActivMS = 0
+
     # Save in session
     orders_act = orders_l.copy()
     orders_act['activation_date'] = orders_act['activation_date'].astype(str)
     orders_act['return_date'] = orders_act['return_date'].astype(str)
     orders_act = orders_act.to_dict(orient='records')
-    request.session['orders_act'] = orders_act
+    request.session['orders_listing'] = orders_act
     # List
     orders_l = orders_l.to_dict('records')
   
@@ -672,6 +798,7 @@ def orders_activations(request):
         'orders': orders,
         'sims': sims,
         'ord_st_list': ord_st_list,
+        'plan_list': plan_list,
         'oper_list': oper_list,
         'url_filter': url_filter,
         'status_choice_dict': status_choice_dict,
@@ -679,32 +806,25 @@ def orders_activations(request):
         'countActivTM': countActivTM,
         'countActivCM': countActivCM,
         'countActivTC': countActivTC,
+        'countActivTI': countActivTI,
+        'countActivMS': countActivMS,
+        'activGoing_1': activGoing_1,
+        'activGoing_2': activGoing_2,
+        'activReturn_1': activReturn_1,
+        'activReturn_2': activReturn_2,
+        'oper_f': oper_f,
+        'ord_st_f': ord_st_f,
+        'ord_planos_f': ord_planos_f,
     }
     return render(request, 'painel/orders/activations.html', context)
 
-@login_required(login_url='/login/')
-def atualizar_status(request):
+
+def update_status(request):
+    # Atualizar status dos pedidos
     update_st.delay()
-    return HttpResponse('Verificação de status concluída')
+    messages.success(request, 'Processando atualização de status... Aguarde alguns minutos e atualize a página de pedidos')
+    return HttpResponse('Atualizando status!')
 
-
-def verifica_pedidos(request):
-    apiStore = ApiStore.conectApiStore()
-    order_p = apiStore.get('orders', params={'status': 'processing'})
-    lista_pedidos = []
-    contagem = 0
-    for order in order_p:
-        order_id = order['id']
-        data = order['order_date']
-        data = DateFormats.dateDMA(data)
-        try:
-            order_sis = Orders.objects.get(order_id=order_id)
-            contagem += 1
-        except Orders.DoesNotExist:
-            lista_pedidos.append({f'{data} - Pedido: {order_id}': 'Pedido não encontrado no sistema'})
-            up_order_st_store(order_id,'processing')
-    return JsonResponse(lista_pedidos, contagem, safe=False)    
-        
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza

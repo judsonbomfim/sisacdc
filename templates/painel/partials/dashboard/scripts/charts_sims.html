@@ -1,153 +1,111 @@
 <script>
-    // WEEK
-    var optionsSimsWeek = {
-        series: [{
-            name: 'SIMs',
-            data: JSON.parse('{{ weekSimsValuesS|escapejs|safe }}')
-        }, {
-            name: 'eSIMs',
-            data: JSON.parse('{{ weekSimsValuesE|escapejs|safe }}')
-        }],
-        chart: {
-            height: 350,
-            type: 'bar',
-            zoom: {
-                enabled: false
-            }
-        },
-        colors: ['#103651', '#D9A648'],
-        dataLabels: {
-            enabled: false,
-        },
-        stroke: {
-            curve: 'smooth'
-        },
-        title: {
-            text: 'Vendas de {{dateWeek|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}',
-            align: 'left'
-        },
-        grid: {
-            row: {
-                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.5
-            },
-        },
-        xaxis: {
-            title: {
-                text: 'Dias'
-            },
-            type: 'datetime',
-            categories: JSON.parse('{{ weekSimsDates|escapejs|safe }}'),
-            labels: {
-                format: 'd',
-            }
-        }
-    };
+document.addEventListener("DOMContentLoaded", function() {
+    // --- WEEKLY SIMS CHART ---
+    try {
+        const weekSimsValuesSRaw = '{{ weekSimsValuesS|escapejs|safe }}';
+        const weekSimsValuesERaw = '{{ weekSimsValuesE|escapejs|safe }}';
+        const weekSimsDatesRaw = '{{ weekSimsDates|escapejs|safe }}';
+        const weekSimsValuesS = weekSimsValuesSRaw ? JSON.parse(weekSimsValuesSRaw) : [];
+        const weekSimsValuesE = weekSimsValuesERaw ? JSON.parse(weekSimsValuesERaw) : [];
+        const weekSimsDates = weekSimsDatesRaw ? JSON.parse(weekSimsDatesRaw) : [];
 
-    var ttSimsWeek = new ApexCharts(document.querySelector("#ttSimsWeek"), optionsSimsWeek);
-    ttSimsWeek.render();
-
-    // MONTH
-    $('#total_sims-month-tab').on("shown.bs.tab", function () {
-        var optionsSimsMonth = {
-            series: [{
-                name: 'SIMs',
-                data: JSON.parse('{{ monthSimsValuesS|escapejs|safe }}')
-            }, {
-                name: 'eSIMs',
-                data: JSON.parse('{{ monthSimsValuesE|escapejs|safe }}')
-            }],
-            chart: {
-                height: 350,
-                type: 'line',
-                zoom: {
-                    enabled: false
-                }
-            },
-            colors: ['#103651', '#d79a2c'],
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            title: {
-                text: 'Vendas de {{dateMonth|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}',
-                align: 'left'
-            },
-            grid: {
-                row: {
-                    colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                    opacity: 0.5
-                },
-            },
+        var optionsSimsWeek = {
+            series: [
+                { name: 'SIMs', data: weekSimsValuesS },
+                { name: 'eSIMs', data: weekSimsValuesE }
+            ],
+            chart: { height: 350, type: 'bar', zoom: { enabled: false } },
+            colors: ['#103651', '#D9A648'],
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth' },
+            title: { text: 'Vendas de {{dateWeek|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
+            grid: { row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
             xaxis: {
-                title: {
-                    text: 'Dias'
-                },
+                title: { text: 'Dias' },
                 type: 'datetime',
-                categories: JSON.parse('{{ monthSimsDays|escapejs|safe }}'),
-                labels: {
-                    format: 'd',
-                }
-            }
+                categories: weekSimsDates,
+                labels: { format: 'd' }
+            },
+            noData: { text: "Sem dados para exibir" }
         };
-    
-        var ttSimsMonth = new ApexCharts(document.querySelector("#ttSimsMonth"), optionsSimsMonth);
-        ttSimsMonth.render();
+        var ttSimsWeek = new ApexCharts(document.querySelector("#ttSimsWeek"), optionsSimsWeek);
+        ttSimsWeek.render();
+    } catch (error) {
+        console.error("Erro ao renderizar o gráfico de SIMs da semana:", error);
+    }
 
+    // --- MONTHLY SIMS CHART ---
+    $('#total_sims-month-tab').on("shown.bs.tab", function () {
+        try {
+            const monthSimsValuesSRaw = '{{ monthSimsValuesS|escapejs|safe }}';
+            const monthSimsValuesERaw = '{{ monthSimsValuesE|escapejs|safe }}';
+            const monthSimsDatesRaw = '{{ monthSimsDates|escapejs|safe }}';
+            const monthSimsValuesS = monthSimsValuesSRaw ? JSON.parse(monthSimsValuesSRaw) : [];
+            const monthSimsValuesE = monthSimsValuesERaw ? JSON.parse(monthSimsValuesERaw) : [];
+            const monthSimsDates = monthSimsDatesRaw ? JSON.parse(monthSimsDatesRaw) : [];
+
+            var optionsSimsMonth = {
+                series: [
+                    { name: 'SIMs', data: monthSimsValuesS },
+                    { name: 'eSIMs', data: monthSimsValuesE }
+                ],
+                chart: { height: 350, type: 'line', zoom: { enabled: false } },
+                colors: ['#103651', '#d79a2c'],
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth' },
+                title: { text: 'Vendas de {{dateMonth|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
+                grid: { row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
+                xaxis: {
+                    title: { text: 'Dias' },
+                    type: 'datetime',
+                    categories: monthSimsDates,
+                    labels: { format: 'd' }
+                },
+                noData: { text: "Sem dados para exibir" }
+            };
+            var ttSimsMonth = new ApexCharts(document.querySelector("#ttSimsMonth"), optionsSimsMonth);
+            ttSimsMonth.render();
+        } catch (error) {
+            console.error("Erro ao renderizar o gráfico de SIMs do mês:", error);
+        }
         $('#total_sims-month-tab').off();
     });
 
-    // YEAR
+    // --- YEARLY SIMS CHART ---
     $('#total_sims-year-tab').on("shown.bs.tab", function () {
-        var optionsSimsYear = {
-            series: [{
-                name: 'SIMs',
-                data: JSON.parse('{{ yearSimsValuesS|escapejs|safe }}')
-            }, {
-                name: 'eSIMs',
-                data: JSON.parse('{{ yearSimsValuesE|escapejs|safe }}')
-            }],
-            chart: {
-                height: 350,
-                type: 'bar',
-                zoom: {
-                    enabled: false
-                }
-            },
-            colors: ['#103651', '#d79a2c'],
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            title: {
-                text: 'Vendas de {{dateMonth|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}',
-                align: 'left'
-            },
-            grid: {
-                row: {
-                    colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                    opacity: 0.5
-                },
-            },
-            xaxis: {
-                title: {
-                    text: 'Dias'
-                },
-                type: 'datetime',
-                categories: JSON.parse('{{ yearSimsDates|escapejs|safe }}'),
-                labels: {
-                    format: 'MMM',
-                }
-            }
-        };
-    
-        var ttSimsYear = new ApexCharts(document.querySelector("#ttSimsYear"), optionsSimsYear);
-        ttSimsYear.render();
+        try {
+            const yearSimsValuesSRaw = '{{ yearSimsValuesS|escapejs|safe }}';
+            const yearSimsValuesERaw = '{{ yearSimsValuesE|escapejs|safe }}';
+            const yearSimsDatesRaw = '{{ yearSimsDates|escapejs|safe }}';
+            const yearSimsValuesS = yearSimsValuesSRaw ? JSON.parse(yearSimsValuesSRaw) : [];
+            const yearSimsValuesE = yearSimsValuesERaw ? JSON.parse(yearSimsValuesERaw) : [];
+            const yearSimsDates = yearSimsDatesRaw ? JSON.parse(yearSimsDatesRaw) : [];
 
+            var optionsSimsYear = {
+                series: [
+                    { name: 'SIMs', data: yearSimsValuesS },
+                    { name: 'eSIMs', data: yearSimsValuesE }
+                ],
+                chart: { height: 350, type: 'bar', zoom: { enabled: false } },
+                colors: ['#103651', '#d79a2c'],
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth' },
+                title: { text: 'Vendas de {{dateYear|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
+                grid: { row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
+                xaxis: {
+                    title: { text: 'Meses' },
+                    type: 'datetime',
+                    categories: yearSimsDates,
+                    labels: { format: 'MMM' }
+                },
+                noData: { text: "Sem dados para exibir" }
+            };
+            var ttSimsYear = new ApexCharts(document.querySelector("#ttSimsYear"), optionsSimsYear);
+            ttSimsYear.render();
+        } catch (error) {
+            console.error("Erro ao renderizar o gráfico de SIMs do ano:", error);
+        }
         $('#total_sims-year-tab').off();
     });
+});
 </script>

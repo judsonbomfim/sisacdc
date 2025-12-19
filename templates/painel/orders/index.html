@@ -50,7 +50,7 @@
     {% if request.user|can:'edit_orders' %}
       <div class="col-md-1">
         <div class="dm-select">
-          <select class="form-control form-control-lg ps-3 pe-5" name="ord_staus">
+          <select class="form-control form-control-lg ps-3 pe-5" name="ord_status" id="ord_status">
             <option value="" selected>Alterar Status</option>
             {% for ord_st in ord_st_list %}
               <option value="{{ ord_st.0 }}">{{ ord_st.1 }}</option>
@@ -63,20 +63,20 @@
       </div>
     {% endif %}
     <div class="col-md-2">
-      <input type="text" class="form-control form-control-lg" placeholder="Nome" name="ord_name_f" />
+      <input type="text" class="form-control form-control-lg" placeholder="Nome" name="ord_name_f" value="{{ ord_name_f|default:'' }}" />
     </div>
     <div class="col-md-1">
-      <input type="text" class="form-control form-control-lg" placeholder="Pedido" name="ord_order_f" />
+      <input type="text" class="form-control form-control-lg" placeholder="Pedido" name="ord_order_f" value="{{ ord_order_f|default:'' }}" />
     </div>
     <div class="col-md-1">
-      <input type="text" class="form-control form-control-lg" placeholder="(e)SIM)" name="ord_sim_f" />
+      <input type="text" class="form-control form-control-lg" placeholder="(e)SIM)" name="ord_sim_f" value="{{ ord_sim_f|default:'' }}" />
     </div>
     <div class="col-md-2">
       <div class="dm-select">
         <select class="form-control form-control-lg ps-3 pe-5" name="oper_f">
-          <option value="" selected>Todas Operadoras</option>
+          <option value="">Todas Operadoras</option>
           {% for op_s in oper_list %}
-            <option value="{{ op_s.0 }}">{{ op_s.1 }}</option>
+            <option value="{{ op_s.0 }}" {% if oper_f == op_s.0 %}selected{% endif %}>{{ op_s.1 }}</option>
           {% endfor %}
         </select>
       </div>
@@ -84,10 +84,10 @@
     <div class="col-md-2">
       <div class="dm-select">
         <select class="form-control form-control-lg ps-3 pe-5" name="ord_st_f">
-          <option value="" selected>Todos Status</option>
+          <option value="">Todos Status</option>
           {% for ord_st in ord_st_list %}
             {% if ord_st.2 != 0 %}
-              <option value="{{ ord_st.0 }}">{{ ord_st.1 }} ({{ ord_st.2 }})</option>
+              <option value="{{ ord_st.0 }}" {% if ord_st_f == ord_st.0 %}selected{% endif %}>{{ ord_st.1 }} ({{ ord_st.2 }})</option>
             {% endif %}
           {% endfor %}
         </select>
@@ -98,7 +98,12 @@
     </div>
     <div class="col-md-1 p-2">
       <div class="application-task d-flex align-items-center">
-        <a class="btn-default btn-rounded" href="{% url 'orders_list' %}"><i class="bi bi-arrow-clockwise"></i>Limpar</a>
+        <a class="btn-default btn-rounded pe-3" href="{% url 'orders_list' %}">
+            <i class="bi bi-arrow-clockwise fs-4"></i>
+        </a>
+        <a class="btn-default btn-rounded pe-3" href="{% url 'ord_export' %}">
+            <i class="bi bi-arrow-down-circle fs-4"></i>
+        </a>
       </div>
     </div>
     <div class="table-responsive">
@@ -113,11 +118,11 @@
             <th class="userDatatable-title">(e)SIM</th>
             <th class="userDatatable-title">Op.</th>
             <th class="userDatatable-title">Produto</th>
+            <th class="userDatatable-title">Celular</th>
+            <th class="userDatatable-title">Ped/SIM</th>
             <th class="userDatatable-title text-center">Países</th>
             <th class="userDatatable-title text-center">Voz</th>
             <th class="userDatatable-title text-center">Dias</th>
-            <th class="userDatatable-title">Celular</th>
-            <th class="userDatatable-title">Ped./Chip</th>
             <th class="userDatatable-title text-center">Ativação</th>
             <th class="userDatatable-title text-center">Término</th>
             <th class="userDatatable-title text-center">Status</th>
@@ -168,35 +173,14 @@
                   </div>
                 </td>
                 <td>
-                  <div class="userDatatable-content">{{ order.id_sim.operator }}</div>
+                  <div class="userDatatable-content text-center">{{ order.id_sim.get_operator_display }}</div>
                 </td>
                 <td>
-                  <div class="userDatatable-content">{{ order.get_product_display }} {{ order.get_data_day_display }}</div>
+                  <div class="userDatatable-content text-center">{{ order.get_product_display }} {{ order.get_data_day_display }}</div>
                 </td>
                 <td class="text-center">
                   <div class="userDatatable-content">
-                    {% if order.countries == 0 %}
-                      -
-                    {% else %}
-                      <span class="badge badge-round badge-lg alert-success">Sim</span>
-                    {% endif %}
-                  </div>
-                </td>
-                <td>
-                  <div class="userDatatable-content">
-                    {% if order.calls == 0 %}
-                      -
-                    {% else %}
-                      <span class="badge badge-round badge-lg alert-success">Voz</span>
-                    {% endif %}
-                  </div>
-                </td>
-                <td>
-                  <div class="userDatatable-content">{{ order.days }}</div>
-                </td>
-                <td>
-                  <div class="userDatatable-content">
-                    {% if order.cell_mod %}
+                    {% if order.cell_mod and order.cell_mod != 'False' and order.cell_mod != 'false' and order.cell_mod|length > 0 %}
                       <i class="bi bi-phone text-primary" style="cursor: pointer;" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="{{ order.cell_mod }}"></i>
                     {% endif %}
                     {% if order.cell_imei %}
@@ -209,6 +193,27 @@
                 </td>
                 <td>
                   <div class="userDatatable-content">{{ order.ord_chip_nun }}</div>
+                </td>
+                <td class="text-center">
+                  <div class="userDatatable-content text-center">
+                    {% if order.countries == 0 %}
+                      -
+                    {% else %}
+                      <span class="badge badge-round badge-lg alert-success">Sim</span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td>
+                  <div class="userDatatable-content text-center">
+                    {% if order.calls == 0 %}
+                      -
+                    {% else %}
+                      <span class="badge badge-round badge-lg alert-success">Voz</span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td>
+                  <div class="userDatatable-content">{{ order.days }}</div>
                 </td>
                 <td class="text-center">
                   <div class="userDatatable-content">{{ order.activation_date|date:'d/m/Y' }}</div>
@@ -226,8 +231,8 @@
                 <td>
                   <div class="userDatatable-content">
                     {% if request.user|can:'edit_orders' %}
-                      <a href="{% url 'ord_edit' order.id %}"><i class="bi bi-pencil-square pe-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Editar"></i></a>
-                      {% if order.id_sim.operator == 'TC' %}  
+                      <a href="{% url 'ord_edit' order.id %}"><i class="bi bi-pencil-square pe-1 text-info" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Editar Pedido"></i></a>
+                      {% if order.id_sim.operator == 'TI' and order.order_status == 'AT' or order.id_sim.operator == 'TC' and order.order_status == 'AT' or order.id_sim.operator == 'CM' and order.order_status == 'AT' %}  
                         <a href="#" data-bs-toggle="modal" data-bs-target="#produtoModal" onclick="carregarDetalhes({{ order.id }})"><i class="bi bi-info-square pe-1 text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Detalhes do pedido"></i></a>
                       {% endif %}
                       {% if order.id_sim != None %}

@@ -212,16 +212,27 @@
         $('#checkAll').on('change', function () {
           $('.checkItem').prop('checked', this.checked)
         })
-    
-        // Datepicker format
-        $('#voice_going_f').datepicker({
-          dateFormat: 'dd/mm/yy'
-        })
-        $('#voice_return_f').datepicker({
-          dateFormat: 'dd/mm/yy',
-          language: 'pt-BR'
-        })
       })
     })(jQuery)
   </script>
+  <script>
+        (function ($) {
+            $(document).ready(function () {
+                $("#voice_going_f").dateRangePicker({
+                    showOn: "focus",
+                    rangeSeparator: " - ",
+                    dateFormat: "dd/mm/yy",
+                    useHiddenAltFields: true,
+                    constrainInput: true,
+                });
+                $("#voice_return_f").dateRangePicker({
+                    showOn: "focus",
+                    rangeSeparator: " - ",
+                    dateFormat: "dd/mm/yy",
+                    useHiddenAltFields: true,
+                    constrainInput: true,
+                });
+            });
+        })(jQuery);
+</script>
 {% endblock %}

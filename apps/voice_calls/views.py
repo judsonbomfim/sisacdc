@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
+from apps.voice_calls.classes import NoteVoiceCall, UpdateVoice
 from apps.voice_calls.models import VoiceNumbers, VoiceCalls
 from apps.voice_calls.tasks import number_up_status, voices_up_status, update_password
 from apps.orders.models import Orders
@@ -21,11 +22,15 @@ def voice_index(request):
     voice_item_f = None
     voice_number_f = None
     voice_going_f = None
+    voice_going_1 = None
+    voice_going_2 = None
     voice_return_f = None
+    voice_return_1 = None
+    voice_return_2 = None
     voice_status_f = None
     
     url_cdn = settings.URL_CDN
-    fields_df = ['id', 'id_number__number', 'id_item__client', 'id_number__id', 'id_item__item_id', 'id_number__login', 'id_number__password', 'id_number__number_qrcode', 'id_item__days', 'id_item__activation_date', 'call_status']
+    fields_df = ['id', 'id_number__number', 'id_item__client', 'id_number__id', 'id_item__item_id', 'id_number__login', 'id_number__password', 'id_number__number_qrcode', 'days', 'activation_date', 'call_status']
     
     voices_all = VoiceCalls.objects.all().order_by('-id')
     vox_status = VoiceCalls.call_status.field.choices # Listar status dos pedidos
@@ -54,14 +59,16 @@ def voice_index(request):
         
         if request.GET.get('voice_item_f'): voice_item_f = request.GET.get('voice_item_f')
         if request.GET.get('voice_number_f'): voice_number_f = request.GET.get('voice_number_f')    
-        if request.GET.get('voice_going_f'): voice_going_f = request.GET.get('voice_going_f')       
-        if request.GET.get('voice_return_f'): voice_return_f = request.GET.get('voice_return_f')    
+        if request.GET.get('voice_going_1'): voice_going_1 = request.GET.get('voice_going_1')  
+        if request.GET.get('voice_going_2'): voice_going_2 = request.GET.get('voice_going_2')  
+        if request.GET.get('voice_return_1'): voice_return_1 = request.GET.get('voice_return_1')    
+        if request.GET.get('voice_return_2'): voice_return_2 = request.GET.get('voice_return_2')    
         if request.GET.get('voice_status_f'): voice_status_f = request.GET.get('voice_status_f')
 
     if request.method == 'POST':
         
         if request.POST.get('voice_item_f'): voice_item_f = request.POST.get('voice_item_f')
-        if request.POST.get('voice_number_f'): voice_number_f = request.POST.get('voice_number_f')    
+        if request.POST.get('voice_number_f'): voice_number_f = request.POST.get('voice_number_f')
         if request.POST.get('voice_going_f'): voice_going_f = request.POST.get('voice_going_f')
         if request.POST.get('voice_return_f'): voice_return_f = request.POST.get('voice_return_f')
         if request.POST.get('voice_status_f'): voice_status_f = request.POST.get('voice_status_f')
@@ -74,7 +81,8 @@ def voice_index(request):
                 voices_up_status.delay(voice_id, voice_st)
                 messages.success(request,f'Pedido(s) atualizado com sucesso!')
             else:
-                messages.info(request,f'Você precisa marcar alguma opção')     
+                messages.info(request,f'Você precisa marcar alguma opção')
+
 
     # FIlters
     
@@ -90,21 +98,50 @@ def voice_index(request):
         voices_l = voices_l[(voices_l['num_number'] == voice_number_f)]
         url_filter += f"&voice_number_f={voice_number_f}"    
 
-    if voice_going_f is not None:
-        voice_going_f = DateFormats.dateF(voice_going_f) 
-        voices_l = voices_l[(voices_l['activation_date'] == voice_going_f)]
-        url_filter += f"&voice_going_f={voice_going_f}"
+    if voice_going_1 and voice_going_2:
+        voices_l = voices_l[(voices_l['activation_date'] >= voice_going_1) & (voices_l['activation_date'] <= voice_going_2)]
+        url_filter += f"&voice_going_1={voice_going_1}&voice_going_2={voice_going_2}"
+    elif voice_going_1:
+        voices_l = voices_l[(voices_l['activation_date'] == voice_going_1)]
+        url_filter += f"&voice_going_1={voice_going_1}"          
 
-    if voice_return_f is not None:
-        voice_return_f = DateFormats.dateF(voice_return_f) 
-        voices_l = voices_l[(voices_l['return_date'] == voice_return_f)]
-        url_filter += f"&voice_return_f={voice_return_f}"
-        
+    if voice_return_1 and voice_return_2:
+        voices_l = voices_l[(voices_l['return_date'] >= voice_return_1) & (voices_l['return_date'] <= voice_return_2)]
+        url_filter += f"&voice_return_1={voice_return_1}&voice_return_2={voice_return_2}"
+    elif voice_return_1:
+        voices_l = voices_l[(voices_l['return_date'] == voice_return_1)]
+        url_filter += f"&voice_return_1={voice_return_1}"
+    
     if voice_status_f is not None:
         voice_status_f = voice_status_f 
         voices_l = voices_l[(voices_l['call_status'] == voice_status_f)]
         url_filter += f"&voice_status_f={voice_status_f}"   
-        
+    
+    # Aplicar filtros para POST (formulário)
+    if request.method == 'POST':
+        if voice_going_f is not None:
+            voice_going = [item.strip() for item in voice_going_f.split('-')]
+            voice_going_1 = DateFormats.dateF(voice_going[0])
+            try: 
+                voice_going_2 = DateFormats.dateF(voice_going[1])
+                voices_l = voices_l[(voices_l['activation_date'] >= voice_going_1) & (voices_l['activation_date'] <= voice_going_2)]
+                url_filter += f"&voice_going_1={voice_going_1}&voice_going_2={voice_going_2}"
+            except:
+                voices_l = voices_l[(voices_l['activation_date'] == voice_going_1)]
+                url_filter += f"&voice_going_1={voice_going_1}"  
+
+        if voice_return_f is not None:
+            voice_return = [item.strip() for item in voice_return_f.split('-')]
+            voice_return_1 = DateFormats.dateF(voice_return[0])
+            try:
+                voice_return_2 = DateFormats.dateF(voice_return[1])
+                voices_l = voices_l[(voices_l['return_date'] >= voice_return_1) & (voices_l['return_date'] <= voice_return_2)]
+                url_filter += f"&voice_return_1={voice_return_1}&voice_return_2={voice_return_2}"
+            except:
+                voices_l = voices_l[(voices_l['return_date'] == voice_return_1)]
+                url_filter += f"&voice_return_1={voice_return_1}"   
+    
+    
     voices_l = voices_l.to_dict('records')
 
     vox_st_list = []
@@ -146,20 +183,30 @@ def voice_edit(request,id):
         return render(request, 'painel/voice/edit.html', context)
     
     if request.method == 'POST':
-        
-        print('>>>>>>>>>> EDITAR PEDIDO')
-        
+                
         call_put = VoiceCalls.objects.get(pk=id)
-        call_put.days = request.POST.get('days')
+        status_now = call_put.call_status
+        if request.POST.get('days'):
+            call_put.days = request.POST.get('days')
         if request.POST.get('activation_date'):
             call_put.activation_date = request.POST.get('activation_date')
         else:
             call_put.activation_date = call_put.activation_date
-        call_put.call_status = request.POST.get('ord_st_f')
         call_put.save()
         
+        if request.POST.get('ord_st_f') != status_now:
+            UpdateVoice.upStatus(call_put,request.POST.get('ord_st_f'))
+            NoteVoiceCall.addNote(id_item=call_put, note=f"Status alterado de {status_now} para {request.POST.get('ord_st_f')}", id_user=request.user, type_note='P')
+        
+        note_text = request.POST.get('ord_note')
+        print(f"Nota recebida: '{note_text}'")
+        if note_text:
+            NoteVoiceCall.addNote(id_item=call_put, note=note_text, id_user=request.user, type_note='P')
+        
+        NoteVoiceCall.addNote(id_item=call_put, note="Pedido Alterado", id_user=request.user, type_note='P')            
         messages.success(request,f'Pedido {call_put.id_item} atualizado com sucesso!')
         return redirect('voice_index')
+
 
 @login_required(login_url='/login/')
 def voice_import(request):
@@ -193,11 +240,17 @@ def voice_import(request):
         if voice != '':
             arquivo = voice.read().decode("utf-8")
             line_h = 0            
+
             for lines in arquivo.split('\n'):
-                                
+                if not lines.strip():
+                    continue  # pula linha vazia
+
                 line = []
                 col = lines.split(',')
                 line.append(col)
+                if len(col) < 3:
+                    messages.error(request, 'Linha com dados insuficientes no arquivo CSV.')
+                    continue
                 
                 f_login = line[0][0]
                 f_extension = line[0][1]
@@ -327,3 +380,21 @@ def up_password(request,id):
     messages.success(request,f'Senha e QrCode redefinidos com sucesso!')
 
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+
+@login_required(login_url='/login/')
+def atualizarDataVoz(request):
+    voxs = VoiceCalls.objects.all()
+
+    for vox in voxs:
+        # if str(vox.activation_date) in ['0001-01-01', '1-01-01']:
+        if str(vox.days) == '1':
+            order = Orders.objects.get(pk=vox.id_item.id)
+            vox.days = order.days
+            # vox.activation_date = order.activation_date
+            vox.save()
+            print(f"Voz {vox.id} atualizada com sucesso!")
+    print("----------------- Dados de voz atualizados com sucesso!")
+    # mensagem de retorno
+    messages.success(request, "Dados de voz atualizados com sucesso!")
+    return redirect('voice_index')
