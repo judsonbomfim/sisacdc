@@ -54,7 +54,7 @@
                   <label class="form-label">Status</label>
                   <select class="form-select" name="ord_st_f">
                     {% for ord_s in vox_status %}
-                      {% if ord_s.0 == vox.order_status %}
+                      {% if ord_s.0 == vox.call_status %}
                         <option value="{{ ord_s.0 }}" selected>{{ ord_s.1 }}</option>
                       {% else %}
                         <option value="{{ ord_s.0 }}">{{ ord_s.1 }}</option>
