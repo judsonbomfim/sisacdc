@@ -286,14 +286,3 @@ def voiceDesactivate(id=None):
         conn.close()
                 
     print('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
-
-
-# Aliases to match Celery beat names configured in settings
-@shared_task
-def simActivateVC(id=None):
-    return voiceActivate(id=id)
-
-
-@shared_task
-def simDeactivateVC(id=None):
-    return voiceDesactivate(id=id)
