@@ -99,7 +99,7 @@ def orders_list(request):
         url_filter += f"&ord_st={ord_st_f}"
         
     # Buscar planos para mapeamento
-    plans = {plan['name']: plan['data_day'] for plan in Orders.products.values('name', 'data_day')}
+    plans = {plan['product']: plan['data_day'] for plan in Orders.objects.values('product', 'data_day').distinct()}
 
     # Sessão: salve dados serializáveis (lista de dicts) e calcule return_date
     qs = orders_l.values(
