@@ -243,6 +243,24 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # Requer autenticação por padrão
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Tempo de validade do token de acesso
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Tempo de validade do token de refresh
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+
 # API TELCON
 APITC_USERNAME = str(os.getenv('APITC_USERNAME'))
 APITC_PASSWORD = str(os.getenv('APITC_PASSWORD'))
@@ -261,17 +279,7 @@ APITM_URL = str(os.getenv('APITM_URL'))
 APIMS_TOKEN = str(os.getenv('APIMS_TOKEN'))
 APIMS_URL = str(os.getenv('APIMS_URL'))
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',  # Requer autenticação por padrão
-    ),
-}
+# API VOICE CALLS
+APIVC_KEY = str(os.getenv('APIVC_KEY'))
+APIVC_URL = str(os.getenv('APIVC_URL'))
 
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Tempo de validade do token de acesso
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Tempo de validade do token de refresh
-    'AUTH_HEADER_TYPES': ('Bearer',),
-}
