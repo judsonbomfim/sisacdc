@@ -5,10 +5,11 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
-from apps.orders.models import Orders, Notes
-from apps.orders.classes import ApiStore, StatusStore
+from apps.orders.models import Orders, Notes, User
+from apps.orders.classes import ApiStore, StatusStore, UpdateStore
 from apps.voice_calls.models import VoiceCalls
 from apps.voice_calls.classes import NumberFormatter
+import time
 
 @shared_task
 def send_email_sims(id=None):
@@ -28,11 +29,13 @@ def send_email_sims(id=None):
         name = order.client
         client_email = order.email
         order_id = order.item_id
+        ord_id = order.order_id
         order_st = order.order_status
         try: qrcode = order.id_sim.link
         except: qrcode = None
         activation_date = order.activation_date
         product = f'{order.get_product_display()} {order.get_data_day_display()}'
+        operator = order.id_sim.operator if order.id_sim else None
         days = order.days     
         product_plan = order.get_product_display()
         try: type_sim = order.id_sim.type_sim
@@ -48,6 +51,7 @@ def send_email_sims(id=None):
             'order_id': order_id,
             'qrcode': qrcode,
             'activation_date': activation_date,
+            'operator': operator,
             'product': product,
             'days': days,
             'product_plan': product_plan,
@@ -74,34 +78,25 @@ def send_email_sims(id=None):
         email.attach_alternative(html_content, "text/html")
         email.send()
         
-        if (order_st != 'CN' or order_st != 'AT') and type_sim == 'esim':
-            if product_plan == 'USA' or product_plan == 'USA 30 Dias':
-                # Update Order
-                order = Orders.objects.get(pk=id)
-                order.order_status = 'AI'
-                order.save()
-                # Update Store
-            else:
-                # Update Order
-                order = Orders.objects.get(pk=id)
-                order.order_status = 'AA'
-                order.save()
-                # Update Store
-                apiStore = ApiStore.conectApiStore()
-                status_def_sis = StatusStore.st_sis_site()            
-                update_store = {
-                    'status': status_def_sis['AA']
-                }
-                apiStore.put(f'orders/{order.order_id}', update_store).json()
+        # if order_st != 'CN' or order_st != 'AT':
+        # ...
         
+        try:
+            id_user = User.objects.get(pk=request.user.id)
+            type_note = 'U'
+        except:
+            id_user = None
+            type_note = 'S'
+            
         # Add note
         add_note = Notes( 
             id_item = order,
-            id_user = None,
+            id_user = id_user,
             note = 'E-mail enviado com sucesso!',
-            type_note = 'S',
+            type_note = type_note,
         )
         add_note.save()
+
 
 @shared_task
 def send_email_voice(id=None):

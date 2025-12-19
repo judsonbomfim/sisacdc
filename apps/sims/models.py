@@ -12,6 +12,8 @@ SIM_OPERATOR = [
     ('TM', 'T-Mobile'), 
     ('CM', 'China Mobile'),
     ('TC', 'Telcom'),
+    ('TI', 'Telcom IMSI'),
+    ('MS', 'MoviStar'),
 ]
 SIM_TYPES = [
     ('sim', 'SIM (Físico)'),   

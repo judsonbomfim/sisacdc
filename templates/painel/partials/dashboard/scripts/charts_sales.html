@@ -1,150 +1,96 @@
 <script>
-    // WEEK
-    var optionsSalesWeek = {
-        series: [{
-            name: "Pedidos",
-            data: JSON.parse('{{ weekSalesValues|escapejs|safe }}'),
-            title: {
-                text: 'Pedidos'
-            }
-        }],
-        chart: {
-            height: 350,
-            type: 'area',
-            zoom: {
-                enabled: false
-            },
-        },
-        colors: ['#106394'],
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'smooth'
-        },
-        title: {
-            text: 'Vendas de {{dateWeek|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}',
-            align: 'left'
-        },
-        grid: {
-            row: {
-                colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                opacity: 0.5
-            },
-        },
-        xaxis: {
-            title: {
-                text: 'Dias'
-            },
-            type: 'datetime',
-            categories: JSON.parse('{{ weekSalesDates|escapejs|safe }}'),
-            labels: {
-                format: 'd/M',
-            }
-        }
-    };
+document.addEventListener("DOMContentLoaded", function() {
+    // --- WEEKLY SALES CHART ---
+    try {
+        const weekSalesValuesRaw = '{{ weekSalesValues|escapejs|safe }}';
+        const weekSalesDatesRaw = '{{ weekSalesDates|escapejs|safe }}';
+        const weekSalesValues = weekSalesValuesRaw ? JSON.parse(weekSalesValuesRaw) : [];
+        const weekSalesDates = weekSalesDatesRaw ? JSON.parse(weekSalesDatesRaw) : [];
 
-    var ttSalesWeek = new ApexCharts(document.querySelector("#ttSalesWeek"), optionsSalesWeek);
-    ttSalesWeek.render();
-
-    // MONTH
-    $('#total_sales-month-tab').on("shown.bs.tab", function () {
-        var optionsSalesMonth = {
-            series: [{
-                name: "Pedidos",
-                data: JSON.parse('{{ monthSalesValues|escapejs|safe }}'),
-            }],
-            chart: {
-                height: 350,
-                type: 'area',
-                zoom: {
-                    enabled: false
-                }
-            },
+        var optionsSalesWeek = {
+            series: [{ name: "Pedidos", data: weekSalesValues }],
+            chart: { height: 350, type: 'area', zoom: { enabled: false } },
             colors: ['#106394'],
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            title: {
-                text: 'Vendas de {{dateMonth|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}',
-                align: 'left'
-            },
-            grid: {
-                row: {
-                    colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                    opacity: 0.5
-                },
-            },
+            dataLabels: { enabled: false },
+            stroke: { curve: 'smooth' },
+            title: { text: 'Vendas de {{dateWeek|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
+            grid: { row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
             xaxis: {
-                title: {
-                    text: 'Meses'
-                },
+                title: { text: 'Dias' },
                 type: 'datetime',
-                categories: JSON.parse('{{ monthSalesDates|escapejs|safe }}'),
-                labels: {
-                    format: 'd',
-                }
-            }
+                categories: weekSalesDates,
+                labels: { format: 'd/M' }
+            },
+            noData: { text: "Sem dados para exibir" }
         };
+        var ttSalesWeek = new ApexCharts(document.querySelector("#ttSalesWeek"), optionsSalesWeek);
+        ttSalesWeek.render();
+    } catch (error) {
+        console.error("Erro ao renderizar o gráfico de vendas da semana:", error);
+    }
 
-        var ttSalesMonth = new ApexCharts(document.querySelector("#ttSalesMonth"), optionsSalesMonth);
-        ttSalesMonth.render();
+    // --- MONTHLY SALES CHART ---
+    $('#total_sales-month-tab').on("shown.bs.tab", function () {
+        try {
+            const monthSalesValuesRaw = '{{ monthSalesValues|escapejs|safe }}';
+            const monthSalesDatesRaw = '{{ monthSalesDates|escapejs|safe }}';
+            const monthSalesValues = monthSalesValuesRaw ? JSON.parse(monthSalesValuesRaw) : [];
+            const monthSalesDates = monthSalesDatesRaw ? JSON.parse(monthSalesDatesRaw) : [];
 
+            var optionsSalesMonth = {
+                series: [{ name: "Pedidos", data: monthSalesValues }],
+                chart: { height: 350, type: 'area', zoom: { enabled: false } },
+                colors: ['#106394'],
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth' },
+                title: { text: 'Vendas de {{dateMonth|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
+                grid: { row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
+                xaxis: {
+                    title: { text: 'Dias' },
+                    type: 'datetime',
+                    categories: monthSalesDates,
+                    labels: { format: 'd' }
+                },
+                noData: { text: "Sem dados para exibir" }
+            };
+            var ttSalesMonth = new ApexCharts(document.querySelector("#ttSalesMonth"), optionsSalesMonth);
+            ttSalesMonth.render();
+        } catch (error) {
+            console.error("Erro ao renderizar o gráfico de vendas do mês:", error);
+        }
         $('#total_sales-month-tab').off();
     });
 
-    // YEAR
+    // --- YEARLY SALES CHART ---
     $('#total_sales-year-tab').on("shown.bs.tab", function () {
-        var optionsSalesYear = {
-            series: [{
-                name: "Pedidos",
-                data: JSON.parse('{{ yearSalesValues|escapejs|safe }}'),
-                title: {
-                    text: 'Pedidos'
-                }
-            }],
-            chart: {
-                height: 350,
-                type: 'area',
-                zoom: {
-                    enabled: false
-                }
-            },
-            colors: ['#106394'],
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            title: {
-                text: 'Vendas de {{dateYear|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}',
-                align: 'left'
-            },
-            grid: {
-                row: {
-                    colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
-                    opacity: 0.5
-                },
-            },
-            xaxis: {
-                title: {
-                    text: 'Meses'
-                },
-                type: 'datetime',
-                categories: JSON.parse('{{ yearSalesDates|escapejs|safe }}'),
-                labels: {
-                    format: 'MMM',
-                }
-            }
-        };
+        try {
+            const yearSalesValuesRaw = '{{ yearSalesValues|escapejs|safe }}';
+            const yearSalesDatesRaw = '{{ yearSalesDates|escapejs|safe }}';
+            const yearSalesValues = yearSalesValuesRaw ? JSON.parse(yearSalesValuesRaw) : [];
+            const yearSalesDates = yearSalesDatesRaw ? JSON.parse(yearSalesDatesRaw) : [];
 
-        var ttSalesYear = new ApexCharts(document.querySelector("#ttSalesYear"), optionsSalesYear);
-        ttSalesYear.render();
-
+            var optionsSalesYear = {
+                series: [{ name: "Pedidos", data: yearSalesValues }],
+                chart: { height: 350, type: 'area', zoom: { enabled: false } },
+                colors: ['#106394'],
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth' },
+                title: { text: 'Vendas de {{dateYear|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
+                grid: { row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
+                xaxis: {
+                    title: { text: 'Meses' },
+                    type: 'datetime',
+                    categories: yearSalesDates,
+                    labels: { format: 'MMM' }
+                },
+                noData: { text: "Sem dados para exibir" }
+            };
+            var ttSalesYear = new ApexCharts(document.querySelector("#ttSalesYear"), optionsSalesYear);
+            ttSalesYear.render();
+        } catch (error) {
+            console.error("Erro ao renderizar o gráfico de vendas do ano:", error);
+        }
         $('#total_sales-year-tab').off();
     });
+});
 </script>

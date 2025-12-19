@@ -2,6 +2,7 @@
     var countActivTM = Number('{{ countActivTM }}');
     var countActivCM = Number('{{ countActivCM }}');
     var countActivTC = Number('{{ countActivTC }}');
+    var countActivTI = Number('{{ countActivTI }}');
 
     var optionsContActiv = {
         series: [{
@@ -13,6 +14,9 @@
         }, {
             name: 'Telcom',
             data: [countActivTC]
+        }, {
+            name: 'Telecom IMSI',
+            data: [countActivTI]
         }],
         chart: {
             height: 80,

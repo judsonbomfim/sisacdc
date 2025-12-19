@@ -32,7 +32,7 @@
 <div class="container-fluid">
 
     <div class="row pt-5">
-        <div class="col-xxl-3 col-sm-3 mb-25">
+        {% comment %} <div class="col-xxl-4 col-sm-3 mb-25">
             <!-- Card 1  -->
             <div class="ap-po-details ap-po-details--2 p-25 radius-xl d-flex justify-content-between">
                 <div class="overview-content w-100">
@@ -50,7 +50,7 @@
                 </div>
             </div>
             <!-- Card 1 End  -->
-        </div>
+        </div> {% endcomment %}
         <div class="col-xxl-3 col-sm-3 mb-25">
             <!-- Card 2 -->
             <div class="ap-po-details ap-po-details--2 p-25 radius-xl d-flex justify-content-between">
@@ -108,6 +108,44 @@
             </div>
             <!-- Card 4 End  -->
         </div>
+        <div class="col-xxl-3 col-sm-3 mb-25">
+            <!-- Card 4  -->
+            <div class="ap-po-details ap-po-details--2 p-25 radius-xl d-flex justify-content-between">
+                <div class="overview-content w-100">
+                    <h5 class="text-primary fw-bold m-0">Telcom IMSI</h5>
+                    <div class=" ap-po-details-content d-flex flex-wrap justify-content-between">
+                        <div class="ap-po-details__titlebar p-2">
+                            <span class="h1">{{countActivTI}}</span><span class="ps-3">Ativações</span>
+                        </div>
+                        <div class="ap-po-details__icon-area">
+                            <div class="svg-icon order-bg-opacity-primary bg-secondary">
+                                <i class="bi bi-sim-fill fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 4 End  -->
+        </div>
+        <div class="col-xxl-3 col-sm-3 mb-25">
+            <!-- Card 4  -->
+            <div class="ap-po-details ap-po-details--2 p-25 radius-xl d-flex justify-content-between">
+                <div class="overview-content w-100">
+                    <h5 class="text-primary fw-bold m-0">MoviStar</h5>
+                    <div class=" ap-po-details-content d-flex flex-wrap justify-content-between">
+                        <div class="ap-po-details__titlebar p-2">
+                            <span class="h1">{{countActivMS}}</span><span class="ps-3">Ativações</span>
+                        </div>
+                        <div class="ap-po-details__icon-area">
+                            <div class="svg-icon order-bg-opacity-primary bg-secondary">
+                                <i class="bi bi-sim-fill fa-2x text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 4 End  -->
+        </div>
     </div>
 </div>
 
@@ -117,12 +155,12 @@
 
     <form action="{% url 'orders_activations' %}" method="POST">
     {% csrf_token %}
-    {% if request.user|can:'edit_orders' %}
         
     <div class="form-group row">
+        {% if request.user|can:'edit_orders' %}
         <div class="col-md-1">
             <div class="dm-select">
-                <select class="form-control form-control-lg ps-3 pe-5" name="ord_staus">
+                <select class="form-control form-control-lg ps-3 pe-5" name="ord_status">
                     <option value="" selected>Alterar Status</option>
                     {% for ord_st in ord_st_list %}
                     <option value="{{ord_st.0}}">{{ord_st.1}}</option>
@@ -136,11 +174,13 @@
         </div>
         {% endif %}
         <div class="col-md-2">
-            <div id="pageContentArea" class="pageSection">
-                <input type="text" id="activGoing_f" name="activGoing_f"
-                    class="inputField shortInputField dateRangeField form-control  ih-medium ip-gray radius-xs b-light"
-                    placeholder="Data de Ativação" data-from-field="txtDateFrom" data-to-field="txtDateTo"
-                    autocomplete="off" />
+            <div class="dm-date-picker">
+                <div class="form-group mb-0 form-group-calender">
+                    <div class="position-relative">
+                    <input type="text" class="form-control form-control-lg" id="activGoing_f" name="activGoing_f" placeholder="Ida" autocomplete="off" />
+                    <a href="#"><img class="svg" src="{% static 'painel/theme/hexadash/img/svg/calendar.svg' %}" alt="calendar" /></a>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-md-2">
@@ -154,20 +194,34 @@
         <div class="col-md-2">
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="oper_f">
-                    <option value="" selected>Todas Operadoras</option>
+                    <option value="">Operadoras</option>
                     {% for op_s in oper_list %}
-                    <option value="{{op_s.0}}">{{op_s.1}}</option>
+                    <option value="{{op_s.0}}" {% if oper_f == op_s.0 %}selected{% endif %}>{{op_s.1}}</option>
                     {% endfor %}
                 </select>
             </div>
         </div>
-        <div class="col-md-2">
+            <div class="col-md-1">
+            <div class="dm-select">
+                <select class="form-control form-control-lg ps-3 pe-5" name="ord_planos_f">
+                    <option value="">Planos</option>
+                    {% for ord_plan in plan_list %}
+                    {% if ord_plan.2 != 0 %}
+                    <option value="{{ord_plan.0}}" {% if ord_planos_f == ord_plan.0 %}selected{% endif %}>{{ord_plan.1}}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        
+        <div class="col-md-1">
             <div class="dm-select">
                 <select class="form-control form-control-lg ps-3 pe-5" name="ord_st_f">
-                    <option value="" selected>Todos Status</option>
+                    <option value="">Status</option>
                     {% for ord_st in ord_st_list %}
                     {% if ord_st.2 != 0 %}
-                    <option value="{{ord_st.0}}">{{ord_st.1}} ({{ord_st.2}})</option>
+                    <option value="{{ord_st.0}}" {% if ord_st_f == ord_st.0 %}selected{% endif %}>{{ord_st.1}} ({{ord_st.2}})</option>
                     {% endif %}
                     {% endfor %}
                 </select>
@@ -182,7 +236,7 @@
                 <a class="btn-default btn-rounded pe-3" href="{% url 'orders_activations' %}">
                     <i class="bi bi-arrow-clockwise fs-4"></i>
                 </a>
-                <a class="btn-default btn-rounded pe-3" href="{% url 'ord_export_act' %}">
+                <a class="btn-default btn-rounded pe-3" href="{% url 'ord_export' %}">
                     <i class="bi bi-arrow-down-circle fs-4"></i>
                 </a>
             </div>

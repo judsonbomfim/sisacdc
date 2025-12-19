@@ -135,11 +135,16 @@
                           {% if type_sim == 'esim' %}
                             {% if product_plan == 'USA' or product_plan == 'USA 30 Dias' %}
                               {% include 'painel/emails/partials/esim_eua.html' %}
+                            {% elif operator == 'TI' or operator == 'TM' %}
+                              {% include 'painel/emails/partials/esim_telcom.html' %}
                             {% else %}
                               {% include 'painel/emails/partials/esim_other.html' %}
                             {% endif %}
                           {% else %}
-                            {% include 'painel/emails/partials/sim_all.html' %}
+                            {% if operator == 'TI' or operator == 'TM' %}
+                                {% include 'painel/emails/partials/sim_telcom.html' %}
+                            {% endif %}
+                                {% include 'painel/emails/partials/sim_all.html' %}
                           {% endif %}
 
                           {% if countries == True and product_plan == 'GLOBAL' %}
