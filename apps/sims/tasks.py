@@ -693,7 +693,7 @@ def simActivateTM(id=None):
         days = order.days
                 
         # Dados para a solicitação
-        url = settings.APITM_URL
+        url = f'{settings.APITM_URL}/activation/index/submit'
         parsed_url = urlparse(url)
         payload = json.dumps({
             "active_time": activation_date.strftime("%Y-%m-%d"),
@@ -725,7 +725,7 @@ def simActivateTM(id=None):
         except (json.JSONDecodeError, ValueError) as e:
             # API retornou resposta vazia ou inválida
             UpdateOrder.upStatus(id_item,'EA')
-            NotesAdd.addNote(order,f'Erro ao decodificar resposta da API para SIM {iccid}. Status HTTP: {res.status}. Erro: {str(e)}')
+            NotesAdd.addNote(order,f'Erro ao decodificar resposta da API para SIM {iccid}. Status HTTP: {res.status}. Erro: {str(e)} - {data}')
             conn.close()
             continue
         
