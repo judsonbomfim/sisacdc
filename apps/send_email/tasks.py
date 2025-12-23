@@ -90,7 +90,7 @@ def send_email_sims(id=None):
             
         # Add note
         add_note = Notes( 
-            id_item = order_id,
+            id_item = order,
             id_user = id_user,
             note = 'E-mail enviado com sucesso!!',
             type_note = type_note,
