@@ -454,7 +454,7 @@ def ord_edit(request,id):
             orders_up_status(order.id, ord_st,user_name, ord_s_prev) 
                         
             # Enviar email
-            if ord_st == 'CN' and type_sim == 'sim':
+            if ord_st == 'AA':
                 send_email_sims(id=order_id)
                 
                 addNote(f'E-mail enviado com sucesso!')

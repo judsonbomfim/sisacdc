@@ -83,16 +83,16 @@ def send_email_sims(id=None):
         
         try:
             id_user = User.objects.get(pk=request.user.id)
-            type_note = 'U'
+            type_note = 'P'
         except:
             id_user = None
             type_note = 'S'
             
         # Add note
         add_note = Notes( 
-            id_item = order,
+            id_item = order_id,
             id_user = id_user,
-            note = 'E-mail enviado com sucesso!',
+            note = 'E-mail enviado com sucesso!!',
             type_note = type_note,
         )
         add_note.save()
