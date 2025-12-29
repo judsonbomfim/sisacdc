@@ -850,6 +850,8 @@ def sendEmailEsim(request):
                 print(f'E-mail já foi enviado anteriormente para o pedido {ord.order_id}, pulando...')
         except Exception as e:
             print(f'Erro ao enviar e-mail para o pedido {ord.order_id}: {e}')
+    
+    return HttpResponse('Processo de envio de eSIM concluído!')
 
 
 # def textImg(request):
