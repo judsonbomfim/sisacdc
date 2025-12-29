@@ -109,6 +109,8 @@ def sims_in_orders():
             # Save SIMs
             if (type_sim_i == 'esim' or reuso_sim != '-') and not esim_eua:
                 status_ord = 'AA'
+                # Enviar e-mail
+                send_email_sims.delay(order_id_i)
             elif esim_eua: status_ord = 'AI'
             elif type_sim_i == 'sim': status_ord = 'ES'
             
@@ -1362,3 +1364,5 @@ def simActivateMS(id=None):
             NotesAdd.addNote(order, f"Ocorreu um erro interno no sistema ao tentar ativar o SIM {order.id_sim.sim}: {e}")
 
     logger.info('Tarefa de ativação de SIMs da Movistar (MS) finalizada.')
+    
+    

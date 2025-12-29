@@ -10,5 +10,5 @@ urlpatterns = [
     path('enviar/esims/', views.send_esims, name='send_esims'),
     path('ativacoes/', views.orders_activations, name='orders_activations'),
     path('ativacoes/exportar', views.ord_export, name='ord_export'),
-    path('update_status', views.update_st, name='update_st'),
+    path('sendemailesim', views.sendEmailEsim, name='sendEmailEsim'),
 ]

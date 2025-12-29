@@ -825,6 +825,32 @@ def update_status(request):
     messages.success(request, 'Processando atualização de status... Aguarde alguns minutos e atualize a página de pedidos')
     return HttpResponse('Atualizando status!')
 
+def sendEmailEsim(request):
+    
+    # Pedidos aguardando ativação e esims não enviados
+    orders_all = Orders.objects.filter(order_status='AA').filter(id_sim__type_sim='esim')
+    
+    for ord in orders_all:
+        try:
+            # Verificar se o eSIM já foi enviado
+            notes_exist = Notes.objects.filter(id_item=ord.id, note__icontains='E-mail enviado com sucesso!').exists()
+            if not notes_exist:
+                print(f'Enviando e-mail para o pedido {ord.order_id} - Cliente: {ord.client}')
+                send_email_sims.delay(id=ord.order_id)
+                # Adicionar nota de envio
+                add_sim = Notes( 
+                    id_item = Orders.objects.get(pk=ord.id),
+                    id_user = None,
+                    note = 'E-mail enviado com sucesso!',
+                    type_note = 'S',
+                )
+                add_sim.save()
+                print(f'E-mail enviado com sucesso para o pedido {ord.order_id}')
+            else:
+                print(f'E-mail já foi enviado anteriormente para o pedido {ord.order_id}, pulando...')
+        except Exception as e:
+            print(f'Erro ao enviar e-mail para o pedido {ord.order_id}: {e}')
+
 
 # def textImg(request):
 #     # Carrega a imagem em escala de cinza
