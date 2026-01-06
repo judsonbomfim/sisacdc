@@ -134,6 +134,8 @@ def order_import():
                     order_status_i = 'MB'
                 elif condition_i == 'reuso-sim':
                     order_status_i = 'RS'
+                elif type_sim_i == 'esim':
+                    order_status_i = 'AS'
                 else:
                     order_status_i = 'AS'
                 
