@@ -609,6 +609,7 @@ def simDeactivateTC(id=None):
     print('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
 
 
+@shared_task
 def simDeactivateAll(id=None):
 
     timezone = pytz.timezone(settings.TIME_ZONE)
