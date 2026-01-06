@@ -455,15 +455,11 @@ def ord_edit(request,id):
                         
             # Enviar email
             if ord_st == 'AA':
-                send_email_sims(id=order_id)
-                
-                addNote(f'E-mail enviado com sucesso!')
-                messages.success(request,'E-mail enviado com sucesso!')
+                send_email_sims.delay(id=order_id)
 
         if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
             print('----------------- Alterar/desativar TC/TI -----------------')
-            simDeactivateTC(id=order.id)
-
+            simDeactivateTC.delay(id=order.id)
         # Atualizar site
         try:
             UpdateStore.upStore(
