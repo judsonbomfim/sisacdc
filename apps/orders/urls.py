@@ -7,6 +7,7 @@ urlpatterns = [
     path('importar/', views.ord_import, name='ord_import'),
     path('editar/<int:id>', views.ord_edit, name='ord_edit'),
     path('exportar/', views.ord_export_op, name='ord_export_op'),
+    path('exportar/protocolo-csv', views.export_protocolo_from_txt, name='export_protocolo_from_txt'),
     path('enviar/esims/', views.send_esims, name='send_esims'),
     path('ativacoes/', views.orders_activations, name='orders_activations'),
     path('ativacoes/exportar', views.ord_export, name='ord_export'),

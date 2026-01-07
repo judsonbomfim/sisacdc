@@ -1366,4 +1366,3 @@ def simActivateMS(id=None):
 
     logger.info('Tarefa de ativação de SIMs da Movistar (MS) finalizada.')
     
-    

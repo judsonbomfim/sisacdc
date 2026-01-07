@@ -3,6 +3,7 @@ import os
 from django.contrib.auth.models import User
 from rolepermissions.decorators import has_permission_decorator
 import csv
+import requests
 from django.http import HttpResponse, JsonResponse
 from datetime import date, datetime, timedelta
 from django.shortcuts import get_object_or_404, render, redirect
@@ -600,6 +601,57 @@ def ord_export_op(request):
         return response 
     
     return render(request, 'painel/orders/export_op.html', context)
+
+
+@login_required(login_url='/login/')
+@has_permission_decorator('view_orders')
+def export_protocolo_from_txt(request):
+    url = request.GET.get('url')
+    if not url:
+        return HttpResponse('Parâmetro "url" é obrigatório. Ex: ?url=https://exemplo.com/pedidos.txt', status=400)
+
+    try:
+        resp = requests.get(url, timeout=15)
+        resp.raise_for_status()
+        content = resp.text
+    except Exception as e:
+        return HttpResponse(f'Erro ao baixar arquivo TXT: {e}', status=502)
+
+    lines = [ln.strip() for ln in content.splitlines() if ln.strip()]
+
+    order_ids = []
+    for ln in lines:
+        # Tenta interpretar como inteiro; se falhar, ignora a linha
+        try:
+            order_ids.append(int(ln))
+        except ValueError:
+            continue
+
+    if not order_ids:
+        return HttpResponse('Nenhum número de pedido válido encontrado no TXT.', status=400)
+
+    # Busca notas contendo "protocolo" para os pedidos informados (por order_id)
+    notes_qs = (
+        Notes.objects
+        .select_related('id_item')
+        .filter(id_item__order_id__in=list(set(order_ids)), note__icontains='protocolo')
+        .order_by('id_item__order_id', 'created_at')
+    )
+
+    # Monta CSV: Pedido, Nota, Data da Nota
+    response = HttpResponse(content_type='text/csv')
+    today_str = date.today().isoformat()
+    response['Content-Disposition'] = f'attachment; filename="protocolo-notas-{today_str}.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Pedido', 'Nota', 'Data da Nota'])
+
+    for n in notes_qs:
+        pedido = n.id_item.order_id if n.id_item else ''
+        nota = n.note.replace('\r', ' ').replace('\n', ' ').strip() if n.note else ''
+        data_nota = n.created_at.strftime('%d/%m/%Y %H:%M') if n.created_at else ''
+        writer.writerow([pedido, nota, data_nota])
+
+    return response
 
 
 @login_required(login_url='/login/')
