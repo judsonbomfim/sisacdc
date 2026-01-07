@@ -18,7 +18,11 @@ def send_email_sims(id=None):
     if id == None:
         orders_all = Orders.objects.filter(order_status='EE')
     else:
-        orders_all = Orders.objects.filter(pk=id)
+        try:
+            orders_all = Orders.objects.filter(pk=id)
+        except:
+            print(f'Pedido {id} não encontrado!')
+            return None
         
     url_site = settings.URL_CDN
     url_img = f'{url_site}/email/'

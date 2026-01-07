@@ -110,7 +110,7 @@ def sims_in_orders():
             if (type_sim_i == 'esim' or reuso_sim != '-') and not esim_eua:
                 status_ord = 'AA'
                 # Enviar e-mail
-                send_email_sims.delay(order_id_i)
+                send_email_sims.delay(id=id_id_i)
                 addNote(f'Status alterado para Agd. Ativação')
                 print(f'Pedido {order_id_i} com eSIM ou reuso, status definido para AA e e-mail enviado!')
             elif esim_eua: status_ord = 'AI'
