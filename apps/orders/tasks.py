@@ -522,10 +522,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
                 _status = ord_s if ord_s else None,
                 status_g = ord_s if ord_s else None,
             )
-        
-        # Enviar e-mail de ativação
-        if ord_s == 'AA':
-            send_email_sims.delay(id=order.id)           
+                
 
         # Save Notes
         if id_user != None:
@@ -552,7 +549,9 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
                 old_status = ord_status.get(old_status_code, f'Status {old_status_code} desconhecido')
                 new_status = ord_status.get(ord_s, f'Status {ord_s} desconhecido')
                 addNote(f'Alterado de {old_status} para {new_status}')
-                print(f"Nota gravada: Alterado de {old_status} para {new_status}")
+                # Enviar e-mail de ativação
+                if ord_s == 'AA':
+                    send_email_sims.delay(id=order.id)   
             except Exception as e:
                 print(f"Erro ao gravar nota: {e}")
             
