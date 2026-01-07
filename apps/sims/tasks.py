@@ -618,7 +618,7 @@ def simDeactivateAll(id=None):
 
     # Selecionar pedidos
     if id is None:       
-        orders_to_process = Orders.objects.exclude(order_status='AT', id_sim__operator__in=['TC', 'TI']).order_by('-id')
+        orders_to_process = Orders.objects.filter(order_status='AT').exclude(id_sim__operator__in=['TC', 'TI']).order_by('-id')
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
