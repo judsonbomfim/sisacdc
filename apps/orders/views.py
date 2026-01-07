@@ -268,8 +268,8 @@ def ord_edit(request,id):
         order = Orders.objects.get(pk=id)
         order_id = order.order_id
         order_status = order.order_status
-        try: order_sim = order.id_sim.sim
-        except: order_sim = ''
+        # Capturar SIM antigo ANTES de qualquer modificação
+        order_sim = order.id_sim.sim if order.id_sim else ''
         try: sim_id = int(order.id_sim.id)
         except: sim_id = ''
         qrcode = ''
@@ -279,7 +279,7 @@ def ord_edit(request,id):
         data_day = request.POST.get('data_day')
         type_sim = request.POST.get('type_sim')
         operator = request.POST.get('operator')
-        sim = request.POST.get('sim')
+        sim_new = request.POST.get('sim')
         activation_date = request.POST.get('activation_date')
         email = request.POST.get('email')
         cell_imei = request.POST.get('cell_imei')
@@ -348,12 +348,12 @@ def ord_edit(request,id):
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
 
         # Se SIM preenchico
-        if sim:
+        if sim_new:
             if order_sim != '':
                 # Alterar status do SIM no sistema e no site
                 updateSIM()
-            
-            sims_all = Sims.objects.all().filter(sim=sim)
+            # Verificar se SIM já existe
+            sims_all = Sims.objects.all().filter(sim=sim_new)
             if sims_all:
                 # Update order
                 sim_id = sims_all[0].id
@@ -368,7 +368,7 @@ def ord_edit(request,id):
             else:
                 # Save SIMs - Insert Stock
                 add_sim = Sims( 
-                    sim = sim,
+                    sim = sim_new,
                     type_sim = type_sim,
                     operator = operator,
                     sim_status = 'AT',
@@ -389,9 +389,9 @@ def ord_edit(request,id):
                 sim = ''
                 qrcode = None
             
-            # SIM Notes
-            if sim != '':
-                addNote(f'Alteração de {order_sim} para {sim}')
+            # SIM Notes - Apenas registra se houve mudança e há um SIM novo
+            if sim_new and sim_new != order_sim:
+                addNote(f'Alteração de {order_sim if order_sim else "sem SIM"} para {sim_new}')
             
         else:
             # Troca de SIM
