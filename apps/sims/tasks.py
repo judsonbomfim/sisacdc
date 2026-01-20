@@ -40,6 +40,7 @@ def sims_in_orders():
         condition_i = ord.condition
         countries_i = ord.countries
         type_sim_i = ord.type_sim
+        data_day_i = ord.data_day
         # celular_samsung = ord.celular_samsung
         reuso_sim = ord.ord_chip_nun
         update_store = {}
@@ -98,6 +99,13 @@ def sims_in_orders():
                 addNote(f'eSIM EUA - SIM padrão adicionado')
             elif reuso_sim != '-':
                 sim_ds = Sims.objects.filter(sim=reuso_sim).first()
+            elif operator_i == 'OR':
+                sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS', data_day=data_day_i).first()
+                if sim_ds:
+                    pass
+                else:
+                    print('>>>>>>>>>>>>>>>>>>>>>>> SIMs indisponíveis!')
+                    continue
             else:
                 sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
                 if sim_ds:

@@ -143,6 +143,11 @@ def order_import():
                     order_status_i = 'EI'
                 if product_i == 'chip-internacional-eua-30-dias':
                     calls_i = False
+                elif product_i == 'chip-internacional-europa-ilimitado':
+                    if days_i <= '12':
+                        data_day_i = '20gb'
+                    else:
+                        data_day_i = '50gb'
                     
                 shipping_i = shipping_i[:40]
 
