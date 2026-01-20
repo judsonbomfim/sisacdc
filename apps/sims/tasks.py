@@ -67,7 +67,6 @@ def sims_in_orders():
                 'chip-internacional-marrocos-premium',
                 'chip-internacional-egito-premium',
                 'chip-internacional-indonesia-premium',
-                'chip-internacional-europa-ilimitado',
             }
             planos_tc = {
                 'chip-internacional-europa-premium',
@@ -87,6 +86,8 @@ def sims_in_orders():
                     operator_i = 'TC'
                 else:
                     operator_i = 'CM'
+            elif product_i == 'chip-internacional-europa-ilimitado':
+                operator_i = 'OR'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
             else: operator_i = 'CM'
@@ -764,6 +765,40 @@ def simActivateTM(id=None):
                 
     print('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
 
+@shared_task
+def simActivateOR(id=None):
+          
+    tz = pytz.timezone(settings.TIME_ZONE)
+    today = datetime.now(tz).date()
+    tomorrow = today + timedelta(days=1)
+
+    print(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA - {tomorrow}')
+    
+    # Selecionar pedidos
+    if id is None:
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=tomorrow)
+    else:
+        orders_all = Orders.objects.filter(pk=id)
+        
+    for order in orders_all:
+                        
+        order = Orders.objects.get(pk=order.id)
+        id_item = order.id
+        order_id = order.order_id
+        
+        # Alterar status
+        UpdateOrder.upStatus(id_item,'AT')
+        UpdateStore.upStore(
+            order_id = order_id,
+            item_id_store = order.item_id_store if order.item_id_store else None,
+            _status = 'AT',
+            status_g = 'AT',
+        )            
+        # Adicionar nota
+        NotesAdd.addNote(order,f'eSIM Ativado - Processo automático')
+        
+                
+    print('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
 
 @shared_task
 def simActivateCM(id=None):

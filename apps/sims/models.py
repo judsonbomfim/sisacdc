@@ -8,16 +8,24 @@ SIM_STATUS = [
     ('IN', 'Indisponível'),
     ('TC', 'Troca'),
 ]
+
 SIM_OPERATOR = [
     ('TM', 'T-Mobile'), 
     ('CM', 'China Mobile'),
     ('TC', 'Telcom'),
     ('TI', 'Telcom IMSI'),
     ('MS', 'MoviStar'),
+    ('OR', 'Orange'),
 ]
+
 SIM_TYPES = [
     ('sim', 'SIM (Físico)'),   
     ('esim', 'eSIM (Virtual)'),
+]
+
+DATA = [
+    ('20gb', '20GB'),
+    ('50gb', '50GB')
 ]
 
 class Sims(models.Model):
@@ -25,6 +33,7 @@ class Sims(models.Model):
     sim = models.CharField(max_length=25)
     link = models.URLField(null=True, blank=True, default='-')
     type_sim =  models.CharField(max_length=20, choices=SIM_TYPES)
+    data = models.CharField(max_length=15, null=True, blank=True, choices=DATA)
     operator = models.CharField(max_length=20, choices=SIM_OPERATOR)
     sim_status = models.CharField(max_length=20, choices=SIM_STATUS, default='DS')
     created_at = models.DateTimeField(auto_now_add=True)

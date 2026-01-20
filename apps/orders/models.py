@@ -32,7 +32,9 @@ DATA = [
     ('500mb-dia', '500MB'),
     ('1gb', '1GB'),
     ('2gb', '2GB'),
-    ('ilimitado', 'Ilimitado')
+    ('ilimitado', 'Ilimitado'),
+    ('20gb', '20GB'),
+    ('50gb', '50GB')
 ]
 
 ORDER_STATUS = [

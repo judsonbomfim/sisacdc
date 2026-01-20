@@ -46,6 +46,7 @@ def index(request):
     countActivTC = operator_counts.get('TC', 0)
     countActivTI = operator_counts.get('TI', 0)
     countActivMS = operator_counts.get('MS', 0)
+    countActivOR = operator_counts.get('OR', 0)
     
     # Queries
     simsAll = Sims.objects.all()
@@ -178,6 +179,7 @@ def index(request):
     weekOperValuesCM = json.dumps([oper_by_date_week[d].get('CM', 0) for d in all_week_dates])
     weekOperValuesTC = json.dumps([oper_by_date_week[d].get('TC', 0) for d in all_week_dates])
     weekOperValuesTI = json.dumps([oper_by_date_week[d].get('TI', 0) for d in all_week_dates])
+    weekOperValuesOR = json.dumps([oper_by_date_week[d].get('OR', 0) for d in all_week_dates])
 
     # --- Month
     oper_by_date_month = defaultdict(lambda: defaultdict(int))
@@ -189,6 +191,7 @@ def index(request):
     monthOperValuesCM = json.dumps([oper_by_date_month[d].get('CM', 0) for d in all_month_dates])
     monthOperValuesTC = json.dumps([oper_by_date_month[d].get('TC', 0) for d in all_month_dates])
     monthOperValuesTI = json.dumps([oper_by_date_month[d].get('TI', 0) for d in all_month_dates])
+    monthOperValuesOR = json.dumps([oper_by_date_month[d].get('OR', 0) for d in all_month_dates])
 
     # --- Year
     oper_by_month_year = defaultdict(lambda: defaultdict(int))
@@ -200,6 +203,7 @@ def index(request):
     yearOperValuesCM = json.dumps([oper_by_month_year[m].get('CM', 0) for m in all_year_months])
     yearOperValuesTC = json.dumps([oper_by_month_year[m].get('TC', 0) for m in all_year_months])
     yearOperValuesTI = json.dumps([oper_by_month_year[m].get('TI', 0) for m in all_year_months])
+    yearOperValuesOR = json.dumps([oper_by_month_year[m].get('OR', 0) for m in all_year_months])
 
     # Verificar estoque de operadoras
     sim_tm = simsAll.filter(sim_status='DS',operator='TM', type_sim='sim').count()
@@ -210,8 +214,9 @@ def index(request):
     esim_tc = simsAll.filter(sim_status='DS',operator='TC', type_sim='esim').count()
     sim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='sim').count()
     esim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='esim').count()
-    sim_ms = simsAll.filter(sim_status='DS',operator='MS', type_sim='sim').count()
-    esim_ms = simsAll.filter(sim_status='DS',operator='MS', type_sim='esim').count()
+    sim_or = simsAll.filter(sim_status='DS',operator='OR', type_sim='sim').count()
+    esim_or = simsAll.filter(sim_status='DS',operator='OR', type_sim='esim').count()
+
 
     context= {
         'sims': simsAll,
@@ -223,8 +228,8 @@ def index(request):
         'esim_tc': esim_tc,
         'sim_ti': sim_ti,
         'esim_ti': esim_ti,
-        'sim_ms': sim_ms,
-        'esim_ms': esim_ms,
+        'sim_or': sim_or,
+        'esim_or': esim_or,
         'dateDay': dateDay,
         'dateYesterday': dateYesterday,
         'dateWeek': dateWeek,
@@ -237,7 +242,7 @@ def index(request):
         'countActivCM': countActivCM,
         'countActivTC': countActivTC,
         'countActivTI': countActivTI,
-        'countActivMS': countActivMS,
+        'countActivOR': countActivOR,
         'weekSalesDates': weekSalesDates,
         'weekSalesValues': weekSalesValues,
         'weekSimsDates': weekSimsDates,
@@ -248,6 +253,7 @@ def index(request):
         'weekOperValuesCM': weekOperValuesCM,
         'weekOperValuesTC': weekOperValuesTC,
         'weekOperValuesTI': weekOperValuesTI,
+        'weekOperValuesOR': weekOperValuesOR,
         'monthSalesDates': monthSalesDates,
         'monthSalesValues': monthSalesValues,
         'monthSimsDates': monthSimsDates,
@@ -258,6 +264,7 @@ def index(request):
         'monthOperValuesCM': monthOperValuesCM,
         'monthOperValuesTC': monthOperValuesTC,
         'monthOperValuesTI': monthOperValuesTI,
+        'monthOperValuesOR': monthOperValuesOR,
         'yearSalesDates': yearSalesDates,
         'yearSalesValues': yearSalesValues,
         'yearSimsDates': yearSimsDates,
@@ -267,7 +274,8 @@ def index(request):
         'yearOperValuesTM': yearOperValuesTM,
         'yearOperValuesCM': yearOperValuesCM,
         'yearOperValuesTC': yearOperValuesTC,      
-        'yearOperValuesTI': yearOperValuesTI,      
+        'yearOperValuesTI': yearOperValuesTI,  
+        'yearOperValuesOR': yearOperValuesOR,  
     }
     
     return render(request, 'painel/dashboard/index.html', context)

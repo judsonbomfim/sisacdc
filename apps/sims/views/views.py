@@ -109,6 +109,8 @@ def sims_list(request):
     esim_ti = sims_all.filter(sim_status='DS',operator='TI', type_sim='esim').count()
     sim_ms = sims_all.filter(sim_status='DS',operator='MS', type_sim='sim').count()
     esim_ms = sims_all.filter(sim_status='DS',operator='MS', type_sim='esim').count()
+    sim_or = sims_all.filter(sim_status='DS',operator='OR', type_sim='sim').count()
+    esim_or = sims_all.filter(sim_status='DS',operator='OR', type_sim='esim').count()
     
     url = reverse('sims_index')
     
@@ -129,6 +131,8 @@ def sims_list(request):
         'esim_ti': esim_ti,
         'sim_ms': sim_ms,
         'esim_ms': esim_ms,
+        'sim_or': sim_or,
+        'esim_or': esim_or,
         'url_filter': url_filter,
         'sim_f': sim_f,
         'sim_type_f': sim_type_f,
@@ -209,7 +213,16 @@ def sims_add_esim(request):
     if request.method == 'POST':
                 
         type_sim = request.POST.get('type_sim')
-        operator = request.POST.get('operator')
+        oper_val = request.POST.get('operator')
+        if oper_val == 'OR20' or oper_val == 'OR50':
+            operator = 'OR'
+            if oper_val == 'OR20':
+                data = '20gb'
+            elif oper_val == 'OR50':
+                data = '50gb'
+        else:
+            operator = oper_val
+            data = ''
         esims = request.FILES.getlist('esim')
  
         if type_sim == '' or operator == '' or esims == '':
@@ -229,8 +242,7 @@ def sims_add_esim(request):
                 fileurl = fileurl.replace(settings.URL_CDN,'')
             else:
                 messages.error(request,'O arquivo não é uma imagem. Verifique por favor!')
-                return render(request, 'painel/sims/add-esim.html')           
-
+                return render(request, 'painel/sims/add-esim.html')
             
             sims_all = Sims.objects.all().filter(sim=sim_i[0]).filter(type_sim='esim')
             if sims_all:
@@ -241,6 +253,7 @@ def sims_add_esim(request):
                 sim = sim_i[0],
                 link = fileurl,
                 type_sim = type_sim,
+                data = data,
                 operator = operator
             )
             add_sim.save()
