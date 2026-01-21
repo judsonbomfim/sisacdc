@@ -100,7 +100,7 @@ def sims_in_orders():
             elif reuso_sim != '-':
                 sim_ds = Sims.objects.filter(sim=reuso_sim).first()
             elif operator_i == 'OR':
-                sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS', data_day=data_day_i).first()
+                sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS', data=data_day_i).first()
                 if sim_ds:
                     pass
                 else:
