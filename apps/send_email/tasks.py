@@ -38,7 +38,7 @@ def send_email_sims(id=None):
         try: qrcode = order.id_sim.link
         except: qrcode = None
         activation_date = order.activation_date
-        product = f'{order.get_product_display()} {order.get_data_day_display()}'
+        product = f'{order.get_product_display()} {order.get_data_day_display() if operator != "OR" else ""}'
         operator = order.id_sim.operator if order.id_sim else None
         days = order.days     
         product_plan = order.get_product_display()

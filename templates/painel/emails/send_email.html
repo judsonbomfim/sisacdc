@@ -137,6 +137,8 @@
                               {% include 'painel/emails/partials/esim_eua.html' %}
                             {% elif operator == 'TI' or operator == 'TM' %}
                               {% include 'painel/emails/partials/esim_telcom.html' %}
+                            {% elif operator == 'OR' %}
+                              {% include 'painel/emails/partials/esim_orange.html' %}
                             {% else %}
                               {% include 'painel/emails/partials/esim_other.html' %}
                             {% endif %}
