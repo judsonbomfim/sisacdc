@@ -99,7 +99,7 @@
                         </td>
                         <td>
                             <div class="userDatatable-content">
-                                {{ sim.sim }} ({{ sim.data }})
+                                {{ sim.sim }} {% if sim.data %}({{ sim.data }}){% endif %}
                             </div>
                         </td>
                         <td>
