@@ -248,7 +248,6 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
