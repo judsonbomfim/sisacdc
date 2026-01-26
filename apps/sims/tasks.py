@@ -557,7 +557,14 @@ def simDeactivateTC(id=None):
         try:
             iccid = order.id_sim.sim
         except (AttributeError, ObjectDoesNotExist):
-            print(f"Pedido {order.order_id} sem SIM associado. Pulando.")
+            print(f"Pedido {order.order_id} sem SIM associado.")
+            UpdateOrder.upStatus(order.id, 'DE')
+            UpdateStore.upStore(
+                order_id=order.order_id,
+                item_id_store=order.item_id_store if order.item_id_store else None,
+                _status='DE',
+                status_g='DE',
+            )
             continue
 
         try:
@@ -653,12 +660,6 @@ def simDeactivateAll(id=None):
             continue
 
         print(f'Iniciando desativação para o pedido {order.order_id}')
-        
-        try:
-            iccid = order.id_sim.sim
-        except (AttributeError, ObjectDoesNotExist):
-            print(f"Pedido {order.order_id} sem SIM associado. Pulando.")
-            continue
 
         if id is None:
             UpdateOrder.upStatus(order.id, 'DE')
@@ -671,7 +672,7 @@ def simDeactivateAll(id=None):
             sim_put = Sims.objects.get(pk=order.id_sim.id)
             sim_put.sim_status = 'DE'
             sim_put.save()
-        NotesAdd.addNote(order, f'{iccid} desativado com sucesso. Processo automático')
+        NotesAdd.addNote(order, f'Desativado com sucesso. Processo automático')
         
     print(f'Pedido {order.order_id} desativado com sucesso.')                
     print('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
