@@ -1283,7 +1283,7 @@ def simActivateCM(id=None):
                 list_plan = list_cm_global
         elif order_product == "chip-internacional-eua-canada-e-mexico":
             list_plan = list_cm_north
-        elif order_product == "chip-internacional-sul-america":
+        elif order_product == "chip-internacional-america-do-sul-premium":
             list_plan = list_cm_south
         
         # Selecionar plano
