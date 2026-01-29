@@ -296,7 +296,7 @@
                     </td>
                     <td>
                         <div class="userDatatable-content">
-                            {{ order.product }} {{ order.data_day }}
+                            {{ order.product }} {% if order.get_product_display != 'Europa Ilimitado' %}{{ order.data_day }}{% endif %}
                         </div>
                     </td>
                     <td class="text-center">
