@@ -179,7 +179,7 @@
                   <div class="userDatatable-content text-center">
                     {{ order.get_product_display }} 
                     {% if order.data_day == '20gb' %}A
-                    {% elif if order.data_day == '50gb' %}B
+                    {% elif order.data_day == '50gb' %}B
                     {% else %}{{ order.get_data_day_display }}
                     {% endif %}
                   </div>
