@@ -176,7 +176,13 @@
                   <div class="userDatatable-content text-center">{{ order.id_sim.get_operator_display }}</div>
                 </td>
                 <td>
-                  <div class="userDatatable-content text-center">{{ order.get_product_display }} {% if order.get_product_display != 'Europa Ilimitado' %}{{ order.get_data_day_display }}{% endif %}</div>
+                  <div class="userDatatable-content text-center">
+                    {{ order.get_product_display }} 
+                    {% if order.data_day == '20gb' %}A
+                    {% elif if order.data_day == '50gb' %}B
+                    {% else %}{{ order.get_data_day_display }}
+                    {% endif %}
+                  </div>
                 </td>
                 <td class="text-center">
                   <div class="userDatatable-content">
