@@ -669,9 +669,10 @@ def simDeactivateAll(id=None):
                 _status='DE',
                 status_g='DE',
             )
-            sim_put = Sims.objects.get(pk=order.id_sim.id)
-            sim_put.sim_status = 'DE'
-            sim_put.save()
+            if order.id_sim:
+                sim_put = Sims.objects.get(pk=order.id_sim.id)
+                sim_put.sim_status = 'DE'
+                sim_put.save()
         NotesAdd.addNote(order, f'Desativado com sucesso. Processo automático')
         
     print(f'Pedido {order.order_id} desativado com sucesso.')                
