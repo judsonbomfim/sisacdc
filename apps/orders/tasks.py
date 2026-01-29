@@ -24,11 +24,22 @@ def order_import():
 
     # Pedidos com status 'processing'
     response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing'})
+    
+    # Verificar status HTTP antes de tentar decodificar JSON
+    if response.status_code >= 500:
+        print(f"Erro de servidor da API Store: {response.status_code} - {response.reason}")
+        print(f"A API está temporariamente indisponível. Tentando novamente na próxima execução.")
+        return
+    elif response.status_code >= 400:
+        print(f"Erro de cliente da API Store: {response.status_code} - {response.reason}")
+        print(f"Conteúdo da resposta: {response.text[:500]}")
+        return
+    
     try:
         ord = response.json()            
     except Exception as e:
         print(f"Erro ao decodificar JSON da resposta da API: {e}")
-        print(f"Status code: {response.status_code}, Conteúdo: {response.text}")
+        print(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
         return
     
     # Listar pedidos         
@@ -251,11 +262,22 @@ def order_import_voice():
        
     # Pedidos com status 'processing'
     response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing'})
+    
+    # Verificar status HTTP antes de tentar decodificar JSON
+    if response.status_code >= 500:
+        print(f"Erro de servidor da API Store: {response.status_code} - {response.reason}")
+        print(f"A API está temporariamente indisponível. Tentando novamente na próxima execução.")
+        return
+    elif response.status_code >= 400:
+        print(f"Erro de cliente da API Store: {response.status_code} - {response.reason}")
+        print(f"Conteúdo da resposta: {response.text[:500]}")
+        return
+    
     try:
         ord = response.json()            
     except Exception as e:
         print(f"Erro ao decodificar JSON da resposta da API: {e}")
-        print(f"Status code: {response.status_code}, Conteúdo: {response.text}")
+        print(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
         return
     
     # Listar pedidos         
