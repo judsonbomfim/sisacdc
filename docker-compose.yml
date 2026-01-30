@@ -11,6 +11,8 @@ services:
       - .env
     depends_on:
       - redis
+    networks:
+      - sisacdc-network
 
   celery:
     container_name: celery
@@ -24,6 +26,8 @@ services:
     volumes:
       - .:/djangoweb
     restart: on-failure
+    networks:
+      - sisacdc-network
 
   celery_beat:
     container_name: celery_beat
@@ -37,6 +41,8 @@ services:
     volumes:
       - .:/djangoweb
     restart: on-failure
+    networks:
+      - sisacdc-network
 
   redis:
     container_name: redis
@@ -45,6 +51,12 @@ services:
       - redis-data:/data
     ports:
       - "6379:6379"
+    networks:
+      - sisacdc-network
 
 volumes:
   redis-data:
+
+networks:
+  sisacdc-network:
+    driver: bridge

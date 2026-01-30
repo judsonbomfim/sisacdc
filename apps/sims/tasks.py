@@ -104,14 +104,14 @@ def sims_in_orders():
                 if sim_ds:
                     pass
                 else:
-                    print('>>>>>>>>>>>>>>>>>>>>>>> SIMs indisponíveis!')
+                    print('-------------------- SIMs indisponíveis!')
                     continue
             else:
                 sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
                 if sim_ds:
                     pass
                 else:
-                    print('>>>>>>>>>>>>>>>>>>>>>>> SIMs indisponíveis!')
+                    print('-------------------- SIMs indisponíveis!')
                     continue
             
             # update order
