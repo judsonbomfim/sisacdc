@@ -20,7 +20,7 @@ services:
       - redis
     volumes:
       - logs:/djangoweb/logs
-      - /home/sprdmntrdr/docker/.env:/djangoweb/.env:ro
+      - /home/sprdmntrdr/docker/django/.env:/djangoweb/.env:ro
     labels:
       # Habilitar Traefik para este container
       - "traefik.enable=true"
@@ -82,7 +82,7 @@ services:
       - web
     volumes:
       - logs:/djangoweb/logs
-      - /home/sprdmntrdr/docker/.env:/djangoweb/.env:ro
+      - /home/sprdmntrdr/docker/django/.env:/djangoweb/.env:ro
     restart: on-failure
     
   redis:
