@@ -18,7 +18,7 @@ services:
       - redis
     volumes:
       - logs:/djangoweb/logs
-      - /home/ubuntu/.env:/djangoweb/.env:ro
+      - /home/ubuntu/sprdmntrdr/docker/.env:/djangoweb/.env:ro
     labels:
       # Habilitar Traefik para este container
       - "traefik.enable=true"
@@ -57,7 +57,7 @@ services:
       - web
     volumes:
       - logs:/djangoweb/logs
-      - /home/ubuntu/.env:/djangoweb/.env:ro
+      - /home/ubuntu/sprdmntrdr/docker/.env:/djangoweb/.env:ro
     restart: on-failure
 
   celery_beat:
@@ -74,7 +74,7 @@ services:
       - web
     volumes:
       - logs:/djangoweb/logs
-      - /home/ubuntu/.env:/djangoweb/.env:ro
+      - /home/ubuntu/sprdmntrdr/docker/.env:/djangoweb/.env:ro
     restart: on-failure
     
   redis:
