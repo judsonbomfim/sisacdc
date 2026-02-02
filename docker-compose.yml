@@ -14,7 +14,6 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - DOMAIN=painel2.acasadochip.com
       - IMAGE_NAME=djangoweb:latest
     depends_on:
       - redis
@@ -27,12 +26,12 @@ services:
       - "traefik.docker.network=public"
       
       # Configuração HTTP
-      - "traefik.http.routers.django-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.django-http.rule=Host(`painel2.acasadochip.com`)"
       - "traefik.http.routers.django-http.entrypoints=web"
       - "traefik.http.routers.django-http.middlewares=https-redirect"
       
       # Configuração HTTPS
-      - "traefik.http.routers.django-https.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.django-https.rule=Host(`painel2.acasadochip.com`)"
       - "traefik.http.routers.django-https.entrypoints=websecure"
       - "traefik.http.routers.django-https.tls=true"
       - "traefik.http.routers.django-https.tls.certresolver=leresolver"
@@ -47,7 +46,7 @@ services:
 
   celery:
     container_name: celery
-    image: ${IMAGE_NAME}
+    image: djangoweb:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -67,7 +66,7 @@ services:
 
   celery_beat:
     container_name: celery_beat
-    image: ${IMAGE_NAME}
+    image: djangoweb:latest
     build:
       context: .
       dockerfile: Dockerfile
