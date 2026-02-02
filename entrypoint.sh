@@ -1,5 +1,12 @@
 #!/bin/sh
 
+echo "Criando diretório de logs..."
+mkdir -p /djangoweb/logs
+touch /djangoweb/logs/django.log
+touch /djangoweb/logs/celery.log
+touch /djangoweb/logs/api_calls.log
+touch /djangoweb/logs/performance.log
+
 echo "Executando migrações..."
 python manage.py migrate
 
