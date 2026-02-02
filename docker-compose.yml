@@ -72,8 +72,6 @@ services:
     command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     networks:
       - internal
-    # env_file:
-    #   - ./.env  # Variáveis injetadas pelo Portainer
     depends_on:
       - redis
       - web
