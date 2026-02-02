@@ -11,6 +11,8 @@ services:
     networks:
       - public
       - internal
+    # env_file:
+    #   - ./.env  # Variáveis injetadas pelo Portainer
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -51,8 +53,8 @@ services:
     command: celery -A core worker --loglevel=info --concurrency=8 --max-tasks-per-child=50
     networks:
       - internal
-    env_file:
-      - ./.env
+    # env_file:
+    #   - ./.env  # Variáveis injetadas pelo Portainer
     depends_on:
       - redis
       - web
@@ -70,8 +72,8 @@ services:
     command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     networks:
       - internal
-    env_file:
-      - ./.env
+    # env_file:
+    #   - ./.env  # Variáveis injetadas pelo Portainer
     depends_on:
       - redis
       - web
