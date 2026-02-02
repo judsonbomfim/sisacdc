@@ -59,8 +59,8 @@ services:
       - redis
       - web
     volumes:
-      - .:/djangoapp
-      - ./logs:/djangoapp/logs
+      - .:/djangoweb
+      - ./logs:/djangoweb/logs
     restart: on-failure
 
   celery_beat:
@@ -78,8 +78,8 @@ services:
       - redis
       - web
     volumes:
-      - .:/djangoapp
-      - ./logs:/djangoapp/logs
+      - .:/djangoweb
+      - ./logs:/djangoweb/logs
     restart: on-failure
     
   redis:
