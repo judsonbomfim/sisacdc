@@ -11,8 +11,6 @@ services:
     networks:
       - public
       - internal
-    # env_file:
-    #   - ./.env  # Variáveis injetadas pelo Portainer
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -20,6 +18,7 @@ services:
       - redis
     volumes:
       - logs:/djangoweb/logs
+      - /home/ubuntu/.env:/djangoweb/.env:ro
     labels:
       # Habilitar Traefik para este container
       - "traefik.enable=true"
@@ -53,13 +52,12 @@ services:
     command: celery -A core worker --loglevel=info --concurrency=8 --max-tasks-per-child=50
     networks:
       - internal
-    # env_file:
-    #   - ./.env  # Variáveis injetadas pelo Portainer
     depends_on:
       - redis
       - web
     volumes:
       - logs:/djangoweb/logs
+      - /home/ubuntu/.env:/djangoweb/.env:ro
     restart: on-failure
 
   celery_beat:
@@ -76,6 +74,7 @@ services:
       - web
     volumes:
       - logs:/djangoweb/logs
+      - /home/ubuntu/.env:/djangoweb/.env:ro
     restart: on-failure
     
   redis:
