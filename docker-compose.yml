@@ -100,5 +100,3 @@ volumes:
     driver: local
   logs:
     driver: local
-  logs:
-    driver: local
