@@ -212,7 +212,7 @@ class ApiTC:
                     }
                 }
             })    
-            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)
+            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             conn.request("POST", "/api/ChangePlan", payload, headers)
             res_plan = conn.getresponse()
             data_plan = res_plan.read()
@@ -233,7 +233,7 @@ class ApiTC:
         endPointId = ApiTC.get_iccid(iccid, headers)
         # Obter dados de uso
         time.sleep(0.5)
-        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)    
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)    
         conn.request("GET", f"/api/GetStatistics?endPointId={endPointId[0]}&from_date={dateToday}&to_date={dateToday}", payload, headers)
         res = conn.getresponse()
         data_endpointId = json.loads(res.read())
@@ -272,7 +272,7 @@ class ApiTI:
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
         }
-        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         conn.request("POST", "/api/login", payload_token, headers_token)
         res_token = conn.getresponse()
         data_token = json.loads(res_token.read())
@@ -301,7 +301,7 @@ class ApiTI:
     def get_iccid(iccid, headers):
         time.sleep(0.5)
         payload_endpointId = ''
-        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
         conn.request(
             "GET", f"/api/fetchSIM?iccid={iccid}", payload_endpointId, headers)
         res_endpointId = conn.getresponse()
@@ -412,7 +412,7 @@ class ApiTI:
                     }
                 }
             })        
-            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)
+            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             conn.request("POST", "/api/ChangePlan", payload, headers)
             res_plan = conn.getresponse()
             data_plan = res_plan.read()
@@ -433,7 +433,7 @@ class ApiTI:
         endPointId = ApiTI.get_iccid(iccid, headers)        
         time.sleep(0.5)
         # Obter dados de uso
-        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)    
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)    
         conn.request("GET", f"/api/GetStatistics?endPointId={endPointId[0]}&from_date={dateToday}&to_date={dateToday}", payload, headers)
         res = conn.getresponse()
         data_endpointId = json.loads(res.read())

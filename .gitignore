@@ -288,3 +288,9 @@ poetry.toml
 # End of https://www.toptal.com/developers/gitignore/api/python,django,visualstudiocode
 .env.bak
 .env.bak
+
+# SISACDC - Logs personalizados
+logs/*.log
+logs/*.txt
+!logs/.gitkeep
+diagnostico_*.txt

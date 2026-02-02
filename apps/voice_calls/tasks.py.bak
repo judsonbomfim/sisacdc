@@ -180,7 +180,7 @@ def voiceActivate(id=None):
             'x-painel-acdc-token': settings.APIVC_KEY
         }
         # Estabelece a conexão HTTPS
-        conn = http.client.HTTPSConnection(parsed_url.netloc, timeout=10)
+        conn = http.client.HTTPSConnection(parsed_url.netloc)
         # Envia a solicitação POST
         conn.request("POST", parsed_url.path, payload, headers)
         # Obtém a resposta
@@ -277,7 +277,7 @@ def voiceDesactivate(id=None):
             'x-painel-acdc-token': settings.APIVC_KEY
         }
         # Estabelece a conexão HTTPS
-        conn = http.client.HTTPSConnection(parsed_url.netloc, timeout=10)
+        conn = http.client.HTTPSConnection(parsed_url.netloc)
         # Envia a solicitação POST
         conn.request("POST", parsed_url.path, payload, headers)
         # Obtém a resposta

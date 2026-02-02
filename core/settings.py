@@ -193,6 +193,104 @@ EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = str(os.getenv('DEFAULT_FROM_EMAIL'))
 
 
+# LOGGING
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {name} {module} {funcName}: {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '[{levelname}] {asctime}: {message}',
+            'style': '{',
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file_django': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'file_celery': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/celery.log'),
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'file_api': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/api_calls.log'),
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'file_performance': {
+            'level': 'WARNING',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/performance.log'),
+            'maxBytes': 10485760,  # 10MB
+            'backupCount': 3,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file_django'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': ['console', 'file_celery'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps.sims.tasks': {
+            'handlers': ['console', 'file_celery', 'file_performance'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps.orders.tasks': {
+            'handlers': ['console', 'file_celery', 'file_performance'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps.voice_calls.tasks': {
+            'handlers': ['console', 'file_celery', 'file_performance'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps.sims.classes': {
+            'handlers': ['console', 'file_api'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps.orders.classes': {
+            'handlers': ['console', 'file_api'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+
 # CELERY
 
 CELERY_BROKER_URL = str(os.getenv('CELERY_BROKER_URL'))

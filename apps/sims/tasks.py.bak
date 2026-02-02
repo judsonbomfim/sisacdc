@@ -215,7 +215,7 @@ def simActivateTC(id=None):
     
     token_api = ApiTC.get_token()
     time.sleep(0.5)
-    conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)
+    conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
     headers = ApiTC.get_headers(token_api)
         
     for order in orders_all:
@@ -386,7 +386,7 @@ def simActivateTI(id=None):
     
     token_api = ApiTI.get_token()
     time.sleep(0.5)
-    conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)
+    conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
     time.sleep(0.5)
     headers = ApiTI.get_headers(token_api)
         
@@ -580,7 +580,7 @@ def simDeactivateTC(id=None):
             # Gerar token de acesso a API
             time.sleep(0.5)
             token_api = ApiTC.get_token()
-            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)
+            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN)
             headers = ApiTC.get_headers(token_api, cookie=True)
             
             get_iccid_result = ApiTC.get_iccid(iccid, headers)
@@ -738,7 +738,7 @@ def simActivateTM(id=None):
             'Content-Type': 'application/json'
         }
         # Estabelece a conexão HTTPS
-        conn = http.client.HTTPSConnection(parsed_url.netloc, timeout=10)
+        conn = http.client.HTTPSConnection(parsed_url.netloc)
         # Envia a solicitação POST
         conn.request("POST", parsed_url.path, payload, headers)
         # Obtém a resposta
