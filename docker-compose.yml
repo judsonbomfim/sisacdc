@@ -14,6 +14,8 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - DOMAIN=painel2.acasadochip.com
+      - IMAGE_NAME=djangoweb:latest
     depends_on:
       - redis
     volumes:
@@ -25,12 +27,12 @@ services:
       - "traefik.docker.network=public"
       
       # Configuração HTTP
-      - "traefik.http.routers.django-http.rule=Host(`${DOMAIN:-django.example.com}`)"
+      - "traefik.http.routers.django-http.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.django-http.entrypoints=web"
       - "traefik.http.routers.django-http.middlewares=https-redirect"
       
       # Configuração HTTPS
-      - "traefik.http.routers.django-https.rule=Host(`${DOMAIN:-django.example.com}`)"
+      - "traefik.http.routers.django-https.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.django-https.entrypoints=websecure"
       - "traefik.http.routers.django-https.tls=true"
       - "traefik.http.routers.django-https.tls.certresolver=leresolver"
@@ -45,7 +47,7 @@ services:
 
   celery:
     container_name: celery
-    image: ${IMAGE_NAME:-djangoweb:latest}
+    image: ${IMAGE_NAME}
     build:
       context: .
       dockerfile: Dockerfile
@@ -60,12 +62,12 @@ services:
       - web
     volumes:
       - logs:/djangoweb/logs
-      - /home/sprdmntrdr/docker/.env:/djangoweb/.env:ro
+      - /home/sprdmntrdr/docker/django/.env:/djangoweb/.env:ro
     restart: on-failure
 
   celery_beat:
     container_name: celery_beat
-    image: ${IMAGE_NAME:-djangoweb:latest}
+    image: ${IMAGE_NAME}
     build:
       context: .
       dockerfile: Dockerfile
