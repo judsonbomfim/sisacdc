@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: /djangoapp/entrypoint.sh
+    command: /djangoweb/scripts/entrypoint.sh
     networks:
       - public
       - internal
@@ -19,7 +19,7 @@ services:
     depends_on:
       - redis
     volumes:
-      - ./logs:/djangoapp/logs
+      - ./logs:/djangoweb/logs
     labels:
       # Habilitar Traefik para este container
       - "traefik.enable=true"
