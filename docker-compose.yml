@@ -19,7 +19,7 @@ services:
     depends_on:
       - redis
     volumes:
-      - ./logs:/djangoweb/logs
+      - logs:/djangoweb/logs
     labels:
       # Habilitar Traefik para este container
       - "traefik.enable=true"
@@ -59,8 +59,7 @@ services:
       - redis
       - web
     volumes:
-      - .:/djangoweb
-      - ./logs:/djangoweb/logs
+      - logs:/djangoweb/logs
     restart: on-failure
 
   celery_beat:
@@ -76,8 +75,7 @@ services:
       - redis
       - web
     volumes:
-      - .:/djangoweb
-      - ./logs:/djangoweb/logs
+      - logs:/djangoweb/logs
     restart: on-failure
     
   redis:
@@ -99,4 +97,8 @@ networks:
 
 volumes:
   redis-data:
+    driver: local
+  logs:
+    driver: local
+  logs:
     driver: local
