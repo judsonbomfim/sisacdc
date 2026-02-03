@@ -153,22 +153,20 @@ def voiceActivate(id=None):
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)        
     
-    logger.info(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para processar')
     if voice_all.count() == 0:
-        logger.info('>>>>>>>>>> Nenhum pedido de voz pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
         return
     
     for order in voice_all:
         
-        logger.info(f'Processando pedido ID: {order.id}')
-
         # Verifica se há número associado
         if order.id_number is None:
             logger.info(f'Pedido {order.id} sem número associado, pulando ativação')
             UpdateVoice.upStatus(order.id, 'EA')
             NoteVoiceCall.addNote(order, 'Erro: sem número associado para ativação')
             continue
+        
+        logger.info(f'Processando pedido ID: {order.id}')        
         
         # order = VoiceCalls.objects.get(pk=order.id)
         order_id = order.id
@@ -243,16 +241,12 @@ def voiceDesactivate(id=None):
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)
     
-    logger.info(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para desativar')
     if not voice_all.exists():
-        logger.info('>>>>>>>>>> Não há pedidos de voz para serem desativados.')
         logger.info('>>>>>>>>>> DESATIVAÇÃO VOICE FINALIZADA')
         return
     
     for order in voice_all:
-        
-        logger.info(f'Processando pedido ID: {order.id}')
-          
+                  
         # Garante que activation_date e days não são nulos
         if order.activation_date is None or order.days is None:
             continue
@@ -263,6 +257,8 @@ def voiceDesactivate(id=None):
             NoteVoiceCall.addNote(order, 'Erro: sem número associado para ativação')
             logger.info(f'Pedido {order.id} sem número associado, pulando desativação')
             continue
+        
+        logger.info(f'Processando pedido ID: {order.id}')
         
         # Calcula a data de desativação
         # A lógica é: data de ativação + (duração do plano - 1 dia)

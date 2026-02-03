@@ -29,9 +29,7 @@ def sims_in_orders():
     
     if total_count > MAX_ORDERS_PER_RUN:
         logger.warning(f'ATENÇÃO: {total_count} pedidos pendentes, processando apenas {MAX_ORDERS_PER_RUN} por vez')
-    
-    logger.info(f'Iniciando processamento de {orders.count()} pedidos (Total pendente: {total_count})')
-    
+        
     global n_item_total
     n_item_total = 0
     global msg_ord
@@ -369,7 +367,7 @@ def simActivateTI(id=None):
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
 
-    logger.info(f'>>>>>>>>>> ATIVAÇÂO TI INICIADA - {tomorrow}')
+    logger.info(f'>>>>>>>>>> ATIVAÇÂO TI INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -804,7 +802,7 @@ def simActivateOR(id=None):
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
 
-    logger.info(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA - {tomorrow}')
+    logger.info(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA')
     
     # Selecionar pedidos
     if id is None:

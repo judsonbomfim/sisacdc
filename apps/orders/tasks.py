@@ -462,7 +462,6 @@ def order_import_voice():
 
 @shared_task
 def orders_auto():
-    logger.info('-----------------orders_auto')
     order_import.delay()
     time.sleep(10)
     order_import_voice.delay()
@@ -476,7 +475,6 @@ def orders_auto():
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
-    logger.info(f"[orders_up_status] recebido: ord_id={ord_id}, ord_s={ord_s}, id_user={id_user}")
     
     # Verificar se ord_id é uma lista
     if not isinstance(ord_id, list):

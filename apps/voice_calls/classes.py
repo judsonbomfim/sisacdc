@@ -22,9 +22,7 @@ class NoteVoiceCall:
                 note=note,
                 id_user=id_user,
                 type_note=type_note
-            )
-            
-            logger.error(f"  Nota criada com ID: {nota.id}")
+            )            
             return nota
             
         except Exception as e:
