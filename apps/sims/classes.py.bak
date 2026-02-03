@@ -63,7 +63,7 @@ class ApiTC:
         }
         if cookie is None:
             headers['Cookie'] = 'Encrypt_cookies=rd20o00000000000000000000ffff0af30e15o12021'
-        logger.error(">>>>>>>>>>>>>>>>>>> get_headers finalizado")
+        logger.info(">>>>>>>>>>>>>>>>>>> get_headers finalizado")
         return headers
 
 
@@ -454,7 +454,7 @@ class ApiTI:
 
 class ApiCM:
     
-    logger.error(">>>>>>>>>>>>>>>>>>> Classe ApiCM iniciada")
+    logger.info(">>>>>>>>>>>>>>>>>>> Classe ApiCM iniciada")
     
     app_key = settings.APICM_KEY
     app_secret = settings.APICM_SECRET
@@ -473,7 +473,7 @@ class ApiCM:
         if api_token:
             return api_token
         
-        logger.error(">>>>>>>>>>>>>>>>>>> Obtendo token de acesso para API CM...")
+        logger.info(">>>>>>>>>>>>>>>>>>> Obtendo token de acesso para API CM...")
         # URL do endpoint
         url_api = f'{settings.APICM_URL}/aep/APP_getAccessToken_SBO/v1'
         parsed_url = urlparse(url_api)
@@ -523,7 +523,7 @@ class ApiCM:
     @staticmethod
     def childOrderId(iccid):
 
-        logger.error(f">>>>>>>>>>>>>>>>>>> Acessando childOrderId {iccid}")
+        logger.info(f">>>>>>>>>>>>>>>>>>> Acessando childOrderId {iccid}")
 
         url_api = f'{settings.APICM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
         parsed_url = urlparse(url_api)
@@ -637,7 +637,7 @@ class ApiCM:
 
         
         # # Resultado
-        # logger.error(f">>>>>>>>>>>>>>>>>>> Status da resposta: {data}")
+        # logger.info(f">>>>>>>>>>>>>>>>>>> Status da resposta: {data}")
         # return data
         
 

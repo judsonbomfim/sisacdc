@@ -14,9 +14,8 @@ from apps.sims.models import Sims
 from datetime import datetime, timedelta
 import pytz
 import requests
-import logging
 from django.core.exceptions import ObjectDoesNotExist
-
+import logging
 logger = logging.getLogger(__name__)
 
 # Limite de processamento por execução (evita sobrecarga)
@@ -43,7 +42,7 @@ def sims_in_orders():
     for ord in orders:
         
         id_id_i = ord.id
-        logger.error(f'Processando pedido {id_id_i}')
+        logger.info(f'Processando pedido {id_id_i}')
         order_id_i = ord.order_id
         product_i = ord.product
         condition_i = ord.condition
@@ -130,7 +129,7 @@ def sims_in_orders():
                 # Enviar e-mail
                 send_email_sims.delay(id=id_id_i)
                 addNote(f'Status alterado para Agd. Ativação')
-                logger.error(f'Pedido {order_id_i} com eSIM ou reuso, status definido para AA e e-mail enviado!')
+                logger.info(f'Pedido {order_id_i} com eSIM ou reuso, status definido para AA e e-mail enviado!')
             elif esim_eua: status_ord = 'AI'
             elif type_sim_i == 'sim': status_ord = 'ES'
             
@@ -211,7 +210,7 @@ def simActivateTC(id=None):
             
     # Checar conexão com API
     def error_api():
-        logger.info('>>>>>>>>>> ERRO API')
+        logger.error('>>>>>>>>>> ERRO API')
         # Checar Status
         UpdateOrder.upStatus(id_item,'EA')
         # Adicionar nota
@@ -228,7 +227,7 @@ def simActivateTC(id=None):
                         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
-        logger.error(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
+        logger.info(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
         id_item = order.id
         try:
             iccid = order.id_sim.sim
@@ -372,7 +371,7 @@ def simActivateTI(id=None):
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
 
-    logger.error(f'>>>>>>>>>> ATIVAÇÂO TI INICIADA - {tomorrow}')
+    logger.info(f'>>>>>>>>>> ATIVAÇÂO TI INICIADA - {tomorrow}')
     
     # Selecionar pedidos
     if id is None:
@@ -388,7 +387,7 @@ def simActivateTI(id=None):
             
     # Checar conexão com API
     def error_api():
-        logger.info('>>>>>>>>>> ERRO API')
+        logger.error('>>>>>>>>>> ERRO API')
         # Checar Status
         UpdateOrder.upStatus(id_item,'EA')
         # Adicionar nota
@@ -577,7 +576,7 @@ def simDeactivateTC(id=None):
         if id is None and deactivation_date > yesterday:
             continue
 
-        logger.error(f'Iniciando desativação para o pedido {order.order_id}')
+        logger.info(f'Iniciando desativação para o pedido {order.order_id}')
         
         try:
             iccid = order.id_sim.sim
@@ -622,7 +621,7 @@ def simDeactivateTC(id=None):
             resultDescription = data.get("Response", {}).get("resultParam", {}).get("resultDescription", str(data))
 
             if resultCode == 0:
-                logger.error(f'Pedido {order.order_id} desativado com sucesso.')
+                logger.info(f'Pedido {order.order_id} desativado com sucesso.')
                 if id is None:
                     UpdateOrder.upStatus(order.id, 'DE')
                     UpdateStore.upStore(
@@ -688,7 +687,7 @@ def simDeactivateAll(id=None):
         if id is None and deactivation_date > yesterday:
             continue
 
-        logger.error(f'Iniciando desativação para o pedido {order.order_id}')
+        logger.info(f'Iniciando desativação para o pedido {order.order_id}')
 
         if id is None:
             UpdateOrder.upStatus(order.id, 'DE')
@@ -823,7 +822,7 @@ def simActivateOR(id=None):
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
 
-    logger.error(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA - {tomorrow}')
+    logger.info(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA - {tomorrow}')
     
     # Selecionar pedidos
     if id is None:
@@ -1302,7 +1301,7 @@ def simActivateCM(id=None):
         api_token = ApiCM.get_token()
         
         if api_token == "error":
-            logger.info('>>>>>>>>>> ERRO DE TOKEN')
+            logger.error('>>>>>>>>>> ERRO DE TOKEN')
             return
     
     for order in orders_all:
@@ -1320,7 +1319,7 @@ def simActivateCM(id=None):
         order_sim = order.id_sim.sim
         list_plan = []
         
-        logger.error(f'>>>>>>>>>> ATIVANDO SIM {order_sim} - {order_id}')
+        logger.info(f'>>>>>>>>>> ATIVANDO SIM {order_sim} - {order_id}')
         
         def errorData(data_dict=None):
             # Adicionar Nota
@@ -1461,8 +1460,6 @@ def simActivateMS(id=None):
 
             client_email = order.email if order.email else "chip@acasadochip.com"
             
-            logger.error(f'>>>>>>>>>> Data de ativação {order.activation_date} para o pedido {order.order_id}')
-
             payload = {
                 "operator": 15,
                 "product": 694,
@@ -1541,7 +1538,7 @@ def simActivateMS(id=None):
                 error_to_save = e.response.text
                 log_message += f" Resposta não-JSON: {error_to_save}"
 
-            logger.error(log_message)
+            logger.info(log_message)
             UpdateOrder.upStatus(order.id, 'EA')
             NotesAdd.addNote(order, f"{log_message}")
             

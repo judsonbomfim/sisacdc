@@ -20,7 +20,8 @@ from apps.sims.classes import ApiTC, ApiCM
 from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
 from ..tasks import simDeactivateTC, sims_in_orders
-
+import logging
+logger = logging.getLogger(__name__)
 
 # Script Upload S3
 def get_s3_client():
@@ -233,9 +234,6 @@ def sims_add_esim(request):
         for sim_img in esims:
             sim_i = sim_img.name.split('.')
             
-            logger.error(sim_img.name)
-            logger.error(sim_img)
-            
             fileurl = ''
             if imghdr.what(sim_img):
                 fileurl = upload_file_to_s3(sim_img)
@@ -333,7 +331,7 @@ def testeMobileData(request, iccid):
     
     try:
         # Verificar se a classe foi importada corretamente
-        logger.error(f"Classe ApiCM disponível: {ApiCM}")        
+        logger.info(f"Classe ApiCM disponível: {ApiCM}")        
         # Chamar método mobileData da classe ApiCM
         mobile_data = ApiCM.mobileData(iccid)        
         # Retornar resposta JSON

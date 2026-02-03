@@ -6,11 +6,11 @@ from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 import time, requests
-import logging
 from apps.sims.tasks import sims_in_orders, simDeactivateTC
 from apps.send_email.tasks import send_email_sims
 from apps.voice_calls.tasks import number_in_voice
 
+import logging
 logger = logging.getLogger(__name__)
 
 @shared_task
@@ -45,7 +45,7 @@ def order_import():
     except Exception as e:
         logger.error(f"Erro ao decodificar JSON da resposta da API: {e}")
         logger.error(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
-        logger.info('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA COM ERRO')
+        logger.error('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA COM ERRO')
         return
     
     # Verificar se há pedidos para importar
@@ -61,7 +61,7 @@ def order_import():
         
         # Verificar se order é válido (dicionário com ID)
         if not isinstance(order, dict) or 'id' not in order:
-            logger.error(f"Sem itens para importar")
+            logger.info(f"Sem itens para importar")
             continue
             
         n_item = 1
@@ -205,7 +205,7 @@ def order_import():
                 
                 # SÓ PROCESSA SE FOR NOVO
                 if created:
-                    logger.error(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
+                    logger.info(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
                     
                     # Save Notes
                     Notes.objects.create(
@@ -251,7 +251,7 @@ def order_import():
                     n_item_total += 1
                     msg_info.append(f'Pedido {order_id_i} importado com sucesso')
                 else:
-                    logger.error(f'Item já existe: {item_id_i}, pulando')
+                    logger.info(f'Item já existe: {item_id_i}, pulando')
                 
                 # Definir variáveis
                 q_i += 1 
@@ -310,7 +310,7 @@ def order_import_voice():
 
         # Verificar pedido repetido
         if Orders.objects.filter(order_id=id_ord).exists():
-            logger.error(f'Pedido {id_ord} já importado, pulando')
+            logger.info(f'Pedido {id_ord} já importado, pulando')
             continue
         
         # Verificar se line_items existe
@@ -328,7 +328,7 @@ def order_import_voice():
             qtd = item['quantity']
             q_i = 1 
             
-            logger.error(f'---------- Importando pedido {id_ord}')
+            logger.info(f'---------- Importando pedido {id_ord}')
             
             while q_i <= qtd:
                 order_id_i = order['id']
@@ -403,7 +403,7 @@ def order_import_voice():
                 
                 # SÓ PROCESSA SE FOR NOVO
                 if created:
-                    logger.error(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
+                    logger.info(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
                     
                     # Save Notes
                     Notes.objects.create(
@@ -449,7 +449,7 @@ def order_import_voice():
                     n_item_total += 1
                     msg_info.append(f'Pedido {order_id_i} importado com sucesso')
                 else:
-                    logger.error(f'Item já existe: {item_id_i}, pulando')
+                    logger.info(f'Item já existe: {item_id_i}, pulando')
 
                 # Definir variáveis
                 q_i += 1 
@@ -476,7 +476,7 @@ def orders_auto():
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
-    logger.error(f"[orders_up_status] recebido: ord_id={ord_id}, ord_s={ord_s}, id_user={id_user}")
+    logger.info(f"[orders_up_status] recebido: ord_id={ord_id}, ord_s={ord_s}, id_user={id_user}")
     
     # Verificar se ord_id é uma lista
     if not isinstance(ord_id, list):
@@ -665,7 +665,7 @@ def update_st(*args, **kwargs):
             
             # Verificar se a resposta contém dados
             if response.text.strip() == "":
-                logger.error(f"Resposta vazia na página {n_page}")
+                logger.info(f"Resposta vazia na página {n_page}")
                 break
             
             ord = response.json()
@@ -698,8 +698,8 @@ def update_st(*args, **kwargs):
                 )                    
 
                 total_ord += 1
-                logger.error(f'>>>>>>>>>> Pedidos {id_ord} - {order_status} = TOTAL {total_ord}')
+                logger.info(f'>>>>>>>>>> Pedidos {id_ord} - {order_status} = TOTAL {total_ord}')
 
         n_page += 1
 
-    logger.error(f'Total de pedidos processados: {total_ord}')
+    logger.info(f'Total de pedidos processados: {total_ord}')

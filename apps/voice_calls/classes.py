@@ -1,5 +1,6 @@
 from .models import NotesVoice, VoiceCalls, VoiceNumbers
-
+import logging
+logger = logging.getLogger(__name__)
 
 class NumberFormatter:
     @staticmethod

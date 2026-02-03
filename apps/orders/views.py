@@ -3,7 +3,6 @@ import os
 from django.contrib.auth.models import User
 from rolepermissions.decorators import has_permission_decorator
 import csv
-import requests
 from django.http import HttpResponse, JsonResponse
 from datetime import date, datetime, timedelta
 from django.shortcuts import get_object_or_404, render, redirect
@@ -58,11 +57,11 @@ def orders_list(request):
                 id_user = None
             
             if ord_s and ord_s != '' and ord_id:
-                logger.error(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
+                print(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
                 orders_up_status.delay(ord_id, ord_s, id_user)
                 messages.success(request, f'Atualizando {len(ord_id)} pedido(s) para status: {ord_s}')
             else:
-                logger.error(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")
+                print(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")
                 messages.error(request, 'Selecione pedidos e status antes de atualizar')
             
             return redirect('orders_list')             
@@ -179,7 +178,7 @@ def ord_details(request, order_id):
     if mobile_data != '':
         mobile_data_f = f"{float(mobile_data):.2f}"
         
-    logger.error(f'Consumo de dados: {mobile_data} MB')
+    print(f'Consumo de dados: {mobile_data} MB')
     
     # Calcular porcentagem de dados usados
     # data_day é o total (em MB ou 'Ilimitado'), mobile_data é o usado (em MB)
@@ -251,7 +250,7 @@ def ord_edit(request,id):
         
     if request.method == 'POST':
         
-        logger.error('>>>>>>>>>> EDITAR PEDIDO')
+        print('>>>>>>>>>> EDITAR PEDIDO')
         
         global msg_info
         msg_info = []
@@ -268,8 +267,8 @@ def ord_edit(request,id):
         order = Orders.objects.get(pk=id)
         order_id = order.order_id
         order_status = order.order_status
-        # Capturar SIM antigo ANTES de qualquer modificação
-        order_sim = order.id_sim.sim if order.id_sim else ''
+        try: order_sim = order.id_sim.sim
+        except: order_sim = ''
         try: sim_id = int(order.id_sim.id)
         except: sim_id = ''
         qrcode = ''
@@ -279,7 +278,7 @@ def ord_edit(request,id):
         data_day = request.POST.get('data_day')
         type_sim = request.POST.get('type_sim')
         operator = request.POST.get('operator')
-        sim_new = request.POST.get('sim')
+        sim = request.POST.get('sim')
         activation_date = request.POST.get('activation_date')
         email = request.POST.get('email')
         cell_imei = request.POST.get('cell_imei')
@@ -302,7 +301,7 @@ def ord_edit(request,id):
                 order_put.id_sim_id = None  # CORRIGIR: usar None em vez de ''
                 order_put.save()
             else:
-                logger.error("Aviso: Tentativa de atualizar SIM, mas sim_id está vazio")
+                print("Aviso: Tentativa de atualizar SIM, mas sim_id está vazio")
 
         # Verificar Usuário
         try:
@@ -348,12 +347,12 @@ def ord_edit(request,id):
                 msg_error.append(f'Não há estoque de {operator} - {type_sim} no sistema')
 
         # Se SIM preenchico
-        if sim_new:
+        if sim:
             if order_sim != '':
                 # Alterar status do SIM no sistema e no site
                 updateSIM()
-            # Verificar se SIM já existe
-            sims_all = Sims.objects.all().filter(sim=sim_new)
+            
+            sims_all = Sims.objects.all().filter(sim=sim)
             if sims_all:
                 # Update order
                 sim_id = sims_all[0].id
@@ -368,7 +367,7 @@ def ord_edit(request,id):
             else:
                 # Save SIMs - Insert Stock
                 add_sim = Sims( 
-                    sim = sim_new,
+                    sim = sim,
                     type_sim = type_sim,
                     operator = operator,
                     sim_status = 'AT',
@@ -389,9 +388,9 @@ def ord_edit(request,id):
                 sim = ''
                 qrcode = None
             
-            # SIM Notes - Apenas registra se houve mudança e há um SIM novo
-            if sim_new and sim_new != order_sim:
-                addNote(f'Alteração de {order_sim if order_sim else "sem SIM"} para {sim_new}')
+            # SIM Notes
+            if sim != '':
+                addNote(f'Alteração de {order_sim} para {sim}')
             
         else:
             # Troca de SIM
@@ -455,12 +454,16 @@ def ord_edit(request,id):
             orders_up_status(order.id, ord_st,user_name, ord_s_prev) 
                         
             # Enviar email
-            if ord_st == 'AA':
-                send_email_sims.delay(id=order_id)
+            if ord_st == 'CN' and type_sim == 'sim':
+                send_email_sims(id=order_id)
+                
+                addNote(f'E-mail enviado com sucesso!')
+                messages.success(request,'E-mail enviado com sucesso!')
 
         if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
-            logger.error('----------------- Alterar/desativar TC/TI -----------------')
-            simDeactivateTC.delay(id=order.id)
+            print('----------------- Alterar/desativar TC/TI -----------------')
+            simDeactivateTC(id=order.id)
+
         # Atualizar site
         try:
             UpdateStore.upStore(
@@ -473,7 +476,7 @@ def ord_edit(request,id):
                 status_g = ord_st if ord_st else None,
             )
         except Exception as e:
-            logger.error(f">>>>>>>>>> ERRO ao atualizar site: {e}")
+            print(f">>>>>>>>>> ERRO ao atualizar site: {e}")
                 
         for msg_e in msg_error:
             messages.error(request,msg_e)
@@ -492,7 +495,7 @@ def ord_export(request):
 
     if request.session.get('orders_listing'):
         orders_all = request.session.get('orders_listing')
-        logger.error(f'>>>>>>>>>>>>>>>>>>>>>< Exportando {len(orders_all)} pedidos')
+        print(f'>>>>>>>>>>>>>>>>>>>>>< Exportando {len(orders_all)} pedidos')
     else:
         messages.error(request, 'Nenhum dado disponível para exportação. Por favor, aplique filtros na lista de pedidos antes de exportar.')
         return request
@@ -501,7 +504,7 @@ def ord_export(request):
     ]
     
     for ord in orders_all:
-        logger.error(f'Exportando pedido {ord}')
+        print(f'Exportando pedido {ord}')
         if ord['id_sim__operator']:
             ord_operator = list_oper[ord['id_sim__operator']]
         else: ord_operator = ''
@@ -604,57 +607,6 @@ def ord_export_op(request):
 
 
 @login_required(login_url='/login/')
-@has_permission_decorator('view_orders')
-def export_protocolo_from_txt(request):
-    url = request.GET.get('url')
-    if not url:
-        return HttpResponse('Parâmetro "url" é obrigatório. Ex: ?url=https://exemplo.com/pedidos.txt', status=400)
-
-    try:
-        resp = requests.get(url, timeout=15)
-        resp.raise_for_status()
-        content = resp.text
-    except Exception as e:
-        return HttpResponse(f'Erro ao baixar arquivo TXT: {e}', status=502)
-
-    lines = [ln.strip() for ln in content.splitlines() if ln.strip()]
-
-    order_ids = []
-    for ln in lines:
-        # Tenta interpretar como inteiro; se falhar, ignora a linha
-        try:
-            order_ids.append(int(ln))
-        except ValueError:
-            continue
-
-    if not order_ids:
-        return HttpResponse('Nenhum número de pedido válido encontrado no TXT.', status=400)
-
-    # Busca notas contendo "protocolo" para os pedidos informados (por order_id)
-    notes_qs = (
-        Notes.objects
-        .select_related('id_item')
-        .filter(id_item__order_id__in=list(set(order_ids)), note__icontains='protocolo')
-        .order_by('id_item__order_id', 'created_at')
-    )
-
-    # Monta CSV: Pedido, Nota, Data da Nota
-    response = HttpResponse(content_type='text/csv')
-    today_str = date.today().isoformat()
-    response['Content-Disposition'] = f'attachment; filename="protocolo-notas-{today_str}.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Pedido', 'Nota', 'Data da Nota'])
-
-    for n in notes_qs:
-        pedido = n.id_item.order_id if n.id_item else ''
-        nota = n.note.replace('\r', ' ').replace('\n', ' ').strip() if n.note else ''
-        data_nota = n.created_at.strftime('%d/%m/%Y %H:%M') if n.created_at else ''
-        writer.writerow([pedido, nota, data_nota])
-
-    return response
-
-
-@login_required(login_url='/login/')
 def send_esims(request):
     if request.method == 'GET':
         return render(request, 'painel/orders/send_esim.html')
@@ -734,8 +686,8 @@ def orders_activations(request):
             id_user = request.user.id
             
             # Log para debug
-            logger.error(f">>>>>>>>>> ATUALIZAÇÃO EM MASSA (ACTIVATIONS)")
-            logger.error(f"Pedidos: {ord_id}, Status: {ord_s}, Usuário: {id_user}")
+            print(f">>>>>>>>>> ATUALIZAÇÃO EM MASSA (ACTIVATIONS)")
+            print(f"Pedidos: {ord_id}, Status: {ord_s}, Usuário: {id_user}")
             
             try:
                 orders_up_status.delay(ord_id, ord_s, id_user)

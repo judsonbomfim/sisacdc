@@ -43,7 +43,7 @@ def sims_in_orders():
     for ord in orders:
         
         id_id_i = ord.id
-        logger.error(f'Processando pedido {id_id_i}')
+        logger.info(f'Processando pedido {id_id_i}')
         order_id_i = ord.order_id
         product_i = ord.product
         condition_i = ord.condition
@@ -130,7 +130,7 @@ def sims_in_orders():
                 # Enviar e-mail
                 send_email_sims.delay(id=id_id_i)
                 addNote(f'Status alterado para Agd. Ativação')
-                logger.error(f'Pedido {order_id_i} com eSIM ou reuso, status definido para AA e e-mail enviado!')
+                logger.info(f'Pedido {order_id_i} com eSIM ou reuso, status definido para AA e e-mail enviado!')
             elif esim_eua: status_ord = 'AI'
             elif type_sim_i == 'sim': status_ord = 'ES'
             
@@ -195,7 +195,7 @@ def simActivateTC(id=None):
     today = datetime.now(tz).date()
     tomorrow = today +timedelta(days=1)
 
-    logger.error('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -222,7 +222,7 @@ def simActivateTC(id=None):
                         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
-        logger.error(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
+        logger.info(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
         id_item = order.id
         try:
             iccid = order.id_sim.sim
@@ -284,7 +284,7 @@ def simActivateTC(id=None):
         else:
             # Alterar SIM na operadora
             if simStatus == 'Active':
-                logger.error('simStatus == Active')
+                logger.info('simStatus == Active')
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{iccid} já estava ativado na Telcon')
                 # Alterar Status
@@ -298,7 +298,7 @@ def simActivateTC(id=None):
                 continue
             
             elif simStatus == 'Suspended':
-                logger.error('simStatus == Suspended')
+                logger.info('simStatus == Suspended')
                 payload = json.dumps({
                     "Request": {
                         "endPointId": f"{endpointId}",
@@ -316,7 +316,6 @@ def simActivateTC(id=None):
                 process = True
                 
             else:
-                logger.error('simStatus == Other')
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
                 NotesAdd.addNote(order,f'{iccid} com erro de ativação na Telcon. Verificar erro.')
@@ -356,7 +355,7 @@ def simActivateTC(id=None):
         # Fecha a conexão
         conn.close()
                 
-    logger.error('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
 
 
 @shared_task
@@ -366,7 +365,7 @@ def simActivateTI(id=None):
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
 
-    logger.error(f'>>>>>>>>>> ATIVAÇÂO TI INICIADA - {tomorrow}')
+    logger.info(f'>>>>>>>>>> ATIVAÇÂO TI INICIADA - {tomorrow}')
     
     # Selecionar pedidos
     if id is None:
@@ -394,7 +393,7 @@ def simActivateTI(id=None):
                         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
-        logger.error(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
+        logger.info(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
         id_item = order.id
         try:
             iccid = order.id_sim.sim
@@ -520,7 +519,7 @@ def simActivateTI(id=None):
         # Fecha a conexão
         conn.close()
 
-    logger.error('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
 
 
 @shared_task

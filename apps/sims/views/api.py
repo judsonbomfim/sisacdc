@@ -5,6 +5,9 @@ from ..serializers import ConsumoSerializer
 from ..classes import ApiTC, ApiCM
 from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
+import logging
+logger = logging.getLogger(__name__)
+
 
 class ConsumoView(APIView):
     permission_classes = [IsAuthenticated]  # Requer autenticação JWT
@@ -12,8 +15,6 @@ class ConsumoView(APIView):
     def get(self, request, iccid):
         sim = Sims.objects.filter(sim=iccid).first()
         sim_operator = sim.operator if sim else None
-        logger.error(f"ICCID recebido: {iccid}")
-        logger.error(f"Operadora do SIM: {sim_operator}")
 
         try:
             if sim_operator == 'TC' or sim_operator == 'TI':
