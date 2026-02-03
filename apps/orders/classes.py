@@ -90,7 +90,7 @@ class UpdateStore():
                 else:
                     return False                    
             except Exception as e:
-                print(f"Erro ao atualizar pedido {order_id} na loja: {e}")
+                logger.error(f"Erro ao atualizar pedido {order_id} na loja: {e}")
                 return False        
 
 class NoteStore():

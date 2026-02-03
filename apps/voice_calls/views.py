@@ -212,7 +212,7 @@ def voice_edit(request,id):
             NoteVoiceCall.addNote(id_item=call_put, note=f"Status alterado de {status_now} para {status}", id_user=request.user, type_note='P')               
             
         note_text = request.POST.get('ord_note')
-        print(f"Nota recebida: '{note_text}'")
+        logger.error(f"Nota recebida: '{note_text}'")
         if note_text:
             NoteVoiceCall.addNote(id_item=call_put, note=note_text, id_user=request.user, type_note='P')
         
@@ -328,7 +328,7 @@ def mumber_list(request):
         number_number_f = request.POST.get('number_number_f')
         number_status_f = request.POST.get('number_status_f')
         
-        print(number_login_f, number_extension_f, number_number_f, number_status_f)
+        logger.error(number_login_f, number_extension_f, number_number_f, number_status_f)
 
         if 'up_status' in request.POST:
             number_id = request.POST.getlist('number_id')
@@ -406,8 +406,8 @@ def atualizarDataVoz(request):
             vox.days = order.days
             # vox.activation_date = order.activation_date
             vox.save()
-            print(f"Voz {vox.id} atualizada com sucesso!")
-    print("----------------- Dados de voz atualizados com sucesso!")
+            logger.error(f"Voz {vox.id} atualizada com sucesso!")
+    logger.error("----------------- Dados de voz atualizados com sucesso!")
     # mensagem de retorno
     messages.success(request, "Dados de voz atualizados com sucesso!")
     return redirect('voice_index')

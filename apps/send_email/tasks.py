@@ -21,7 +21,7 @@ def send_email_sims(id=None):
         try:
             orders_all = Orders.objects.filter(pk=id)
         except:
-            print(f'Pedido {id} não encontrado!')
+            logger.error(f'Pedido {id} não encontrado!')
             return None
         
     url_site = settings.URL_CDN

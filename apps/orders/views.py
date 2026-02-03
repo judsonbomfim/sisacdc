@@ -58,11 +58,11 @@ def orders_list(request):
                 id_user = None
             
             if ord_s and ord_s != '' and ord_id:
-                print(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
+                logger.error(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
                 orders_up_status.delay(ord_id, ord_s, id_user)
                 messages.success(request, f'Atualizando {len(ord_id)} pedido(s) para status: {ord_s}')
             else:
-                print(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")
+                logger.error(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")
                 messages.error(request, 'Selecione pedidos e status antes de atualizar')
             
             return redirect('orders_list')             
@@ -179,7 +179,7 @@ def ord_details(request, order_id):
     if mobile_data != '':
         mobile_data_f = f"{float(mobile_data):.2f}"
         
-    print(f'Consumo de dados: {mobile_data} MB')
+    logger.error(f'Consumo de dados: {mobile_data} MB')
     
     # Calcular porcentagem de dados usados
     # data_day é o total (em MB ou 'Ilimitado'), mobile_data é o usado (em MB)
@@ -251,7 +251,7 @@ def ord_edit(request,id):
         
     if request.method == 'POST':
         
-        print('>>>>>>>>>> EDITAR PEDIDO')
+        logger.error('>>>>>>>>>> EDITAR PEDIDO')
         
         global msg_info
         msg_info = []
@@ -302,7 +302,7 @@ def ord_edit(request,id):
                 order_put.id_sim_id = None  # CORRIGIR: usar None em vez de ''
                 order_put.save()
             else:
-                print("Aviso: Tentativa de atualizar SIM, mas sim_id está vazio")
+                logger.error("Aviso: Tentativa de atualizar SIM, mas sim_id está vazio")
 
         # Verificar Usuário
         try:
@@ -459,7 +459,7 @@ def ord_edit(request,id):
                 send_email_sims.delay(id=order_id)
 
         if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
-            print('----------------- Alterar/desativar TC/TI -----------------')
+            logger.error('----------------- Alterar/desativar TC/TI -----------------')
             simDeactivateTC.delay(id=order.id)
         # Atualizar site
         try:
@@ -473,7 +473,7 @@ def ord_edit(request,id):
                 status_g = ord_st if ord_st else None,
             )
         except Exception as e:
-            print(f">>>>>>>>>> ERRO ao atualizar site: {e}")
+            logger.error(f">>>>>>>>>> ERRO ao atualizar site: {e}")
                 
         for msg_e in msg_error:
             messages.error(request,msg_e)
@@ -492,7 +492,7 @@ def ord_export(request):
 
     if request.session.get('orders_listing'):
         orders_all = request.session.get('orders_listing')
-        print(f'>>>>>>>>>>>>>>>>>>>>>< Exportando {len(orders_all)} pedidos')
+        logger.error(f'>>>>>>>>>>>>>>>>>>>>>< Exportando {len(orders_all)} pedidos')
     else:
         messages.error(request, 'Nenhum dado disponível para exportação. Por favor, aplique filtros na lista de pedidos antes de exportar.')
         return request
@@ -501,7 +501,7 @@ def ord_export(request):
     ]
     
     for ord in orders_all:
-        print(f'Exportando pedido {ord}')
+        logger.error(f'Exportando pedido {ord}')
         if ord['id_sim__operator']:
             ord_operator = list_oper[ord['id_sim__operator']]
         else: ord_operator = ''
@@ -734,8 +734,8 @@ def orders_activations(request):
             id_user = request.user.id
             
             # Log para debug
-            print(f">>>>>>>>>> ATUALIZAÇÃO EM MASSA (ACTIVATIONS)")
-            print(f"Pedidos: {ord_id}, Status: {ord_s}, Usuário: {id_user}")
+            logger.error(f">>>>>>>>>> ATUALIZAÇÃO EM MASSA (ACTIVATIONS)")
+            logger.error(f"Pedidos: {ord_id}, Status: {ord_s}, Usuário: {id_user}")
             
             try:
                 orders_up_status.delay(ord_id, ord_s, id_user)

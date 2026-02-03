@@ -43,7 +43,7 @@ def sims_in_orders():
     for ord in orders:
         
         id_id_i = ord.id
-        print(f'Processando pedido {id_id_i}')
+        logger.error(f'Processando pedido {id_id_i}')
         order_id_i = ord.order_id
         product_i = ord.product
         condition_i = ord.condition
@@ -113,14 +113,14 @@ def sims_in_orders():
                 if sim_ds:
                     pass
                 else:
-                    print('-------------------- SIMs indisponíveis!')
+                    logger.info('-------------------- SIMs indisponíveis!')
                     continue
             else:
                 sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
                 if sim_ds:
                     pass
                 else:
-                    print('-------------------- SIMs indisponíveis!')
+                    logger.info('-------------------- SIMs indisponíveis!')
                     continue
             
             # update order
@@ -130,7 +130,7 @@ def sims_in_orders():
                 # Enviar e-mail
                 send_email_sims.delay(id=id_id_i)
                 addNote(f'Status alterado para Agd. Ativação')
-                print(f'Pedido {order_id_i} com eSIM ou reuso, status definido para AA e e-mail enviado!')
+                logger.error(f'Pedido {order_id_i} com eSIM ou reuso, status definido para AA e e-mail enviado!')
             elif esim_eua: status_ord = 'AI'
             elif type_sim_i == 'sim': status_ord = 'ES'
             
@@ -184,7 +184,7 @@ def sims_in_orders():
             
             n_item_total += 1
     
-        print('>>>>>>>>>>>>>>>>>>>>>>> SIMs atribuidos!')
+        logger.info('>>>>>>>>>>>>>>>>>>>>>>> SIMs atribuidos!')
     
 
 @shared_task
@@ -195,7 +195,7 @@ def simActivateTC(id=None):
     today = datetime.now(tz).date()
     tomorrow = today +timedelta(days=1)
 
-    print('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO TC INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -203,15 +203,15 @@ def simActivateTC(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TC para processar')
+    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TC para processar')
     if orders_all.count() == 0:
-        print('>>>>>>>>>> Nenhum pedido TC pendente. Aguardando próxima execução.')
-        print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
+        logger.info('>>>>>>>>>> Nenhum pedido TC pendente. Aguardando próxima execução.')
+        logger.info('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
         return
             
     # Checar conexão com API
     def error_api():
-        print('>>>>>>>>>> ERRO API')
+        logger.info('>>>>>>>>>> ERRO API')
         # Checar Status
         UpdateOrder.upStatus(id_item,'EA')
         # Adicionar nota
@@ -228,7 +228,7 @@ def simActivateTC(id=None):
                         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
-        print(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
+        logger.error(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
         id_item = order.id
         try:
             iccid = order.id_sim.sim
@@ -290,7 +290,7 @@ def simActivateTC(id=None):
         else:
             # Alterar SIM na operadora
             if simStatus == 'Active':
-                print('simStatus == Active')
+                logger.info('simStatus == Active')
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{iccid} já estava ativado na Telcon')
                 # Alterar Status
@@ -304,7 +304,7 @@ def simActivateTC(id=None):
                 continue
             
             elif simStatus == 'Suspended':
-                print('simStatus == Suspended')
+                logger.info('simStatus == Suspended')
                 payload = json.dumps({
                     "Request": {
                         "endPointId": f"{endpointId}",
@@ -322,7 +322,7 @@ def simActivateTC(id=None):
                 process = True
                 
             else:
-                print('simStatus == Other')
+                logger.info('simStatus == Other')
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
                 NotesAdd.addNote(order,f'{iccid} com erro de ativação na Telcon. Verificar erro.')
@@ -362,7 +362,7 @@ def simActivateTC(id=None):
         # Fecha a conexão
         conn.close()
                 
-    print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
 
 
 @shared_task
@@ -372,7 +372,7 @@ def simActivateTI(id=None):
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
 
-    print(f'>>>>>>>>>> ATIVAÇÂO TI INICIADA - {tomorrow}')
+    logger.error(f'>>>>>>>>>> ATIVAÇÂO TI INICIADA - {tomorrow}')
     
     # Selecionar pedidos
     if id is None:
@@ -380,15 +380,15 @@ def simActivateTI(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TI para processar')
+    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TI para processar')
     if orders_all.count() == 0:
-        print('>>>>>>>>>> Nenhum pedido TI pendente. Aguardando próxima execução.')
-        print('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
+        logger.info('>>>>>>>>>> Nenhum pedido TI pendente. Aguardando próxima execução.')
+        logger.info('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
         return
             
     # Checar conexão com API
     def error_api():
-        print('>>>>>>>>>> ERRO API')
+        logger.info('>>>>>>>>>> ERRO API')
         # Checar Status
         UpdateOrder.upStatus(id_item,'EA')
         # Adicionar nota
@@ -406,7 +406,7 @@ def simActivateTI(id=None):
                         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
-        print(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
+        logger.error(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
         id_item = order.id
         try:
             iccid = order.id_sim.sim
@@ -460,7 +460,7 @@ def simActivateTI(id=None):
         else:
             # Alterar SIM na operadora
             if simStatus == 'Active':
-                print('simStatus == Active')
+                logger.info('simStatus == Active')
                 # Adicionar nota
                 NotesAdd.addNote(order,f'{iccid} já estava ativado na Telcon')
                 # Alterar Status
@@ -474,7 +474,7 @@ def simActivateTI(id=None):
                 continue
             
             elif simStatus == 'Suspended':
-                print('simStatus == Suspended')
+                logger.info('simStatus == Suspended')
                 payload = json.dumps({
                     "Request": {
                         "endPointId": f"{endpointId}",
@@ -492,7 +492,7 @@ def simActivateTI(id=None):
                 process = True
                 
             else:
-                print('simStatus == Other')
+                logger.info('simStatus == Other')
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
                 NotesAdd.addNote(order,f'{iccid} com erro na ativação da Telcon. Verificar erro.')
@@ -532,13 +532,13 @@ def simActivateTI(id=None):
         # Fecha a conexão
         conn.close()
 
-    print('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
 
 
 @shared_task
 def simDeactivateTC(id=None):
 
-    print('>>>>>>>>>> DESATIVAÇÃO TC INICIADA')
+    logger.info('>>>>>>>>>> DESATIVAÇÃO TC INICIADA')
     
     timezone = pytz.timezone(settings.TIME_ZONE)
 
@@ -551,16 +551,16 @@ def simDeactivateTC(id=None):
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
-    print(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos TC/TI ativos para verificar desativação')
+    logger.error(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos TC/TI ativos para verificar desativação')
     if not orders_to_process.exists():
-        print('>>>>>>>>>> Não há pedidos TC/TI que correspondam aos critérios de filtro.')
-        print('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
+        logger.info('>>>>>>>>>> Não há pedidos TC/TI que correspondam aos critérios de filtro.')
+        logger.info('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
         return
     
-    print('>>>>>>>>>> INICIANDO VERIFICAÇÃO DE DESATIVAÇÃO TC <<<<<<<<<<')
+    logger.info('>>>>>>>>>> INICIANDO VERIFICAÇÃO DE DESATIVAÇÃO TC <<<<<<<<<<')
 
     def error_api(order_item, iccid_val):
-        print(f'>>>>>>>>>> ERRO API PARA O PEDIDO {order_item.order_id} <<<<<<<<<<')
+        logger.error(f'>>>>>>>>>> ERRO API PARA O PEDIDO {order_item.order_id} <<<<<<<<<<')
         UpdateOrder.upStatus(order_item.id, 'ED')
         NotesAdd.addNote(order_item, f'ERRO API: {iccid_val} com erro na Telcon. Verificar erro.')
 
@@ -577,12 +577,12 @@ def simDeactivateTC(id=None):
         if id is None and deactivation_date > yesterday:
             continue
 
-        print(f'Iniciando desativação para o pedido {order.order_id}')
+        logger.error(f'Iniciando desativação para o pedido {order.order_id}')
         
         try:
             iccid = order.id_sim.sim
         except (AttributeError, ObjectDoesNotExist):
-            print(f"Pedido {order.order_id} sem SIM associado.")
+            logger.error(f"Pedido {order.order_id} sem SIM associado.")
             UpdateOrder.upStatus(order.id, 'DE')
             UpdateStore.upStore(
                 order_id=order.order_id,
@@ -622,7 +622,7 @@ def simDeactivateTC(id=None):
             resultDescription = data.get("Response", {}).get("resultParam", {}).get("resultDescription", str(data))
 
             if resultCode == 0:
-                print(f'Pedido {order.order_id} desativado com sucesso.')
+                logger.error(f'Pedido {order.order_id} desativado com sucesso.')
                 if id is None:
                     UpdateOrder.upStatus(order.id, 'DE')
                     UpdateStore.upStore(
@@ -636,7 +636,7 @@ def simDeactivateTC(id=None):
                     sim_put.save()
                 NotesAdd.addNote(order, f'{iccid} desativado com sucesso na Telcon. TC: {resultDescription}')
             else:
-                print(f'Erro ao desativar pedido {order.order_id}.')
+                logger.error(f'Erro ao desativar pedido {order.order_id}.')
                 if id is None:
                     UpdateOrder.upStatus(order.id, 'ED')
                 NotesAdd.addNote(order, f'ERRO DESATIVADO: {iccid} com erro na Telcon. TC: {resultDescription}')
@@ -649,13 +649,13 @@ def simDeactivateTC(id=None):
             if 'conn' in locals() and conn:
                 conn.close()
                 
-    print('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
+    logger.info('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
 
 
 @shared_task
 def simDeactivateAll(id=None):
 
-    print('>>>>>>>>>> DESATIVAÇÃO ALL INICIADA')
+    logger.info('>>>>>>>>>> DESATIVAÇÃO ALL INICIADA')
     
     timezone = pytz.timezone(settings.TIME_ZONE)
     now = datetime.now(timezone)
@@ -667,13 +667,13 @@ def simDeactivateAll(id=None):
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
-    print(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos ativos (outras operadoras) para verificar desativação')
+    logger.error(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos ativos (outras operadoras) para verificar desativação')
     if not orders_to_process.exists():
-        print('>>>>>>>>>> Não há pedidos que correspondam aos critérios de filtro.')
-        print('>>>>>>>>>> DESATIVAÇÃO ALL FINALIZADA <<<<<<<<<<')
+        logger.info('>>>>>>>>>> Não há pedidos que correspondam aos critérios de filtro.')
+        logger.info('>>>>>>>>>> DESATIVAÇÃO ALL FINALIZADA <<<<<<<<<<')
         return
     
-    print('>>>>>>>>>> INICIANDO VERIFICAÇÃO DE DESATIVAÇÃO ALL <<<<<<<<<<')
+    logger.info('>>>>>>>>>> INICIANDO VERIFICAÇÃO DE DESATIVAÇÃO ALL <<<<<<<<<<')
 
     for order in orders_to_process:
         # Garante que activation_date e days não são nulos
@@ -688,7 +688,7 @@ def simDeactivateAll(id=None):
         if id is None and deactivation_date > yesterday:
             continue
 
-        print(f'Iniciando desativação para o pedido {order.order_id}')
+        logger.error(f'Iniciando desativação para o pedido {order.order_id}')
 
         if id is None:
             UpdateOrder.upStatus(order.id, 'DE')
@@ -704,8 +704,8 @@ def simDeactivateAll(id=None):
                 sim_put.save()
         NotesAdd.addNote(order, f'Desativado com sucesso. Processo automático')
         
-    print(f'Pedido {order.order_id} desativado com sucesso.')                
-    print('>>>>>>>>>> DESATIVAÇÃO ALL FINALIZADA <<<<<<<<<<')
+    logger.error(f'Pedido {order.order_id} desativado com sucesso.')                
+    logger.info('>>>>>>>>>> DESATIVAÇÃO ALL FINALIZADA <<<<<<<<<<')
 
 
 @shared_task
@@ -715,7 +715,7 @@ def simActivateTM(id=None):
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
     
-    print('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -723,10 +723,10 @@ def simActivateTM(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TM para processar')
+    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TM para processar')
     if orders_all.count() == 0:
-        print('>>>>>>>>>> Nenhum pedido TM pendente. Aguardando próxima execução.')
-        print('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
+        logger.info('>>>>>>>>>> Nenhum pedido TM pendente. Aguardando próxima execução.')
+        logger.info('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
         return
     
     # Selecionar pedidos
@@ -814,7 +814,7 @@ def simActivateTM(id=None):
         conn.close()
         
                 
-    print('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
 
 @shared_task
 def simActivateOR(id=None):
@@ -823,7 +823,7 @@ def simActivateOR(id=None):
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
 
-    print(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA - {tomorrow}')
+    logger.error(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA - {tomorrow}')
     
     # Selecionar pedidos
     if id is None:
@@ -831,18 +831,18 @@ def simActivateOR(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
+    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
     if orders_all.count() == 0:
-        print('>>>>>>>>>> Nenhum pedido OR pendente. Aguardando próxima execução.')
-        print('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
+        logger.info('>>>>>>>>>> Nenhum pedido OR pendente. Aguardando próxima execução.')
+        logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
         return
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
+    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
     if orders_all.count() == 0:
-        print('>>>>>>>>>> Nenhum pedido OR pendente. Aguardando próxima execução.')
-        print('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
+        logger.info('>>>>>>>>>> Nenhum pedido OR pendente. Aguardando próxima execução.')
+        logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
         return
         
     for order in orders_all:
@@ -863,7 +863,7 @@ def simActivateOR(id=None):
         NotesAdd.addNote(order,f'eSIM Ativado - Processo automático')
         
                 
-    print('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
 
 @shared_task
 def simActivateCM(id=None):
@@ -1283,7 +1283,7 @@ def simActivateCM(id=None):
     tz = pytz.timezone("Europe/Lisbon")
     today = datetime.now(tz).date()
 
-    print('>>>>>>>>>> ATIVAÇÂO CM INICIADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO CM INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -1291,10 +1291,10 @@ def simActivateCM(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)    
     
-    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos CM para processar')
+    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos CM para processar')
     if orders_all.count() == 0:
-        print('>>>>>>>>>> Nenhum pedido CM pendente. Aguardando próxima execução.')
-        print('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
+        logger.info('>>>>>>>>>> Nenhum pedido CM pendente. Aguardando próxima execução.')
+        logger.info('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
         return    
     
     if orders_all != None:
@@ -1302,7 +1302,7 @@ def simActivateCM(id=None):
         api_token = ApiCM.get_token()
         
         if api_token == "error":
-            print('>>>>>>>>>> ERRO DE TOKEN')
+            logger.info('>>>>>>>>>> ERRO DE TOKEN')
             return
     
     for order in orders_all:
@@ -1320,7 +1320,7 @@ def simActivateCM(id=None):
         order_sim = order.id_sim.sim
         list_plan = []
         
-        print(f'>>>>>>>>>> ATIVANDO SIM {order_sim} - {order_id}')
+        logger.error(f'>>>>>>>>>> ATIVANDO SIM {order_sim} - {order_id}')
         
         def errorData(data_dict=None):
             # Adicionar Nota
@@ -1422,7 +1422,7 @@ def simActivateCM(id=None):
 
         conn.close()
 
-    print('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
 
 
 @shared_task
@@ -1461,7 +1461,7 @@ def simActivateMS(id=None):
 
             client_email = order.email if order.email else "chip@acasadochip.com"
             
-            print(f'>>>>>>>>>> Data de ativação {order.activation_date} para o pedido {order.order_id}')
+            logger.error(f'>>>>>>>>>> Data de ativação {order.activation_date} para o pedido {order.order_id}')
 
             payload = {
                 "operator": 15,

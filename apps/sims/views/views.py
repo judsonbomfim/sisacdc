@@ -233,8 +233,8 @@ def sims_add_esim(request):
         for sim_img in esims:
             sim_i = sim_img.name.split('.')
             
-            print(sim_img.name)
-            print(sim_img)
+            logger.error(sim_img.name)
+            logger.error(sim_img)
             
             fileurl = ''
             if imghdr.what(sim_img):
@@ -333,7 +333,7 @@ def testeMobileData(request, iccid):
     
     try:
         # Verificar se a classe foi importada corretamente
-        print(f"Classe ApiCM disponível: {ApiCM}")        
+        logger.error(f"Classe ApiCM disponível: {ApiCM}")        
         # Chamar método mobileData da classe ApiCM
         mobile_data = ApiCM.mobileData(iccid)        
         # Retornar resposta JSON
@@ -345,7 +345,7 @@ def testeMobileData(request, iccid):
         })
         
     except Exception as e:
-        print(f"Erro em testeMobileDataCM: {e}")
+        logger.error(f"Erro em testeMobileDataCM: {e}")
         
         return JsonResponse({
             'success': False,

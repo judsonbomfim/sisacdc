@@ -12,8 +12,8 @@ class ConsumoView(APIView):
     def get(self, request, iccid):
         sim = Sims.objects.filter(sim=iccid).first()
         sim_operator = sim.operator if sim else None
-        print(f"ICCID recebido: {iccid}")
-        print(f"Operadora do SIM: {sim_operator}")
+        logger.error(f"ICCID recebido: {iccid}")
+        logger.error(f"Operadora do SIM: {sim_operator}")
 
         try:
             if sim_operator == 'TC' or sim_operator == 'TI':

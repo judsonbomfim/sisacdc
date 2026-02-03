@@ -6,13 +6,16 @@ from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 import time, requests
+import logging
 from apps.sims.tasks import sims_in_orders, simDeactivateTC
 from apps.send_email.tasks import send_email_sims
 from apps.voice_calls.tasks import number_in_voice
 
+logger = logging.getLogger(__name__)
+
 @shared_task
 def order_import():
-    print('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS INICIADA')
+    logger.info('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS INICIADA')
     
     # Importar pedidos
     apiStore = ApiStore.conectApiStore()
@@ -29,36 +32,36 @@ def order_import():
     
     # Verificar status HTTP antes de tentar decodificar JSON
     if response.status_code >= 500:
-        print(f"Erro de servidor da API Store: {response.status_code} - {response.reason}")
-        print(f"A API está temporariamente indisponível. Tentando novamente na próxima execução.")
+        logger.error(f"Erro de servidor da API Store: {response.status_code} - {response.reason}")
+        logger.error(f"A API está temporariamente indisponível. Tentando novamente na próxima execução.")
         return
     elif response.status_code >= 400:
-        print(f"Erro de cliente da API Store: {response.status_code} - {response.reason}")
-        print(f"Conteúdo da resposta: {response.text[:500]}")
+        logger.error(f"Erro de cliente da API Store: {response.status_code} - {response.reason}")
+        logger.error(f"Conteúdo da resposta: {response.text[:500]}")
         return
     
     try:
         ord = response.json()            
     except Exception as e:
-        print(f"Erro ao decodificar JSON da resposta da API: {e}")
-        print(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
-        print('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA COM ERRO')
+        logger.error(f"Erro ao decodificar JSON da resposta da API: {e}")
+        logger.error(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
+        logger.info('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA COM ERRO')
         return
     
     # Verificar se há pedidos para importar
     if not ord or len(ord) == 0:
-        print('>>>>>>>>>> Nenhum pedido novo encontrado na API Store')
-        print('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA')
+        logger.info('>>>>>>>>>> Nenhum pedido novo encontrado na API Store')
+        logger.info('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA')
         return
     
-    print(f'>>>>>>>>>> Encontrados {len(ord)} pedidos na API Store para verificar')
+    logger.info(f'>>>>>>>>>> Encontrados {len(ord)} pedidos na API Store para verificar')
     
     # Listar pedidos         
     for order in ord:
         
         # Verificar se order é válido (dicionário com ID)
         if not isinstance(order, dict) or 'id' not in order:
-            print(f"Sem itens para importar")
+            logger.error(f"Sem itens para importar")
             continue
             
         n_item = 1
@@ -66,7 +69,7 @@ def order_import():
                 
         # Verificar pedido repetido - se order_id já existe, pula
         if Orders.objects.filter(order_id=id_ord).exists():
-            print(f'Pedido {id_ord} já importado, pulando')
+            logger.error(f'Pedido {id_ord} já importado, pulando')
             continue
         
         # Listar itens do pedido
@@ -86,7 +89,7 @@ def order_import():
             qtd = item['quantity']
             q_i = 1 
             
-            print(f'---------- Importando pedido {id_ord}')            
+            logger.error(f'---------- Importando pedido {id_ord}')            
             
             while q_i <= qtd:
                 order_id_i = order['id']
@@ -202,7 +205,7 @@ def order_import():
                 
                 # SÓ PROCESSA SE FOR NOVO
                 if created:
-                    print(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
+                    logger.error(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
                     
                     # Save Notes
                     Notes.objects.create(
@@ -248,7 +251,7 @@ def order_import():
                     n_item_total += 1
                     msg_info.append(f'Pedido {order_id_i} importado com sucesso')
                 else:
-                    print(f'Item já existe: {item_id_i}, pulando')
+                    logger.error(f'Item já existe: {item_id_i}, pulando')
                 
                 # Definir variáveis
                 q_i += 1 
@@ -256,11 +259,11 @@ def order_import():
                     
     # Status 
     if n_item_total != 0:
-        print(f'>>>>>>>>>>>>>>>>>>>>>>> {n_item_total} pedidos importados com sucesso')
+        logger.error(f'>>>>>>>>>>>>>>>>>>>>>>> {n_item_total} pedidos importados com sucesso')
     else:
-        print('>>>>>>>>>> Nenhum pedido novo foi importado (todos já existem ou não atendem aos critérios)')
+        logger.info('>>>>>>>>>> Nenhum pedido novo foi importado (todos já existem ou não atendem aos critérios)')
     
-    print('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA')
+    logger.info('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA')
 
 
 @shared_task
@@ -280,19 +283,19 @@ def order_import_voice():
     
     # Verificar status HTTP antes de tentar decodificar JSON
     if response.status_code >= 500:
-        print(f"Erro de servidor da API Store: {response.status_code} - {response.reason}")
-        print(f"A API está temporariamente indisponível. Tentando novamente na próxima execução.")
+        logger.error(f"Erro de servidor da API Store: {response.status_code} - {response.reason}")
+        logger.error(f"A API está temporariamente indisponível. Tentando novamente na próxima execução.")
         return
     elif response.status_code >= 400:
-        print(f"Erro de cliente da API Store: {response.status_code} - {response.reason}")
-        print(f"Conteúdo da resposta: {response.text[:500]}")
+        logger.error(f"Erro de cliente da API Store: {response.status_code} - {response.reason}")
+        logger.error(f"Conteúdo da resposta: {response.text[:500]}")
         return
     
     try:
         ord = response.json()            
     except Exception as e:
-        print(f"Erro ao decodificar JSON da resposta da API: {e}")
-        print(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
+        logger.error(f"Erro ao decodificar JSON da resposta da API: {e}")
+        logger.error(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
         return
     
     # Listar pedidos         
@@ -307,7 +310,7 @@ def order_import_voice():
 
         # Verificar pedido repetido
         if Orders.objects.filter(order_id=id_ord).exists():
-            print(f'Pedido {id_ord} já importado, pulando')
+            logger.error(f'Pedido {id_ord} já importado, pulando')
             continue
         
         # Verificar se line_items existe
@@ -325,7 +328,7 @@ def order_import_voice():
             qtd = item['quantity']
             q_i = 1 
             
-            print(f'---------- Importando pedido {id_ord}')
+            logger.error(f'---------- Importando pedido {id_ord}')
             
             while q_i <= qtd:
                 order_id_i = order['id']
@@ -400,7 +403,7 @@ def order_import_voice():
                 
                 # SÓ PROCESSA SE FOR NOVO
                 if created:
-                    print(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
+                    logger.error(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
                     
                     # Save Notes
                     Notes.objects.create(
@@ -446,7 +449,7 @@ def order_import_voice():
                     n_item_total += 1
                     msg_info.append(f'Pedido {order_id_i} importado com sucesso')
                 else:
-                    print(f'Item já existe: {item_id_i}, pulando')
+                    logger.error(f'Item já existe: {item_id_i}, pulando')
 
                 # Definir variáveis
                 q_i += 1 
@@ -454,12 +457,12 @@ def order_import_voice():
                     
     # Status 
     if n_item_total != 0:
-        print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
+        logger.info('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
 
 @shared_task
 def orders_auto():
-    print('-----------------orders_auto')
+    logger.info('-----------------orders_auto')
     order_import.delay()
     time.sleep(10)
     order_import_voice.delay()
@@ -473,7 +476,7 @@ def orders_auto():
 
 @shared_task
 def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
-    print(f"[orders_up_status] recebido: ord_id={ord_id}, ord_s={ord_s}, id_user={id_user}")
+    logger.error(f"[orders_up_status] recebido: ord_id={ord_id}, ord_s={ord_s}, id_user={id_user}")
     
     # Verificar se ord_id é uma lista
     if not isinstance(ord_id, list):
@@ -482,11 +485,11 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
     for o_id in ord_id:
         
         if o_id is None:
-            print(f"Item de pedido inválido ou sem ID: {order}")
+            logger.error(f"Item de pedido inválido ou sem ID: {order}")
             continue
                
         order = Orders.objects.get(pk=o_id)
-        print(f"[orders_up_status] processando order.pk={order.pk} -> novo_status={ord_s}")
+        logger.error(f"[orders_up_status] processando order.pk={order.pk} -> novo_status={ord_s}")
         user = User.objects.get(pk=id_user)
         order_id = order.id
         order_plan = order.get_product_display()
@@ -498,14 +501,14 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         # Save status System
         order.order_status = ord_s
         order.save()
-        print(f"[orders_up_status] atualizado order.pk={order.pk} para {ord_s}")
+        logger.error(f"[orders_up_status] atualizado order.pk={order.pk} para {ord_s}")
         
         # Desativar (e)SIM
         if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE'):
             if order.id_sim:                
                 # Change TC                
                 if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_s == 'DE':
-                    print('----------------- Alterar/desativar TC/TI -----------------')
+                    logger.info('----------------- Alterar/desativar TC/TI -----------------')
                     simDeactivateTC(id=order.id)
                 
                 if ord_s_prev != 'ED':
@@ -540,7 +543,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         
         # Só cancelar se todos os itens estiverem cancelados / reembolsados
         if (order_canc == 0 and ord_s == 'CC') or (order_reemb == 0 and ord_s == 'RB') or ord_s != 'DE':
-            print('--------------------------- Alterar STATUS Loja')        
+            logger.info('--------------------------- Alterar STATUS Loja')        
             if ord_s in StatusStore.st_sis_site():
                 UpdateStore.upStore(
                     order_id = order.order_id,
@@ -549,7 +552,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
                     status_g = ord_s if ord_s else None,
                 ) 
         elif ord_s not in ['CC', 'RB', 'DE']:
-            print('--------------------------- Alterar STATUS Loja')        
+            logger.info('--------------------------- Alterar STATUS Loja')        
             UpdateStore.upStore(
                 order_id = order.order_id,
                 item_id_store = order.item_id_store if order.item_id_store else None,
@@ -595,7 +598,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
                 if ord_s == 'AA':
                     send_email_sims.delay(id=order.id)   
             except Exception as e:
-                print(f"Erro ao gravar nota: {e}")
+                logger.error(f"Erro ao gravar nota: {e}")
             
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
@@ -614,16 +617,16 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
 #             data_inicio = date(2025, 8, 10)  # exemplo de data
 
 #             ord = Orders.objects.filter(order_date__gte=data_inicio)
-#             print('ORD >>>>>>>>>> ',ord)
+#             logger.info('ORD >>>>>>>>>> ',ord)
             
 #             # Se não houver mais pedidos, sair do loop
 #             if not ord:
 #                 break
 #         except requests.exceptions.RequestException as e:
-#             print(f"Erro ao obter pedidos na página {n_page}: {e}")
+#             logger.error(f"Erro ao obter pedidos na página {n_page}: {e}")
 #             break
 #         except ValueError as e:
-#             print(f"Erro ao decodificar JSON na página {n_page}: {e}")
+#             logger.error(f"Erro ao decodificar JSON na página {n_page}: {e}")
 #             break
 
 #         # Listar pedidos         
@@ -637,11 +640,11 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
 #                 order_status = id_sis.order_status
 #                 UpdateStore.upStore(order_id, _status='AT', status_g='AT')                
 #                 total_ord += 1
-#                 print(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
+#                 logger.error(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
 
 #         n_page += 1
 
-#     print(f'Total de pedidos processados: {total_ord}')
+#     logger.error(f'Total de pedidos processados: {total_ord}')
     
     
 @shared_task(time_limit=300)
@@ -662,7 +665,7 @@ def update_st(*args, **kwargs):
             
             # Verificar se a resposta contém dados
             if response.text.strip() == "":
-                print(f"Resposta vazia na página {n_page}")
+                logger.error(f"Resposta vazia na página {n_page}")
                 break
             
             ord = response.json()
@@ -671,10 +674,10 @@ def update_st(*args, **kwargs):
             if not ord:
                 break
         except requests.exceptions.RequestException as e:
-            print(f"Erro ao obter pedidos na página {n_page}: {e}")
+            logger.error(f"Erro ao obter pedidos na página {n_page}: {e}")
             break
         except ValueError as e:
-            print(f"Erro ao decodificar JSON na página {n_page}: {e}")
+            logger.error(f"Erro ao decodificar JSON na página {n_page}: {e}")
             break
 
         # Listar pedidos         
@@ -695,8 +698,8 @@ def update_st(*args, **kwargs):
                 )                    
 
                 total_ord += 1
-                print(f'>>>>>>>>>> Pedidos {id_ord} - {order_status} = TOTAL {total_ord}')
+                logger.error(f'>>>>>>>>>> Pedidos {id_ord} - {order_status} = TOTAL {total_ord}')
 
         n_page += 1
 
-    print(f'Total de pedidos processados: {total_ord}')
+    logger.error(f'Total de pedidos processados: {total_ord}')

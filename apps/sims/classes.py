@@ -63,7 +63,7 @@ class ApiTC:
         }
         if cookie is None:
             headers['Cookie'] = 'Encrypt_cookies=rd20o00000000000000000000ffff0af30e15o12021'
-        print(">>>>>>>>>>>>>>>>>>> get_headers finalizado")
+        logger.error(">>>>>>>>>>>>>>>>>>> get_headers finalizado")
         return headers
 
 
@@ -454,7 +454,7 @@ class ApiTI:
 
 class ApiCM:
     
-    print(">>>>>>>>>>>>>>>>>>> Classe ApiCM iniciada")
+    logger.error(">>>>>>>>>>>>>>>>>>> Classe ApiCM iniciada")
     
     app_key = settings.APICM_KEY
     app_secret = settings.APICM_SECRET
@@ -473,7 +473,7 @@ class ApiCM:
         if api_token:
             return api_token
         
-        print(">>>>>>>>>>>>>>>>>>> Obtendo token de acesso para API CM...")
+        logger.error(">>>>>>>>>>>>>>>>>>> Obtendo token de acesso para API CM...")
         # URL do endpoint
         url_api = f'{settings.APICM_URL}/aep/APP_getAccessToken_SBO/v1'
         parsed_url = urlparse(url_api)
@@ -523,7 +523,7 @@ class ApiCM:
     @staticmethod
     def childOrderId(iccid):
 
-        print(f">>>>>>>>>>>>>>>>>>> Acessando childOrderId {iccid}")
+        logger.error(f">>>>>>>>>>>>>>>>>>> Acessando childOrderId {iccid}")
 
         url_api = f'{settings.APICM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
         parsed_url = urlparse(url_api)
@@ -531,7 +531,7 @@ class ApiCM:
         
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
-            print(f">>>>>>>>>>>>>>>>>>> Erro ao obter token de acesso para API CM")
+            logger.error(f">>>>>>>>>>>>>>>>>>> Erro ao obter token de acesso para API CM")
             return 0
 
         # Gerar PasswordDigest
@@ -624,7 +624,7 @@ class ApiCM:
                 mobile_data = soma_qtaconsumption
                 return mobile_data
             except (KeyError, IndexError, TypeError) as e:
-                print(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso: {e}")
+                logger.error(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso: {e}")
                 return 0
                             
         except Exception as e:
@@ -637,7 +637,7 @@ class ApiCM:
 
         
         # # Resultado
-        # print(f">>>>>>>>>>>>>>>>>>> Status da resposta: {data}")
+        # logger.error(f">>>>>>>>>>>>>>>>>>> Status da resposta: {data}")
         # return data
         
 

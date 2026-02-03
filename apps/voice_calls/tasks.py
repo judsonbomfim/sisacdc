@@ -7,12 +7,15 @@ import pytz
 import qrcode
 import boto3
 import time
+import logging
 from django.db.models import Q
 from io import BytesIO
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.files.storage import default_storage
 from celery import shared_task
+
+logger = logging.getLogger(__name__)
 from apps.voice_calls.classes import NoteVoiceCall, UpdateVoice
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
 from apps.send_email.tasks import send_email_voice
@@ -142,7 +145,7 @@ def voiceActivate(id=None):
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=2)
     
-    print('>>>>>>>>>> ATIVAÇÂO VOICE INICIADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO VOICE INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -150,19 +153,19 @@ def voiceActivate(id=None):
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)        
     
-    print(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para processar')
+    logger.error(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para processar')
     if voice_all.count() == 0:
-        print('>>>>>>>>>> Nenhum pedido de voz pendente. Aguardando próxima execução.')
-        print('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
+        logger.info('>>>>>>>>>> Nenhum pedido de voz pendente. Aguardando próxima execução.')
+        logger.info('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
         return
     
     for order in voice_all:
         
-        print(f'Processando pedido ID: {order.id}')
+        logger.error(f'Processando pedido ID: {order.id}')
 
         # Verifica se há número associado
         if order.id_number is None:
-            print(f'Pedido {order.id} sem número associado, pulando ativação')
+            logger.error(f'Pedido {order.id} sem número associado, pulando ativação')
             UpdateVoice.upStatus(order.id, 'EA')
             NoteVoiceCall.addNote(order, 'Erro: sem número associado para ativação')
             continue
@@ -223,7 +226,7 @@ def voiceActivate(id=None):
         conn.close()
         
                 
-    print('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
     
 @shared_task
 def voiceDesactivate(id=None):
@@ -232,7 +235,7 @@ def voiceDesactivate(id=None):
     now = datetime.now(timezone)
     yesterday = now.date() - timedelta(days=1)
     
-    print('>>>>>>>>>> DESATIVAÇÃO VOICE INICIADA')
+    logger.info('>>>>>>>>>> DESATIVAÇÃO VOICE INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -240,15 +243,15 @@ def voiceDesactivate(id=None):
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)
     
-    print(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para desativar')
+    logger.error(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para desativar')
     if not voice_all.exists():
-        print('>>>>>>>>>> Não há pedidos de voz para serem desativados.')
-        print('>>>>>>>>>> DESATIVAÇÃO VOICE FINALIZADA')
+        logger.info('>>>>>>>>>> Não há pedidos de voz para serem desativados.')
+        logger.info('>>>>>>>>>> DESATIVAÇÃO VOICE FINALIZADA')
         return
     
     for order in voice_all:
         
-        print(f'Processando pedido ID: {order.id}')
+        logger.error(f'Processando pedido ID: {order.id}')
           
         # Garante que activation_date e days não são nulos
         if order.activation_date is None or order.days is None:
@@ -258,7 +261,7 @@ def voiceDesactivate(id=None):
         if order.id_number is None:
             UpdateVoice.upStatus(order.id, 'DS')
             NoteVoiceCall.addNote(order, 'Erro: sem número associado para ativação')
-            print(f'Pedido {order.id} sem número associado, pulando desativação')
+            logger.error(f'Pedido {order.id} sem número associado, pulando desativação')
             continue
         
         # Calcula a data de desativação
@@ -321,7 +324,7 @@ def voiceDesactivate(id=None):
         # Fecha a conexão
         conn.close()
                 
-    print('>>>>>>>>>> DESATIVAÇÃO VOICE FINALIZADA')
+    logger.info('>>>>>>>>>> DESATIVAÇÃO VOICE FINALIZADA')
 
 # Aliases to match Celery Beat names configured in core.settings
 @shared_task

@@ -23,11 +23,11 @@ class NoteVoiceCall:
                 type_note=type_note
             )
             
-            print(f"  Nota criada com ID: {nota.id}")
+            logger.error(f"  Nota criada com ID: {nota.id}")
             return nota
             
         except Exception as e:
-            print(f"  ERRO ao criar nota: {e}")
+            logger.error(f"  ERRO ao criar nota: {e}")
             return None
 
 class UpdateVoice():
