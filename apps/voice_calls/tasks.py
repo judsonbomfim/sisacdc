@@ -150,6 +150,12 @@ def voiceActivate(id=None):
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)        
     
+    print(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para processar')
+    if voice_all.count() == 0:
+        print('>>>>>>>>>> Nenhum pedido de voz pendente. Aguardando próxima execução.')
+        print('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
+        return
+    
     for order in voice_all:
         
         print(f'Processando pedido ID: {order.id}')
@@ -234,8 +240,10 @@ def voiceDesactivate(id=None):
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)
     
+    print(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para desativar')
     if not voice_all.exists():
-        print('Não há pedidos para serem desativados.')
+        print('>>>>>>>>>> Não há pedidos de voz para serem desativados.')
+        print('>>>>>>>>>> DESATIVAÇÃO VOICE FINALIZADA')
         return
     
     for order in voice_all:

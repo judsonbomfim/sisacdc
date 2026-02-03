@@ -12,6 +12,8 @@ from apps.voice_calls.tasks import number_in_voice
 
 @shared_task
 def order_import():
+    print('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS INICIADA')
+    
     # Importar pedidos
     apiStore = ApiStore.conectApiStore()
     
@@ -40,7 +42,16 @@ def order_import():
     except Exception as e:
         print(f"Erro ao decodificar JSON da resposta da API: {e}")
         print(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
+        print('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA COM ERRO')
         return
+    
+    # Verificar se há pedidos para importar
+    if not ord or len(ord) == 0:
+        print('>>>>>>>>>> Nenhum pedido novo encontrado na API Store')
+        print('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA')
+        return
+    
+    print(f'>>>>>>>>>> Encontrados {len(ord)} pedidos na API Store para verificar')
     
     # Listar pedidos         
     for order in ord:
@@ -245,7 +256,11 @@ def order_import():
                     
     # Status 
     if n_item_total != 0:
-        print('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
+        print(f'>>>>>>>>>>>>>>>>>>>>>>> {n_item_total} pedidos importados com sucesso')
+    else:
+        print('>>>>>>>>>> Nenhum pedido novo foi importado (todos já existem ou não atendem aos critérios)')
+    
+    print('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA')
 
 
 @shared_task

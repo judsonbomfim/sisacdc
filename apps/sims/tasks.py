@@ -202,6 +202,12 @@ def simActivateTC(id=None):
         orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TC', activation_date__lte=tomorrow)
     else:
         orders_all = Orders.objects.filter(pk=id)
+    
+    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TC para processar')
+    if orders_all.count() == 0:
+        print('>>>>>>>>>> Nenhum pedido TC pendente. Aguardando próxima execução.')
+        print('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
+        return
             
     # Checar conexão com API
     def error_api():
@@ -373,6 +379,12 @@ def simActivateTI(id=None):
         orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TI', activation_date__lte=tomorrow)
     else:
         orders_all = Orders.objects.filter(pk=id)
+    
+    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TI para processar')
+    if orders_all.count() == 0:
+        print('>>>>>>>>>> Nenhum pedido TI pendente. Aguardando próxima execução.')
+        print('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
+        return
             
     # Checar conexão com API
     def error_api():
@@ -526,6 +538,8 @@ def simActivateTI(id=None):
 @shared_task
 def simDeactivateTC(id=None):
 
+    print('>>>>>>>>>> DESATIVAÇÃO TC INICIADA')
+    
     timezone = pytz.timezone(settings.TIME_ZONE)
 
     now = datetime.now(timezone)
@@ -537,8 +551,10 @@ def simDeactivateTC(id=None):
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
+    print(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos TC/TI ativos para verificar desativação')
     if not orders_to_process.exists():
-        print('Não há pedidos que correspondam aos critérios de filtro.')
+        print('>>>>>>>>>> Não há pedidos TC/TI que correspondam aos critérios de filtro.')
+        print('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
         return
     
     print('>>>>>>>>>> INICIANDO VERIFICAÇÃO DE DESATIVAÇÃO TC <<<<<<<<<<')
@@ -639,6 +655,8 @@ def simDeactivateTC(id=None):
 @shared_task
 def simDeactivateAll(id=None):
 
+    print('>>>>>>>>>> DESATIVAÇÃO ALL INICIADA')
+    
     timezone = pytz.timezone(settings.TIME_ZONE)
     now = datetime.now(timezone)
     yesterday = now.date() - timedelta(days=1)
@@ -649,8 +667,10 @@ def simDeactivateAll(id=None):
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
+    print(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos ativos (outras operadoras) para verificar desativação')
     if not orders_to_process.exists():
-        print('Não há pedidos que correspondam aos critérios de filtro.')
+        print('>>>>>>>>>> Não há pedidos que correspondam aos critérios de filtro.')
+        print('>>>>>>>>>> DESATIVAÇÃO ALL FINALIZADA <<<<<<<<<<')
         return
     
     print('>>>>>>>>>> INICIANDO VERIFICAÇÃO DE DESATIVAÇÃO ALL <<<<<<<<<<')
@@ -685,7 +705,7 @@ def simDeactivateAll(id=None):
         NotesAdd.addNote(order, f'Desativado com sucesso. Processo automático')
         
     print(f'Pedido {order.order_id} desativado com sucesso.')                
-    print('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
+    print('>>>>>>>>>> DESATIVAÇÃO ALL FINALIZADA <<<<<<<<<<')
 
 
 @shared_task
@@ -696,6 +716,18 @@ def simActivateTM(id=None):
     tomorrow = today + timedelta(days=1)
     
     print('>>>>>>>>>> ATIVAÇÂO TM INICIADA')
+    
+    # Selecionar pedidos
+    if id is None:
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='TM')
+    else:
+        orders_all = Orders.objects.filter(pk=id)
+    
+    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TM para processar')
+    if orders_all.count() == 0:
+        print('>>>>>>>>>> Nenhum pedido TM pendente. Aguardando próxima execução.')
+        print('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
+        return
     
     # Selecionar pedidos
     if id is None:
@@ -798,6 +830,20 @@ def simActivateOR(id=None):
         orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=tomorrow)
     else:
         orders_all = Orders.objects.filter(pk=id)
+    
+    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
+    if orders_all.count() == 0:
+        print('>>>>>>>>>> Nenhum pedido OR pendente. Aguardando próxima execução.')
+        print('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
+        return
+    else:
+        orders_all = Orders.objects.filter(pk=id)
+    
+    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
+    if orders_all.count() == 0:
+        print('>>>>>>>>>> Nenhum pedido OR pendente. Aguardando próxima execução.')
+        print('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
+        return
         
     for order in orders_all:
                         
@@ -1244,6 +1290,12 @@ def simActivateCM(id=None):
         orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='CM', activation_date__lte=today)
     else:
         orders_all = Orders.objects.filter(pk=id)    
+    
+    print(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos CM para processar')
+    if orders_all.count() == 0:
+        print('>>>>>>>>>> Nenhum pedido CM pendente. Aguardando próxima execução.')
+        print('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
+        return    
     
     if orders_all != None:
         # Gerar Token
