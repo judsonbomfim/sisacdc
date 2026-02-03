@@ -237,7 +237,7 @@ def voiceDesactivate(id=None):
     
     # Selecionar pedidos
     if id is None:
-        voice_all = VoiceCalls.objects.filter(call_status='AT')
+        voice_all = VoiceCalls.objects.filter(call_status='AT').exclude(activation_date__gte=now.date())
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)
     
@@ -257,9 +257,7 @@ def voiceDesactivate(id=None):
             NoteVoiceCall.addNote(order, 'Erro: sem número associado para ativação')
             logger.info(f'Pedido {order.id} sem número associado, pulando desativação')
             continue
-        
-        logger.info(f'Processando pedido ID: {order.id}')
-        
+                
         # Calcula a data de desativação
         # A lógica é: data de ativação + (duração do plano - 1 dia)
         deactivation_date = order.activation_date + timedelta(days=order.days - 1)
@@ -267,6 +265,8 @@ def voiceDesactivate(id=None):
         # Se um ID específico não foi passado, só desativa se a data for ontem ou anterior
         if id is None and deactivation_date > yesterday:
             continue
+
+        logger.info(f'Processando pedido ID: {order.id}')
 
         order_id = order.id
         pedido = order.id_item.item_id
