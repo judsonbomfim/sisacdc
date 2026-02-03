@@ -603,7 +603,7 @@ def simDeactivateTC(id=None):
             resultDescription = data.get("Response", {}).get("resultParam", {}).get("resultDescription", str(data))
 
             if resultCode == 0:
-                logger.error(f'Pedido {order.order_id} desativado com sucesso.')
+                logger.info(f'Pedido {order.order_id} desativado com sucesso.')
                 if id is None:
                     UpdateOrder.upStatus(order.id, 'DE')
                     UpdateStore.upStore(

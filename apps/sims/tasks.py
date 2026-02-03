@@ -685,7 +685,7 @@ def simDeactivateAll(id=None):
                 sim_put.save()
         NotesAdd.addNote(order, f'Desativado com sucesso. Processo automático')
         
-    logger.error(f'Pedido {order.order_id} desativado com sucesso.')                
+    logger.info(f'Pedido {order.order_id} desativado com sucesso.')                
     logger.info('>>>>>>>>>> DESATIVAÇÃO ALL FINALIZADA <<<<<<<<<<')
 
 
