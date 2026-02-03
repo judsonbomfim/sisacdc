@@ -487,7 +487,6 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
             continue
                
         order = Orders.objects.get(pk=o_id)
-        logger.error(f"[orders_up_status] processando order.pk={order.pk} -> novo_status={ord_s}")
         user = User.objects.get(pk=id_user)
         order_id = order.id
         order_plan = order.get_product_display()
@@ -499,14 +498,13 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         # Save status System
         order.order_status = ord_s
         order.save()
-        logger.error(f"[orders_up_status] atualizado order.pk={order.pk} para {ord_s}")
+        logger.info(f"[orders_up_status] atualizado order.pk={order.pk} para {ord_s}")
         
         # Desativar (e)SIM
         if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE'):
             if order.id_sim:                
                 # Change TC                
                 if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_s == 'DE':
-                    logger.info('----------------- Alterar/desativar TC/TI -----------------')
                     simDeactivateTC(id=order.id)
                 
                 if ord_s_prev != 'ED':

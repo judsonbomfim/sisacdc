@@ -399,7 +399,7 @@ def simActivateTI(id=None):
                         
         order = Orders.objects.get(pk=order.id)
         order_id = order.order_id
-        logger.error(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
+        logger.info(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order_id}')
         id_item = order.id
         try:
             iccid = order.id_sim.sim
