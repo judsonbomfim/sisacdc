@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     container_name: djangoapp
-    image: ${IMAGE_NAME:-djangoweb:latest}
+    image: djangoweb:latest
     build:
       context: .
       dockerfile: Dockerfile
