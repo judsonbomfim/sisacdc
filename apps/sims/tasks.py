@@ -202,9 +202,7 @@ def simActivateTC(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TC para processar')
     if orders_all.count() == 0:
-        logger.info('>>>>>>>>>> Nenhum pedido TC pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
         return
             
@@ -379,9 +377,7 @@ def simActivateTI(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TI para processar')
     if orders_all.count() == 0:
-        logger.info('>>>>>>>>>> Nenhum pedido TI pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
         return
             
@@ -550,14 +546,10 @@ def simDeactivateTC(id=None):
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
-    logger.info(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos TC/TI ativos para verificar desativação')
     if not orders_to_process.exists():
-        logger.info('>>>>>>>>>> Não há pedidos TC/TI que correspondam aos critérios de filtro.')
         logger.info('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
         return
     
-    logger.info('>>>>>>>>>> INICIANDO VERIFICAÇÃO DE DESATIVAÇÃO TC <<<<<<<<<<')
-
     def error_api(order_item, iccid_val):
         logger.error(f'>>>>>>>>>> ERRO API PARA O PEDIDO {order_item.order_id} <<<<<<<<<<')
         UpdateOrder.upStatus(order_item.id, 'ED')
@@ -576,8 +568,6 @@ def simDeactivateTC(id=None):
         if id is None and deactivation_date > yesterday:
             continue
 
-        logger.info(f'Iniciando desativação para o pedido {order.order_id}')
-        
         try:
             iccid = order.id_sim.sim
         except (AttributeError, ObjectDoesNotExist):
@@ -666,14 +656,10 @@ def simDeactivateAll(id=None):
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
-    logger.info(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos ativos (outras operadoras) para verificar desativação')
     if not orders_to_process.exists():
-        logger.info('>>>>>>>>>> Não há pedidos que correspondam aos critérios de filtro.')
         logger.info('>>>>>>>>>> DESATIVAÇÃO ALL FINALIZADA <<<<<<<<<<')
         return
     
-    logger.info('>>>>>>>>>> INICIANDO VERIFICAÇÃO DE DESATIVAÇÃO ALL <<<<<<<<<<')
-
     for order in orders_to_process:
         # Garante que activation_date e days não são nulos
         if order.activation_date is None or order.days is None:
@@ -686,8 +672,6 @@ def simDeactivateAll(id=None):
         # Se um ID específico não foi passado, só desativa se a data for ontem ou anterior
         if id is None and deactivation_date > yesterday:
             continue
-
-        logger.info(f'Iniciando desativação para o pedido {order.order_id}')
 
         if id is None:
             UpdateOrder.upStatus(order.id, 'DE')
@@ -722,9 +706,7 @@ def simActivateTM(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TM para processar')
     if orders_all.count() == 0:
-        logger.info('>>>>>>>>>> Nenhum pedido TM pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
         return
     
@@ -830,20 +812,12 @@ def simActivateOR(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
     if orders_all.count() == 0:
-        logger.info('>>>>>>>>>> Nenhum pedido OR pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
         return
     else:
         orders_all = Orders.objects.filter(pk=id)
-    
-    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
-    if orders_all.count() == 0:
-        logger.info('>>>>>>>>>> Nenhum pedido OR pendente. Aguardando próxima execução.')
-        logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
-        return
-        
+           
     for order in orders_all:
                         
         order = Orders.objects.get(pk=order.id)
@@ -1290,9 +1264,7 @@ def simActivateCM(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)    
     
-    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos CM para processar')
     if orders_all.count() == 0:
-        logger.info('>>>>>>>>>> Nenhum pedido CM pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
         return    
     
@@ -1491,15 +1463,10 @@ def simActivateMS(id=None):
                 'Accept': 'application/json',
             }
 
-            logger.debug(f"URL: {url}")
-            logger.debug(f"Params: {params}")
-            logger.debug(f"Payload: {json.dumps(payload, indent=2)}")
-
             response = requests.post(url, params=params, headers=headers, json=payload, timeout=30)
             response.raise_for_status()
             
             response_data = response.json()
-            logger.info(f"Resposta da API para o pedido {order.order_id}: {response_data}")
 
             logger.info(f'Pedido {order.order_id} ativado com sucesso na MS. Hash: {response_data[0]["hash"]}')
             UpdateOrder.upStatus(order.id, 'AT')
