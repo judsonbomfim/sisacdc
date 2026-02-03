@@ -203,7 +203,7 @@ def simActivateTC(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TC para processar')
+    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TC para processar')
     if orders_all.count() == 0:
         logger.info('>>>>>>>>>> Nenhum pedido TC pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
@@ -380,7 +380,7 @@ def simActivateTI(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TI para processar')
+    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TI para processar')
     if orders_all.count() == 0:
         logger.info('>>>>>>>>>> Nenhum pedido TI pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
@@ -551,7 +551,7 @@ def simDeactivateTC(id=None):
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
-    logger.error(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos TC/TI ativos para verificar desativação')
+    logger.info(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos TC/TI ativos para verificar desativação')
     if not orders_to_process.exists():
         logger.info('>>>>>>>>>> Não há pedidos TC/TI que correspondam aos critérios de filtro.')
         logger.info('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
@@ -667,7 +667,7 @@ def simDeactivateAll(id=None):
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
-    logger.error(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos ativos (outras operadoras) para verificar desativação')
+    logger.info(f'>>>>>>>>>> Encontrados {orders_to_process.count()} pedidos ativos (outras operadoras) para verificar desativação')
     if not orders_to_process.exists():
         logger.info('>>>>>>>>>> Não há pedidos que correspondam aos critérios de filtro.')
         logger.info('>>>>>>>>>> DESATIVAÇÃO ALL FINALIZADA <<<<<<<<<<')
@@ -723,7 +723,7 @@ def simActivateTM(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TM para processar')
+    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos TM para processar')
     if orders_all.count() == 0:
         logger.info('>>>>>>>>>> Nenhum pedido TM pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
@@ -831,7 +831,7 @@ def simActivateOR(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
+    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
     if orders_all.count() == 0:
         logger.info('>>>>>>>>>> Nenhum pedido OR pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
@@ -839,7 +839,7 @@ def simActivateOR(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
+    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos OR para processar')
     if orders_all.count() == 0:
         logger.info('>>>>>>>>>> Nenhum pedido OR pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
@@ -1291,7 +1291,7 @@ def simActivateCM(id=None):
     else:
         orders_all = Orders.objects.filter(pk=id)    
     
-    logger.error(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos CM para processar')
+    logger.info(f'>>>>>>>>>> Encontrados {orders_all.count()} pedidos CM para processar')
     if orders_all.count() == 0:
         logger.info('>>>>>>>>>> Nenhum pedido CM pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')

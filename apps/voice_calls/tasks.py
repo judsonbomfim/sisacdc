@@ -153,7 +153,7 @@ def voiceActivate(id=None):
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)        
     
-    logger.error(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para processar')
+    logger.info(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para processar')
     if voice_all.count() == 0:
         logger.info('>>>>>>>>>> Nenhum pedido de voz pendente. Aguardando próxima execução.')
         logger.info('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
@@ -243,7 +243,7 @@ def voiceDesactivate(id=None):
     else:
         voice_all = VoiceCalls.objects.filter(pk=id)
     
-    logger.error(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para desativar')
+    logger.info(f'>>>>>>>>>> Encontrados {voice_all.count()} pedidos de voz para desativar')
     if not voice_all.exists():
         logger.info('>>>>>>>>>> Não há pedidos de voz para serem desativados.')
         logger.info('>>>>>>>>>> DESATIVAÇÃO VOICE FINALIZADA')
