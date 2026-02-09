@@ -812,8 +812,6 @@ def simActivateOR(id=None):
     if orders_all.count() == 0:
         logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
         return
-    else:
-        orders_all = Orders.objects.filter(pk=id)
            
     for order in orders_all:
                         
