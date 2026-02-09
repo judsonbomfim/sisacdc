@@ -800,13 +800,12 @@ def simActivateOR(id=None):
           
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
-    tomorrow = today + timedelta(days=1)
 
     logger.info(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA')
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=tomorrow)
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=today)
     else:
         orders_all = Orders.objects.filter(pk=id)
     
