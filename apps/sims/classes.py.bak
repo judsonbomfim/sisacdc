@@ -453,9 +453,7 @@ class ApiTI:
         return mobile_data
 
 class ApiCM:
-    
-    logger.info(">>>>>>>>>>>>>>>>>>> Classe ApiCM iniciada")
-    
+        
     app_key = settings.APICM_KEY
     app_secret = settings.APICM_SECRET
 
