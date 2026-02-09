@@ -88,9 +88,7 @@ def order_import():
                         
             qtd = item['quantity']
             q_i = 1 
-            
-            logger.error(f'---------- Importando pedido {id_ord}')            
-            
+                        
             while q_i <= qtd:
                 order_id_i = order['id']
                 item_id_i = f'{order_id_i}-{n_item}'
@@ -259,7 +257,7 @@ def order_import():
                     
     # Status 
     if n_item_total != 0:
-        logger.error(f'>>>>>>>>>>>>>>>>>>>>>>> {n_item_total} pedidos importados com sucesso')
+        logger.info(f'>>>>>>>>>>>>>>>>>>>>>>> {n_item_total} pedidos importados com sucesso')
     else:
         logger.info('>>>>>>>>>> Nenhum pedido novo foi importado (todos já existem ou não atendem aos critérios)')
     
