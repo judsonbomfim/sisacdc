@@ -418,6 +418,12 @@ def ord_edit(request,id):
             activation_date = order.activation_date
         if email == '':
             email = order.email
+        if not product or product == '':
+            product = order.product
+        if not data_day or data_day == '':
+            data_day = order.data_day
+        if not days or days == '':
+            days = order.days
                 
         order_put = Orders.objects.get(pk=order.id)
         order_put.days = days
