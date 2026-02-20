@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: /djangoweb/scripts/entrypoint.sh
+    command: /djangoweb/entrypoint.sh
     networks:
       - public
       - internal
