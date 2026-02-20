@@ -762,7 +762,7 @@ def orders_activations(request):
             url_filter += f"&ord_planos={ord_planos_f}"
 
     # Total de registro
-    orders_count = orders_l.count()
+    orders_count = int(orders_l.shape[0])
     
     sims = Sims.objects.all()
     oper_list = Sims.operator.field.choices

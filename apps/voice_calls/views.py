@@ -150,7 +150,7 @@ def voice_index(request):
                 url_filter += f"&voice_return_1={voice_return_1}"   
     
     # Total de registros
-    voice_count = voices_l.count()
+    voice_count = int(voices_l.shape[0])
     voices_l = voices_l.to_dict('records')
 
     vox_st_list = []
