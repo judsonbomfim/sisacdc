@@ -12,9 +12,7 @@ RUN apt-get update && apt-get install -y nano && \
 
 COPY . .
 
-COPY entrypoint.sh ./scripts/entrypoint.sh
-
-RUN chmod +x /djangoweb/scripts/entrypoint.sh && \
+RUN chmod +x /djangoweb/entrypoint.sh && \
     mkdir -p /djangoweb/logs && \
     touch /djangoweb/logs/django.log && \
     touch /djangoweb/logs/celery.log && \

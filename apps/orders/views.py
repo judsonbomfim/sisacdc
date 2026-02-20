@@ -89,6 +89,9 @@ def orders_list(request):
         orders_l = orders_l.filter(order_status=ord_st_f)
         url_filter += f"&ord_st={ord_st_f}"
         
+    # Total de registros
+    orders_count = orders_l.count()
+        
     # Buscar planos para mapeamento
     plans = {name: data_day for name, data_day in Orders.product.field.choices}
 
@@ -145,6 +148,7 @@ def orders_list(request):
         'ord_sim_f': ord_sim_f,
         'oper_f': oper_f,
         'ord_st_f': ord_st_f,
+        'orders_count': orders_count,
     }
     return render(request, 'painel/orders/index.html', context)
 
@@ -757,6 +761,9 @@ def orders_activations(request):
             orders_l = orders_l[(orders_l['product_code'] == ord_planos_f)]
             url_filter += f"&ord_planos={ord_planos_f}"
 
+    # Total de registro
+    orders_count = orders_l.count()
+    
     sims = Sims.objects.all()
     oper_list = Sims.operator.field.choices
     ord_status = Orders.order_status.field.choices
@@ -821,6 +828,7 @@ def orders_activations(request):
         'oper_f': oper_f,
         'ord_st_f': ord_st_f,
         'ord_planos_f': ord_planos_f,
+        'orders_count': orders_count,
     }
     return render(request, 'painel/orders/activations.html', context)
 

@@ -149,7 +149,8 @@ def voice_index(request):
                 voices_l = voices_l[(voices_l['return_date'] == voice_return_1)]
                 url_filter += f"&voice_return_1={voice_return_1}"   
     
-    
+    # Total de registros
+    voice_count = voices_l.count()
     voices_l = voices_l.to_dict('records')
 
     vox_st_list = []
@@ -170,6 +171,7 @@ def voice_index(request):
         'vox_st_list': vox_st_list,
         'url_cdn': url_cdn,
         'url_filter': url_filter,
+        'voice_count': voice_count,
     }
     return render(request, 'painel/voice/index.html', context)
 

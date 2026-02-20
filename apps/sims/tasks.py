@@ -232,6 +232,7 @@ def simActivateTC(id=None):
             continue
         dataDay = order.data_day
         product = order.product
+        product_name = order.get_product_display()
         condition = order.condition
         
         # Variaveis globais        
@@ -267,7 +268,7 @@ def simActivateTC(id=None):
             UpdateOrder.upStatus(id_item,'EA')
             NotesAdd.addNote(order,f'{iccid} Plano não alterado. Verificar plano {dataDay} - TC: Plano não encontrado.')
             continue
-        NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay} - TELCOM: {json.loads(data_plan)}')    
+        NotesAdd.addNote(order,f'{iccid} Plano alterado para {product_name} {dataDay} - TELCOM: {json.loads(data_plan)}')    
 
         if simStatus == 'Pre-Active':
             # Ativar SIM na operadora
@@ -408,6 +409,7 @@ def simActivateTI(id=None):
             continue
         dataDay = order.data_day
         product = order.product
+        product_name = order.get_product_display()
         
         # Variaveis globais        
         endpointId = None
@@ -434,7 +436,7 @@ def simActivateTI(id=None):
             UpdateOrder.upStatus(id_item,'EA')
             NotesAdd.addNote(order,f'{iccid} Plano não alterado. Verificar plano {dataDay} - TI: Plano não encontrado.')
             continue
-        NotesAdd.addNote(order,f'{iccid} Plano alterado para {dataDay}')    
+        NotesAdd.addNote(order,f'{iccid} Plano alterado para {product_name} {dataDay}')    
 
         if simStatus == 'Pre-Active':
             # Ativar SIM na operadora

@@ -35,9 +35,20 @@ class UpdateVoice():
         voice = VoiceCalls.objects.get(pk=order_id)
         # Disponibilizar número quando desativado
         if order_st == 'DS' and voice.id_number is not None:
-            num = VoiceNumbers.objects.get(pk=voice.id_number.id)
-            num.number_status = 'DS'
-            num.save()
+            number_id = voice.id_number.id
+            number_in_use_elsewhere = VoiceCalls.objects.filter(
+                id_number_id=number_id
+            ).exclude(
+                pk=voice.pk
+            ).exclude(
+                call_status='DS'
+            ).exists()
+
+            if not number_in_use_elsewhere:
+                num = VoiceNumbers.objects.get(pk=number_id)
+                num.number_status = 'DS'
+                num.save(update_fields=['number_status', 'updated_at'])
+
             voice.id_number = None
         
         voice.call_status = order_st

@@ -9,6 +9,7 @@ import boto3
 import time
 import logging
 from django.db.models import Q
+from django.db import transaction
 from io import BytesIO
 from datetime import datetime, timedelta
 from django.conf import settings
@@ -92,7 +93,7 @@ def update_password(number_id):
    
 
 @shared_task
-def number_in_voice():  # <- remover 'request'
+def number_in_voice():
     
     send_date = datetime.now().date() + timedelta(days=3)
 
@@ -100,41 +101,55 @@ def number_in_voice():  # <- remover 'request'
     voice_s = VoiceCalls.objects.filter(
         Q(call_status='PR', id_item__activation_date__lte=send_date) |
         Q(call_status='SL')
-    )
+    ).values_list('id', flat=True)
         
     # Insert Number
-    for vox in voice_s:
-        id_vox = vox.id
-        number_s = VoiceNumbers.objects.all().order_by('id').filter(number_status='DS').first()
-        if not number_s:
-            voice_put = VoiceCalls.objects.get(pk=id_vox)
-            voice_put.call_status = 'EP'
-            voice_put.save()
-            continue
-            
-        # Change Status Voice
-        voice_put = VoiceCalls.objects.get(pk=id_vox)
-        voice_put.call_status = 'AA'
-        voice_put.id_number = number_s
-        voice_put.save()
-        
-        # Change Status Number
-        number_s.number_status = 'AT'
-        number_s.save()
-        update_password.delay(number_id=[number_s.id])
-        
-        # Adicionar nota SEM request.user
-        # Use um usuário padrão ou None
-        from django.contrib.auth.models import User
-        admin_user = User.objects.filter(is_superuser=True).first()  # pega um admin
-        
-        NoteVoiceCall.addNote(
-            id_item=voice_put, 
-            note=f"Ramal alterado - {number_s.extension}", 
-            id_user=admin_user,  # <- use admin ou None
-            type_note='P'
-        )
-        time.sleep(2)
+    for id_vox in voice_s:
+        number_id = None
+        number_extension = None
+
+        with transaction.atomic():
+            voice_put = VoiceCalls.objects.select_for_update().get(pk=id_vox)
+
+            if voice_put.call_status not in ('PR', 'SL'):
+                continue
+
+            number_in_use_status = ['AA', 'AT', 'EA', 'ED', 'EE']
+            number_in_use = VoiceCalls.objects.filter(
+                id_number__isnull=False,
+                call_status__in=number_in_use_status
+            ).values_list('id_number_id', flat=True).distinct()
+
+            number_s = VoiceNumbers.objects.select_for_update(skip_locked=True).filter(
+                number_status='DS'
+            ).exclude(
+                id__in=number_in_use
+            ).order_by('id').first()
+
+            if not number_s:
+                voice_put.call_status = 'EP'
+                voice_put.save(update_fields=['call_status', 'updated_at'])
+                continue
+
+            voice_put.call_status = 'AA'
+            voice_put.id_number = number_s
+            voice_put.save(update_fields=['call_status', 'id_number', 'updated_at'])
+
+            number_s.number_status = 'AT'
+            number_s.save(update_fields=['number_status', 'updated_at'])
+
+            number_id = number_s.id
+            number_extension = number_s.extension
+
+        if number_id is not None:
+            update_password.delay(number_id=[number_id])
+
+            NoteVoiceCall.addNote(
+                id_item=voice_put,
+                note=f"Ramal alterado - {number_extension}",
+                type_note='S'
+            )
+            time.sleep(5)
         #send email
         # send_email_voice.delay(id_vox)
         
