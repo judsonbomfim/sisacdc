@@ -116,31 +116,31 @@ def order_import():
                 cell_mod_i = False
                 celular_samsung_i = False
                 type_sim_i = 'sim'
-                days_i = '0'
+                days_i = '30'
                 
                 # Percorrer itens do pedido
                 for i in item['meta_data']:
-                    if i['key'] == '_tipo_chip': 
+                    if i['key'] == '_tipo_chip':
                         type_sim_i = i['value']
-                    if i['key'] == '_condicao_chip': 
+                    if i['key'] == '_condicao_chip':
                         if i['value'] == 'novo':
                             condition_i = 'novo-sim'
                     if i['key'] == '_agencia_cadastrada':
                         condition_i = 'reuso-sim'
                     if i['key'] == '_numero_sim':
                         ord_chip_nun_i = i['value']
-                    if i['key'] == 'pa_dados-diarios': 
+                    if i['key'] == 'pa_dados-diarios':
                         data_day_i = i['value']
-                    if i['key'] == 'pa_dias': 
+                    if i['key'] == 'pa_dias':
                         days_i = i['value']
-                    if i['key'] == '_plano_voz': 
+                    if i['key'] == '_plano_voz':
                         if i['value'] == '1':
                             calls_i = True
                     if i['key'] == '_china_hongkong_taiwan':
                         countries_i = True if i['display_value'] == 'Sim' else False
-                    if i['key'] == '_data_ativacao': 
+                    if i['key'] == '_data_ativacao':
                         activation_date_i = i['value']
-                    if i['key'] == '_celular_samsung': 
+                    if i['key'] == '_celular_samsung':
                         celular_samsung_i = True
                 
                 shipping_i = order['shipping_lines'][0]['method_title']
@@ -170,6 +170,11 @@ def order_import():
                     if days_i <= '12':
                         data_day_i = '20gb'
                     else:
+                        data_day_i = '50gb'
+                elif product_i == 'chip-internacional-europa-franquia-total':
+                    if data_day_i <= '20gb-30-dias':
+                        data_day_i = '20gb'
+                    elif data_day_i == '50gb-30-dias':
                         data_day_i = '50gb'
                     
                 shipping_i = shipping_i[:40]

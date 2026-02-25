@@ -9,12 +9,13 @@ PRODUCT = [
     ('chip-internacional-eua-canada-e-mexico', 'USA/CAN/MEX'),
     ('chip-internacional-europa-plus', 'Europa Plus'),
     ('chip-internacional-europa', 'Europa'),
-    ('chip-internacional-global', 'Global'),
-    ('chip-internacional-america-do-sul', 'América do Sul'),
-    ('chamada-de-voz', 'Plano de Voz'),
     ('chip-internacional-europa-ilimitado', 'Europa Ilimitado'),
     ('chip-internacional-europa-premium', 'Europa Premium'),
     ('chip-internacional-europa-1gb-total-05', 'Europa Total'),
+    ('chip-internacional-europa-franquia-total', 'Europa F. Total'),
+    ('chip-internacional-global', 'Global'),
+    ('chip-internacional-america-do-sul', 'América do Sul'),
+    ('chamada-de-voz', 'Plano de Voz'),
     ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
     ('chip-internacional-israel-premium', 'Israel Premium'),
     ('chip-internacional-tunisia-premium', 'Tunísia Premium'),
@@ -34,7 +35,7 @@ DATA = [
     ('2gb', '2GB'),
     ('ilimitado', 'Ilimitado'),
     ('20gb', '20GB'),
-    ('50gb', '50GB')
+    ('50gb', '50GB'),
 ]
 
 ORDER_STATUS = [

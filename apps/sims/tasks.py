@@ -93,7 +93,7 @@ def sims_in_orders():
                     operator_i = 'TC'
                 else:
                     operator_i = 'CM'
-            elif product_i == 'chip-internacional-europa-ilimitado':
+            elif product_i == 'chip-internacional-europa-ilimitado' or product_i == 'chip-internacional-europa-franquia-total':
                 operator_i = 'OR'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
