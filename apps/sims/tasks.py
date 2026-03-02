@@ -77,7 +77,7 @@ def sims_in_orders():
             }
             planos_tc = {
                 'chip-internacional-europa-premium',
-                'chip-internacional-europa-1gb-total-05',
+                'chip-internacional-europa-1gb-total',
                 'chip-internacional-eua-premium',
                 'chip-internacional-africa-premium',
                 'chip-internacional-asia-premium',
