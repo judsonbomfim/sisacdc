@@ -6,7 +6,7 @@ import http.client
 import json
 import time
 from django.conf import settings
-from .classes import ApiTC, ApiTI, ApiCM
+from .classes import ApiTC, ApiTI, ApiCM, operPlan
 from apps.orders.models import Orders, Notes
 from apps.orders.classes import ApiStore, StatusStore, NotesAdd, UpdateOrder, UpdateStore
 from apps.send_email.tasks import send_email_sims
@@ -65,35 +65,16 @@ def sims_in_orders():
                 )
                 add_sim.save()
 
-            # ESCOLHER OPERADORA
-            planos_ti = {
-                'chip-internacional-america-do-sul',
-                # 'chip-internacional-america-do-sul-premium',
-                'chip-internacional-israel-premium',
-                'chip-internacional-tunisia-premium',
-                'chip-internacional-marrocos-premium',
-                'chip-internacional-egito-premium',
-                'chip-internacional-indonesia-premium',
-            }
-            planos_tc = {
-                'chip-internacional-europa-premium',
-                'chip-internacional-europa-1gb-total',
-                'chip-internacional-eua-premium',
-                'chip-internacional-africa-premium',
-                'chip-internacional-asia-premium',
-                'chip-internacional-oceania-premium',
-                'chip-internacional-oriente-medio-premium',
-            }
-            if product_i in planos_ti:
+            if product_i in operPlan.listPlan('TI'):
                 operator_i = 'TI'
-            elif product_i in planos_tc:
+            elif product_i in operPlan.listPlan('TC'):
                 operator_i = 'TC'
             elif product_i == 'chip-internacional-eua-canada-e-mexico':
                 if condition_i == 'novo-sim':
                     operator_i = 'TC'
                 else:
                     operator_i = 'CM'
-            elif product_i == 'chip-internacional-europa-ilimitado' or product_i == 'chip-internacional-europa-franquia-total':
+            elif product_i in operPlan.listPlan('OR'):
                 operator_i = 'OR'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'

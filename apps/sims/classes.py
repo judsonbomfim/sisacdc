@@ -642,3 +642,37 @@ class ApiCM:
         # return data
         
 
+class operPlan():
+    @staticmethod
+    def listPlan(operator):
+        if operator == 'TI':
+            planList = {
+                'chip-internacional-america-do-sul',
+                # 'chip-internacional-america-do-sul-premium',
+                'chip-internacional-israel-premium',
+                'chip-internacional-tunisia-premium',
+                'chip-internacional-marrocos-premium',
+                'chip-internacional-egito-premium',
+                'chip-internacional-indonesia-premium',
+            }
+        elif operator == 'TC':            
+            planList = {
+                'chip-internacional-europa-premium',
+                'chip-internacional-europa-1gb-total',
+                'chip-internacional-eua-premium',
+                'chip-internacional-africa-premium',
+                'chip-internacional-asia-premium',
+                'chip-internacional-oceania-premium',
+                'chip-internacional-oriente-medio-premium',
+            }
+        elif operator == 'OR':
+            planList = {
+                'chip-internacional-europa-ilimitado',
+                'chip-internacional-europa-franquia-total',
+                'chip-internacional-america-do-sul-franquia-total',
+                'chip-internacional-global-franquia-total',
+                'chip-internacional-asia-franquia-total',
+                'chip-internacional-africa-franquia-total',
+            }
+        
+        return planList

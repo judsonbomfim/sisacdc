@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from celery import shared_task
 from django.utils.text import slugify
+
+from apps.sims.classes import operPlan
 from .classes import ApiStore, StatusStore, DateFormats, UpdateStore
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
@@ -161,21 +163,26 @@ def order_import():
                     order_status_i = 'AS'
                 else:
                     order_status_i = 'AS'
+
                 
                 if activation_date_i == '2001-01-01':
                     order_status_i = 'EI'
                 if product_i == 'chip-internacional-eua-30-dias':
                     calls_i = False
-                elif product_i == 'chip-internacional-europa-ilimitado':
-                    if days_i <= '12':
-                        data_day_i = '20gb'
+                elif product_i in operPlan.listPlan('OR'):
+                    if product_i == 'chip-internacional-europa-ilimitado':
+                        if days_i <= '12':
+                            data_day_i = '20gb'
+                        else:
+                            data_day_i = '50gb'
+                    elif product_i == 'chip-internacional-europa-franquia-total':
+                        if data_day_i <= '20gb-30-dias':
+                            data_day_i = '20gb'
+                        elif data_day_i == '50gb-30-dias':
+                            data_day_i = '50gb'
                     else:
-                        data_day_i = '50gb'
-                elif product_i == 'chip-internacional-europa-franquia-total':
-                    if data_day_i <= '20gb-30-dias':
-                        data_day_i = '20gb'
-                    elif data_day_i == '50gb-30-dias':
-                        data_day_i = '50gb'
+                        data_day_i = 'world'                    
+                    
                     
                 shipping_i = shipping_i[:40]
 

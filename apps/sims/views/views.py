@@ -221,6 +221,9 @@ def sims_add_esim(request):
                 data = '20gb'
             elif oper_val == 'OR50':
                 data = '50gb'
+        elif oper_val == 'ORWD':
+            operator = 'OR'
+            data = 'world'
         else:
             operator = oper_val
             data = ''
