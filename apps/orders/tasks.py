@@ -97,7 +97,7 @@ def order_import():
                 item_id_store_i = item['id']
                 client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
                 email_i = order['billing']['email']
-                if "Global" in item['name']:
+                if "140" in item['name']: # Plano Global
                     product_i = 'chip-internacional-global'
                 else:
                     product_i = slugify(item['name'])
