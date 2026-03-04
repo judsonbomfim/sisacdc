@@ -7,6 +7,7 @@ PRODUCT = [
     ('chip-internacional-eua-30-dias', 'USA 30 Dias'),
     ('chip-internacional-eua-e-canada', 'USA/CANADA'),
     ('chip-internacional-eua-canada-e-mexico', 'USA/CAN/MEX'),
+    ('chip-internacional-america-do-norte-franquia-total', 'América do Norte F. Total'),
     ('chip-internacional-europa-plus', 'Europa Plus'),
     ('chip-internacional-europa', 'Europa'),
     ('chip-internacional-europa-ilimitado', 'Europa Ilimitado'),
@@ -17,9 +18,9 @@ PRODUCT = [
     ('chip-internacional-global', 'Global'),
     ('chip-internacional-global-franquia-total', 'Global F. Total'),
     ('chip-internacional-america-do-sul', 'América do Sul'),
+    ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
     ('chip-internacional-america-do-sul-franquia-total', 'Am. do Sul F. Total'),
     ('chamada-de-voz', 'Plano de Voz'),
-    ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
     ('chip-internacional-israel-premium', 'Israel Premium'),
     ('chip-internacional-tunisia-premium', 'Tunísia Premium'),
     ('chip-internacional-marrocos-premium', 'Marrocos Premium'),
@@ -31,6 +32,7 @@ PRODUCT = [
     ('chip-internacional-asia-premium', 'Ásia Premium'),
     ('chip-internacional-asia-franquia-total', 'Ásia F. Total'),
     ('chip-internacional-oriente-medio-premium', 'Oriente Médio Premium'),
+    ('chip-internacional-oriente-medio-franquia-total', 'Oriente Médio F. Total'),
     ('chip-internacional-oceania-premium', 'Oceania Premium'),
 ]
 

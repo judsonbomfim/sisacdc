@@ -673,6 +673,8 @@ class operPlan():
                 'chip-internacional-global-franquia-total',
                 'chip-internacional-asia-franquia-total',
                 'chip-internacional-africa-franquia-total',
+                'chip-internacional-america-do-norte-franquia-total',
+                'chip-internacional-oriente-medio-franquia-total',
             }
         
         return planList
