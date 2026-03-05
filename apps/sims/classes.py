@@ -555,7 +555,7 @@ class ApiCM:
 
         # Fazer a requisição POST com tempo limite
         try:
-            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=100)
+            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
             conn.request("POST", parsed_url.path, payload, headers)
             res = conn.getresponse()
 
@@ -611,7 +611,7 @@ class ApiCM:
 
         # Fazer a requisição POST com tempo limite
         try:
-            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=100)
+            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
             conn.request("POST", parsed_url.path, payload, headers)
             res = conn.getresponse()            
             # Verificar o status da resposta
