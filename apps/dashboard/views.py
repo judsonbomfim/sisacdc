@@ -216,6 +216,8 @@ def index(request):
     esim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='esim').count()
     esim_or_20gb = simsAll.filter(sim_status='DS',operator='OR', type_sim='esim', data='20gb').count()
     esim_or_50gb = simsAll.filter(sim_status='DS',operator='OR', type_sim='esim', data='50gb').count()
+    esim_or_world = simsAll.filter(sim_status='DS',operator='OR', type_sim='esim', data='world').count()
+
 
 
     context= {
@@ -230,6 +232,7 @@ def index(request):
         'esim_ti': esim_ti,
         'esim_or_20gb': esim_or_20gb,
         'esim_or_50gb': esim_or_50gb,
+        'esim_or_world': esim_or_world,
         'dateDay': dateDay,
         'dateYesterday': dateYesterday,
         'dateWeek': dateWeek,

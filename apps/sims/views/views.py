@@ -112,6 +112,7 @@ def sims_list(request):
     esim_ms = sims_all.filter(sim_status='DS',operator='MS', type_sim='esim').count()
     esim_or_20gb = sims_all.filter(sim_status='DS',operator='OR', type_sim='esim', data='20gb').count()
     esim_or_50gb = sims_all.filter(sim_status='DS',operator='OR', type_sim='esim', data='50gb').count()
+    esim_or_world = sims_all.filter(sim_status='DS',operator='OR', type_sim='esim', data='world').count()
     
     url = reverse('sims_index')
     
@@ -134,6 +135,7 @@ def sims_list(request):
         'esim_ms': esim_ms,
         'esim_or_20gb': esim_or_20gb,
         'esim_or_50gb': esim_or_50gb,
+        'esim_or_world': esim_or_world,
         'url_filter': url_filter,
         'sim_f': sim_f,
         'sim_type_f': sim_type_f,

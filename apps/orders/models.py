@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from apps.sims.models import Sims
 
 PRODUCT = [
+    ('chamada-de-voz', 'Plano de Voz'),
     ('chip-internacional-eua', 'USA'),
     ('chip-internacional-eua-30-dias', 'USA 30 Dias'),
     ('chip-internacional-eua-e-canada', 'USA/CANADA'),
@@ -20,7 +21,6 @@ PRODUCT = [
     ('chip-internacional-america-do-sul', 'América do Sul'),
     ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
     ('chip-internacional-america-do-sul-franquia-total', 'Am. do Sul F. Total'),
-    ('chamada-de-voz', 'Plano de Voz'),
     ('chip-internacional-israel-premium', 'Israel Premium'),
     ('chip-internacional-tunisia-premium', 'Tunísia Premium'),
     ('chip-internacional-marrocos-premium', 'Marrocos Premium'),
@@ -34,6 +34,8 @@ PRODUCT = [
     ('chip-internacional-oriente-medio-premium', 'Oriente Médio Premium'),
     ('chip-internacional-oriente-medio-franquia-total', 'Oriente Médio F. Total'),
     ('chip-internacional-oceania-premium', 'Oceania Premium'),
+    ('chip-internacional-oceania-franquia-total', 'Oceania F. Total'),
+    ('chip-internacional-caribe-franquia-total', 'Caribe F. Total'),
 ]
 
 DATA = [
