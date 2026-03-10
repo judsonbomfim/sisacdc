@@ -711,28 +711,24 @@ def simActivateTM(id=None):
             imei = order.cell_imei
         activation_date = order.activation_date
         days = order.days
-
-        # Garante envio do dia sem zero à esquerda (ex.: 05 -> 5)
-        day_to_send = int(str(days).lstrip('0') or '0')
+        if days < 7:
+            days = 7
+        else:
+            days = order.days
                 
         # Dados para a solicitação
         url = f"{settings.APITM_URL.rstrip('/')}/api/public/orders"
-        payload_data = {
+        payload = json.dumps({
             "planName": "$50",
             "carrier": "T-Mobile",
-            "day": day_to_send,
+            "day": int(days),
             "sim": iccid,
             "imei": imei,
             "activationDate": activation_date.strftime("%Y-%m-%d"),
             "areaCode": "",
             "customerEmail": "",
             "comment": "",
-        }
-        
-        logger.info(
-            f'Enviando solicitação de ativação para SIM {iccid} com plano {day_to_send} dias '
-            f'(planName: $50). URL: {url}: {json.dumps(payload_data)}'
-        )
+        })        
         
         # Cabeçalhos da solicitação
         headers = {
@@ -741,7 +737,7 @@ def simActivateTM(id=None):
         }
 
         try:
-            response = requests.post(url, json=payload_data, headers=headers, timeout=30, allow_redirects=False)
+            response = requests.post(url, data=payload, headers=headers, timeout=30, allow_redirects=False)
         except requests.exceptions.RequestException as e:
             UpdateOrder.upStatus(id_item,'EA')
             NotesAdd.addNote(order, f'Erro de comunicação com API T-Mobile para SIM {iccid}: {e}')
@@ -799,15 +795,12 @@ def simActivateTM(id=None):
                 # Alterar status
                 UpdateOrder.upStatus(id_item,'EA')
                 # Adicionar nota
-                NotesAdd.addNote(order,f'Houve um erro ao ativar o SIM {iccid}. Verificar manualmente. planName enviado: $50. day enviado: {day_to_send}. Resposta: {response_data}')
+                NotesAdd.addNote(order,f'Houve um erro ao ativar o SIM {iccid}. Verificar manualmente. {response_data}')
         else:
             # Alterar status
             UpdateOrder.upStatus(id_item,'EA')
             # Adicionar nota
-            if 'error' in response_data:
-                NotesAdd.addNote(order,f'Erro retornado pela API ao ativar o SIM {iccid}. planName enviado: $50. day enviado: {day_to_send}. Erro: {response_data.get("error")}')
-            else:
-                NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente. day enviado: {day_to_send}. Resposta: {response_data}')
+            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.{response_data}')
 
                 
     logger.info('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
