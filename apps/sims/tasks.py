@@ -713,7 +713,7 @@ def simActivateTM(id=None):
         days = order.days
                 
         # Dados para a solicitação
-        url = f'{settings.APITM_URL}/activation/index/submit'
+        url = f'{settings.APITM_URL}/api/public/orders'
         parsed_url = urlparse(url)
         payload = json.dumps({
             "planName": "$50",
@@ -725,7 +725,7 @@ def simActivateTM(id=None):
             "areaCode": "",
             "customerEmail": "",
             "comment": "",
-            "token": str(settings.APITM_TOKEN)
+            "token": f"{settings.APITM_TOKEN}"
         })        
         
         # Cabeçalhos da solicitação
