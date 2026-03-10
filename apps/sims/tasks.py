@@ -44,7 +44,6 @@ def sims_in_orders():
         order_id_i = ord.order_id
         product_i = ord.product
         condition_i = ord.condition
-        countries_i = ord.countries
         type_sim_i = ord.type_sim
         data_day_i = ord.data_day
         # celular_samsung = ord.celular_samsung
@@ -93,14 +92,14 @@ def sims_in_orders():
                 if sim_ds:
                     pass
                 else:
-                    logger.info('-------------------- SIMs indisponíveis!')
+                    logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
                     continue
             else:
                 sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
                 if sim_ds:
                     pass
                 else:
-                    logger.info('-------------------- SIMs indisponíveis!')
+                    logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
                     continue
             
             # update order
@@ -1368,7 +1367,7 @@ def simActivateCM(id=None):
         # Verificar se plan_code foi definido
         if plan_code is None:
             # Inserir nota e alterar status do sistema
-            NotesAdd.addNote(order, "Nenhum plano correspondente encontrado para order_day e order_data.")
+            NotesAdd.addNote(order, f"Nenhum plano correspondente encontrado para {order_day} e {order_data}.")
             errorData()
             continue
 
