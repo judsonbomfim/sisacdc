@@ -716,16 +716,16 @@ def simActivateTM(id=None):
         url = f'{settings.APITM_URL}/activation/index/submit'
         parsed_url = urlparse(url)
         payload = json.dumps({
-            "active_time": activation_date.strftime("%Y-%m-%d"),
-            "sim": iccid,
-            "plan": "$50",
-            "day": days,
-            "imei": imei,
-            "area": "",
-            "customer_email": "",
-            "comment": "",
+            "planName": "$50",
             "carrier": "T-Mobile",
-            "token": "ba8cbf5fd3c288c21d6725b532f04d73"
+            "day": days,
+            "sim": iccid,
+            "imei": imei,
+            "activationDate": activation_date.strftime("%Y-%m-%d"),
+            "areaCode": "",
+            "customerEmail": "",
+            "comment": "",
+            "token": str(settings.APITM_TOKEN)
         })        
         
         # Cabeçalhos da solicitação
