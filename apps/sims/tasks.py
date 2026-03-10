@@ -1344,7 +1344,7 @@ def simActivateCM(id=None):
         # Definir lista
         if order_product == "chip-internacional-europa-plus" or order_product == "chip-internacional-europa":
             list_plan = list_cm_europe
-        elif order_product == "Chip Internacional Europa Premium":
+        elif order_product == "chip-internacional-europa-premium":
             list_plan = list_cm_europe_premium
         elif order_product == "chip-internacional-global":
             if order_country == True:
