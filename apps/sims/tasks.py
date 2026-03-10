@@ -711,13 +711,16 @@ def simActivateTM(id=None):
             imei = order.cell_imei
         activation_date = order.activation_date
         days = order.days
+
+        # Garante envio do dia sem zero à esquerda (ex.: 05 -> 5)
+        day_to_send = int(str(days).lstrip('0') or '0')
                 
         # Dados para a solicitação
         url = f"{settings.APITM_URL.rstrip('/')}/api/public/orders"
         payload = json.dumps({
             "planName": "$50",
             "carrier": "T-Mobile",
-            "day": int(days),
+            "day": day_to_send,
             "sim": iccid,
             "imei": imei,
             "activationDate": activation_date.strftime("%Y-%m-%d"),
@@ -796,7 +799,7 @@ def simActivateTM(id=None):
             # Alterar status
             UpdateOrder.upStatus(id_item,'EA')
             # Adicionar nota
-            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.{response_data}')
+            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente. day enviado: {day_to_send}. Resposta: {response_data}')
 
                 
     logger.info('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
