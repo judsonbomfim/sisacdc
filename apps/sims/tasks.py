@@ -774,7 +774,6 @@ def simActivateTM(id=None):
             NotesAdd.addNote(
                 order,
                 f'Erro ao decodificar resposta da API para SIM {iccid}. '
-                f'Status HTTP: {response.status_code}. Erro: {str(e)} - {data}'
             )
             continue
         
