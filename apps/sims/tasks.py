@@ -778,29 +778,33 @@ def simActivateTM(id=None):
             )
             continue
         
-        # Verifica o código de resposta
-        if 'code' in response_data:
-            if response_data['code'] == 0:
-                # Alterar status
-                UpdateOrder.upStatus(id_item,'AT')
-                UpdateStore.upStore(
-                    order_id = order_id,
-                    item_id_store = order.item_id_store if order.item_id_store else None,
-                    _status = 'AT',
-                    status_g = 'AT',
-                )
-                # Adicionar nota
-                NotesAdd.addNote(order,f'{iccid} Enviado para ativação na T-Mobile')
+        # API antiga: {'code': 0} | API nova: {'success': True, 'order': {...}}
+        success_by_code = ('code' in response_data and response_data.get('code') == 0)
+        success_by_flag = (response_data.get('success') is True and isinstance(response_data.get('order'), dict))
+
+        if success_by_code or success_by_flag:
+            # Alterar status
+            UpdateOrder.upStatus(id_item,'AT')
+            UpdateStore.upStore(
+                order_id = order_id,
+                item_id_store = order.item_id_store if order.item_id_store else None,
+                _status = 'AT',
+                status_g = 'AT',
+            )
+            # Adicionar nota
+            tm_order_status = response_data.get('order', {}).get('status') if isinstance(response_data.get('order'), dict) else None
+            if tm_order_status:
+                NotesAdd.addNote(order,f'{iccid} Enviado para ativação na T-Mobile. Status operadora: {tm_order_status}')
             else:
-                # Alterar status
-                UpdateOrder.upStatus(id_item,'EA')
-                # Adicionar nota
-                NotesAdd.addNote(order,f'Houve um erro ao ativar o SIM {iccid}. Verificar manualmente. {response_data}')
+                NotesAdd.addNote(order,f'{iccid} Enviado para ativação na T-Mobile')
         else:
             # Alterar status
             UpdateOrder.upStatus(id_item,'EA')
             # Adicionar nota
-            NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.{response_data}')
+            if 'error' in response_data:
+                NotesAdd.addNote(order,f'Erro retornado pela API ao ativar o SIM {iccid}. Verificar manualmente. {response_data.get("error")}')
+            else:
+                NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente. {response_data}')
 
                 
     logger.info('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
