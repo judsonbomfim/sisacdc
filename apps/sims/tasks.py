@@ -713,8 +713,7 @@ def simActivateTM(id=None):
         days = order.days
                 
         # Dados para a solicitação
-        url = f'{settings.APITM_URL}/activation/index/submit'
-        parsed_url = urlparse(url)
+        url = f"{settings.APITM_URL.rstrip('/')}/activation/index/submit"
         payload = json.dumps({
             "planName": "$50",
             "carrier": "T-Mobile",
@@ -732,21 +731,47 @@ def simActivateTM(id=None):
             'Content-Type': 'application/json',
             "Authorization": f"Bearer {settings.APITM_TOKEN}"
         }
-        # Estabelece a conexão HTTPS
-        conn = http.client.HTTPSConnection(parsed_url.netloc, timeout=10)
-        # Envia a solicitação POST
-        conn.request("POST", parsed_url.path, payload, headers)
-        # Obtém a resposta
-        res = conn.getresponse()
-        data = res.read()
+
+        try:
+            response = requests.post(url, data=payload, headers=headers, timeout=30, allow_redirects=False)
+        except requests.exceptions.RequestException as e:
+            UpdateOrder.upStatus(id_item,'EA')
+            NotesAdd.addNote(order, f'Erro de comunicação com API T-Mobile para SIM {iccid}: {e}')
+            continue
+
+        # A API TM pode redirecionar para /login quando URL/token estão inválidos.
+        if response.status_code in (301, 302, 303, 307, 308):
+            location = response.headers.get('Location', 'N/A')
+            UpdateOrder.upStatus(id_item,'EA')
+            NotesAdd.addNote(
+                order,
+                f'Redirecionamento inesperado na API T-Mobile para SIM {iccid}. '
+                f'Status HTTP: {response.status_code}. Location: {location}. '
+                'Verificar APITM_URL/APITM_TOKEN.'
+            )
+            continue
+
+        if response.status_code in (401, 403):
+            UpdateOrder.upStatus(id_item,'EA')
+            NotesAdd.addNote(
+                order,
+                f'Falha de autenticação na API T-Mobile para SIM {iccid}. '
+                f'Status HTTP: {response.status_code}. Verificar APITM_TOKEN.'
+            )
+            continue
+
+        data = response.content
         # Decodifica a resposta
         try:
             response_data = json.loads(data.decode("utf-8"))
         except (json.JSONDecodeError, ValueError) as e:
             # API retornou resposta vazia ou inválida
             UpdateOrder.upStatus(id_item,'EA')
-            NotesAdd.addNote(order,f'Erro ao decodificar resposta da API para SIM {iccid}. Status HTTP: {res.status}. Erro: {str(e)} - {data}')
-            conn.close()
+            NotesAdd.addNote(
+                order,
+                f'Erro ao decodificar resposta da API para SIM {iccid}. '
+                f'Status HTTP: {response.status_code}. Erro: {str(e)} - {data}'
+            )
             continue
         
         # Verifica o código de resposta
@@ -773,9 +798,6 @@ def simActivateTM(id=None):
             # Adicionar nota
             NotesAdd.addNote(order,f'Código não identificado ao ativar o SIM {iccid}. Verificar manualmente.{response_data}')
 
-        # Fecha a conexão
-        conn.close()
-        
                 
     logger.info('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
 
