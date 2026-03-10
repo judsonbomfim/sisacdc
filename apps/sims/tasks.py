@@ -720,7 +720,7 @@ def simActivateTM(id=None):
         payload = json.dumps({
             "planName": "$50",
             "carrier": "T-Mobile",
-            "day": day_to_send,
+            "day": 5,
             "sim": iccid,
             "imei": imei,
             "activationDate": activation_date.strftime("%Y-%m-%d"),
