@@ -64,21 +64,21 @@ def sims_in_orders():
                 )
                 add_sim.save()
 
-            if product_i in operPlan.listPlan('TI'):
-                operator_i = 'TI'
-            elif product_i in operPlan.listPlan('TC'):
-                operator_i = 'TC'
-            elif product_i == 'chip-internacional-eua-canada-e-mexico':
+            if product_i == 'chip-internacional-eua-canada-e-mexico':
                 if condition_i == 'novo-sim':
                     operator_i = 'TC'
                 else:
                     operator_i = 'CM'
-            elif product_i in operPlan.listPlan('OR'):
-                operator_i = 'OR'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
             elif product_i == 'chip-internacional-europa-premium' and type_sim_i == 'sim':
                 operator_i = 'CM'
+            elif product_i in operPlan.listPlan('TI'):
+                operator_i = 'TI'
+            elif product_i in operPlan.listPlan('TC'):
+                operator_i = 'TC'
+            elif product_i in operPlan.listPlan('OR'):
+                operator_i = 'OR'
             else: operator_i = 'CM'
             
             # Select SIM
