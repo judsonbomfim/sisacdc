@@ -720,14 +720,16 @@ def simActivateTM(id=None):
         payload = json.dumps({
             "planName": "$50",
             "carrier": "T-Mobile",
-            "day": 5,
+            "day": day_to_send,
             "sim": iccid,
             "imei": imei,
             "activationDate": activation_date.strftime("%Y-%m-%d"),
             "areaCode": "",
             "customerEmail": "",
             "comment": "",
-        })        
+        })
+        
+        logger.info(f'Enviando solicitação de ativação para SIM {iccid} com plano {day_to_send} dias. URL: {url}: {payload}')
         
         # Cabeçalhos da solicitação
         headers = {
