@@ -713,7 +713,7 @@ def simActivateTM(id=None):
         days = order.days
                 
         # Dados para a solicitação
-        url = f"{settings.APITM_URL.rstrip('/')}/activation/index/submit"
+        url = f"{settings.APITM_URL.rstrip('/')}/api/public/orders"
         payload = json.dumps({
             "planName": "$50",
             "carrier": "T-Mobile",
