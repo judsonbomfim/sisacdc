@@ -71,8 +71,6 @@ def sims_in_orders():
                     operator_i = 'CM'
             elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
                 operator_i = 'TM'
-            elif product_i == 'chip-internacional-europa-premium' and type_sim_i == 'sim':
-                operator_i = 'CM'
             elif product_i in operPlan.listPlan('TI'):
                 operator_i = 'TI'
             elif product_i in operPlan.listPlan('TC'):
