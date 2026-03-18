@@ -147,6 +147,10 @@ class ApiTC:
             planList = {
                 '1gb': '925331',
             }
+        elif product == 'chip-fisico-internacional-europa-ilimitado':
+            planList = {
+                '1gb': '942896',
+            }
         elif product == 'chip-internacional-eua-premium':
             planList = {
                 '500mb-dia': '866488',
