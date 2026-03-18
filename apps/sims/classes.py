@@ -659,6 +659,7 @@ class operPlan():
             planList = {
                 'chip-internacional-europa-premium',
                 'chip-internacional-europa-1gb-total',
+                'chip-fisico-internacional-europa-ilimitado',
                 'chip-internacional-eua-premium',
                 'chip-internacional-africa-premium',
                 'chip-internacional-asia-premium',

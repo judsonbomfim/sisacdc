@@ -12,6 +12,7 @@ PRODUCT = [
     ('chip-internacional-europa-plus', 'Europa Plus'),
     ('chip-internacional-europa', 'Europa'),
     ('chip-internacional-europa-ilimitado', 'Europa Ilimitado'),
+    ('chip-fisico-internacional-europa-ilimitado', 'Europa F. Ilimitado'),    
     ('chip-internacional-europa-premium', 'Europa Premium'),
     ('chip-internacional-europa-1gb-total-05', 'Europa Total'),
     ('chip-internacional-europa-1gb-total', 'Europa Total'),
