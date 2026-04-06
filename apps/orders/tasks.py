@@ -141,7 +141,18 @@ def order_import():
                     if i['key'] == '_china_hongkong_taiwan':
                         countries_i = True if i['display_value'] == 'Sim' else False
                     if i['key'] == '_data_ativacao':
-                        activation_date_i = i['value']
+                        from datetime import datetime
+                        def data_woo_valida(valor):
+                            try:
+                                datetime.strptime(valor, '%Y-%m-%d')
+                                return True
+                            except (TypeError, ValueError):
+                                return False
+                        valor_data = i['value']
+                        if data_woo_valida(valor_data):
+                            activation_date_i = valor_data
+                        else:
+                            logger.error(f"Data de ativação inválida vinda do WooCommerce: {valor_data}")
                     if i['key'] == '_celular_samsung':
                         celular_samsung_i = True
                 
@@ -162,11 +173,11 @@ def order_import():
                 elif type_sim_i == 'esim':
                     order_status_i = 'AS'
                 else:
-                    order_status_i = 'AS'
-
-                
+                    order_status_i = 'AS'               
                 if activation_date_i == '2001-01-01':
                     order_status_i = 'EI'
+                
+                
                 if product_i == 'chip-internacional-eua-30-dias':
                     calls_i = False
                 elif product_i in operPlan.listPlan('OR'):

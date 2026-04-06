@@ -806,6 +806,7 @@ def simActivateTM(id=None):
                 
     logger.info('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
 
+
 @shared_task
 def simActivateOR(id=None):
           
@@ -843,6 +844,7 @@ def simActivateOR(id=None):
         
                 
     logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
+
 
 @shared_task
 def simActivateCM(id=None):
