@@ -428,7 +428,14 @@ def lpaChange(request):
     ).filter(
         Q(lpa__isnull=True) | Q(lpa__exact='')
     ).order_by('id')
+    total = sims.count()
     contagem = 0
+    logger.info(f"Iniciando lpaChange. Total de eSIMs sem LPA: {total}")
+
+    if total == 0:
+        logger.info("lpaChange finalizado sem registros para processar.")
+        return HttpResponse('Nenhum eSIM sem LPA encontrado para processamento.')
+
     for sim in sims:
         link_qrcode = F"https://{settings.AWS_S3_CUSTOM_DOMAIN}{sim.link}"
         try:
@@ -437,9 +444,10 @@ def lpaChange(request):
                 sim.lpa = new_lpa
                 sim.save()
             contagem += 1
-            logger.info(f"Processado SIM: {sim.sim} - TOTAL: {contagem}/{sims.count()}")
+            logger.info(f"Processado SIM: {sim.sim} - TOTAL: {contagem}/{total}")
         except Exception as e:
             logger.error(f"Erro ao atualizar LPA para SIM {sim.sim}: {e}")
+    logger.info(f"lpaChange finalizado. Total processado: {contagem}/{total}")
     return HttpResponse('Processando atualização de LPA... Aguarde alguns minutos e atualize a página de pedidos')
 
 def deleteSIM(request):

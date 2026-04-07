@@ -282,6 +282,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'apps.sims.views': {
+            'handlers': ['console', 'file_django'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         'apps.orders.classes': {
             'handlers': ['console', 'file_api'],
             'level': 'INFO',
