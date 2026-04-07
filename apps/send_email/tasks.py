@@ -94,12 +94,8 @@ def send_email_sims(id=None):
         # if order_st != 'CN' or order_st != 'AT':
         # ...
         
-        try:
-            id_user = User.objects.get(pk=request.user.id)
-            type_note = 'P'
-        except:
-            id_user = None
-            type_note = 'S'
+        id_user = None
+        type_note = 'S'
             
         # Add note
         add_note = Notes( 

@@ -28,6 +28,8 @@ today = datetime.now()
 @has_permission_decorator('view_orders')
 def orders_list(request):
     url_cdn = settings.URL_CDN
+    link_esim_android = settings.LINK_ESIM_ANDROID
+    link_esim_ios = settings.LINK_ESIM_IOS
 
     orders_all = Orders.objects.exclude(product='chamada-de-voz').order_by('-id')
     sims = Sims.objects.all().order_by('-id')
@@ -137,6 +139,8 @@ def orders_list(request):
 
     context = {
         'url_cdn': url_cdn,
+        'link_esim_android': link_esim_android,
+        'link_esim_ios': link_esim_ios,
         'orders_l': orders_l,
         'orders': orders,
         'sims': sims,
