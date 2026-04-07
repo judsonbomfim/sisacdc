@@ -23,7 +23,7 @@ from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
 from ..tasks import simDeactivateTC, sims_in_orders
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('apps.sims.views')
 
 # Script Upload S3
 def get_s3_client():
@@ -430,10 +430,14 @@ def lpaChange(request):
     ).order_by('id')
     total = sims.count()
     contagem = 0
-    logger.info(f"Iniciando lpaChange. Total de eSIMs sem LPA: {total}")
+    start_message = f"Iniciando lpaChange. Total de eSIMs sem LPA: {total}"
+    logger.info(start_message)
+    print(start_message, flush=True)
 
     if total == 0:
-        logger.info("lpaChange finalizado sem registros para processar.")
+        empty_message = "lpaChange finalizado sem registros para processar."
+        logger.info(empty_message)
+        print(empty_message, flush=True)
         return HttpResponse('Nenhum eSIM sem LPA encontrado para processamento.')
 
     for sim in sims:
@@ -444,10 +448,17 @@ def lpaChange(request):
                 sim.lpa = new_lpa
                 sim.save()
             contagem += 1
-            logger.info(f"Processado SIM: {sim.sim} - TOTAL: {contagem}/{total}")
+            if contagem == 1 or contagem % 100 == 0 or contagem == total:
+                progress_message = f"Processado SIM: {sim.sim} - TOTAL: {contagem}/{total}"
+                logger.info(progress_message)
+                print(progress_message, flush=True)
         except Exception as e:
-            logger.error(f"Erro ao atualizar LPA para SIM {sim.sim}: {e}")
-    logger.info(f"lpaChange finalizado. Total processado: {contagem}/{total}")
+            error_message = f"Erro ao atualizar LPA para SIM {sim.sim}: {e}"
+            logger.error(error_message)
+            print(error_message, flush=True)
+    finish_message = f"lpaChange finalizado. Total processado: {contagem}/{total}"
+    logger.info(finish_message)
+    print(finish_message, flush=True)
     return HttpResponse('Processando atualização de LPA... Aguarde alguns minutos e atualize a página de pedidos')
 
 def deleteSIM(request):
