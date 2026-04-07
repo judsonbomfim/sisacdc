@@ -24,6 +24,21 @@ ALLOWED_HOSTS = [
     if h.strip()
 ]
 
+URL_PAINEL = str(os.getenv('URL_PAINEL', '')).strip()
+if not URL_PAINEL:
+    primary_host = next(
+        (
+            host for host in ALLOWED_HOSTS
+            if host not in {'localhost', '127.0.0.1', '0.0.0.0'}
+            and 'cloudfront.net' not in host
+            and 'amazonaws.com' not in host
+            and not host.replace('.', '').isdigit()
+        ),
+        ''
+    )
+    if primary_host:
+        URL_PAINEL = f'https://{primary_host}'
+
 CSRF_TRUSTED_ORIGINS = [
     a.strip() for a in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
     if a.strip()

@@ -1,3 +1,6 @@
+from urllib.parse import quote
+from django.conf import settings
+from django.http import HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -21,3 +24,18 @@ def send_email_voices(request,id):
     voz = VoiceCalls.objects.get(id=id)    
     NoteVoiceCall.addNote(id_item=voz, note="E-mail enviado!", type_note='S')
     return redirect('voice_index')
+
+
+def esim_install_redirect(request, platform):
+    lpa = (request.GET.get('lpa') or '').strip()
+    if not lpa:
+        return HttpResponseBadRequest('LPA ausente.')
+
+    if platform == 'ios':
+        base_url = settings.LINK_ESIM_IOS
+    elif platform == 'android':
+        base_url = settings.LINK_ESIM_ANDROID
+    else:
+        return HttpResponseBadRequest('Plataforma invalida.')
+
+    return redirect(f'{base_url}{quote(lpa, safe="")}')
