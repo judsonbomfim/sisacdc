@@ -1,5 +1,4 @@
 from urllib import request
-from urllib.parse import quote
 from celery import shared_task
 from django.shortcuts import redirect
 from django.core.mail import EmailMultiAlternatives
@@ -54,8 +53,6 @@ def send_email_sims(id=None):
         countries = order.countries
         link_esim_android = settings.LINK_ESIM_ANDROID
         link_esim_ios = settings.LINK_ESIM_IOS
-        link_esim_android_url = f'{link_esim_android}{quote(lpa, safe="")}' if lpa else ''
-        link_esim_ios_url = f'{link_esim_ios}{quote(lpa, safe="")}' if lpa else ''
         
         context = {
             'url_site': url_site,
@@ -74,8 +71,6 @@ def send_email_sims(id=None):
             'countries': countries,
             'link_esim_android': link_esim_android,
             'link_esim_ios': link_esim_ios,
-            'link_esim_android_url': link_esim_android_url,
-            'link_esim_ios_url': link_esim_ios_url,
         }
         html_content = render_to_string('painel/emails/send_email.html', context)
         text_content = strip_tags(html_content)

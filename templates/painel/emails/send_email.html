@@ -125,7 +125,7 @@
             </td>
           </tr>
 
-          {% if type_sim == 'esim' and lpa %}
+          {% if type_sim == 'esim' and lpa != '' %}
             <tr>
               <td class="esdev-adapt-off" align="left" style="margin:0;padding-top:10px;padding-bottom:10px;padding-left:30px;padding-right:30px">
                 <table cellpadding="0" cellspacing="0" class="esdev-mso-table" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px;width:540px">
@@ -143,31 +143,15 @@
                                 </td>
                               </tr>
                               <tr>
-                                <td align="left" style="padding:0;margin:0;padding-top:10px">
-                                  <table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:separate;border-spacing:0px">
+                                <td align="center" style="padding:0;margin:0;font-size:0px;padding-top:10px">
+                                  <table cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:separate;border-spacing:0px;margin:0 auto;">
                                     <tr>
-                                      <td align="center" valign="middle" style="padding:0;margin:0;">
-                                        <!--[if mso]>
-                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ link_esim_ios_url }}" style="height:42px;v-text-anchor:middle;width:190px;" arcsize="10%" stroke="f" fillcolor="#2CB543">
-                                          <w:anchorlock/>
-                                          <center style="color:#ffffff;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;">Instalar no iPhone (iOS)</center>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-- -->
-                                        <a href="{{ link_esim_ios_url }}" target="_blank" style="display:inline-block;background-color:#2CB543;border:1px solid #2CB543;border-radius:6px;color:#FFFFFF;font-family:roboto, 'helvetica neue', helvetica, arial, sans-serif;font-size:14px;font-weight:700;line-height:20px;text-align:center;text-decoration:none;padding:10px 20px;white-space:nowrap;">Instalar no iPhone (iOS)</a>
-                                        <!--<![endif]-->
+                                      <td align="center" bgcolor="#2CB543" style="padding:0;margin:0;border-radius:6px;">
+                                        <a href="{{ link_esim_ios }}{{ lpa|urlencode }}" target="_blank" style="display:inline-block;background-color:#2CB543;border:1px solid #2CB543;border-radius:6px;color:#FFFFFF;font-family:roboto, 'helvetica neue', helvetica, arial, sans-serif;font-size:14px;font-weight:700;line-height:20px;text-align:center;text-decoration:none;padding:10px 20px;white-space:nowrap;">Instalar no iPhone (iOS)</a>
                                       </td>
                                       <td style="padding:0;margin:0;width:12px"></td>
-                                      <td align="center" valign="middle" style="padding:0;margin:0;">
-                                        <!--[if mso]>
-                                        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ link_esim_android_url }}" style="height:42px;v-text-anchor:middle;width:170px;" arcsize="10%" stroke="f" fillcolor="#2CB543">
-                                          <w:anchorlock/>
-                                          <center style="color:#ffffff;font-family:Arial, sans-serif;font-size:14px;font-weight:bold;">Instalar no Android</center>
-                                        </v:roundrect>
-                                        <![endif]-->
-                                        <!--[if !mso]><!-- -->
-                                        <a href="{{ link_esim_android_url }}" target="_blank" style="display:inline-block;background-color:#2CB543;border:1px solid #2CB543;border-radius:6px;color:#FFFFFF;font-family:roboto, 'helvetica neue', helvetica, arial, sans-serif;font-size:14px;font-weight:700;line-height:20px;text-align:center;text-decoration:none;padding:10px 20px;white-space:nowrap;">Instalar no Android</a>
-                                        <!--<![endif]-->
+                                      <td align="center" bgcolor="#2CB543" style="padding:0;margin:0;border-radius:6px;">
+                                        <a href="{{ link_esim_android }}{{ lpa|urlencode }}" target="_blank" style="display:inline-block;background-color:#2CB543;border:1px solid #2CB543;border-radius:6px;color:#FFFFFF;font-family:roboto, 'helvetica neue', helvetica, arial, sans-serif;font-size:14px;font-weight:700;line-height:20px;text-align:center;text-decoration:none;padding:10px 20px;white-space:nowrap;">Instalar no Android</a>
                                       </td>
                                     </tr>
                                   </table>
