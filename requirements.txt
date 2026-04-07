@@ -31,6 +31,7 @@ jsonschema==4.25.0
 jsonschema-specifications==2025.4.1
 kombu==5.3.5
 numpy==1.26.2
+opencv-python-headless==4.10.0.84
 packaging==23.2
 pandas==2.1.4
 Pillow==10.1.0

@@ -10,4 +10,6 @@ urlpatterns = [
     path('alterar/operadora', views.alterarOperadora, name='alterarOperadora'), 
     path('mobile_data/<str:iccid>/', views.testeMobileData, name='testeMobileData'), 
     path('desativartm/', views.desativarTM, name='desativarTM'), 
+    path('atualizar_lpa/', views.lpaChange, name='lpaChange'),
+    path('delete_sim/', views.deleteSIM, name='deleteSIM'),
 ]

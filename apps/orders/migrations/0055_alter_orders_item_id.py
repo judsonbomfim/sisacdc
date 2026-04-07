@@ -3,6 +3,26 @@
 from django.db import migrations, models
 
 
+def deduplicate_item_id(apps, schema_editor):
+    Orders = apps.get_model('orders', 'Orders')
+
+    seen = set()
+    duplicates = []
+    for item_id in Orders.objects.order_by('item_id', 'id').values_list('item_id', flat=True):
+        if item_id in seen:
+            duplicates.append(item_id)
+            continue
+        seen.add(item_id)
+
+    for item_id in sorted(set(duplicates)):
+        orders = Orders.objects.filter(item_id=item_id).order_by('id')
+        for duplicate in orders[1:]:
+            suffix = f'-x{duplicate.pk}'
+            base_item_id = item_id[:15 - len(suffix)]
+            duplicate.item_id = f'{base_item_id}{suffix}'
+            duplicate.save(update_fields=['item_id'])
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,6 +30,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(deduplicate_item_id, migrations.RunPython.noop),
         migrations.AlterField(
             model_name='orders',
             name='item_id',

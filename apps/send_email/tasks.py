@@ -11,6 +11,9 @@ from apps.voice_calls.models import VoiceCalls
 from apps.voice_calls.classes import NumberFormatter
 import time
 
+import logging
+logger = logging.getLogger(__name__)
+
 @shared_task
 def send_email_sims(id=None):
     
@@ -46,7 +49,10 @@ def send_email_sims(id=None):
         except: continue
         try: sim = order.id_sim.sim
         except: continue     
+        lpa = order.id_sim.lpa if order.id_sim.lpa else ''
         countries = order.countries
+        link_esim_android = settings.LINK_ESIM_ANDROID
+        link_esim_ios = settings.LINK_ESIM_IOS
         
         context = {
             'url_site': url_site,
@@ -61,7 +67,10 @@ def send_email_sims(id=None):
             'product_plan': product_plan,
             'type_sim': type_sim,
             'sim': sim,
-            'countries': countries,        
+            'lpa': lpa,
+            'countries': countries,
+            'link_esim_android': link_esim_android,
+            'link_esim_ios': link_esim_ios,
         }
         html_content = render_to_string('painel/emails/send_email.html', context)
         text_content = strip_tags(html_content)

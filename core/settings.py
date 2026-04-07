@@ -17,7 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = str(os.getenv('SECRET_KEY'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True if os.getenv('DEBUG', 'False').lower() in ('true', '1', 't') else False
 
 ALLOWED_HOSTS = [
     h.strip() for h in os.getenv('ALLOWED_HOSTS', '').split(',')
@@ -383,4 +383,7 @@ APIMS_URL = str(os.getenv('APIMS_URL'))
 # API VOICE CALLS
 APIVC_KEY = str(os.getenv('APIVC_KEY'))
 APIVC_URL = str(os.getenv('APIVC_URL'))
+
+LINK_ESIM_ANDROID = str(os.getenv('LINK_ESIM_ANDROID'))
+LINK_ESIM_IOS = str(os.getenv('LINK_ESIM_IOS'))
 

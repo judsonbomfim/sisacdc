@@ -43,8 +43,9 @@
         <label class="btn btn-outline-primary me-2" for="operator8">Orange World</label>
     </div>
     <div class="form-group">
-        <label for="formFile" class="form-label">Enviar imagens</label>
-        <input class="form-control" type="file" id="formFile" name="esim" multiple required>
+        <label for="formFile" class="form-label">Enviar planilha CSV</label>
+        <input class="form-control" type="file" id="formFile" name="esim" accept=".csv,text/csv" required>
+        <small class="form-text text-muted">A planilha deve conter as colunas lpa e sim ou iccid.</small>
     </div>
     <div class="form-group mt-5">
         <button type="submit" class="btn btn-default btn-rounded color-primary btn-primary">

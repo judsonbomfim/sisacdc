@@ -31,6 +31,7 @@ DATA = [
 class Sims(models.Model):
     id = models.AutoField(primary_key=True, serialize=False)
     sim = models.CharField(max_length=25)
+    lpa = models.CharField(max_length=255, null=True, blank=True, )
     link = models.URLField(null=True, blank=True, default='-')
     type_sim =  models.CharField(max_length=20, choices=SIM_TYPES)
     data = models.CharField(max_length=15, null=True, blank=True, choices=DATA)
@@ -44,4 +45,4 @@ class Sims(models.Model):
         verbose_name_plural = 'Sims'
         ordering = ['id']
     def __str__(self):
-        return self.sim
+        return self.sim if self.sim else self.lpa

@@ -9,7 +9,11 @@ from datetime import datetime
 from django.conf import settings
 from django.core.cache import cache
 from urllib.parse import urlparse
+from urllib.request import urlopen
 import logging
+import cv2
+import numpy as np
+import qrcode
 
 logger = logging.getLogger(__name__)
 
@@ -259,6 +263,7 @@ class ApiTC:
         conn.close()
         return mobile_data
 
+
 class ApiTI:
 
     # Get tokem de acesso a API
@@ -458,6 +463,7 @@ class ApiTI:
         
         conn.close()
         return mobile_data
+
 
 class ApiCM:
         
@@ -685,3 +691,37 @@ class operPlan():
             }
         
         return planList
+    
+    
+class qrcodeChange():
+    @staticmethod
+    def read_qr_code(file_path):
+        parsed_url = urlparse(file_path)
+
+        if parsed_url.scheme in ('http', 'https'):
+            with urlopen(file_path, timeout=HTTP_TIMEOUT) as response:
+                image_bytes = response.read()
+            qr_image = cv2.imdecode(np.frombuffer(image_bytes, dtype=np.uint8), cv2.IMREAD_COLOR)
+        else:
+            qr_image = cv2.imread(file_path)
+
+        if qr_image is None or qr_image.size == 0:
+            raise ValueError(f'Nao foi possivel carregar a imagem do QR code: {file_path}')
+
+        # Criar um detector de QR code
+        qr_detector = cv2.QRCodeDetector()
+        # Detectar e decodificar o QR code
+        data, points, _ = qr_detector.detectAndDecode(qr_image)
+        print(f">>>>> Decoded data: {data}")  # Debug: Verificar o resultado da decodificação
+        if data:
+            return data
+        else:
+            return None
+    
+    @staticmethod
+    def convert_qr_code(data):
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(data)
+        qr.make(fit=True)
+        img = qr.make_image(fill='black', back_color='white')
+        return img

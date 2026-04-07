@@ -1,5 +1,5 @@
 import csv
-import imghdr
+import io
 import boto3
 from django.contrib.auth.decorators import login_required
 from rolepermissions.decorators import has_permission_decorator
@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from datetime import date
@@ -16,7 +17,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from ..serializers import ConsumoSerializer
-from apps.sims.classes import ApiTC, ApiCM
+from apps.sims.classes import ApiTC, ApiCM, qrcodeChange
 from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
 from ..tasks import simDeactivateTC, sims_in_orders
@@ -35,8 +36,46 @@ def upload_file_to_s3(file):
     s3 = get_s3_client()
     bucket_name = settings.AWS_STORAGE_BUCKET_NAME
     file_path = f"{settings.MEDIA_LOCATION}/{file.name}"
+    if hasattr(file, 'seek'):
+        file.seek(0)
     s3.upload_fileobj(file, bucket_name, file_path)
     return default_storage.url(file_path)
+
+
+def get_operator_data(oper_val):
+    if oper_val == 'OR20':
+        return 'OR', '20gb'
+    if oper_val == 'OR50':
+        return 'OR', '50gb'
+    if oper_val == 'ORWD':
+        return 'OR', 'world'
+    return oper_val, ''
+
+
+def normalize_csv_row(row):
+    normalized = {}
+    for key, value in row.items():
+        if key is None:
+            continue
+        normalized[key.strip().lower()] = value.strip() if isinstance(value, str) else value
+    return normalized
+
+
+def get_csv_value(row, *keys):
+    for key in keys:
+        value = row.get(key)
+        if value:
+            return value.strip()
+    return ''
+
+
+def build_qr_file(lpa, sim):
+    qr_image = qrcodeChange.convert_qr_code(lpa)
+    qr_image = qr_image.get_image() if hasattr(qr_image, 'get_image') else qr_image
+
+    image_buffer = io.BytesIO()
+    qr_image.save(image_buffer, format='JPEG')
+    return ContentFile(image_buffer.getvalue(), name=f'{sim}.jpg')
 
 @login_required(login_url='/login/')
 @has_permission_decorator('view_sims')
@@ -217,51 +256,71 @@ def sims_add_esim(request):
                 
         type_sim = request.POST.get('type_sim')
         oper_val = request.POST.get('operator')
-        if oper_val == 'OR20' or oper_val == 'OR50':
-            operator = 'OR'
-            if oper_val == 'OR20':
-                data = '20gb'
-            elif oper_val == 'OR50':
-                data = '50gb'
-        elif oper_val == 'ORWD':
-            operator = 'OR'
-            data = 'world'
-        else:
-            operator = oper_val
-            data = ''
-        esims = request.FILES.getlist('esim')
+        operator, data = get_operator_data(oper_val)
+        esim_file = request.FILES.get('esim')
  
-        if type_sim == '' or operator == '' or esims == '':
+        if type_sim == '' or operator == '' or not esim_file:
             messages.error(request,'Preencha todos os campos')
             return render(request, 'painel/sims/add-esim.html')
-                           
-        
-        for sim_img in esims:
-            sim_i = sim_img.name.split('.')
-            
-            fileurl = ''
-            if imghdr.what(sim_img):
-                fileurl = upload_file_to_s3(sim_img)
-                fileurl = fileurl.replace(settings.URL_CDN,'')
-            else:
-                messages.error(request,'O arquivo não é uma imagem. Verifique por favor!')
-                return render(request, 'painel/sims/add-esim.html')
-            
-            sims_all = Sims.objects.all().filter(sim=sim_i[0]).filter(type_sim='esim')
-            if sims_all:
-                messages.info(request,f'O SIM {sim_i[0]} já está cadastrado no sistema')
+
+        if not esim_file.name.lower().endswith('.csv'):
+            messages.error(request,'O arquivo está incorreto. Envie uma planilha CSV.')
+            return render(request, 'painel/sims/add-esim.html')
+
+        try:
+            decoded_file = esim_file.read().decode('utf-8-sig')
+        except UnicodeDecodeError:
+            messages.error(request,'Não foi possível ler o CSV. Salve a planilha em UTF-8 e tente novamente.')
+            return render(request, 'painel/sims/add-esim.html')
+
+        reader = csv.DictReader(io.StringIO(decoded_file))
+        if not reader.fieldnames:
+            messages.error(request,'A planilha CSV está vazia ou sem cabeçalho.')
+            return render(request, 'painel/sims/add-esim.html')
+
+        normalized_headers = [header.strip().lower() for header in reader.fieldnames if header]
+        if 'lpa' not in normalized_headers or not any(header in normalized_headers for header in ['sim', 'iccid']):
+            messages.error(request,'A planilha deve conter as colunas lpa e sim ou iccid.')
+            return render(request, 'painel/sims/add-esim.html')
+
+        created_total = 0
+        skipped_total = 0
+
+        for row_number, row in enumerate(reader, start=2):
+            normalized_row = normalize_csv_row(row)
+            sim_value = get_csv_value(normalized_row, 'sim', 'iccid')
+            lpa_value = get_csv_value(normalized_row, 'lpa')
+
+            if not sim_value or not lpa_value:
+                skipped_total += 1
+                messages.info(request, f'Linha {row_number} ignorada: sim/iccid ou lpa ausente.')
                 continue
-            # Save SIMs
+
+            sim_exists = Sims.objects.filter(sim=sim_value, type_sim='esim').exists()
+            if sim_exists:
+                skipped_total += 1
+                messages.info(request, f'O SIM {sim_value} já está cadastrado no sistema')
+                continue
+
+            qr_file = build_qr_file(lpa_value, sim_value)
+            fileurl = upload_file_to_s3(qr_file).replace(f'https://{settings.AWS_S3_CUSTOM_DOMAIN}', '')
+
             add_sim = Sims(
-                sim = sim_i[0],
-                link = fileurl,
-                type_sim = type_sim,
-                data = data,
-                operator = operator
+                sim=sim_value,
+                lpa=lpa_value,
+                link=fileurl,
+                type_sim=type_sim,
+                data=data,
+                operator=operator
             )
             add_sim.save()
+            created_total += 1
 
-        messages.success(request,'Lista gravada com sucesso')
+        if created_total == 0 and skipped_total > 0:
+            messages.warning(request, 'Nenhum eSIM novo foi gravado. Verifique as linhas ignoradas.')
+            return render(request, 'painel/sims/add-esim.html')
+
+        messages.success(request, f'Lista gravada com sucesso. {created_total} eSIM(s) cadastrado(s).')
         return render(request, 'painel/sims/add-esim.html')
 
 @login_required(login_url='/login/')
@@ -360,3 +419,32 @@ def testeMobileData(request, iccid):
 def desativarTM(request):
     simDeactivateTC.delay()
     return HttpResponse('Processando desativações... Aguarde alguns minutos e atualize a página de pedidos')
+
+def lpaChange(request):
+    sims = Sims.objects.filter(type_sim='esim', sim_status='DS', operator='TI')
+    for sim in sims:
+        link_qrcode = F"https://{settings.AWS_S3_CUSTOM_DOMAIN}{sim.link}"
+        print(f"Processando SIM: {sim.sim}, Link do QR Code: {link_qrcode}")
+        try:
+            new_lpa = qrcodeChange.read_qr_code(link_qrcode)
+            if new_lpa:
+                print(f"SIM: {sim.sim}, LPA Antigo: {sim.lpa}, LPA Novo: {new_lpa}")
+                sim.lpa = new_lpa
+                sim.save()
+        except Exception as e:
+            logger.error(f"Erro ao atualizar LPA para SIM {sim.sim}: {e}")
+    return HttpResponse('Processando atualização de LPA... Aguarde alguns minutos e atualize a página de pedidos')
+
+def deleteSIM(request):
+    sims = Sims.objects.filter(sim_status='IN')
+    s3 = get_s3_client()
+    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+    for sim in sims:
+        if sim.link and sim.link != '-':
+            file_path = sim.link.lstrip('/')
+            try:
+                s3.delete_object(Bucket=bucket_name, Key=file_path)
+            except Exception as e:
+                logger.error(f"Erro ao excluir arquivo S3 do SIM {sim.sim}: {e}")
+        sim.delete()
+    return HttpResponse('Processando exclusão de SIMs... Aguarde alguns minutos e atualize a página de pedidos')
