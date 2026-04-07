@@ -421,7 +421,12 @@ def desativarTM(request):
     return HttpResponse('Processando desativações... Aguarde alguns minutos e atualize a página de pedidos')
 
 def lpaChange(request):
-    sims = Sims.objects.filter(type_sim='esim', sim_status='DS', lpa=None).order_by('id')
+    sims = Sims.objects.filter(
+        type_sim='esim',
+        sim_status='DS',
+    ).filter(
+        Q(lpa__isnull=True) | Q(lpa__exact='')
+    ).order_by('id')
     contagem = 0
     for sim in sims:
         link_qrcode = F"https://{settings.AWS_S3_CUSTOM_DOMAIN}{sim.link}"
