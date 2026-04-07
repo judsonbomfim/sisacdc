@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db.models import Q
+from django.db.models.functions import Length, Trim
 from django.http import JsonResponse
 from datetime import date
 from rest_framework.views import APIView
@@ -425,8 +426,12 @@ def lpaChange(request):
     sims = Sims.objects.filter(
         type_sim='esim',
         sim_status__in=['DS', 'AT'],
+    ).annotate(
+        lpa_trimmed=Trim('lpa'),
+        lpa_trimmed_length=Length(Trim('lpa')),
     ).filter(
-        Q(lpa__isnull=True) | Q(lpa__exact='')
+        Q(lpa__isnull=True) |
+        Q(lpa_trimmed_length__lt=5)
     ).order_by('id')
     total = sims.count()
     contagem = 0
