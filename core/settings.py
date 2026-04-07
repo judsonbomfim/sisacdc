@@ -217,6 +217,7 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
+            'stream': 'ext://sys.stdout',
         },
         'file_django': {
             'level': 'INFO',
@@ -283,6 +284,11 @@ LOGGING = {
             'propagate': False,
         },
         'apps.sims.views': {
+            'handlers': ['console', 'file_django'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps.sims.views.views': {
             'handlers': ['console', 'file_django'],
             'level': 'INFO',
             'propagate': False,
