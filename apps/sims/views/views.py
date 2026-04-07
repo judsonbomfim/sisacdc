@@ -11,6 +11,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.db.models import Q
 from django.http import JsonResponse
 from datetime import date
 from rest_framework.views import APIView
