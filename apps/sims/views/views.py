@@ -424,7 +424,7 @@ def desativarTM(request):
 def lpaChange(request):
     sims = Sims.objects.filter(
         type_sim='esim',
-        sim_status='DS',
+        sim_status__in=['DS', 'AT'],
     ).filter(
         Q(lpa__isnull=True) | Q(lpa__exact='')
     ).order_by('id')
