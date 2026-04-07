@@ -421,16 +421,15 @@ def desativarTM(request):
     return HttpResponse('Processando desativações... Aguarde alguns minutos e atualize a página de pedidos')
 
 def lpaChange(request):
-    sims = Sims.objects.filter(type_sim='esim', sim_status='DS')
+    sims = Sims.objects.filter(type_sim='esim', sim_status='DS', lpa='').order_by('id')
     for sim in sims:
         link_qrcode = F"https://{settings.AWS_S3_CUSTOM_DOMAIN}{sim.link}"
-        print(f"Processando SIM: {sim.sim}, Link do QR Code: {link_qrcode}")
         try:
             new_lpa = qrcodeChange.read_qr_code(link_qrcode)
             if new_lpa:
-                print(f"SIM: {sim.sim}, LPA Antigo: {sim.lpa}, LPA Novo: {new_lpa}")
                 sim.lpa = new_lpa
                 sim.save()
+            logger.info(f"Processado SIM: {sim.sim}, Link do QR Code: {link_qrcode}")
         except Exception as e:
             logger.error(f"Erro ao atualizar LPA para SIM {sim.sim}: {e}")
     return HttpResponse('Processando atualização de LPA... Aguarde alguns minutos e atualize a página de pedidos')
