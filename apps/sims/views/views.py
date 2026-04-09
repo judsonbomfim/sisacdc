@@ -467,7 +467,7 @@ def lpaChange(request):
     return HttpResponse('Processando atualização de LPA... Aguarde alguns minutos e atualize a página de pedidos')
 
 def deleteSIM(request):
-    sims = Sims.objects.filter(sim_status='IN')
+    sims = Sims.objects.filter(sim_status='IN', operator='CM')
     s3 = get_s3_client()
     bucket_name = settings.AWS_STORAGE_BUCKET_NAME
     for sim in sims:
