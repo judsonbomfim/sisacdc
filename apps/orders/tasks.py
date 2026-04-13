@@ -199,6 +199,7 @@ def order_import():
                     else:
                         data_day_i = '30-ilimitado'
                     order_status_i = 'AA'
+                    simAT = Sims.objects.filter(pk=47282).first()  # SIM genérico para ativação AT
                     send_email_sims.delay(id=order_id_i)  # Enviar e-mail de ativação para planos AT
                 elif product_i in operPlan.listPlan('TM') and type_sim_i == 'sim':
                     calls_i = False
@@ -224,6 +225,7 @@ def order_import():
                         'cell_mod': cell_mod_i,
                         'ord_chip_nun': ord_chip_nun_i,
                         'shipping': shipping_i,
+                        'id_sim': simAT if simAT else '',
                         'order_date': order_date_i,
                         'activation_date': activation_date_i,
                         'order_status': order_status_i,

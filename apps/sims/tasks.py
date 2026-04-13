@@ -1463,7 +1463,7 @@ def simActivateMS(id=None):
     # A lógica original busca até 2 dias no futuro, mantendo isso.
     activation_limit_date = today + timedelta(days=2)
     
-    logger.info('Iniciando a tarefa de ativação de SIMs da Movistar (MS).')
+    logger.info('>>>>>>>>>> ATIVAÇÂO MS INICIADA')
 
     # Selecionar pedidos
     if id is None:
@@ -1584,12 +1584,12 @@ def simActivateMS(id=None):
 @shared_task
 def simActivateAT(id=None):
     # Timezone UTC+2h
-    tz = pytz.timezone("Europe/Madrid")
+    tz = pytz.timezone("America/Sao_Paulo")
     today = datetime.now(tz).date()
     # A lógica original busca até 2 dias no futuro, mantendo isso.
     activation_limit_date = today
     
-    logger.info('Iniciando a tarefa de ativação de SIMs da AT&T.')
+    logger.info('>>>>>>>>>> ATIVAÇÂO AT INICIADA')
 
     # Selecionar pedidos
     if id is None:
@@ -1678,7 +1678,7 @@ def simActivateAT(id=None):
             UpdateOrder.upStatus(order.id, 'EA')
             NotesAdd.addNote(order, f"Ocorreu um erro interno no sistema ao tentar ativar o SIM {order.id_sim.sim}: {e}")
 
-    logger.info('Tarefa de ativação de SIMs da AT&T finalizada.')
+    logger.info('>>>>>>>>>> ATIVAÇÂO AT FINALIZADA')
     
 @shared_task
 def simAgdOperator():
@@ -1687,7 +1687,7 @@ def simAgdOperator():
     orders = Orders.objects.filter(order_status='AO')
     
     if not orders.exists():
-        logger.info('Nenhum pedido encontrado para ativação da AT&T.')
+        logger.info('Nenhum pedido encontrado para processamento.')
         return
     
     for order in orders:
