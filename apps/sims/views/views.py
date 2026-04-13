@@ -70,15 +70,6 @@ def get_csv_value(row, *keys):
             return value.strip()
     return ''
 
-
-def build_qr_file(lpa, sim):
-    qr_image = qrcodeChange.convert_qr_code(lpa)
-    qr_image = qr_image.get_image() if hasattr(qr_image, 'get_image') else qr_image
-
-    image_buffer = io.BytesIO()
-    qr_image.save(image_buffer, format='JPEG')
-    return ContentFile(image_buffer.getvalue(), name=f'{sim}.jpg')
-
 @login_required(login_url='/login/')
 @has_permission_decorator('view_sims')
 def sims_list(request):
@@ -304,7 +295,7 @@ def sims_add_esim(request):
                 messages.info(request, f'O SIM {sim_value} já está cadastrado no sistema')
                 continue
 
-            qr_file = build_qr_file(lpa_value, sim_value)
+            qr_file = qrcodeChange.build_qr_file(lpa_value, sim_value)
             fileurl = upload_file_to_s3(qr_file).replace(f'https://{settings.AWS_S3_CUSTOM_DOMAIN}', '')
 
             add_sim = Sims(

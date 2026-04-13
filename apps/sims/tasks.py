@@ -6,7 +6,8 @@ import http.client
 import json
 import time
 from django.conf import settings
-from .classes import ApiTC, ApiTI, ApiCM, operPlan
+
+from .classes import ApiTC, ApiTI, ApiCM, operPlan, qrcodeChange
 from apps.orders.models import Orders, Notes
 from apps.orders.classes import ApiStore, StatusStore, NotesAdd, UpdateOrder, UpdateStore
 from apps.send_email.tasks import send_email_sims
@@ -49,7 +50,6 @@ def sims_in_orders():
         # celular_samsung = ord.celular_samsung
         reuso_sim = ord.ord_chip_nun
         update_store = {}
-        esim_eua = type_sim_i == 'esim' and (product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias')
         
         # Se já houver SIM   
         if ord.id_sim != None:
@@ -69,8 +69,10 @@ def sims_in_orders():
                     operator_i = 'TC'
                 else:
                     operator_i = 'CM'
-            elif product_i == 'chip-internacional-eua' or product_i == 'chip-internacional-eua-30-dias':
+            elif product_i in operPlan.listPlan('TM') and type_sim_i == 'sim': # EUA Ilimitado
                 operator_i = 'TM'
+            elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim': # EUA Ilimitado
+                operator_i = 'AT'
             elif product_i in operPlan.listPlan('TI'):
                 operator_i = 'TI'
             elif product_i in operPlan.listPlan('TC'):
@@ -80,10 +82,7 @@ def sims_in_orders():
             else: operator_i = 'CM'
             
             # Select SIM
-            if esim_eua:
-                sim_ds = Sims.objects.all().get(pk=0)
-                addNote(f'eSIM EUA - SIM padrão adicionado')
-            elif reuso_sim != '-':
+            if reuso_sim != '-':
                 sim_ds = Sims.objects.filter(sim=reuso_sim).first()
             elif operator_i == 'OR':
                 sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS', data=data_day_i).first()
@@ -102,23 +101,18 @@ def sims_in_orders():
             
             # update order
             # Save SIMs
-            if (type_sim_i == 'esim' or reuso_sim != '-') and not esim_eua:
+            if (type_sim_i == 'esim' or reuso_sim != '-'):
                 status_ord = 'AA'
                 # Enviar e-mail
                 send_email_sims.delay(id=id_id_i)
                 addNote(f'Status alterado para Agd. Ativação')
                 logger.info(f'Pedido {order_id_i} com eSIM ou reuso, status definido para AA e e-mail enviado!')
-            elif esim_eua: status_ord = 'AI'
             elif type_sim_i == 'sim': status_ord = 'ES'
             
             order_put = Orders.objects.get(pk=id_id_i)
             order_put.id_sim_id = sim_ds.id            
             order_put.order_status = status_ord
             order_put.save()
-            
-            # Verification esim x eua
-            if esim_eua:
-                continue
             
             # update sim
             sim_put = Sims.objects.get(pk=sim_ds.id)
@@ -1533,7 +1527,7 @@ def simActivateMS(id=None):
             
             response_data = response.json()
 
-            logger.info(f'Pedido {order.order_id} ativado com sucesso na MS. Hash: {response_data[0]["hash"]}')
+            logger.info(f'Pedido {order.order_id} ativado com sucesso na MS.')
             UpdateOrder.upStatus(order.id, 'AT')
             UpdateStore.upStore(
                 order_id = order.order_id,
@@ -1541,7 +1535,7 @@ def simActivateMS(id=None):
                 _status='AT',
                 status_g = 'AT',
             )  
-            NotesAdd.addNote(order, f'Pedido {order.order_id} ativado com sucesso na MS.) Hash: {response_data[0]["hash"]}')
+            NotesAdd.addNote(order, f'Pedido {order.order_id} ativado com sucesso na MS.)')
 
         except requests.exceptions.HTTPError as e:
             # CORREÇÃO: Captura o erro HTTP para extrair a mensagem da API.
@@ -1585,4 +1579,183 @@ def simActivateMS(id=None):
             NotesAdd.addNote(order, f"Ocorreu um erro interno no sistema ao tentar ativar o SIM {order.id_sim.sim}: {e}")
 
     logger.info('Tarefa de ativação de SIMs da Movistar (MS) finalizada.')
+    
+
+@shared_task
+def simActivateAT(id=None):
+    # Timezone UTC+2h
+    tz = pytz.timezone("Europe/Madrid")
+    today = datetime.now(tz).date()
+    # A lógica original busca até 2 dias no futuro, mantendo isso.
+    activation_limit_date = today
+    
+    logger.info('Iniciando a tarefa de ativação de SIMs da AT&T.')
+
+    # Selecionar pedidos
+    if id is None:
+        orders_to_process = Orders.objects.filter(
+            order_status='AA', 
+            id_sim__operator='AT', 
+            activation_date__lte=activation_limit_date
+        )
+    else:
+        orders_to_process = Orders.objects.filter(pk=id)
+    
+    if not orders_to_process.exists():
+        logger.info('Nenhum pedido encontrado para ativação da AT&T.')
+        return
+
+    for order in orders_to_process:
+        try:
+            logger.info(f'Processando ativação para o pedido {order.order_id} (SIM: {order.id_sim.sim})')
+            
+            if order.data_day == '10-ilimitado':
+                product_id = 20
+            elif order.data_day == '30-ilimitado':
+                product_id = 19
+                     
+            url = f"{settings.APISM_URL}/api/v1/order"
+            headers = {
+                "Accept": "application/json",
+                "Authorization": f"Bearer {settings.APISM_TOKEN}",
+            }
+            payload = {
+                "product_id": product_id,
+            }               
+
+            response = requests.post(url, headers=headers, data=payload)
+            response_data = response.json()
+            
+            status_now = response_data['status']['name']
+            
+            order_sim = response_data.id
+            order.order_sim = order_sim
+            order.save()
+
+            logger.info(f'Pedido {order.order_id} enviado com sucesso na AT&T')
+            
+            UpdateOrder.upStatus(order.id, 'AO')
+            NotesAdd.addNote(order, f'Pedido {order.order_id} enviado com sucesso na AT&T. Aguardando retorno da operadora. STATUS ATUAL: {status_now}.')
+
+        except requests.exceptions.HTTPError as e:
+            # CORREÇÃO: Captura o erro HTTP para extrair a mensagem da API.
+            error_to_save = f"Erro HTTP {e.response.status_code}"
+            log_message = f"Erro na API ao ativar o pedido {order.order_id}: {error_to_save}"
+            
+            try:
+                # Tenta decodificar a resposta JSON da API
+                error_details = e.response.json()
+                log_message += f" Detalhes: {json.dumps(error_details)}"
+                
+                # Extrai a mensagem de erro específica para salvar no pedido
+                api_message_str = error_details.get('message')
+                if api_message_str:
+                    try:
+                        # A API retorna uma string JSON dentro do campo 'message'
+                        parsed_message = json.loads(api_message_str)
+                        error_to_save = ', '.join(parsed_message) if isinstance(parsed_message, list) else str(parsed_message)
+                    except (json.JSONDecodeError, TypeError):
+                        error_to_save = str(api_message_str)
+                else:
+                    error_to_save = json.dumps(error_details)
+
+            except json.JSONDecodeError:
+                # Se a resposta não for JSON, salva o texto bruto
+                error_to_save = e.response.text
+                log_message += f" Resposta não-JSON: {error_to_save}"
+
+            logger.info(log_message)
+            UpdateOrder.upStatus(order.id, 'EA')
+            NotesAdd.addNote(order, f"{log_message}")
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Erro de conexão/HTTP ao ativar o pedido {order.order_id}: {e}")
+            UpdateOrder.upStatus(order.id, 'EA')
+            NotesAdd.addNote(order, f"Erro de comunicação com a API da AT&T ao tentar ativar o SIM {order.id_sim.sim}: {e}")
+        
+        except Exception as e:
+            logger.error(f"Erro inesperado ao processar o pedido {order.order_id}: {e}", exc_info=True)
+            UpdateOrder.upStatus(order.id, 'EA')
+            NotesAdd.addNote(order, f"Ocorreu um erro interno no sistema ao tentar ativar o SIM {order.id_sim.sim}: {e}")
+
+    logger.info('Tarefa de ativação de SIMs da AT&T finalizada.')
+    
+@shared_task
+def simAgdOperator():
+    from apps.sims.views.views import upload_file_to_s3
+    
+    orders = Orders.objects.filter(order_status='AO')
+    
+    if not orders.exists():
+        logger.info('Nenhum pedido encontrado para ativação da AT&T.')
+        return
+    
+    for order in orders:
+        
+        order_sim = order.order_sim
+        order_product = order.product
+        type_sim = order.type_sim
+        data = order.data_day
+        operator = 'AT'  
+        
+        # Verificar de é AT&T
+        if order_product not in operPlan.listPlan(operator):
+            continue
+        
+        url = f"{settings.APISM_URL}/api/v1/order/{order_sim}"
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {settings.APISM_TOKEN}",
+        }
+        payload = {
+        }               
+
+        response = requests.post(url, headers=headers, params=payload) 
+        response_data = response.json()
+        status_now = response_data['status']['name']
+        
+        if status_now == 'completed':
+            
+            sim_value = response_data['products'][0]['sim_data']['iccid']
+            lpa_value = response_data['products'][0]['sim_data']['lpa_code']
+            
+            try:
+                # COnverter e salvaar SIM no estoque            
+                qr_file = qrcodeChange.build_qr_file(lpa_value, sim_value)
+                fileurl = upload_file_to_s3(qr_file).replace(f'https://{settings.AWS_S3_CUSTOM_DOMAIN}', '')
+                add_sim = Sims(
+                    sim=sim_value,
+                    lpa=lpa_value,
+                    link=fileurl,
+                    type_sim=type_sim,
+                    data=data,
+                    operator=operator,
+                    statussim_status='AT',
+                )
+                add_sim.save()
+                
+                # Salvar SIM no pedido
+                order.id_sim = add_sim
+                order.save()
+                
+                # Alterar status do pedido
+                UpdateOrder.upStatus(order.id, 'AT')
+                UpdateStore.upStore(
+                    order_id = order.order_id,
+                    item_id_store = order.item_id_store if order.item_id_store else None,
+                    _status='AT',
+                    status_g = 'AT',
+                )
+                send_email_sims.delay(id=order.id)
+                NotesAdd.addNote(order, f'Pedido {order.order_id} ativado com sucesso na AT&T. SIM: {sim_value}. STATUS ATUAL: {status_now}.')
+            except Exception as e:
+                logger.error(f"Erro ao processar o SIM para o pedido {order.order_id}: {e}", exc_info=True)
+                UpdateOrder.upStatus(order.id, 'EA')
+                NotesAdd.addNote(order, f"Ocorreu um erro interno no sistema ao processar o SIM para o pedido {order.order_id}: {e}")
+            
+        else:
+            continue
+        
+        
+    
     

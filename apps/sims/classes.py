@@ -1,6 +1,7 @@
 import http.client
 import base64
 import hashlib
+import io
 import json
 import random
 import time
@@ -14,6 +15,8 @@ import logging
 import cv2
 import numpy as np
 import qrcode
+from django.core.files.base import ContentFile
+
 
 logger = logging.getLogger(__name__)
 
@@ -689,6 +692,16 @@ class operPlan():
                 'chip-internacional-oceania-franquia-total',
                 'chip-internacional-caribe-franquia-total',
             }
+        elif operator == 'AT':
+            planList = {
+                'chip-internacional-eua',
+                'chip-internacional-eua-30-dias',
+            }
+        elif operator == 'TM':
+            planList = {
+                'chip-internacional-eua',
+                'chip-internacional-eua-30-dias',
+            }
         
         return planList
     
@@ -717,6 +730,15 @@ class qrcodeChange():
             return data
         else:
             return None
+        
+    @staticmethod
+    def build_qr_file(lpa, sim):
+        qr_image = qrcodeChange.convert_qr_code(lpa)
+        qr_image = qr_image.get_image() if hasattr(qr_image, 'get_image') else qr_image
+
+        image_buffer = io.BytesIO()
+        qr_image.save(image_buffer, format='JPEG')
+        return ContentFile(image_buffer.getvalue(), name=f'{sim}.jpg')    
     
     @staticmethod
     def convert_qr_code(data):
@@ -725,3 +747,5 @@ class qrcodeChange():
         qr.make(fit=True)
         img = qr.make_image(fill='black', back_color='white')
         return img
+    
+

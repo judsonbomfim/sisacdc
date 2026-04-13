@@ -176,7 +176,11 @@
                         <td align="left" style="padding:0;margin:0;padding-top:10px;padding-bottom:10px">
                           {% if type_sim == 'esim' %}
                             {% if product_plan == 'USA' or product_plan == 'USA 30 Dias' %}
-                              {% include 'painel/emails/partials/esim_eua.html' %}
+                              {% if type_sim %}
+                                {% include 'painel/emails/partials/esim_eua.html' %}
+                              {% else %}
+                                {% include 'painel/emails/partials/esim_eua_conf.html' %}
+                              {% endif %}
                             {% elif operator == 'TI' or operator == 'TM' %}
                               {% include 'painel/emails/partials/esim_telcom.html' %}
                             {% elif operator == 'OR' %}

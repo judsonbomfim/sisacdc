@@ -346,6 +346,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.sims.tasks.simActivateOR',
         'schedule': crontab(minute='4-59/2'),
     },
+    'task__2_min_simAgdOperator': {
+        'task': 'apps.sims.tasks.simAgdOperator',
+        'schedule': crontab(minute='2-59/2'),
+    },
     'task__2_min_activate_VC': {
         'task': 'apps.voice_calls.tasks.voiceActivate',
         'schedule': crontab(minute='2-59/2'),

@@ -192,8 +192,16 @@ def order_import():
                         elif data_day_i == '50gb-30-dias':
                             data_day_i = '50gb'
                     else:
-                        data_day_i = 'world'                    
-                    
+                        data_day_i = 'world'
+                elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim':
+                    if days_i <= '10':
+                        data_day_i = '10-ilimitado'
+                    else:
+                        data_day_i = '30-ilimitado'
+                    order_status_i = 'AA'
+                    send_email_sims.delay(id=order_id_i)  # Enviar e-mail de ativação para planos AT
+                elif product_i in operPlan.listPlan('TM') and type_sim_i == 'sim':
+                    calls_i = False
                     
                 shipping_i = shipping_i[:40]
 

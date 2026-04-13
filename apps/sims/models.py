@@ -16,6 +16,7 @@ SIM_OPERATOR = [
     ('TI', 'Telcom IMSI'),
     ('MS', 'MoviStar'),
     ('OR', 'Orange'),
+    ('AT', 'AT&T'),
 ]
 
 SIM_TYPES = [

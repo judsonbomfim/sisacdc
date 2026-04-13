@@ -2,7 +2,8 @@ from woocommerce import API
 import os
 from apps.orders.models import Orders, Notes
 from django.contrib.auth.models import User
-
+import logging
+logger = logging.getLogger(__name__)
 
 class ApiStore():
     @staticmethod

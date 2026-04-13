@@ -47,11 +47,14 @@ DATA = [
     ('20gb', '20GB'),
     ('50gb', '50GB'),
     ('world', 'World'),
+    ('10-ilimitado', 'Ilimitado (10)'),
+    ('30-ilimitado', 'Ilimitado (30)'),
 ]
 
 ORDER_STATUS = [
     ('AA', 'Agd. Ativação'),
     ('AE', 'Agd. Envio'),
+    ('AO', 'Agd. Operadora'),
     ('AG', 'Agência'),
     ('AS', 'Atribuir SIM'),
     ('AI', 'Atribuir IMEI'),
@@ -106,6 +109,7 @@ class Orders(models.Model):
     order_status = models.CharField(max_length=20, choices=ORDER_STATUS, default='PR')
     type_sim = models.CharField(max_length=4, null=True, blank=True, default='sim')
     id_sim = models.ForeignKey(Sims, on_delete=models.DO_NOTHING, null=True, blank=True)
+    order_sim = models.CharField(max_length=25, null=True, blank=True)
     condition = models.CharField(max_length=15, choices=CONDITION, default='novo-sim')
     tracking = models.CharField(max_length=25, null=True, blank=True)
     celular_samsung = models.BooleanField(default=False)
