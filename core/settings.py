@@ -396,8 +396,8 @@ APITM_TOKEN = str(os.getenv('APITM_TOKEN'))
 APITM_URL = str(os.getenv('APITM_URL'))
 
 # API MS
-APIMS_TOKEN = str(os.getenv('APIMS_TOKEN'))
-APIMS_URL = str(os.getenv('APIMS_URL'))
+APISM_TOKEN = str(os.getenv('APISM_TOKEN'))
+APISM_URL = str(os.getenv('APISM_URL'))
 
 # API VOICE CALLS
 APIVC_KEY = str(os.getenv('APIVC_KEY'))
