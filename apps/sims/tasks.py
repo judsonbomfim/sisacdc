@@ -1714,6 +1714,7 @@ def simAgdOperator():
 
             response = requests.post(url, headers=headers, params=payload) 
             response_data = response.json()
+            logger.info(f'Pedido {order.order_id} - Resposta da AT&T: {response_data}')
             status_now = response_data['status']['name']
             logger.info(f'Pedido {order.order_id} - Status atual na AT&T: {status_now}')
         except requests.exceptions.HTTPError as e:
