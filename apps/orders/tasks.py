@@ -128,8 +128,6 @@ def order_import():
                         continue
                         
                     q_i = 1
-
-                    logger.info(f'---------- Importando pedido {id_ord} - item {item["id"]} - {item_name} - qtd {qtd}')
                         
                     while q_i <= qtd:
                         order_id_i = order['id']
