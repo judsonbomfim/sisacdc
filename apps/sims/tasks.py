@@ -1712,7 +1712,7 @@ def simAgdOperator():
             payload = {
             }               
 
-            response = requests.post(url, headers=headers, params=payload) 
+            response = requests.get(url, headers=headers, params=payload) 
             response_data = response.json()
             logger.info(f'Pedido {order.order_id} - Resposta da AT&T: {response_data}')
             status_now = response_data['status']['name'] if 'status' in response_data and 'name' in response_data['status'] else 'Status desconhecido'
