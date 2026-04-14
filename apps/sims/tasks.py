@@ -1703,17 +1703,28 @@ def simAgdOperator():
         
         logger.info(f'Processando pedido {order.order_id} para consulta de status na AT&T.')
         
-        url = f"{settings.APISM_URL}/api/v1/order/{order_sim}"
-        headers = {
-            "Accept": "application/json",
-            "Authorization": f"Bearer {settings.APISM_TOKEN}",
-        }
-        payload = {
-        }               
+        try:
+            url = f"{settings.APISM_URL}/api/v1/order/{order_sim}"
+            headers = {
+                "Accept": "application/json",
+                "Authorization": f"Bearer {settings.APISM_TOKEN}",
+            }
+            payload = {
+            }               
 
-        response = requests.post(url, headers=headers, params=payload) 
-        response_data = response.json()
-        status_now = response_data['status']['name']
+            response = requests.post(url, headers=headers, params=payload) 
+            response_data = response.json()
+            status_now = response_data['status']['name']
+            logger.info(f'Pedido {order.order_id} - Status atual na AT&T: {status_now}')
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"Erro HTTP ao consultar o status do pedido {order.order_id} na AT&T: {e}")
+            continue
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Erro de conexão ao consultar o status do pedido {order.order_id} na AT&T: {e}")
+            continue
+        except Exception as e:
+            logger.error(f"Erro inesperado ao consultar o status do pedido {order.order_id} na AT&T: {e}", exc_info=True)
+            continue
         
         if status_now == 'completed':
             
