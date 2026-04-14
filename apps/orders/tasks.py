@@ -18,6 +18,11 @@ logger = logging.getLogger(__name__)
 @shared_task
 def order_import():
     logger.info('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS INICIADA')
+
+    def log_data_error(order_id, item_id, field_name, detail):
+        logger.error(
+            f'[order_import] Falha de validação | order_id={order_id} | item_id={item_id} | campo={field_name} | detalhe={detail}'
+        )
     
     # Importar pedidos
     apiStore = ApiStore.conectApiStore()
@@ -60,238 +65,303 @@ def order_import():
     
     # Listar pedidos         
     for order in ord:
-        
-        logger.info(f'---------- Processando pedido {order["id"]}')
-        
-        # Verificar se order é válido (dicionário com ID)
-        if not isinstance(order, dict) or 'id' not in order:
-            logger.info(f"Sem itens para importar")
-            continue
-            
-        n_item = 1
-        id_ord = order["id"]
-                
-        # Verificar pedido repetido - se order_id já existe, pula
-        if Orders.objects.filter(order_id=id_ord).exists():
-            logger.error(f'Pedido {id_ord} já importado, pulando')
-            continue
-        
-        # Listar itens do pedido
-        for item in order['line_items']:
-
-            # Especificar produtos que NÃO serão listados
-            prod_sel = [
-                8901,   # Chamada de Voz
-                44505,  # Franquia Adicional
-                44549,  # Alteração de Frete
-                47058,  # Troca de Chip
-                68666,  # Dia Adicional
-                ]
-            if item['product_id'] in prod_sel:
+        try:
+            # Verificar se order é válido (dicionário com ID)
+            if not isinstance(order, dict) or 'id' not in order:
+                logger.info('Sem itens para importar: payload de pedido inválido')
                 continue
-                        
-            qtd = item['quantity']
-            q_i = 1 
-            
-            logger.info(f'---------- Importando pedido {id_ord} - item {item["id"]} - {item["name"]} - qtd {qtd}')
-                        
-            while q_i <= qtd:
-                order_id_i = order['id']
-                item_id_i = f'{order_id_i}-{n_item}'
-                item_id_store_i = item['id']
-                client_i = f'{order["billing"]["first_name"]} {order["billing"]["last_name"]}'
-                email_i = order['billing']['email']
-                if "140" in item['name']: # Plano Global
-                    product_i = 'chip-internacional-global'
-                else:
-                    product_i = slugify(item['name'])
-                
-                qty_i = 1
-                if order['coupon_lines']:
-                    coupon_i = order['coupon_lines'][0]['code']
-                else: 
-                    coupon_i = '-'
-                
-                # Definir valor padrão para variáveis
-                ord_chip_nun_i = '-'
-                condition_i = 'novo-sim'
-                calls_i = False
-                countries_i = False
-                activation_date_i = '2001-01-01'
-                data_day_i = '1gb'
-                cell_mod_i = False
-                celular_samsung_i = False
-                type_sim_i = 'sim'
-                days_i = '30'
-                shipping_i = 'Sem Frete'
-                
-                # Percorrer itens do pedido
-                for i in item['meta_data']:
-                    if i['key'] == '_tipo_chip':
-                        type_sim_i = i['value']
-                    if i['key'] == '_condicao_chip':
-                        if i['value'] == 'novo':
-                            condition_i = 'novo-sim'
-                    if i['key'] == '_agencia_cadastrada':
-                        condition_i = 'reuso-sim'
-                    if i['key'] == '_numero_sim':
-                        ord_chip_nun_i = i['value']
-                    if i['key'] == 'pa_dados-diarios':
-                        data_day_i = i['value']
-                    if i['key'] == 'pa_dias':
-                        days_i = i['value']
-                    if i['key'] == '_plano_voz':
-                        if i['value'] == '1':
-                            calls_i = True
-                    if i['key'] == '_china_hongkong_taiwan':
-                        countries_i = True if i['display_value'] == 'Sim' else False
-                    if i['key'] == '_data_ativacao':
-                        from datetime import datetime
-                        def data_woo_valida(valor):
-                            try:
-                                datetime.strptime(valor, '%Y-%m-%d')
-                                return True
-                            except (TypeError, ValueError):
-                                return False
-                        valor_data = i['value']
-                        if data_woo_valida(valor_data):
-                            activation_date_i = valor_data
-                        else:
-                            logger.error(f"Data de ativação inválida vinda do WooCommerce: {valor_data}")
-                    if i['key'] == '_celular_samsung':
-                        celular_samsung_i = True
-                
-                shipping_i = order['shipping_lines'][0]['method_title']
-                order_date_i = DateFormats.dateHour(order['date_created'])
-                
-                # Definir status do pedido
-                if 'RETIRADA' in shipping_i.upper():
-                    shipping_i = 'Retirada SP'
-                    order_status_i = 'RT'
-                elif 'Entrega na Agência' in shipping_i:
-                    shipping_i = 'Entr. Agência'
-                    order_status_i = 'AG'
-                elif 'Motoboy' in shipping_i:
-                    order_status_i = 'MB'
-                elif condition_i == 'reuso-sim':
-                    order_status_i = 'RS'
-                elif type_sim_i == 'esim':
-                    order_status_i = 'AS'
-                else:
-                    order_status_i = 'AS'               
-                if activation_date_i == '2001-01-01':
-                    order_status_i = 'EI'
-                
-                
-                if product_i == 'chip-internacional-eua-30-dias':
-                    calls_i = False
-                elif product_i in operPlan.listPlan('OR'):
-                    if product_i == 'chip-internacional-europa-ilimitado':
-                        if days_i <= '12':
-                            data_day_i = '20gb'
-                        else:
-                            data_day_i = '50gb'
-                    elif product_i == 'chip-internacional-europa-franquia-total':
-                        if data_day_i <= '20gb-30-dias':
-                            data_day_i = '20gb'
-                        elif data_day_i == '50gb-30-dias':
-                            data_day_i = '50gb'
-                    else:
-                        data_day_i = 'world'
-                elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim':
-                    if days_i <= '10':
-                        data_day_i = '10-ilimitado'
-                    else:
-                        data_day_i = '30-ilimitado'
-                    order_status_i = 'AA'
-                    simAT = Sims.objects.filter(pk=47282).first()  # SIM genérico para ativação AT
-                    send_email_sims.delay(id=order_id_i)  # Enviar e-mail de ativação para planos AT
-                elif product_i in operPlan.listPlan('TM') and type_sim_i == 'sim':
-                    calls_i = False
-                    
-                shipping_i = shipping_i[:40]
 
-                # USO DE get_or_create - EVITA DUPLICAÇÃO
-                obj, created = Orders.objects.get_or_create(
-                    item_id=item_id_i,
-                    defaults={
-                        'order_id': order_id_i,
-                        'item_id_store': item_id_store_i,
-                        'client': client_i,
-                        'email': email_i,
-                        'product': product_i,
-                        'data_day': data_day_i,
-                        'qty': qty_i,
-                        'coupon': coupon_i,
-                        'condition': condition_i,
-                        'days': days_i,
-                        'calls': calls_i,
-                        'countries': countries_i,
-                        'cell_mod': cell_mod_i,
-                        'ord_chip_nun': ord_chip_nun_i,
-                        'shipping': shipping_i,
-                        'id_sim': simAT if simAT else '',
-                        'order_date': order_date_i,
-                        'activation_date': activation_date_i,
-                        'order_status': order_status_i,
-                        'type_sim': type_sim_i,
-                        'celular_samsung': celular_samsung_i,
-                    }
-                )
-                
-                # SÓ PROCESSA SE FOR NOVO
-                if created:
-                    logger.info(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
-                    
-                    # Save Notes
-                    Notes.objects.create(
-                        id_item=obj,
-                        id_user=None,
-                        note='Pedido importado para o sistema',
-                        type_note='S',
-                    )
-                    
-                    if activation_date_i == '2001-01-01':
-                        Notes.objects.create(
-                            id_item=obj,
-                            id_user=None,
-                            note='Pedido sem data de ativação. Verificar com cliente.',
-                            type_note='S',
-                        )
-                    
-                    # Insert Voice Calls
-                    if calls_i:
-                        VoiceCalls.objects.create(
-                            id_item=obj,
-                            days=days_i,
-                            activation_date=activation_date_i,
-                            call_status='PR'
-                        )
+            logger.info(f'---------- Processando pedido {order["id"]}')
+
+            n_item = 1
+            id_ord = order["id"]
+
+            # Verificar pedido repetido - se order_id já existe, pula
+            if Orders.objects.filter(order_id=id_ord).exists():
+                logger.error(f'Pedido {id_ord} já importado, pulando')
+                continue
+
+            line_items = order.get('line_items')
+            if not isinstance(line_items, list):
+                log_data_error(id_ord, '-', 'line_items', f'tipo inválido: {type(line_items).__name__}')
+                continue
+
+            # Listar itens do pedido
+            for item in line_items:
+                try:
+
+                    if not isinstance(item, dict):
+                        log_data_error(id_ord, '-', 'line_item', f'item inválido: {type(item).__name__}')
+                        continue
+
+                    # Especificar produtos que NÃO serão listados
+                    prod_sel = [
+                        8901,   # Chamada de Voz
+                        44505,  # Franquia Adicional
+                        44549,  # Alteração de Frete
+                        47058,  # Troca de Chip
+                        68666,  # Dia Adicional
+                        ]
+
+                    product_id = item.get('product_id')
+                    if product_id in prod_sel:
+                        continue
+
+                    if item.get('id') is None:
+                        log_data_error(id_ord, '-', 'item.id', 'item sem id')
+                        continue
+
+                    item_name = item.get('name')
+                    if not item_name:
+                        log_data_error(id_ord, item.get('id'), 'item.name', 'nome ausente ou vazio')
+                        continue
+
+                    quantity_raw = item.get('quantity', 0)
+                    try:
+                        qtd = int(quantity_raw)
+                    except (TypeError, ValueError):
+                        log_data_error(id_ord, item.get('id'), 'item.quantity', f'valor inválido: {quantity_raw}')
+                        continue
+
+                    if qtd <= 0:
+                        log_data_error(id_ord, item.get('id'), 'item.quantity', f'quantidade <= 0: {qtd}')
+                        continue
                         
-                        Notes.objects.create(
-                            id_item=obj,
-                            id_user=None,
-                            note='Chamada de Voz Criada',
-                            type_note='S',
-                        )
-                    
-                    # Atualizar site
-                    UpdateStore.upStore(
-                        order_id=order_id_i,
-                        item_id_store=item_id_store_i if item_id_store_i else None, 
-                        _data_ativacao=activation_date_i if activation_date_i else None,
-                        _status=order_status_i if order_status_i else None,
-                        status_g=order_status_i if order_status_i else None,
-                    )
-                    
-                    n_item_total += 1
-                    msg_info.append(f'Pedido {order_id_i} importado com sucesso')
-                else:
-                    logger.info(f'Item já existe: {item_id_i}, pulando')
+                    q_i = 1
+
+                    logger.info(f'---------- Importando pedido {id_ord} - item {item["id"]} - {item_name} - qtd {qtd}')
+                        
+                    while q_i <= qtd:
+                        order_id_i = order['id']
+                        item_id_i = f'{order_id_i}-{n_item}'
+                        item_id_store_i = item['id']
+
+                        billing = order.get('billing') or {}
+                        first_name = billing.get('first_name', '')
+                        last_name = billing.get('last_name', '')
+                        email_i = billing.get('email', '')
+
+                        if not email_i:
+                            log_data_error(order_id_i, item_id_store_i, 'billing.email', 'email ausente')
+                            break
+
+                        client_i = f'{first_name} {last_name}'.strip() or 'Cliente sem nome'
+
+                        if '140' in item_name:  # Plano Global
+                            product_i = 'chip-internacional-global'
+                        else:
+                            product_i = slugify(item_name)
                 
-                # Definir variáveis
-                q_i += 1 
-                n_item += 1
+                        qty_i = 1
+                        coupon_lines = order.get('coupon_lines') or []
+                        if coupon_lines:
+                            coupon_i = coupon_lines[0].get('code', '-')
+                        else:
+                            coupon_i = '-'
+                
+                        # Definir valor padrão para variáveis
+                        ord_chip_nun_i = '-'
+                        condition_i = 'novo-sim'
+                        calls_i = False
+                        countries_i = False
+                        activation_date_i = '2001-01-01'
+                        data_day_i = '1gb'
+                        cell_mod_i = False
+                        celular_samsung_i = False
+                        type_sim_i = 'sim'
+                        days_i = '30'
+                        shipping_i = 'Sem Frete'
+                        simAT = None
+
+                        # Percorrer itens do pedido
+                        meta_data = item.get('meta_data') or []
+                        if not isinstance(meta_data, list):
+                            log_data_error(order_id_i, item_id_store_i, 'meta_data', f'tipo inválido: {type(meta_data).__name__}')
+                            break
+
+                        for i in meta_data:
+                            key = i.get('key')
+                            value = i.get('value')
+
+                            if key == '_tipo_chip':
+                                type_sim_i = value
+                            if key == '_condicao_chip':
+                                if value == 'novo':
+                                    condition_i = 'novo-sim'
+                            if key == '_agencia_cadastrada':
+                                condition_i = 'reuso-sim'
+                            if key == '_numero_sim':
+                                ord_chip_nun_i = value
+                            if key == 'pa_dados-diarios':
+                                data_day_i = value
+                            if key == 'pa_dias':
+                                days_i = value
+                            if key == '_plano_voz':
+                                if value == '1':
+                                    calls_i = True
+                            if key == '_china_hongkong_taiwan':
+                                countries_i = True if i.get('display_value') == 'Sim' else False
+                            if key == '_data_ativacao':
+                                from datetime import datetime
+                                def data_woo_valida(valor):
+                                    try:
+                                        datetime.strptime(valor, '%Y-%m-%d')
+                                        return True
+                                    except (TypeError, ValueError):
+                                        return False
+                                valor_data = value
+                                if data_woo_valida(valor_data):
+                                    activation_date_i = valor_data
+                                else:
+                                    log_data_error(order_id_i, item_id_store_i, '_data_ativacao', f'data inválida: {valor_data}')
+                            if key == '_celular_samsung':
+                                celular_samsung_i = True
+                
+                        shipping_lines = order.get('shipping_lines') or []
+                        if shipping_lines and isinstance(shipping_lines[0], dict):
+                            shipping_i = shipping_lines[0].get('method_title', 'Sem Frete')
+                        order_date_i = DateFormats.dateHour(order['date_created'])
+                
+                        # Definir status do pedido
+                        if 'RETIRADA' in shipping_i.upper():
+                            shipping_i = 'Retirada SP'
+                            order_status_i = 'RT'
+                        elif 'Entrega na Agência' in shipping_i:
+                            shipping_i = 'Entr. Agência'
+                            order_status_i = 'AG'
+                        elif 'Motoboy' in shipping_i:
+                            order_status_i = 'MB'
+                        elif condition_i == 'reuso-sim':
+                            order_status_i = 'RS'
+                        elif type_sim_i == 'esim':
+                            order_status_i = 'AS'
+                        else:
+                            order_status_i = 'AS'
+                        if activation_date_i == '2001-01-01':
+                            order_status_i = 'EI'
+                
+                        if product_i == 'chip-internacional-eua-30-dias':
+                            calls_i = False
+                        elif product_i in operPlan.listPlan('OR'):
+                            if product_i == 'chip-internacional-europa-ilimitado':
+                                if days_i <= '12':
+                                    data_day_i = '20gb'
+                                else:
+                                    data_day_i = '50gb'
+                            elif product_i == 'chip-internacional-europa-franquia-total':
+                                if data_day_i <= '20gb-30-dias':
+                                    data_day_i = '20gb'
+                                elif data_day_i == '50gb-30-dias':
+                                    data_day_i = '50gb'
+                            else:
+                                data_day_i = 'world'
+                        elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim':
+                            if days_i <= '10':
+                                data_day_i = '10-ilimitado'
+                            else:
+                                data_day_i = '30-ilimitado'
+                            order_status_i = 'AA'
+                            simAT = Sims.objects.filter(pk=47282).first()  # SIM genérico para ativação AT
+                            send_email_sims.delay(id=order_id_i)  # Enviar e-mail de ativação para planos AT
+                        elif product_i in operPlan.listPlan('TM') and type_sim_i == 'sim':
+                            calls_i = False
+
+                        shipping_i = shipping_i[:40]
+
+                        # USO DE get_or_create - EVITA DUPLICAÇÃO
+                        defaults_data = {
+                            'order_id': order_id_i,
+                            'item_id_store': item_id_store_i,
+                            'client': client_i,
+                            'email': email_i,
+                            'product': product_i,
+                            'data_day': data_day_i,
+                            'qty': qty_i,
+                            'coupon': coupon_i,
+                            'condition': condition_i,
+                            'days': days_i,
+                            'calls': calls_i,
+                            'countries': countries_i,
+                            'cell_mod': cell_mod_i,
+                            'ord_chip_nun': ord_chip_nun_i,
+                            'shipping': shipping_i,
+                            'order_date': order_date_i,
+                            'activation_date': activation_date_i,
+                            'order_status': order_status_i,
+                            'type_sim': type_sim_i,
+                            'celular_samsung': celular_samsung_i,
+                        }
+                        if simAT:
+                            defaults_data['id_sim'] = simAT
+
+                        obj, created = Orders.objects.get_or_create(
+                            item_id=item_id_i,
+                            defaults=defaults_data,
+                        )
+                
+                        # SÓ PROCESSA SE FOR NOVO
+                        if created:
+                            logger.info(f'>>>>>>>>>> Importando pedido {order_id_i} - item {item_id_i}')
+
+                            # Save Notes
+                            Notes.objects.create(
+                                id_item=obj,
+                                id_user=None,
+                                note='Pedido importado para o sistema',
+                                type_note='S',
+                            )
+
+                            if activation_date_i == '2001-01-01':
+                                Notes.objects.create(
+                                    id_item=obj,
+                                    id_user=None,
+                                    note='Pedido sem data de ativação. Verificar com cliente.',
+                                    type_note='S',
+                                )
+
+                            # Insert Voice Calls
+                            if calls_i:
+                                VoiceCalls.objects.create(
+                                    id_item=obj,
+                                    days=days_i,
+                                    activation_date=activation_date_i,
+                                    call_status='PR'
+                                )
+
+                                Notes.objects.create(
+                                    id_item=obj,
+                                    id_user=None,
+                                    note='Chamada de Voz Criada',
+                                    type_note='S',
+                                )
+
+                            # Atualizar site
+                            UpdateStore.upStore(
+                                order_id=order_id_i,
+                                item_id_store=item_id_store_i if item_id_store_i else None,
+                                _data_ativacao=activation_date_i if activation_date_i else None,
+                                _status=order_status_i if order_status_i else None,
+                                status_g=order_status_i if order_status_i else None,
+                            )
+
+                            n_item_total += 1
+                            msg_info.append(f'Pedido {order_id_i} importado com sucesso')
+                        else:
+                            logger.info(f'Item já existe: {item_id_i}, pulando')
+
+                        # Definir variáveis
+                        q_i += 1
+                        n_item += 1
+
+                except Exception as e:
+                    logger.exception(
+                        f'[order_import] Erro ao processar item | order_id={id_ord} | item_id={item.get("id", "-")} | erro={e}'
+                    )
+                    continue
+
+        except Exception as e:
+            logger.exception(f'[order_import] Erro ao processar pedido | order_id={order.get("id", "-") if isinstance(order, dict) else "-"} | erro={e}')
+            continue
                     
     # Status 
     if n_item_total != 0:
