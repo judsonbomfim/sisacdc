@@ -1602,7 +1602,6 @@ def simActivateAT(id=None):
         orders_to_process = Orders.objects.filter(pk=id)
     
     if not orders_to_process.exists():
-        logger.info('Nenhum pedido encontrado para ativação da AT&T.')
         return
 
     for order in orders_to_process:

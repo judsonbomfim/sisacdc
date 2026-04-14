@@ -61,6 +61,8 @@ def order_import():
     # Listar pedidos         
     for order in ord:
         
+        logger.info(f'---------- Processando pedido {order["id"]}')
+        
         # Verificar se order é válido (dicionário com ID)
         if not isinstance(order, dict) or 'id' not in order:
             logger.info(f"Sem itens para importar")
