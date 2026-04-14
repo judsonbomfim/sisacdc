@@ -1690,9 +1690,7 @@ def simAgdOperator():
         return
     
     for order in orders:
-        
-        logger.info(f'Processando pedido {order.order_id} para consulta de status na AT&T.')
-        
+                
         order_sim = order.order_sim
         order_product = order.product
         type_sim = order.type_sim
@@ -1702,6 +1700,8 @@ def simAgdOperator():
         # Verificar de é AT&T
         if order_product not in operPlan.listPlan(operator):
             continue
+        
+        logger.info(f'Processando pedido {order.order_id} para consulta de status na AT&T.')
         
         url = f"{settings.APISM_URL}/api/v1/order/{order_sim}"
         headers = {
