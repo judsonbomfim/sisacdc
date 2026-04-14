@@ -1742,7 +1742,7 @@ def simAgdOperator():
                     type_sim=type_sim,
                     data=data,
                     operator=operator,
-                    statussim_status='AT',
+                    sim_status='AT',
                 )
                 add_sim.save()
                 
