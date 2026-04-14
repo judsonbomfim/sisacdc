@@ -1628,7 +1628,7 @@ def simActivateAT(id=None):
             
             status_now = response_data['status']['name']
             
-            order_sim = response_data.id
+            order_sim = response_data['id']
             order.order_sim = order_sim
             order.save()
 
