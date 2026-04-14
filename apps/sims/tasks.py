@@ -1686,10 +1686,12 @@ def simAgdOperator():
     orders = Orders.objects.filter(order_status='AO')
     
     if not orders.exists():
-        logger.info('Nenhum pedido encontrado para processamento.')
+        logger.info('---------- Nenhum pedido encontrado para processamento.')
         return
     
     for order in orders:
+        
+        logger.info(f'Processando pedido {order.order_id} para consulta de status na AT&T.')
         
         order_sim = order.order_sim
         order_product = order.product
