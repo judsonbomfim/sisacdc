@@ -119,6 +119,7 @@ def order_import():
                 celular_samsung_i = False
                 type_sim_i = 'sim'
                 days_i = '30'
+                shipping_i = 'Sem Frete'
                 
                 # Percorrer itens do pedido
                 for i in item['meta_data']:
