@@ -191,13 +191,13 @@
                       <a href="{{ url_cdn }}{{ order.id_sim.link }}" target="_blank"><i class="bi bi-qr-code text-primary ps-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Ver QRCode"></i></a>
                       {% if order.id_sim.lpa %}
                         <a href="#"
-                          data-copy-text="{{ link_esim_android }}{{ order.id_sim.lpa|escapejs }}"
+                          data-copy-text="{{ link_esim_android }}{{ order.id_sim.lpa|urlencode }}"
                           data-copy-label="Link Android copiado"
                           onclick="return copyActivationLink(this);">
                           <i class="bi bi-android2 text-dark ps-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Copiar link Android"></i>
                         </a>
                         <a href="#"
-                          data-copy-text="{{ link_esim_ios }}{{ order.id_sim.lpa|escapejs }}"
+                          data-copy-text="{{ link_esim_ios }}{{ order.id_sim.lpa|urlencode }}"
                           data-copy-label="Link iOS copiado"
                           onclick="return copyActivationLink(this);">
                           <i class="bi bi-apple text-dark ps-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="custom-tooltip" data-bs-title="Copiar link iOS"></i>
