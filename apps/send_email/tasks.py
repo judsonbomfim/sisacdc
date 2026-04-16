@@ -70,9 +70,7 @@ def send_email_sims(id=None):
             'countries': countries,
             'link_esim_android': link_esim_android,
             'link_esim_ios': link_esim_ios,
-        }
-        logger.info(f'---------- Enviando e-mail para contexto: {context}...')
-        
+        }        
         try:
             html_content = render_to_string('painel/emails/send_email.html', context)
             text_content = strip_tags(html_content)
