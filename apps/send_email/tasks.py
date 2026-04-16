@@ -23,6 +23,7 @@ def send_email_sims(id=None):
     else:
         try:
             orders_all = Orders.objects.filter(pk=id)
+            logger.info(f'Enviando e-mail para o pedido {id}...')
         except:
             logger.error(f'Pedido {id} não encontrado!')
             return None
@@ -33,24 +34,21 @@ def send_email_sims(id=None):
     
     for order in orders_all:
         id = order.id
-        name = order.client
-        client_email = order.email
-        order_id = order.item_id
-        ord_id = order.order_id
-        order_st = order.order_status
-        try: qrcode = order.id_sim.link
-        except: qrcode = None
-        activation_date = order.activation_date
+        name = order.client if order.client else None
+        client_email = order.email if order.email else None
+        order_id = order.item_id if order.item_id else None
+        ord_id = order.order_id if order.order_id else None
+        order_st = order.order_status if order.order_status else None
+        qrcode = order.id_sim.link if order.id_sim else None
+        activation_date = order.activation_date if order.activation_date else None
         operator = order.id_sim.operator if order.id_sim else None
         product = f'{order.get_product_display()} {order.get_data_day_display() if operator != "OR" else ""}'
-        days = order.days     
-        product_plan = order.get_product_display()
-        try: type_sim = order.id_sim.type_sim
-        except: continue
-        try: sim = order.id_sim.sim
-        except: continue     
-        lpa = order.id_sim.lpa if order.id_sim.lpa else ''
-        countries = order.countries
+        days = order.days if order.days else None
+        product_plan = order.get_product_display() if order.get_product_display() else None
+        type_sim = order.id_sim.type_sim if order.id_sim else None
+        sim = order.id_sim.sim if order.id_sim else None
+        lpa = order.id_sim.lpa if order.id_sim and order.id_sim.lpa else ''
+        countries = order.countries if order.countries else None
         link_esim_android = settings.LINK_ESIM_ANDROID
         link_esim_ios = settings.LINK_ESIM_IOS
         
