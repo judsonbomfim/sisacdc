@@ -54,12 +54,6 @@
                               <td align="center" style="padding:0;margin:0;font-size:0px">
                                 {% if type_sim == 'sim' %}
                                   <img class="adapt-img" src="{{ url_img }}acdc-sim.png" alt style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="260" />
-                                {% elif product_plan == 'USA' or product_plan == 'USA 30 Dias' %}
-                                  {% if not sim %}
-                                    <img class="adapt-img" src="{{ url_img }}acdc-esim.png" alt style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="260" />
-                                  {% else %}
-                                    <img class="adapt-img" src="{{ url_site }}{{ qrcode }}" alt style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="260" />
-                                  {% endif %}
                                 {% else %}
                                   <img class="adapt-img" src="{{ url_site }}{{ qrcode }}" alt style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic" width="260" />
                                 {% endif %}
@@ -180,7 +174,7 @@
                         <td align="left" style="padding:0;margin:0;padding-top:10px;padding-bottom:10px">
                           {% if type_sim == 'esim' %}
                             {% if product_plan == 'USA' or product_plan == 'USA 30 Dias' %}
-                              {% if sim %}
+                              {% if order_st = "AT" %}
                                 {% include 'painel/emails/partials/esim_eua_conf.html' %}
                               {% else %}
                                 {% include 'painel/emails/partials/esim_eua.html' %}

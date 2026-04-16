@@ -59,6 +59,7 @@ def send_email_sims(id=None):
             'url_img': url_img,
             'name': name,
             'order_id': order_id,
+            'order_st': order_st,
             'qrcode': qrcode,
             'activation_date': activation_date,
             'operator': operator,
