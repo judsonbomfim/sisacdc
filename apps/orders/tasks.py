@@ -238,9 +238,7 @@ def order_import():
                         if activation_date_i == '2001-01-01':
                             order_status_i = 'EI'
                 
-                        if product_i == 'chip-internacional-eua-30-dias':
-                            calls_i = False
-                        elif product_i in operPlan.listPlan('OR'):
+                        if product_i in operPlan.listPlan('OR'):
                             if product_i == 'chip-internacional-europa-ilimitado':
                                 if days_i <= '12':
                                     data_day_i = '20gb'
@@ -254,12 +252,14 @@ def order_import():
                             else:
                                 data_day_i = 'world'
                         elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim':
+                            calls_i = False
                             if days_i <= '10':
                                 data_day_i = '10-ilimitado'
                             else:
                                 data_day_i = '30-ilimitado'
                             order_status_i = 'AA'
                             simAT = Sims.objects.filter(pk=47282).first()  # SIM genérico para ativação AT
+                            time.sleep(2)  # Pequena pausa para garantir que o SIM seja atribuído antes de enviar o e-mail
                             send_email_sims.delay(id=order_id_i)  # Enviar e-mail de ativação para planos AT
                         elif product_i in operPlan.listPlan('TM') and type_sim_i == 'sim':
                             calls_i = False
