@@ -71,6 +71,8 @@ def send_email_sims(id=None):
             'link_esim_android': link_esim_android,
             'link_esim_ios': link_esim_ios,
         }
+        logger.info(f'---------- Enviando e-mail para contexto: {context}...')
+        
         html_content = render_to_string('painel/emails/send_email.html', context)
         text_content = strip_tags(html_content)
         if type_sim == 'esim':
