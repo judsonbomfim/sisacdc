@@ -73,24 +73,28 @@ def send_email_sims(id=None):
         }
         logger.info(f'---------- Enviando e-mail para contexto: {context}...')
         
-        html_content = render_to_string('painel/emails/send_email.html', context)
-        text_content = strip_tags(html_content)
-        if type_sim == 'esim':
-            subject = f"Entrega do eSIM PEDIDO #{order_id}"
-        else:
-            subject = f"Informações PEDIDO #{order_id}"
-        email = EmailMultiAlternatives(
-            #subject
-            subject,
-            #content
-            text_content,
-            #from email
-            settings.DEFAULT_FROM_EMAIL,
-            #to
-            [client_email],
-        )
-        email.attach_alternative(html_content, "text/html")
-        email.send()
+        try:
+            html_content = render_to_string('painel/emails/send_email.html', context)
+            text_content = strip_tags(html_content)
+            if type_sim == 'esim':
+                subject = f"Entrega do eSIM PEDIDO #{order_id}"
+            else:
+                subject = f"Informações PEDIDO #{order_id}"
+            email = EmailMultiAlternatives(
+                #subject
+                subject,
+                #content
+                text_content,
+                #from email
+                settings.DEFAULT_FROM_EMAIL,
+                #to
+                [client_email],
+            )
+            email.attach_alternative(html_content, "text/html")
+            email.send()
+        except Exception as e:
+            logger.error(f'Erro ao enviar e-mail para o pedido {id}: {e}')
+            continue
         
         # if order_st != 'CN' or order_st != 'AT':
         # ...
