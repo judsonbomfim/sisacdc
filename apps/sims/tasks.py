@@ -158,7 +158,7 @@ def sims_in_orders():
         logger.info('>>>>>>>>>>>>>>>>>>>>>>> SIMs atribuidos!')
     
 
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def simActivateTC(id=None):
     
     # dia anterior
@@ -335,7 +335,7 @@ def simActivateTC(id=None):
     logger.info('>>>>>>>>>> ATIVAÇÂO TC FINALIZADA')
 
 
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def simActivateTI(id=None):
     
     tz = pytz.timezone(settings.TIME_ZONE)
@@ -504,7 +504,7 @@ def simActivateTI(id=None):
     logger.info('>>>>>>>>>> ATIVAÇÂO TI FINALIZADA')
 
 
-@shared_task
+@shared_task(time_limit=300, soft_time_limit=270)
 def simDeactivateTC(id=None):
 
     logger.info('>>>>>>>>>> DESATIVAÇÃO TC INICIADA')
@@ -615,7 +615,7 @@ def simDeactivateTC(id=None):
     logger.info('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
 
 
-@shared_task
+@shared_task(time_limit=300, soft_time_limit=270)
 def simDeactivateAll(id=None):
 
     logger.info('>>>>>>>>>> DESATIVAÇÃO ALL INICIADA')
@@ -665,7 +665,7 @@ def simDeactivateAll(id=None):
     logger.info('>>>>>>>>>> DESATIVAÇÃO ALL FINALIZADA <<<<<<<<<<')
 
 
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def simActivateTM(id=None):
           
     tz = pytz.timezone(settings.TIME_ZONE)
@@ -801,7 +801,7 @@ def simActivateTM(id=None):
     logger.info('>>>>>>>>>> ATIVAÇÂO TM FINALIZADA')
 
 
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def simActivateOR(id=None):
           
     tz = pytz.timezone(settings.TIME_ZONE)
@@ -840,7 +840,7 @@ def simActivateOR(id=None):
     logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
 
 
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def simActivateCM(id=None):
     
     import base64
@@ -1455,7 +1455,7 @@ def simActivateCM(id=None):
     logger.info('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
 
 
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def simActivateMS(id=None):
     # Timezone UTC+2h
     tz = pytz.timezone("Europe/Madrid")
@@ -1581,7 +1581,7 @@ def simActivateMS(id=None):
     logger.info('Tarefa de ativação de SIMs da Movistar (MS) finalizada.')
     
 
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def simActivateAT(id=None):
     # Timezone UTC+2h
     tz = pytz.timezone("America/Sao_Paulo")
@@ -1679,7 +1679,7 @@ def simActivateAT(id=None):
 
     logger.info('>>>>>>>>>> ATIVAÇÂO AT FINALIZADA')
     
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def simAgdOperator():
     from apps.sims.views.views import upload_file_to_s3
     

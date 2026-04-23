@@ -53,7 +53,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: celery -A core worker --loglevel=info --concurrency=2 --max-tasks-per-child=50
+    command: celery -A core worker --loglevel=info --concurrency=4 --max-tasks-per-child=50
     networks:
       - internal
     environment:

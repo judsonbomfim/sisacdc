@@ -15,7 +15,7 @@ from apps.voice_calls.tasks import number_in_voice
 import logging
 logger = logging.getLogger(__name__)
 
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def order_import():
     logger.info('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS INICIADA')
 
@@ -370,7 +370,7 @@ def order_import():
     logger.info('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA')
 
 
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def order_import_voice():
     # Importar pedidos
     apiStore = ApiStore.conectApiStore()
@@ -564,7 +564,7 @@ def order_import_voice():
         logger.info('>>>>>>>>>>>>>>>>>>>>>>> Pedidos importados com sucesso')
 
 
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def orders_auto():
     order_import.delay()
     time.sleep(10)

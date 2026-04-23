@@ -145,7 +145,7 @@ def number_in_voice():
         #send email
         # send_email_voice.delay(id_vox)
         
-@shared_task
+@shared_task(time_limit=110, soft_time_limit=100)
 def voiceActivate(id=None):
              
     tz = pytz.timezone(settings.TIME_ZONE)
@@ -233,7 +233,7 @@ def voiceActivate(id=None):
                 
     logger.info('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
     
-@shared_task
+@shared_task(time_limit=300, soft_time_limit=270)
 def voiceDesactivate(id=None):
              
     timezone = pytz.timezone(settings.TIME_ZONE)
