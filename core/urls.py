@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -8,7 +9,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from apps.dashboard.views import index, clear_cache
 
+
+def health_check(request):
+    return HttpResponse("ok", status=200)
+
+
 urlpatterns = [
+    path('health/', health_check, name='health_check'),
     path('', index, name='dashboard'),
     path('admin/', admin.site.urls),
     path('pedidos/', include('apps.orders.urls')),

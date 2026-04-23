@@ -14,7 +14,17 @@ echo "Pulando collectstatic (desenvolvimento)..."
 # python manage.py collectstatic --noinput
 
 echo "Iniciando Gunicorn..."
-gunicorn core.wsgi:application --bind 0.0.0.0:8000 --log-level=info --timeout 120 --capture-output --access-logfile - --error-logfile -
+gunicorn core.wsgi:application \
+    --bind 0.0.0.0:8000 \
+    --workers 3 \
+    --worker-class sync \
+    --timeout 120 \
+    --max-requests 500 \
+    --max-requests-jitter 50 \
+    --log-level=info \
+    --capture-output \
+    --access-logfile - \
+    --error-logfile -
 
 # Nota: Celery worker e beat agora rodam em containers dedicados
 # Veja docker-compose.yml: serviços 'celery' e 'celery_beat'

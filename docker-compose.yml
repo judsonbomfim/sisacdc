@@ -16,10 +16,22 @@ services:
       - REDIS_PORT=6379
       - IMAGE_NAME=djangoweb:latest
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     volumes:
       - logs:/djangoweb/logs
       - /home/sprdmntrdr/docker/django/.env:/djangoweb/.env:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=public"
@@ -48,12 +60,17 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
-      - redis
-      - web
+      redis:
+        condition: service_healthy
     volumes:
       - logs:/djangoweb/logs
       - /home/sprdmntrdr/docker/django/.env:/djangoweb/.env:ro
-    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+    restart: unless-stopped
 
   celery_beat:
     container_name: celery_beat
@@ -68,12 +85,17 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
-      - redis
-      - web
+      redis:
+        condition: service_healthy
     volumes:
       - logs:/djangoweb/logs
       - /home/sprdmntrdr/docker/django/.env:/djangoweb/.env:ro
-    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
     
   redis:
     container_name: redis
@@ -82,8 +104,19 @@ services:
       - internal
     volumes:
       - redis-data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis.conf/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
 
 networks:

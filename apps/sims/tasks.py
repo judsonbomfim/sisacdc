@@ -1714,9 +1714,7 @@ def simAgdOperator():
 
             response = requests.get(url, headers=headers, params=payload) 
             response_data = response.json()
-            logger.info(f'Pedido {order.order_id} - Resposta da AT&T: {response_data}')
             status_now = response_data['status']['name'] if 'status' in response_data and 'name' in response_data['status'] else 'Status desconhecido'
-            logger.info(f'Pedido {order.order_id} - Status atual na AT&T: {status_now}')
         except requests.exceptions.HTTPError as e:
             logger.error(f"Erro HTTP ao consultar o status do pedido {order.order_id} na AT&T: {e}")
             continue

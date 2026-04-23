@@ -114,16 +114,8 @@ def number_in_voice():
             if voice_put.call_status not in ('PR', 'SL'):
                 continue
 
-            number_in_use_status = ['AA', 'AT', 'EA', 'ED', 'EE']
-            number_in_use = VoiceCalls.objects.filter(
-                id_number__isnull=False,
-                call_status__in=number_in_use_status
-            ).values_list('id_number_id', flat=True).distinct()
-
             number_s = VoiceNumbers.objects.select_for_update(skip_locked=True).filter(
                 number_status='DS'
-            ).exclude(
-                id__in=number_in_use
             ).order_by('id').first()
 
             if not number_s:
