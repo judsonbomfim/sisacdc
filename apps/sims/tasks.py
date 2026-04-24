@@ -1622,7 +1622,8 @@ def simActivateAT(id=None):
                 "product_id": product_id,
             }               
 
-            response = requests.post(url, headers=headers, data=payload)
+            response = requests.post(url, headers=headers, data=payload, timeout=30)
+            response.raise_for_status()
             response_data = response.json()
             
             status_now = response_data['status']['name']
@@ -1712,7 +1713,8 @@ def simAgdOperator():
             payload = {
             }               
 
-            response = requests.get(url, headers=headers, params=payload) 
+            response = requests.get(url, headers=headers, params=payload, timeout=30)
+            response.raise_for_status()
             response_data = response.json()
             status_now = response_data['status']['name'] if 'status' in response_data and 'name' in response_data['status'] else 'Status desconhecido'
         except requests.exceptions.HTTPError as e:

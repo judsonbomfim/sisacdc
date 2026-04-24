@@ -1,5 +1,3 @@
-# version: '3.8'
-
 services:
   web:
     container_name: djangoapp
@@ -7,27 +5,42 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    init: true
     command: /djangoweb/entrypoint.sh
     networks:
       - public
       - internal
+    env_file:
+      - ${ENV_FILE_PATH:-.env}
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - IMAGE_NAME=djangoweb:latest
+      - WEB_CONCURRENCY=2
+      - GUNICORN_THREADS=2
+      - GUNICORN_TIMEOUT=90
+      - GUNICORN_MAX_REQUESTS=300
+      - GUNICORN_MAX_REQUESTS_JITTER=30
+      - MIGRATE_ON_STARTUP=true
+      - HEALTHCHECK_HOST=${HEALTHCHECK_HOST:-painel.acasadochip.com}
     depends_on:
       redis:
         condition: service_healthy
     volumes:
       - logs:/djangoweb/logs
-      - /home/sprdmntrdr/docker/django/.env:/djangoweb/.env:ro
     logging:
       driver: "json-file"
       options:
         max-size: "20m"
         max-file: "5"
+    cpus: "1.0"
+    mem_limit: 800m
+    mem_reservation: 512m
+    pids_limit: 256
+    oom_score_adj: -500
+    stop_grace_period: 40s
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; req = urllib.request.Request('http://127.0.0.1:8000/health/'); req.add_header('Host', 'painel.acasadochip.com'); urllib.request.urlopen(req, timeout=5)"]
+      test: ["CMD", "python", "-c", "import os, urllib.request; req = urllib.request.Request('http://127.0.0.1:8000/health/'); req.add_header('Host', os.getenv('HEALTHCHECK_HOST', 'painel.acasadochip.com')); urllib.request.urlopen(req, timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -53,9 +66,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: celery -A core worker --loglevel=info --concurrency=4 --max-tasks-per-child=50
+    init: true
+    command: celery -A core worker --loglevel=info --concurrency=2 --prefetch-multiplier=1 --max-tasks-per-child=50 --max-memory-per-child=300000 -Ofair
     networks:
       - internal
+    env_file:
+      - ${ENV_FILE_PATH:-.env}
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -64,12 +80,16 @@ services:
         condition: service_healthy
     volumes:
       - logs:/djangoweb/logs
-      - /home/sprdmntrdr/docker/django/.env:/djangoweb/.env:ro
     logging:
       driver: "json-file"
       options:
         max-size: "20m"
         max-file: "5"
+    cpus: "1.2"
+    mem_limit: 900m
+    mem_reservation: 512m
+    pids_limit: 256
+    oom_score_adj: 500
     restart: unless-stopped
 
   celery_beat:
@@ -78,9 +98,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    init: true
     command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     networks:
       - internal
+    env_file:
+      - ${ENV_FILE_PATH:-.env}
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -89,28 +112,48 @@ services:
         condition: service_healthy
     volumes:
       - logs:/djangoweb/logs
-      - /home/sprdmntrdr/docker/django/.env:/djangoweb/.env:ro
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+    cpus: "0.25"
+    mem_limit: 256m
+    mem_reservation: 128m
+    pids_limit: 64
+    oom_score_adj: 300
     restart: unless-stopped
     
   redis:
     container_name: redis
     image: redis:7.2.4-alpine
+    init: true
     networks:
       - internal
     volumes:
       - redis-data:/data
-      - ./redis.conf/redis.conf:/usr/local/etc/redis/redis.conf
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    command:
+      - redis-server
+      - --appendonly
+      - "no"
+      - --save
+      - ""
+      - --maxmemory
+      - 200mb
+      - --maxmemory-policy
+      - noeviction
+      - --tcp-keepalive
+      - "60"
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+    cpus: "0.5"
+    mem_limit: 256m
+    mem_reservation: 128m
+    pids_limit: 100
+    oom_score_adj: 200
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s

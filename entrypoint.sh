@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -eu
+
 echo "Criando diretório de logs..."
 mkdir -p /djangoweb/logs
 touch /djangoweb/logs/django.log
@@ -7,20 +9,32 @@ touch /djangoweb/logs/celery.log
 touch /djangoweb/logs/api_calls.log
 touch /djangoweb/logs/performance.log
 
-echo "Executando migrações..."
-python manage.py migrate
+if [ "${MIGRATE_ON_STARTUP:-true}" = "true" ]; then
+    echo "Executando migrações..."
+    python manage.py migrate --noinput
+else
+    echo "MIGRATE_ON_STARTUP=false: migrações ignoradas no startup"
+fi
 
 echo "Pulando collectstatic (desenvolvimento)..."
 # python manage.py collectstatic --noinput
 
+WEB_CONCURRENCY="${WEB_CONCURRENCY:-2}"
+GUNICORN_THREADS="${GUNICORN_THREADS:-2}"
+GUNICORN_TIMEOUT="${GUNICORN_TIMEOUT:-90}"
+GUNICORN_MAX_REQUESTS="${GUNICORN_MAX_REQUESTS:-300}"
+GUNICORN_MAX_REQUESTS_JITTER="${GUNICORN_MAX_REQUESTS_JITTER:-30}"
+
 echo "Iniciando Gunicorn..."
-gunicorn core.wsgi:application \
+exec gunicorn core.wsgi:application \
     --bind 0.0.0.0:8000 \
-    --workers 3 \
-    --worker-class sync \
-    --timeout 120 \
-    --max-requests 500 \
-    --max-requests-jitter 50 \
+    --workers "$WEB_CONCURRENCY" \
+    --threads "$GUNICORN_THREADS" \
+    --worker-class gthread \
+    --timeout "$GUNICORN_TIMEOUT" \
+    --graceful-timeout 30 \
+    --max-requests "$GUNICORN_MAX_REQUESTS" \
+    --max-requests-jitter "$GUNICORN_MAX_REQUESTS_JITTER" \
     --log-level=info \
     --capture-output \
     --access-logfile - \
