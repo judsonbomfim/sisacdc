@@ -26,6 +26,7 @@ services:
         condition: service_healthy
     volumes:
       - logs:/djangoweb/logs
+      - ${DJANGO_ENV_PATH:-/home/sprdmntrdr/docker/django/.env}:/djangoweb/.env:ro
     logging:
       driver: "json-file"
       options:
@@ -72,6 +73,7 @@ services:
         condition: service_healthy
     volumes:
       - logs:/djangoweb/logs
+      - ${DJANGO_ENV_PATH:-/home/sprdmntrdr/docker/django/.env}:/djangoweb/.env:ro
     logging:
       driver: "json-file"
       options:
@@ -99,6 +101,7 @@ services:
         condition: service_healthy
     volumes:
       - logs:/djangoweb/logs
+      - ${DJANGO_ENV_PATH:-/home/sprdmntrdr/docker/django/.env}:/djangoweb/.env:ro
     logging:
       driver: "json-file"
       options:
