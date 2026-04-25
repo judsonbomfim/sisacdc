@@ -35,10 +35,6 @@ services:
         max-file: "5"
     cpus: "1.0"
     mem_limit: 800m
-    mem_reservation: 512m
-    pids_limit: 256
-    oom_score_adj: -500
-    stop_grace_period: 40s
     healthcheck:
       test: ["CMD", "python", "-c", "import os, urllib.request; req = urllib.request.Request('http://127.0.0.1:8000/health/'); req.add_header('Host', os.getenv('HEALTHCHECK_HOST', 'painel.acasadochip.com')); urllib.request.urlopen(req, timeout=5)"]
       interval: 30s
@@ -87,9 +83,6 @@ services:
         max-file: "5"
     cpus: "1.2"
     mem_limit: 900m
-    mem_reservation: 512m
-    pids_limit: 256
-    oom_score_adj: 500
     restart: unless-stopped
 
   celery_beat:
@@ -119,9 +112,6 @@ services:
         max-file: "3"
     cpus: "0.25"
     mem_limit: 256m
-    mem_reservation: 128m
-    pids_limit: 64
-    oom_score_adj: 300
     restart: unless-stopped
     
   redis:
@@ -151,9 +141,6 @@ services:
         max-file: "3"
     cpus: "0.5"
     mem_limit: 256m
-    mem_reservation: 128m
-    pids_limit: 100
-    oom_score_adj: 200
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
