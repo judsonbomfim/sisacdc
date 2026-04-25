@@ -10,8 +10,6 @@ services:
     networks:
       - public
       - internal
-    env_file:
-      - ${ENV_FILE_PATH:-.env}
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -66,8 +64,6 @@ services:
     command: celery -A core worker --loglevel=info --concurrency=2 --prefetch-multiplier=1 --max-tasks-per-child=50 --max-memory-per-child=300000 -Ofair
     networks:
       - internal
-    env_file:
-      - ${ENV_FILE_PATH:-.env}
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -95,8 +91,6 @@ services:
     command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     networks:
       - internal
-    env_file:
-      - ${ENV_FILE_PATH:-.env}
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
