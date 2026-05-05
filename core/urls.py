@@ -26,7 +26,6 @@ urlpatterns = [
     path('clear_cache/', clear_cache, name='clear_cache'),
     path('docs/', docs_serve, name='docs_index'),
     path('docs/_static/<path:path>', docs_static, name='docs_static'),
-    path('docs/_sources/<path:path>', docs_static, name='docs_sources'),
     path('docs/<path:path>', docs_serve, name='docs_serve'),
     
     # API URLs
