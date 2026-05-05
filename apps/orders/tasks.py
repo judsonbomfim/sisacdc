@@ -257,7 +257,10 @@ def order_import():
                             order_status_i = 'AS'
                         if activation_date_i == '2001-01-01':
                             order_status_i = 'EI'
-                
+
+                        simOR = None
+                        simAT = None
+
                         if product_i in operPlan.listPlan('OR'):
                             if product_i == 'chip-internacional-europa-ilimitado':
                                 if days_i <= '12':
