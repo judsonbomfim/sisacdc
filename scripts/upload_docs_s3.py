@@ -80,6 +80,26 @@ def upload_docs():
 
     print(f"\nConcluído: {uploaded} arquivos enviados para s3://{AWS_STORAGE_BUCKET_NAME}/{S3_PREFIX}/")
 
+    # Limpar cache Redis para forçar recarga dos novos arquivos
+    try:
+        import django
+        from django.conf import settings as django_settings
+        if not django_settings.configured:
+            django_settings.configure(
+                CACHES={'default': {'BACKEND': 'django.core.cache.backends.redis.RedisCache', 'LOCATION': os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')}},
+                SECRET_KEY='x',
+            )
+        from django.core.cache import cache
+        keys_deleted = 0
+        # Deletar apenas as chaves de docs (prefixo docs_file_)
+        if hasattr(cache, 'delete_pattern'):
+            keys_deleted = cache.delete_pattern('docs_file_*')
+        else:
+            cache.clear()
+        print(f"Cache Redis limpo ({keys_deleted} chaves removidas).")
+    except Exception as e:
+        print(f"Aviso: não foi possível limpar o cache Redis: {e}")
+
 
 if __name__ == '__main__':
     upload_docs()
