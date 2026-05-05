@@ -296,18 +296,22 @@ def clear_cache(request):
 @login_required(login_url='/login/')
 def docs_serve(request, path='index.html'):
     """
-    Serve documentação Sphinx via URLs pré-assinadas do S3 (se configurado)
-    ou diretamente do sistema de arquivos local como fallback.
+    Serve documentação Sphinx mantendo a URL do sistema.
+    Busca os arquivos do S3 como proxy (se configurado) ou do sistema local como fallback.
     """
     import boto3
     import mimetypes
+    from botocore.exceptions import ClientError
 
     # Proteção contra path traversal
     safe_path = os.path.normpath(path).lstrip('/')
     if safe_path.startswith('..'):
         raise Http404
 
-    # ── Modo S3: redireciona para URL pré-assinada (expira em 1h) ──
+    content_type, _ = mimetypes.guess_type(safe_path)
+    content_type = content_type or 'application/octet-stream'
+
+    # ── Modo S3: busca o arquivo e serve como proxy ──
     bucket = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
     aws_key = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
     aws_secret = getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
@@ -320,15 +324,12 @@ def docs_serve(request, path='index.html'):
                 aws_access_key_id=aws_key,
                 aws_secret_access_key=aws_secret,
             )
-            url = s3.generate_presigned_url(
-                'get_object',
-                Params={'Bucket': bucket, 'Key': s3_key},
-                ExpiresIn=3600,
-            )
-            from django.shortcuts import redirect
-            return redirect(url)
-        except Exception:
-            pass  # fallback para arquivos locais
+            obj = s3.get_object(Bucket=bucket, Key=s3_key)
+            return HttpResponse(obj['Body'].read(), content_type=content_type)
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchKey':
+                raise Http404
+            # Outro erro de S3: fallback para arquivo local
 
     # ── Fallback local ──
     docs_root = os.path.join(settings.BASE_DIR, 'docs', 'build', 'html')
@@ -339,9 +340,6 @@ def docs_serve(request, path='index.html'):
 
     if not os.path.isfile(file_path):
         raise Http404
-
-    content_type, _ = mimetypes.guess_type(file_path)
-    content_type = content_type or 'application/octet-stream'
 
     with open(file_path, 'rb') as f:
         return HttpResponse(f.read(), content_type=content_type)
