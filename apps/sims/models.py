@@ -1,3 +1,10 @@
+"""
+Models do app **sims**.
+
+Define o modelo :class:`Sims` que representa o inventário de cartões SIM
+físicos e eSIMs, com suporte a múltiplas operadoras.
+"""
+
 from django.db import models
 
 SIM_STATUS = [
@@ -30,6 +37,23 @@ DATA = [
 ]
 
 class Sims(models.Model):
+    """
+    Representa um cartão SIM físico ou eSIM no inventário.
+
+    Cada instância é um chip único identificado pelo ICCID (campo ``sim``)
+    ou pelo LPA address (campo ``lpa``, para eSIMs).
+
+    Atributos:
+        sim (str): ICCID do SIM físico (número do chip).
+        lpa (str): LPA address do eSIM (ex: ``LPA:1$sm-v4.com$ABC123``). Nulo para SIM físico.
+        link (str): URL do QR code do eSIM após geração.
+        type_sim (str): Tipo — ``sim`` (físico) ou ``esim`` (virtual).
+        data (str): Franquia de dados do plano associado (``20gb`` ou ``50gb``).
+        operator (str): Operadora — ``TC``, ``TI``, ``TM``, ``CM``, ``MS``, ``OR`` ou ``AT``.
+        sim_status (str): Status atual no inventário (ver choices ``SIM_STATUS``).
+        created_at (datetime): Data de cad as tro no sistema.
+        updated_at (datetime): Data da última atualização.
+    """
     id = models.AutoField(primary_key=True, serialize=False)
     sim = models.CharField(max_length=25)
     lpa = models.CharField(max_length=255, null=True, blank=True, )

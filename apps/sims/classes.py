@@ -1,3 +1,17 @@
+"""
+Classes de integração com APIs das operadoras de SIM do app **sims**.
+
+Fornece acesso autenticado às APIs das operadoras internacionais para
+ativação e desativação de SIMs físicos e eSIMs.
+
+Classes:
+    - :class:`ApiTC` — TelCom (TC): ativação com token Bearer + cache Redis.
+    - :class:`ApiTI` — TelCom IMSI (TI): variante IMSI do TelCom.
+    - :class:`ApiCM` — China Mobile (CM): autenticação por assinatura HMAC-SHA256.
+    - :class:`operPlan` — Mapeamento produto → operadora.
+    - :class:`qrcodeChange` — Leitura e geração de QR codes para eSIMs.
+"""
+
 import http.client
 import base64
 import hashlib
@@ -25,6 +39,15 @@ HTTP_TIMEOUT = 10  # segundos
 
 
 class ApiTC:
+    """
+    Cliente HTTP para a API da operadora **TelCom (TC)**.
+
+    Autentica via token Bearer armazenado em cache Redis (chave ``api_tc_token``,
+    timeout de 540 segundos). Todos os métodos são estáticos.
+
+    Credentials: ``settings.APITC_USERNAME`` / ``settings.APITC_PASSWORD``.
+    Host: ``settings.APITC_HTTPCONN``.
+    """
 
     # Get tokem de acesso a API
     @staticmethod
@@ -268,6 +291,14 @@ class ApiTC:
 
 
 class ApiTI:
+    """
+    Cliente HTTP para a API da operadora **TelCom IMSI (TI)**.
+
+    Funciona da mesma forma que :class:`ApiTC`, porém usa credenciais IMSI
+    separadas e armazena o token no cache Redis sob a chave ``api_ti_token``.
+
+    Credentials: ``settings.APITI_USERNAME`` / ``settings.APITI_PASSWORD``.
+    """
 
     # Get tokem de acesso a API
     @staticmethod
@@ -469,6 +500,13 @@ class ApiTI:
 
 
 class ApiCM:
+    """
+    Cliente HTTP para a API da operadora **China Mobile (CM)**.
+
+    Usa autenticação por assinatura HMAC-SHA256 com nonce e timestamp.
+    As credenciais ``app_key`` e ``app_secret`` são lidas das configurações
+    do Django (``settings.APICM_KEY`` e ``settings.APICM_SECRET``).
+    """
         
     app_key = settings.APICM_KEY
     app_secret = settings.APICM_SECRET
@@ -656,6 +694,12 @@ class ApiCM:
         
 
 class operPlan():
+    """
+    Mapeamento de produtos (slugs) para operadoras de SIM.
+
+    Usado para determinar qual operadora deve ativar um dado produto.
+    """
+
     @staticmethod
     def listPlan(operator):
         if operator == 'TI':
@@ -707,6 +751,13 @@ class operPlan():
     
     
 class qrcodeChange():
+    """
+    Utilitários para leitura e geração de QR codes de eSIMs.
+
+    Suporta leitura de QR codes a partir de URLs (HTTP/HTTPS) ou caminhos
+    locais usando OpenCV, e geração de novos QR codes a partir de strings LPA.
+    """
+
     @staticmethod
     def read_qr_code(file_path):
         parsed_url = urlparse(file_path)

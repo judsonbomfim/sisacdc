@@ -1,6 +1,8 @@
-from django.http import HttpResponse
+import os
+from django.http import HttpResponse, Http404
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from apps.sims.models import Sims
 from apps.orders.models import Orders
 from apps.voice_calls.models import VoiceCalls
@@ -289,3 +291,24 @@ def clear_cache(request):
     from django.core.cache import cache
     cache.clear()
     return HttpResponse("Cache cleared")
+
+
+@login_required(login_url='/login/')
+def docs_serve(request, path='index.html'):
+    """Serve arquivos da documentação Sphinx apenas para usuários autenticados."""
+    docs_root = os.path.join(settings.BASE_DIR, 'docs', 'build', 'html')
+    file_path = os.path.normpath(os.path.join(docs_root, path))
+
+    # Proteção contra path traversal
+    if not file_path.startswith(docs_root):
+        raise Http404
+
+    if not os.path.isfile(file_path):
+        raise Http404
+
+    import mimetypes
+    content_type, _ = mimetypes.guess_type(file_path)
+    content_type = content_type or 'application/octet-stream'
+
+    with open(file_path, 'rb') as f:
+        return HttpResponse(f.read(), content_type=content_type)

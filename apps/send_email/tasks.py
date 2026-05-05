@@ -1,3 +1,9 @@
+"""
+Tarefas Celery do app **send_email**.
+
+Envia notificações HTML por e-mail para clientes após ativação de SIM ou voz.
+"""
+
 from urllib import request
 from celery import shared_task
 from django.shortcuts import redirect
@@ -16,7 +22,17 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def send_email_sims(id=None):
-    
+    """
+    Envia e-mail de ativação/desativação de SIM para o cliente.
+
+    Seleciona pedidos com status ``EE`` (Enviar E-mail) ou um pedido específico
+    pelo PK. Renderiza template HTML, envia via SMTP e atualiza o status
+    do pedido para ``CN`` (Conluído) após envio.
+
+    Args:
+        id (int, optional): PK do pedido. Se ``None``, processa todos os pedidos
+            com status ``EE``.
+    """
     orders_all = None
     if id == None:
         orders_all = Orders.objects.filter(order_status='EE')

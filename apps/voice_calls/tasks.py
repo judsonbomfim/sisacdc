@@ -1,3 +1,10 @@
+"""
+Tarefas Celery do app **voice_calls**.
+
+Gerencia atribuição de ramais, atualização de senhas/QR codes e ativação
+de planos de chamadas de voz.
+"""
+
 import http
 import json
 import random
@@ -24,6 +31,13 @@ from apps.send_email.tasks import send_email_voice
 
 @shared_task
 def voices_up_status(voice_id, voice_st):
+    """
+    Atualiza o status de um ou mais registros de :class:`~apps.voice_calls.models.VoiceCalls`.
+
+    Args:
+        voice_id (int | list[int]): PK ou lista de PKs dos registros a atualizar.
+        voice_st (str): Novo código de status (ver choices ``VOICE_STATUS``).
+    """
     # Accept single id or list of ids
     ids = voice_id if isinstance(voice_id, (list, tuple)) else [voice_id]
     for v_id in ids:
@@ -31,7 +45,13 @@ def voices_up_status(voice_id, voice_st):
 
 @shared_task
 def number_up_status(number_id, number_st):
-       
+    """
+    Atualiza o status de números de voz e envia e-mail se necessário.
+
+    Args:
+        number_id (list[int]): Lista de PKs de :class:`~apps.voice_calls.models.VoiceNumbers`.
+        number_st (str): Novo código de status. Se ``'AT'``, enfileira envio de e-mail.
+    """
     for num_id in number_id:
        
         # Save status System
@@ -46,7 +66,12 @@ def number_up_status(number_id, number_st):
   
 @shared_task
 def update_password(number_id):
-    
+    """
+    Gera nova senha e QR code para ramais de voz e faz upload para o S3.
+
+    Args:
+        number_id (list[int]): Lista de PKs de :class:`~apps.voice_calls.models.VoiceNumbers`.
+    """
     for num_id in number_id:
         
         number = VoiceNumbers.objects.get(pk=num_id)
@@ -94,7 +119,13 @@ def update_password(number_id):
 
 @shared_task
 def number_in_voice():
-    
+    """
+    Atribui um número de voz disponível a planos de voz pendentes (status ``PR`` ou ``SL``).
+
+    Seleciona planos com data de ativação até 3 dias no futuro, usa
+    ``select_for_update`` para evitar condições de corrida e atualiza
+    o status para ``AA`` (Agd. Ativação) após atribuição.
+    """
     send_date = datetime.now().date() + timedelta(days=3)
 
     # Select Voice Calls

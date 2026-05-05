@@ -24,7 +24,16 @@ MAX_ORDERS_PER_RUN = 50
 
 @shared_task(time_limit=300, soft_time_limit=240)
 def sims_in_orders():
-    
+    """
+    Atribui um SIM disponível a cada pedido com status ``AS`` (Atribuir SIM).
+
+    Para cada pedido: determina a operadora pelo produto/tipo de SIM, seleciona
+    o primeiro SIM disponível (``DS``) do inventário, associa ao pedido e atualiza
+    o status para ``AA`` (Agd. Ativação). Sincroniza o ICCID na loja WooCommerce.
+    Processa no máximo ``MAX_ORDERS_PER_RUN`` pedidos por execução.
+
+    Limites: ``soft_time_limit=240s``, ``time_limit=300s``.
+    """
     orders = Orders.objects.filter(order_status='AS')[:MAX_ORDERS_PER_RUN]
     total_count = Orders.objects.filter(order_status='AS').count()
     
@@ -160,7 +169,20 @@ def sims_in_orders():
 
 @shared_task(time_limit=110, soft_time_limit=100)
 def simActivateTC(id=None):
-    
+    """
+    Ativa SIMs da operadora **TelCom (TC)** para pedidos com status ``AA``.
+
+    Args:
+        id (int, optional): PK do pedido a ativar. Se ``None``, processa todos
+            os pedidos com status ``AA``, operadora ``TC`` e data de ativação
+            até amanhã.
+
+    Fluxo: obtém token (cache Redis 540s) → busca endpointId pelo ICCID →
+    troca de plano → ativa/reativa o SIM → atualiza status para ``AT`` →
+    enfileira ``send_email_sims``.
+
+    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
+    """
     # dia anterior
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
@@ -337,7 +359,17 @@ def simActivateTC(id=None):
 
 @shared_task(time_limit=110, soft_time_limit=100)
 def simActivateTI(id=None):
-    
+    """
+    Ativa SIMs da operadora **TelCom IMSI (TI)** para pedidos com status ``AA``.
+
+    Funcionamento idêntico a :func:`simActivateTC`, porém usando credenciais
+    e endpoints IMSI separados para planos com perfis IMSI específicos.
+
+    Args:
+        id (int, optional): PK do pedido a ativar. Se ``None``, processa em lote.
+
+    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
+    """
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
@@ -506,7 +538,17 @@ def simActivateTI(id=None):
 
 @shared_task(time_limit=300, soft_time_limit=270)
 def simDeactivateTC(id=None):
+    """
+    Desativa SIMs das operadoras **TelCom (TC)** e **TelCom IMSI (TI)** com plano expirado.
 
+    Executada diariamente às 00:00. Seleciona pedidos com status ``AT`` e
+    data de ativação vencida (activation_date + days <= ontem).
+
+    Args:
+        id (int, optional): PK do pedido a desativar. Se ``None``, processa em lote.
+
+    Limites: ``soft_time_limit=270s``, ``time_limit=300s``.
+    """
     logger.info('>>>>>>>>>> DESATIVAÇÃO TC INICIADA')
     
     timezone = pytz.timezone(settings.TIME_ZONE)
@@ -617,7 +659,17 @@ def simDeactivateTC(id=None):
 
 @shared_task(time_limit=300, soft_time_limit=270)
 def simDeactivateAll(id=None):
+    """
+    Desativa SIMs de **todas as operadoras exceto TC/TI** com plano expirado.
 
+    Executada diariamente às 00:00. Seleciona pedidos com status ``AT`` de
+    operadoras como TM, CM, MS, OR e AT.
+
+    Args:
+        id (int, optional): PK do pedido a desativar. Se ``None``, processa em lote.
+
+    Limites: ``soft_time_limit=270s``, ``time_limit=300s``.
+    """
     logger.info('>>>>>>>>>> DESATIVAÇÃO ALL INICIADA')
     
     timezone = pytz.timezone(settings.TIME_ZONE)
@@ -667,7 +719,15 @@ def simDeactivateAll(id=None):
 
 @shared_task(time_limit=110, soft_time_limit=100)
 def simActivateTM(id=None):
-          
+    """
+    Ativa SIMs da operadora **T-Mobile (TM)** para pedidos com status ``AA``.
+
+    Args:
+        id (int, optional): PK do pedido a ativar. Se ``None``, processa todos
+            os pedidos com status ``AA`` e operadora ``TM``.
+
+    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
+    """
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
@@ -803,7 +863,15 @@ def simActivateTM(id=None):
 
 @shared_task(time_limit=110, soft_time_limit=100)
 def simActivateOR(id=None):
-          
+    """
+    Ativa SIMs da operadora **Orange (OR)** para pedidos com status ``AA``.
+
+    Args:
+        id (int, optional): PK do pedido a ativar. Se ``None``, processa todos
+            os pedidos com status ``AA`` e operadora ``OR`` com data <= hoje.
+
+    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
+    """
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
 
@@ -842,7 +910,17 @@ def simActivateOR(id=None):
 
 @shared_task(time_limit=110, soft_time_limit=100)
 def simActivateCM(id=None):
-    
+    """
+    Ativa SIMs da operadora **China Mobile (CM)** para pedidos com status ``AA``.
+
+    Usa autenticação por assinatura HMAC-SHA256 (chave/secret) armazenada
+    nas configurações do Django.
+
+    Args:
+        id (int, optional): PK do pedido a ativar. Se ``None``, processa em lote.
+
+    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
+    """
     import base64
     import hashlib
     import json
@@ -1457,6 +1535,14 @@ def simActivateCM(id=None):
 
 @shared_task(time_limit=110, soft_time_limit=100)
 def simActivateMS(id=None):
+    """
+    Ativa SIMs da operadora **MoviStar (MS)** para pedidos com status ``AA``.
+
+    Args:
+        id (int, optional): PK do pedido a ativar. Se ``None``, processa em lote.
+
+    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
+    """
     # Timezone UTC+2h
     tz = pytz.timezone("Europe/Madrid")
     today = datetime.now(tz).date()
@@ -1583,6 +1669,16 @@ def simActivateMS(id=None):
 
 @shared_task(time_limit=110, soft_time_limit=100)
 def simActivateAT(id=None):
+    """
+    Ativa eSIMs da operadora **AT&T (AT)** para pedidos com status ``AA``.
+
+    Usado para eSIMs de clientes com celular Samsung ou compatível com AT&T.
+
+    Args:
+        id (int, optional): PK do pedido a ativar. Se ``None``, processa em lote.
+
+    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
+    """
     # Timezone UTC+2h
     tz = pytz.timezone("America/Sao_Paulo")
     today = datetime.now(tz).date()

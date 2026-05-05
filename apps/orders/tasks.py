@@ -1,3 +1,10 @@
+"""
+Tarefas Celery do app **orders**.
+
+Contém as tarefas periódicas para importação de pedidos, orquestração
+do ciclo de vida (atribuição de SIM, e-mail) e automação geral.
+"""
+
 from django.contrib.auth.models import User
 from celery import shared_task
 from django.utils.text import slugify
@@ -17,7 +24,20 @@ logger = logging.getLogger(__name__)
 
 @shared_task(time_limit=110, soft_time_limit=100)
 def order_import():
-    logger.info('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS INICIADA')
+    """
+    Importa pedidos com status ``processing`` da API WooCommerce.
+
+    Executada pelo Celery Beat a cada 2 minutos. Para cada pedido encontrado:
+
+    1. Valida se já existe no banco (``order_id``).
+    2. Mapeia os campos da API para o modelo :class:`~apps.orders.models.Orders`.
+    3. Persiste o pedido com status ``PR`` (Processando).
+    4. Define o status inicial correto (``AS``, ``AE``, ``PV``, etc.).
+
+    Erros de validação de campo são registrados via logger sem interromper o loop.
+
+    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
+    """
 
     def log_data_error(order_id, item_id, field_name, detail):
         logger.error(

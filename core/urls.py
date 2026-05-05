@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import (
 )
 from django.conf import settings
 from django.conf.urls.static import static
-from apps.dashboard.views import index, clear_cache
+from apps.dashboard.views import index, clear_cache, docs_serve
 
 
 def health_check(request):
@@ -24,6 +24,8 @@ urlpatterns = [
     path('email/', include('apps.send_email.urls')),
     path('voz/', include('apps.voice_calls.urls')),
     path('clear_cache/', clear_cache, name='clear_cache'),
+    path('docs/', docs_serve, name='docs_index'),
+    path('docs/<path:path>', docs_serve, name='docs_serve'),
     
     # API URLs
     path('api/', include('rest_framework.urls')),  # Interface de navegação do DRF (opcional)

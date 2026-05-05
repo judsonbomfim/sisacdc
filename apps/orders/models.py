@@ -1,3 +1,10 @@
+"""
+Models do app **orders**.
+
+Define os modelos principais de pedidos (:class:`Orders`) e notas (:class:`Notes`),
+bem como as listas de escolhas (choices) usadas nesses modelos.
+"""
+
 from django.db import models
 from django.contrib.auth.models import User
 from apps.sims.models import Sims
@@ -86,6 +93,41 @@ CONDITION = [
 ]
 
 class Orders(models.Model):
+    """
+    Representa um pedido importado do e-commerce (WooCommerce).
+
+    Cada instância corresponde a um item de pedido (``item_id``) e rastreia
+    todo o ciclo de vida — desde a importação (``PR``) até a conclusão (``CN``)
+    ou cancelamento (``CC``).
+
+    Atributos:
+        order_id (int): ID do pedido no WooCommerce.
+        item_id (str): ID único do item no pedido (índice principal).
+        item_id_store (str): ID interno do item na loja (para atualizações via API).
+        client (str): Nome completo do cliente.
+        email (str): E-mail do cliente para notificações.
+        product (str): Slug do produto (ver choices ``PRODUCT``).
+        data_day (str): Franquia de dados do plano (ver choices ``DATA``).
+        qty (int): Quantidade de itens no pedido.
+        coupon (str): Código de cupom aplicado.
+        days (int): Duração do plano em dias.
+        calls (bool): Se o plano inclui chamadas de voz.
+        countries (bool): Se o produto cobre múltiplos países.
+        cell_mod (str): Modelo do celular do cliente (para compatibilidade eSIM).
+        cell_imei (str): IMEI do celular (eSIM).
+        cell_eid (str): EID do celular (eSIM).
+        ord_chip_nun (str): Número de SIM para reuso (condição ``reuso-sim``).
+        shipping (str): Método de envio selecionado.
+        order_date (datetime): Data do pedido no e-commerce.
+        activation_date (date): Data de ativação desejada pelo cliente.
+        order_status (str): Status atual do pedido (ver choices ``ORDER_STATUS``).
+        type_sim (str): Tipo de SIM — ``sim`` (físico) ou ``esim`` (virtual).
+        id_sim (Sims): FK para o SIM atribuído ao pedido.
+        order_sim (str): ICCID/SIM reservado manualmente.
+        condition (str): Condição do SIM — ``novo-sim`` ou ``reuso-sim``.
+        tracking (str): Código de rastreamento do envio físico.
+        celular_samsung (bool): Indica se o celular é Samsung (impacta ativação eSIM).
+    """
     id = models.AutoField(primary_key=True)
     order_id = models.IntegerField()
     item_id = models.CharField(max_length=64, unique=True, db_index=True)
@@ -129,6 +171,19 @@ TYPE_NOTE = [
 ]
 
 class Notes(models.Model):
+    """
+    Notas internas associadas a um pedido.
+
+    Usadas para registrar eventos do sistema (tipo ``S``) e observações
+    privadas de operadores (tipo ``P``).
+
+    Atributos:
+        id_item (Orders): FK para o pedido ao qual a nota pertence.
+        id_user (User): FK para o usuário que criou a nota (nulo se for do sistema).
+        note (str): Conteúdo da nota.
+        type_note (str): Tipo — ``S`` (Sistema) ou ``P`` (Privada).
+        created_at (datetime): Data/hora de criação.
+    """
     id = models.AutoField(primary_key=True)
     id_item = models.ForeignKey(Orders, on_delete=models.DO_NOTHING, related_name='order_notes', default=None)
     id_user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='user_notes', default=None, null=True, blank=True)
