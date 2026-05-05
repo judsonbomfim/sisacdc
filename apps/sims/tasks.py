@@ -896,7 +896,7 @@ def simActivateOR(id=None):
         order_id = order.order_id
         
         # ORANGE: Ativação automática para eSIM específico
-        if order.id_sim.type_sim == 'esim' and order.data_day == 'world' and order.id_sim == 48138:  # SIM específico para ativação automática OR
+        if order.id_sim.type_sim == 'esim' and order.data_day == 'world' and order.id_sim_id == 48138:  # SIM específico para ativação automática OR
             sim_ds = Sims.objects.all().order_by('id').filter(operator='OR', type_sim='esim', sim_status='DS', data='world').first()
             sim_put = Sims.objects.get(pk=sim_ds.id)
             sim_put.sim_status = 'AT'
@@ -906,10 +906,11 @@ def simActivateOR(id=None):
             
             order_put = Orders.objects.get(pk=order.id)
             order_put.id_sim_id = sim_ds.id            
-            order_put.order_status = 'AT'
             order_put.save()
             
             send_email_sims.delay(order.id)
+            
+            logger.info(f'Ativação automática OR para o pedido {order.order_id} com SIM {sim_ds.sim}')
 
         
         # Alterar status
