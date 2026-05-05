@@ -62,15 +62,17 @@ def upload_docs():
         content_type = content_type or 'application/octet-stream'
 
         try:
+            # Assets estáticos (_static/, _sources/) são públicos via CloudFront
+            is_static = relative.parts[0] in ('_static', '_sources')
+            extra_args = {
+                'ContentType': content_type,
+                'CacheControl': 'public, max-age=86400' if is_static else 'no-cache',
+            }
             s3.upload_file(
                 str(file_path),
                 AWS_STORAGE_BUCKET_NAME,
                 s3_key,
-                ExtraArgs={
-                    'ContentType': content_type,
-                    'CacheControl': 'max-age=3600',
-                    # Sem ACL 'public-read' — acesso só via URLs pré-assinadas
-                },
+                ExtraArgs=extra_args,
             )
             uploaded += 1
             print(f"[{uploaded}/{total}] {s3_key}")

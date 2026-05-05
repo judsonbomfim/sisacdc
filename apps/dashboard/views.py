@@ -293,15 +293,48 @@ def clear_cache(request):
     return HttpResponse("Cache cleared")
 
 
+def docs_static(request, path):
+    """
+    Redireciona assets estáticos da documentação (_static/, _sources/)
+    direto para o CloudFront — sem passar pelo Django em cada request.
+    CSS, JS e fontes são cacheados pelo browser após o primeiro acesso.
+    """
+    from django.shortcuts import redirect
+
+    safe_path = os.path.normpath(path).lstrip('/')
+    if safe_path.startswith('..'):
+        raise Http404
+
+    cdn = getattr(settings, 'AWS_S3_CUSTOM_DOMAIN', None)
+    if cdn:
+        url = f"https://{cdn}/docs/{safe_path}"
+        response = redirect(url)
+        # Browser cacheia por 1 dia (assets raramente mudam)
+        response['Cache-Control'] = 'public, max-age=86400'
+        return response
+
+    # Fallback local se CDN não estiver configurado
+    docs_root = os.path.join(settings.BASE_DIR, 'docs', 'build', 'html')
+    file_path = os.path.normpath(os.path.join(docs_root, safe_path))
+    if not file_path.startswith(docs_root) or not os.path.isfile(file_path):
+        raise Http404
+    import mimetypes
+    content_type, _ = mimetypes.guess_type(file_path)
+    with open(file_path, 'rb') as f:
+        resp = HttpResponse(f.read(), content_type=content_type or 'application/octet-stream')
+    resp['Cache-Control'] = 'public, max-age=86400'
+    return resp
+
+
 @login_required(login_url='/login/')
 def docs_serve(request, path='index.html'):
     """
-    Serve documentação Sphinx mantendo a URL do sistema.
-    Arquivos são cacheados no Redis após a primeira busca no S3.
+    Serve páginas HTML da documentação para usuários autenticados.
+    Assets (_static/) são servidos pelo CloudFront via docs_static.
     """
-    import boto3
     import mimetypes
     from django.core.cache import cache
+    import boto3
     from botocore.exceptions import ClientError
 
     # Proteção contra path traversal
@@ -310,16 +343,18 @@ def docs_serve(request, path='index.html'):
         raise Http404
 
     content_type, _ = mimetypes.guess_type(safe_path)
-    content_type = content_type or 'application/octet-stream'
+    content_type = content_type or 'text/html; charset=utf-8'
 
-    cache_key = f"docs_file_{safe_path.replace('/', '_')}"
+    cache_key = f"docs_html_{safe_path.replace('/', '_')}"
 
-    # ── Tentar servir do cache Redis ──
+    # ── Cache Redis para HTML (evita chamada S3 repetida) ──
     cached = cache.get(cache_key)
     if cached is not None:
-        return HttpResponse(cached, content_type=content_type)
+        resp = HttpResponse(cached, content_type=content_type)
+        resp['Cache-Control'] = 'private, no-store'
+        return resp
 
-    # ── Buscar do S3 e cachear ──
+    # ── Buscar do S3 ──
     bucket = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
     aws_key = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
     aws_secret = getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
@@ -327,16 +362,13 @@ def docs_serve(request, path='index.html'):
     if bucket and aws_key and aws_key != 'dummy':
         s3_key = f"docs/{safe_path}"
         try:
-            s3 = boto3.client(
-                's3',
-                aws_access_key_id=aws_key,
-                aws_secret_access_key=aws_secret,
-            )
+            s3 = boto3.client('s3', aws_access_key_id=aws_key, aws_secret_access_key=aws_secret)
             obj = s3.get_object(Bucket=bucket, Key=s3_key)
             content = obj['Body'].read()
-            # Cachear por 24h — invalidado ao rodar upload_docs_s3.py
             cache.set(cache_key, content, timeout=86400)
-            return HttpResponse(content, content_type=content_type)
+            resp = HttpResponse(content, content_type=content_type)
+            resp['Cache-Control'] = 'private, no-store'
+            return resp
         except ClientError as e:
             if e.response['Error']['Code'] == 'NoSuchKey':
                 raise Http404
@@ -344,14 +376,11 @@ def docs_serve(request, path='index.html'):
     # ── Fallback local ──
     docs_root = os.path.join(settings.BASE_DIR, 'docs', 'build', 'html')
     file_path = os.path.normpath(os.path.join(docs_root, safe_path))
-
-    if not file_path.startswith(docs_root):
+    if not file_path.startswith(docs_root) or not os.path.isfile(file_path):
         raise Http404
-
-    if not os.path.isfile(file_path):
-        raise Http404
-
     with open(file_path, 'rb') as f:
         content = f.read()
     cache.set(cache_key, content, timeout=86400)
-    return HttpResponse(content, content_type=content_type)
+    resp = HttpResponse(content, content_type=content_type)
+    resp['Cache-Control'] = 'private, no-store'
+    return resp
