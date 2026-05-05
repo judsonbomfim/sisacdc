@@ -275,6 +275,7 @@ def order_import():
                                 simOR = Sims.objects.filter(pk=48138).first()  # SIM genérico para ativação OR
                                 time.sleep(2)  # Pequena pausa para garantir que o SIM seja atribuído antes de enviar o e-mail
                                 send_email_sims.delay(id=order_id_i)  # Enviar e-mail de ativação para planos AT
+                                logger.info(f'Plano OR detectado, atribuindo SIM genérico e enviando e-mail de ativação para pedido {order_id_i}')
 
                         elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim':
                             calls_i = False
