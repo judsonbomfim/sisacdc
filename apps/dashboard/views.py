@@ -332,11 +332,10 @@ def docs_static(request, path):
             resp = HttpResponse(content, content_type=content_type)
             resp['Cache-Control'] = 'public, max-age=86400'
             return resp
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'NoSuchKey':
-                raise Http404
+        except ClientError:
+            pass  # S3 indisponível ou arquivo ausente — usa fallback local
 
-    # Fallback local
+    # Fallback local (arquivos commitados no git)
     docs_root = os.path.join(settings.BASE_DIR, 'docs', 'build', 'html', '_static')
     file_path = os.path.normpath(os.path.join(docs_root, safe_path))
     if not file_path.startswith(docs_root) or not os.path.isfile(file_path):
@@ -392,11 +391,10 @@ def docs_serve(request, path='index.html'):
             resp = HttpResponse(content, content_type=content_type)
             resp['Cache-Control'] = 'private, no-store'
             return resp
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'NoSuchKey':
-                raise Http404
+        except ClientError:
+            pass  # S3 indisponível ou arquivo ausente — usa fallback local
 
-    # ── Fallback local ──
+    # Fallback local (arquivos commitados no git)
     docs_root = os.path.join(settings.BASE_DIR, 'docs', 'build', 'html')
     file_path = os.path.normpath(os.path.join(docs_root, safe_path))
     if not file_path.startswith(docs_root) or not os.path.isfile(file_path):
