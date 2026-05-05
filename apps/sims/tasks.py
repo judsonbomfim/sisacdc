@@ -893,6 +893,23 @@ def simActivateOR(id=None):
         id_item = order.id
         order_id = order.order_id
         
+        # ORANGE: Ativação automática para eSIM específico
+        if order.id_sim.type_sim == 'esim' and order.data_day == 'world' and order.id_sim == 48138:  # SIM específico para ativação automática OR
+            sim_ds = Sims.objects.all().order_by('id').filter(operator='OR', type_sim='esim', sim_status='DS', data='world').first()
+            sim_put = Sims.objects.get(pk=sim_ds.id)
+            sim_put.sim_status = 'AT'
+            sim_put.save()
+            
+            time.sleep(1)
+            
+            order_put = Orders.objects.get(pk=order.id)
+            order_put.id_sim_id = sim_ds.id            
+            order_put.order_status = 'AT'
+            order_put.save()
+            
+            send_email_sims.delay(order.id)
+
+        
         # Alterar status
         UpdateOrder.upStatus(id_item,'AT')
         UpdateStore.upStore(
@@ -1775,6 +1792,7 @@ def simActivateAT(id=None):
             NotesAdd.addNote(order, f"Ocorreu um erro interno no sistema ao tentar ativar o SIM {order.id_sim.sim}: {e}")
 
     logger.info('>>>>>>>>>> ATIVAÇÂO AT FINALIZADA')
+    
     
 @shared_task(time_limit=110, soft_time_limit=100)
 def simAgdOperator():

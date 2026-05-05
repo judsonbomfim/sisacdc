@@ -271,6 +271,11 @@ def order_import():
                                     data_day_i = '50gb'
                             else:
                                 data_day_i = 'world'
+                                order_status_i = 'AA'
+                                simOR = Sims.objects.filter(pk=48138).first()  # SIM genérico para ativação OR
+                                time.sleep(2)  # Pequena pausa para garantir que o SIM seja atribuído antes de enviar o e-mail
+                                send_email_sims.delay(id=order_id_i)  # Enviar e-mail de ativação para planos AT
+
                         elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim':
                             calls_i = False
                             if days_i <= '10':
@@ -311,6 +316,8 @@ def order_import():
                         }
                         if simAT:
                             defaults_data['id_sim'] = simAT
+                        if simOR:
+                            defaults_data['id_sim'] = simOR
 
                         obj, created = Orders.objects.get_or_create(
                             item_id=item_id_i,
