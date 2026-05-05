@@ -888,6 +888,8 @@ def simActivateOR(id=None):
         return
            
     for order in orders_all:
+        
+        logger.info(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order.order_id}')
                         
         order = Orders.objects.get(pk=order.id)
         id_item = order.id
