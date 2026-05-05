@@ -19,6 +19,9 @@ fi
 echo "Pulando collectstatic (desenvolvimento)..."
 # python manage.py collectstatic --noinput
 
+echo "Sincronizando documentação com S3..."
+python scripts/upload_docs_s3.py || echo "Aviso: upload da documentação falhou (continuando inicialização)"
+
 WEB_CONCURRENCY="${WEB_CONCURRENCY:-2}"
 GUNICORN_THREADS="${GUNICORN_THREADS:-2}"
 GUNICORN_TIMEOUT="${GUNICORN_TIMEOUT:-90}"
