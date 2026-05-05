@@ -91,7 +91,7 @@ def order_import():
                 logger.info('Sem itens para importar: payload de pedido inválido')
                 continue
 
-            logger.info(f'---------- Processando pedido {order["id"]}')
+            logger.info(f'---------- Importando pedido {order["id"]}')
 
             n_item = 1
             id_ord = order["id"]

@@ -50,7 +50,6 @@ def sims_in_orders():
     for ord in orders:
         
         id_id_i = ord.id
-        logger.info(f'Processando pedido {id_id_i}')
         order_id_i = ord.order_id
         product_i = ord.product
         condition_i = ord.condition
@@ -888,9 +887,7 @@ def simActivateOR(id=None):
         return
            
     for order in orders_all:
-        
-        logger.info(f'>>>>>>>>>>>>>>>>>>>>> Ativando {order.order_id}')
-                        
+                                
         order = Orders.objects.get(pk=order.id)
         id_item = order.id
         order_id = order.order_id
@@ -909,9 +906,7 @@ def simActivateOR(id=None):
             order_put.save()
             
             send_email_sims.delay(order.id)
-            
-            logger.info(f'Ativação automática OR para o pedido {order.order_id} com SIM {sim_ds.sim}')
-
+        
         
         # Alterar status
         UpdateOrder.upStatus(id_item,'AT')
