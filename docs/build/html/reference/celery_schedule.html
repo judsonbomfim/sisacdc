@@ -1,0 +1,601 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="pt-BR" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda Celery Beat &mdash; Documentação SISACDC 1.0</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=05d536ce"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/translations.js?v=71a39b36"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Índice" href="../genindex.html" />
+    <link rel="search" title="Buscar" href="../search.html" />
+    <link rel="prev" title="Roles e Permissões" href="roles.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SISACDC
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Pesquisar documentos" aria-label="Pesquisar documentos" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Menu de navegação">
+              <p class="caption" role="heading"><span class="caption-text">Visão Geral</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Visão Geral do Sistema</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#funcionalidades-principais">Funcionalidades Principais</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#stack-tecnologico">Stack Tecnológico</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#fluxo-geral-do-sistema">Fluxo Geral do Sistema</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview.html#operadoras-suportadas">Operadoras Suportadas</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../architecture.html">Arquitetura</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html#estrutura-de-apps-django">Estrutura de Apps Django</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html#diagrama-de-dependencias-entre-apps">Diagrama de Dependências entre Apps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html#integracao-com-servicos-externos">Integração com Serviços Externos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html#agenda-celery-beat">Agenda Celery Beat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html#cache-de-tokens-de-api">Cache de Tokens de API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture.html#banco-de-dados">Banco de Dados</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Configuração e Execução</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../setup.html#pre-requisitos">Pré-requisitos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../setup.html#variaveis-de-ambiente">Variáveis de Ambiente</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../setup.html#execucao-via-docker-recomendado">Execução via Docker (Recomendado)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../setup.html#execucao-manual-desenvolvimento">Execução Manual (Desenvolvimento)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../setup.html#comandos-uteis">Comandos Úteis</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Módulos do Sistema</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/orders.html">App: Orders — Pedidos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/orders.html#visao-geral">Visão Geral</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/orders.html#ciclo-de-status">Ciclo de Status</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/orders.html#module-apps.orders.models">Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes"><code class="docutils literal notranslate"><span class="pre">Notes</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">Notes.DoesNotExist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">Notes.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.__str__"><code class="docutils literal notranslate"><span class="pre">Notes.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.created_at"><code class="docutils literal notranslate"><span class="pre">Notes.created_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.get_next_by_created_at"><code class="docutils literal notranslate"><span class="pre">Notes.get_next_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.get_previous_by_created_at"><code class="docutils literal notranslate"><span class="pre">Notes.get_previous_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.get_type_note_display"><code class="docutils literal notranslate"><span class="pre">Notes.get_type_note_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.id"><code class="docutils literal notranslate"><span class="pre">Notes.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.id_item"><code class="docutils literal notranslate"><span class="pre">Notes.id_item</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.id_item_id"><code class="docutils literal notranslate"><span class="pre">Notes.id_item_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.id_user"><code class="docutils literal notranslate"><span class="pre">Notes.id_user</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.id_user_id"><code class="docutils literal notranslate"><span class="pre">Notes.id_user_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.note"><code class="docutils literal notranslate"><span class="pre">Notes.note</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.objects"><code class="docutils literal notranslate"><span class="pre">Notes.objects</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Notes.type_note"><code class="docutils literal notranslate"><span class="pre">Notes.type_note</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders"><code class="docutils literal notranslate"><span class="pre">Orders</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">Orders.DoesNotExist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">Orders.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.__str__"><code class="docutils literal notranslate"><span class="pre">Orders.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.activation_date"><code class="docutils literal notranslate"><span class="pre">Orders.activation_date</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.calls"><code class="docutils literal notranslate"><span class="pre">Orders.calls</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.cell_eid"><code class="docutils literal notranslate"><span class="pre">Orders.cell_eid</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.cell_imei"><code class="docutils literal notranslate"><span class="pre">Orders.cell_imei</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.cell_mod"><code class="docutils literal notranslate"><span class="pre">Orders.cell_mod</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.celular_samsung"><code class="docutils literal notranslate"><span class="pre">Orders.celular_samsung</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.client"><code class="docutils literal notranslate"><span class="pre">Orders.client</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.condition"><code class="docutils literal notranslate"><span class="pre">Orders.condition</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.countries"><code class="docutils literal notranslate"><span class="pre">Orders.countries</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.coupon"><code class="docutils literal notranslate"><span class="pre">Orders.coupon</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.created_at"><code class="docutils literal notranslate"><span class="pre">Orders.created_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.data_day"><code class="docutils literal notranslate"><span class="pre">Orders.data_day</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.days"><code class="docutils literal notranslate"><span class="pre">Orders.days</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.email"><code class="docutils literal notranslate"><span class="pre">Orders.email</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_condition_display"><code class="docutils literal notranslate"><span class="pre">Orders.get_condition_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_data_day_display"><code class="docutils literal notranslate"><span class="pre">Orders.get_data_day_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_next_by_activation_date"><code class="docutils literal notranslate"><span class="pre">Orders.get_next_by_activation_date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_next_by_created_at"><code class="docutils literal notranslate"><span class="pre">Orders.get_next_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_next_by_order_date"><code class="docutils literal notranslate"><span class="pre">Orders.get_next_by_order_date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_next_by_updated_at"><code class="docutils literal notranslate"><span class="pre">Orders.get_next_by_updated_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_order_status_display"><code class="docutils literal notranslate"><span class="pre">Orders.get_order_status_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_previous_by_activation_date"><code class="docutils literal notranslate"><span class="pre">Orders.get_previous_by_activation_date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_previous_by_created_at"><code class="docutils literal notranslate"><span class="pre">Orders.get_previous_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_previous_by_order_date"><code class="docutils literal notranslate"><span class="pre">Orders.get_previous_by_order_date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_previous_by_updated_at"><code class="docutils literal notranslate"><span class="pre">Orders.get_previous_by_updated_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.get_product_display"><code class="docutils literal notranslate"><span class="pre">Orders.get_product_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.id"><code class="docutils literal notranslate"><span class="pre">Orders.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.id_sim"><code class="docutils literal notranslate"><span class="pre">Orders.id_sim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.id_sim_id"><code class="docutils literal notranslate"><span class="pre">Orders.id_sim_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.item_id"><code class="docutils literal notranslate"><span class="pre">Orders.item_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.item_id_store"><code class="docutils literal notranslate"><span class="pre">Orders.item_id_store</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.objects"><code class="docutils literal notranslate"><span class="pre">Orders.objects</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.ord_chip_nun"><code class="docutils literal notranslate"><span class="pre">Orders.ord_chip_nun</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.order_date"><code class="docutils literal notranslate"><span class="pre">Orders.order_date</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.order_id"><code class="docutils literal notranslate"><span class="pre">Orders.order_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.order_notes"><code class="docutils literal notranslate"><span class="pre">Orders.order_notes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.order_sim"><code class="docutils literal notranslate"><span class="pre">Orders.order_sim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.order_status"><code class="docutils literal notranslate"><span class="pre">Orders.order_status</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.product"><code class="docutils literal notranslate"><span class="pre">Orders.product</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.qty"><code class="docutils literal notranslate"><span class="pre">Orders.qty</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.shipping"><code class="docutils literal notranslate"><span class="pre">Orders.shipping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.tracking"><code class="docutils literal notranslate"><span class="pre">Orders.tracking</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.type_sim"><code class="docutils literal notranslate"><span class="pre">Orders.type_sim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.updated_at"><code class="docutils literal notranslate"><span class="pre">Orders.updated_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.models.Orders.voicecalls_set"><code class="docutils literal notranslate"><span class="pre">Orders.voicecalls_set</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/orders.html#module-apps.orders.classes">Classes de Integração</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.ApiStore"><code class="docutils literal notranslate"><span class="pre">ApiStore</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.ApiStore.conectApiStore"><code class="docutils literal notranslate"><span class="pre">ApiStore.conectApiStore()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.DateFormats"><code class="docutils literal notranslate"><span class="pre">DateFormats</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.DateFormats.dateDMA"><code class="docutils literal notranslate"><span class="pre">DateFormats.dateDMA()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.DateFormats.dateF"><code class="docutils literal notranslate"><span class="pre">DateFormats.dateF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.DateFormats.dateHour"><code class="docutils literal notranslate"><span class="pre">DateFormats.dateHour()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.NoteStore"><code class="docutils literal notranslate"><span class="pre">NoteStore</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.NoteStore.addNoteStore"><code class="docutils literal notranslate"><span class="pre">NoteStore.addNoteStore()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.NotesAdd"><code class="docutils literal notranslate"><span class="pre">NotesAdd</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.NotesAdd.addNote"><code class="docutils literal notranslate"><span class="pre">NotesAdd.addNote()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.StatusStore"><code class="docutils literal notranslate"><span class="pre">StatusStore</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.StatusStore.st_sis_site"><code class="docutils literal notranslate"><span class="pre">StatusStore.st_sis_site()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.UpdateOrder"><code class="docutils literal notranslate"><span class="pre">UpdateOrder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.UpdateOrder.upStatus"><code class="docutils literal notranslate"><span class="pre">UpdateOrder.upStatus()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.UpdateStore"><code class="docutils literal notranslate"><span class="pre">UpdateStore</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/orders.html#apps.orders.classes.UpdateStore.upStore"><code class="docutils literal notranslate"><span class="pre">UpdateStore.upStore()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/orders.html#module-apps.orders.tasks">Tarefas Celery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/orders.html#module-apps.orders.views">Views</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.views.ord_details"><code class="docutils literal notranslate"><span class="pre">ord_details()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.views.send_esims"><code class="docutils literal notranslate"><span class="pre">send_esims()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/orders.html#apps.orders.views.update_status"><code class="docutils literal notranslate"><span class="pre">update_status()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/sims.html">App: Sims — Cartões SIM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/sims.html#visao-geral">Visão Geral</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/sims.html#fluxo-de-ativacao">Fluxo de Ativação</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/sims.html#cache-de-tokens">Cache de Tokens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/sims.html#module-apps.sims.models">Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims"><code class="docutils literal notranslate"><span class="pre">Sims</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">Sims.DoesNotExist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">Sims.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.__str__"><code class="docutils literal notranslate"><span class="pre">Sims.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.created_at"><code class="docutils literal notranslate"><span class="pre">Sims.created_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.data"><code class="docutils literal notranslate"><span class="pre">Sims.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.get_data_display"><code class="docutils literal notranslate"><span class="pre">Sims.get_data_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.get_next_by_created_at"><code class="docutils literal notranslate"><span class="pre">Sims.get_next_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.get_next_by_updated_at"><code class="docutils literal notranslate"><span class="pre">Sims.get_next_by_updated_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.get_operator_display"><code class="docutils literal notranslate"><span class="pre">Sims.get_operator_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.get_previous_by_created_at"><code class="docutils literal notranslate"><span class="pre">Sims.get_previous_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.get_previous_by_updated_at"><code class="docutils literal notranslate"><span class="pre">Sims.get_previous_by_updated_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.get_sim_status_display"><code class="docutils literal notranslate"><span class="pre">Sims.get_sim_status_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.get_type_sim_display"><code class="docutils literal notranslate"><span class="pre">Sims.get_type_sim_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.id"><code class="docutils literal notranslate"><span class="pre">Sims.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.link"><code class="docutils literal notranslate"><span class="pre">Sims.link</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.lpa"><code class="docutils literal notranslate"><span class="pre">Sims.lpa</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.objects"><code class="docutils literal notranslate"><span class="pre">Sims.objects</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.operator"><code class="docutils literal notranslate"><span class="pre">Sims.operator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.orders_set"><code class="docutils literal notranslate"><span class="pre">Sims.orders_set</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.sim"><code class="docutils literal notranslate"><span class="pre">Sims.sim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.sim_status"><code class="docutils literal notranslate"><span class="pre">Sims.sim_status</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.type_sim"><code class="docutils literal notranslate"><span class="pre">Sims.type_sim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.models.Sims.updated_at"><code class="docutils literal notranslate"><span class="pre">Sims.updated_at</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/sims.html#module-apps.sims.classes">Classes de Integração com Operadoras</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiCM"><code class="docutils literal notranslate"><span class="pre">ApiCM</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiCM.app_key"><code class="docutils literal notranslate"><span class="pre">ApiCM.app_key</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiCM.app_secret"><code class="docutils literal notranslate"><span class="pre">ApiCM.app_secret</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiCM.childOrderId"><code class="docutils literal notranslate"><span class="pre">ApiCM.childOrderId()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiCM.generate_password_digest"><code class="docutils literal notranslate"><span class="pre">ApiCM.generate_password_digest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiCM.get_token"><code class="docutils literal notranslate"><span class="pre">ApiCM.get_token()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiCM.mobileData"><code class="docutils literal notranslate"><span class="pre">ApiCM.mobileData()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTC"><code class="docutils literal notranslate"><span class="pre">ApiTC</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTC.get_headers"><code class="docutils literal notranslate"><span class="pre">ApiTC.get_headers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTC.get_iccid"><code class="docutils literal notranslate"><span class="pre">ApiTC.get_iccid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTC.get_token"><code class="docutils literal notranslate"><span class="pre">ApiTC.get_token()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTC.mobileData"><code class="docutils literal notranslate"><span class="pre">ApiTC.mobileData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTC.planChange"><code class="docutils literal notranslate"><span class="pre">ApiTC.planChange()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTI"><code class="docutils literal notranslate"><span class="pre">ApiTI</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTI.get_headers"><code class="docutils literal notranslate"><span class="pre">ApiTI.get_headers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTI.get_iccid"><code class="docutils literal notranslate"><span class="pre">ApiTI.get_iccid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTI.get_token"><code class="docutils literal notranslate"><span class="pre">ApiTI.get_token()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTI.mobileData"><code class="docutils literal notranslate"><span class="pre">ApiTI.mobileData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.ApiTI.planChange"><code class="docutils literal notranslate"><span class="pre">ApiTI.planChange()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.operPlan"><code class="docutils literal notranslate"><span class="pre">operPlan</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.operPlan.listPlan"><code class="docutils literal notranslate"><span class="pre">operPlan.listPlan()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.qrcodeChange"><code class="docutils literal notranslate"><span class="pre">qrcodeChange</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.qrcodeChange.build_qr_file"><code class="docutils literal notranslate"><span class="pre">qrcodeChange.build_qr_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.qrcodeChange.convert_qr_code"><code class="docutils literal notranslate"><span class="pre">qrcodeChange.convert_qr_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/sims.html#apps.sims.classes.qrcodeChange.read_qr_code"><code class="docutils literal notranslate"><span class="pre">qrcodeChange.read_qr_code()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/sims.html#module-apps.sims.tasks">Tarefas Celery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/sims.html#module-apps.sims.views">Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/sims.html#module-apps.sims.serializers">Serializers (API REST)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/sims.html#apps.sims.serializers.ConsumoSerializer"><code class="docutils literal notranslate"><span class="pre">ConsumoSerializer</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/voice_calls.html">App: Voice Calls — Chamadas de Voz</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/voice_calls.html#module-apps.voice_calls.models">Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice"><code class="docutils literal notranslate"><span class="pre">NotesVoice</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">NotesVoice.DoesNotExist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">NotesVoice.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.__str__"><code class="docutils literal notranslate"><span class="pre">NotesVoice.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.created_at"><code class="docutils literal notranslate"><span class="pre">NotesVoice.created_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.get_next_by_created_at"><code class="docutils literal notranslate"><span class="pre">NotesVoice.get_next_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.get_previous_by_created_at"><code class="docutils literal notranslate"><span class="pre">NotesVoice.get_previous_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.get_type_note_display"><code class="docutils literal notranslate"><span class="pre">NotesVoice.get_type_note_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.id"><code class="docutils literal notranslate"><span class="pre">NotesVoice.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.id_item"><code class="docutils literal notranslate"><span class="pre">NotesVoice.id_item</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.id_item_id"><code class="docutils literal notranslate"><span class="pre">NotesVoice.id_item_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.id_user"><code class="docutils literal notranslate"><span class="pre">NotesVoice.id_user</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.id_user_id"><code class="docutils literal notranslate"><span class="pre">NotesVoice.id_user_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.note"><code class="docutils literal notranslate"><span class="pre">NotesVoice.note</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.objects"><code class="docutils literal notranslate"><span class="pre">NotesVoice.objects</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.NotesVoice.type_note"><code class="docutils literal notranslate"><span class="pre">NotesVoice.type_note</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls"><code class="docutils literal notranslate"><span class="pre">VoiceCalls</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.DoesNotExist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.__str__"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.activation_date"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.activation_date</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.call_status"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.call_status</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.created_at"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.created_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.days"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.days</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.get_call_status_display"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.get_call_status_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.get_next_by_activation_date"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.get_next_by_activation_date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.get_next_by_created_at"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.get_next_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.get_next_by_updated_at"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.get_next_by_updated_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.get_previous_by_activation_date"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.get_previous_by_activation_date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.get_previous_by_created_at"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.get_previous_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.get_previous_by_updated_at"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.get_previous_by_updated_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.id"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.id_item"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.id_item</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.id_item_id"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.id_item_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.id_number"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.id_number</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.id_number_id"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.id_number_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.objects"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.objects</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.order_voice_notes"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.order_voice_notes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceCalls.updated_at"><code class="docutils literal notranslate"><span class="pre">VoiceCalls.updated_at</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.DoesNotExist"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.DoesNotExist</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.MultipleObjectsReturned"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.MultipleObjectsReturned</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.__str__"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.__str__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.created_at"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.created_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.extension"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.extension</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.get_next_by_created_at"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.get_next_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.get_next_by_updated_at"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.get_next_by_updated_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.get_number_status_display"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.get_number_status_display()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.get_previous_by_created_at"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.get_previous_by_created_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.get_previous_by_updated_at"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.get_previous_by_updated_at()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.id"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.login"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.login</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.number"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.number</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.number_qrcode"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.number_qrcode</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.number_status"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.number_status</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.objects"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.objects</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.password"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.password</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.updated_at"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.updated_at</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.models.VoiceNumbers.voicecalls_set"><code class="docutils literal notranslate"><span class="pre">VoiceNumbers.voicecalls_set</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/voice_calls.html#module-apps.voice_calls.classes">Classes de Integração</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.classes.NoteVoiceCall"><code class="docutils literal notranslate"><span class="pre">NoteVoiceCall</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.classes.NoteVoiceCall.addNote"><code class="docutils literal notranslate"><span class="pre">NoteVoiceCall.addNote()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.classes.NumberFormatter"><code class="docutils literal notranslate"><span class="pre">NumberFormatter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.classes.NumberFormatter.format"><code class="docutils literal notranslate"><span class="pre">NumberFormatter.format()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.classes.UpdateVoice"><code class="docutils literal notranslate"><span class="pre">UpdateVoice</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.classes.UpdateVoice.upStatus"><code class="docutils literal notranslate"><span class="pre">UpdateVoice.upStatus()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/voice_calls.html#module-apps.voice_calls.tasks">Tarefas Celery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/voice_calls.html#module-apps.voice_calls.views">Views</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.views.atualizarDataVoz"><code class="docutils literal notranslate"><span class="pre">atualizarDataVoz()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.views.mumber_list"><code class="docutils literal notranslate"><span class="pre">mumber_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.views.up_password"><code class="docutils literal notranslate"><span class="pre">up_password()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.views.voice_edit"><code class="docutils literal notranslate"><span class="pre">voice_edit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.views.voice_import"><code class="docutils literal notranslate"><span class="pre">voice_import()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/voice_calls.html#apps.voice_calls.views.voice_index"><code class="docutils literal notranslate"><span class="pre">voice_index()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/send_email.html">App: Send Email — Notificações por E-mail</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/send_email.html#visao-geral">Visão Geral</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/send_email.html#templates">Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/send_email.html#module-apps.send_email.tasks">Tarefas Celery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/send_email.html#module-apps.send_email.views">Views</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/send_email.html#apps.send_email.views.send_email"><code class="docutils literal notranslate"><span class="pre">send_email()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/send_email.html#apps.send_email.views.send_email_esims"><code class="docutils literal notranslate"><span class="pre">send_email_esims()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/send_email.html#apps.send_email.views.send_email_voices"><code class="docutils literal notranslate"><span class="pre">send_email_voices()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/dashboard.html">App: Dashboard — Monitoramento</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/dashboard.html#funcionalidades">Funcionalidades</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/dashboard.html#module-apps.dashboard.views">Views</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/dashboard.html#apps.dashboard.views.clear_cache"><code class="docutils literal notranslate"><span class="pre">clear_cache()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/dashboard.html#apps.dashboard.views.index"><code class="docutils literal notranslate"><span class="pre">index()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/users.html">App: Users — Autenticação e Permissões</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/users.html#roles-disponiveis">Roles Disponíveis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/users.html#module-apps.users.views">Views</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../modules/users.html#apps.users.views.login"><code class="docutils literal notranslate"><span class="pre">login()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../modules/users.html#apps.users.views.logout"><code class="docutils literal notranslate"><span class="pre">logout()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/core.html">Core — Configurações Centrais</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../modules/core.html#module-core.celery">Celery</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modules/core.html#module-core.roles">Roles e Permissões</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Referência</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="status_codes.html">Códigos de Status dos Pedidos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="status_codes.html#status-dos-sims">Status dos SIMs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="status_codes.html#status-dos-numeros-de-voz">Status dos Números de Voz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roles.html">Roles e Permissões</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#roles-disponiveis">Roles Disponíveis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#atendente">Atendente</a></li>
+<li class="toctree-l3"><a class="reference internal" href="roles.html#gerente">Gerente</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#como-usar-nas-views">Como Usar nas Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="roles.html#como-atribuir-role-a-um-usuario">Como Atribuir Role a um Usuário</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Agenda Celery Beat</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tarefas-registradas">Tarefas Registradas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#limites-de-tempo">Limites de Tempo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#verificar-tarefas-em-execucao">Verificar Tarefas em Execução</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Menu de navegação móvel" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SISACDC</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Navegação da página">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Agenda Celery Beat</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/reference/celery_schedule.rst.txt" rel="nofollow"> Ver código-fonte da página</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="agenda-celery-beat">
+<h1>Agenda Celery Beat<a class="headerlink" href="#agenda-celery-beat" title="Link para este cabeçalho"></a></h1>
+<p>Todas as tarefas periódicas são gerenciadas pelo <code class="docutils literal notranslate"><span class="pre">django-celery-beat</span></code> com <code class="docutils literal notranslate"><span class="pre">DatabaseScheduler</span></code>.
+A agenda é persistida no banco de dados e pode ser gerenciada via Django Admin (<code class="docutils literal notranslate"><span class="pre">/admin/</span></code>) ou programaticamente.</p>
+<section id="tarefas-registradas">
+<h2>Tarefas Registradas<a class="headerlink" href="#tarefas-registradas" title="Link para este cabeçalho"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Chave (settings)</p></th>
+<th class="head"><p>Tarefa</p></th>
+<th class="head"><p>Frequência</p></th>
+<th class="head"><p>Observação</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">task__2_min_orders_auto</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">orders_auto</span></code></p></td>
+<td><p>A cada 2 min</p></td>
+<td><p>Importa pedidos + atribui SIMs</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">task__2_min_activate_TC</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">simActivateTC</span></code></p></td>
+<td><p>A cada 2 min (min. pares)</p></td>
+<td><p>Ativa SIMs TelCom</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">task__2_min_activate_TI</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">simActivateTI</span></code></p></td>
+<td><p>A cada 2 min (min. pares)</p></td>
+<td><p>Ativa SIMs TelCom IMSI</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">task__2_min_activate_TM</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">simActivateTM</span></code></p></td>
+<td><p>A cada 2 min (min. ímpares)</p></td>
+<td><p>Ativa SIMs T-Mobile</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">task__2_min_activate_CM</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">simActivateCM</span></code></p></td>
+<td><p>A cada 2 min (min. ≥ 4)</p></td>
+<td><p>Ativa SIMs China Mobile</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">task__deactivate_TC</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">simDeactivateTC</span></code></p></td>
+<td><p>Diariamente 00:00</p></td>
+<td><p>Desativa SIMs TelCom expirados</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">task__deactivate_all</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">simDeactivateAll</span></code></p></td>
+<td><p>Diariamente 00:00</p></td>
+<td><p>Desativa todos os SIMs expirados</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="limites-de-tempo">
+<h2>Limites de Tempo<a class="headerlink" href="#limites-de-tempo" title="Link para este cabeçalho"></a></h2>
+<p>Tarefas de ativação em massa possuem limites para evitar travamento de workers:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@shared_task</span><span class="p">(</span><span class="n">time_limit</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">soft_time_limit</span><span class="o">=</span><span class="mi">240</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">simActivateTC</span><span class="p">():</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Tarefa</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">soft_time_limit</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">time_limit</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">order_import</span></code></p></td>
+<td><p>100s</p></td>
+<td><p>110s</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sims_in_orders</span></code></p></td>
+<td><p>240s</p></td>
+<td><p>300s</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">simActivateTC</span></code></p></td>
+<td><p>240s</p></td>
+<td><p>300s</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">simActivateTI</span></code></p></td>
+<td><p>240s</p></td>
+<td><p>300s</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">simActivateTM</span></code></p></td>
+<td><p>240s</p></td>
+<td><p>300s</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">simActivateCM</span></code></p></td>
+<td><p>240s</p></td>
+<td><p>300s</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="verificar-tarefas-em-execucao">
+<h2>Verificar Tarefas em Execução<a class="headerlink" href="#verificar-tarefas-em-execucao" title="Link para este cabeçalho"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verificar fila de tarefas</span>
+redis-cli<span class="w"> </span>KEYS<span class="w"> </span><span class="s2">&quot;*celery*&quot;</span>
+redis-cli<span class="w"> </span>LRANGE<span class="w"> </span>celery<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="m">10</span>
+
+<span class="c1"># Logs de worker em tempo real</span>
+celery<span class="w"> </span>-A<span class="w"> </span>core<span class="w"> </span>worker<span class="w"> </span>--loglevel<span class="o">=</span>debug
+
+<span class="c1"># Verificar tarefas agendadas no banco</span>
+python<span class="w"> </span>manage.py<span class="w"> </span>shell<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+<span class="s2">from django_celery_beat.models import PeriodicTask</span>
+<span class="s2">for t in PeriodicTask.objects.all():</span>
+<span class="s2">    print(t.name, t.enabled)</span>
+<span class="s2">&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Rodapé">
+        <a href="roles.html" class="btn btn-neutral float-left" title="Roles e Permissões" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Anterior</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Direitos autorais 2025, SISACDC.</p>
+  </div>
+
+  Compilado com <a href="https://www.sphinx-doc.org/">Sphinx</a> usando um
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">tema</a>
+    fornecido por <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
