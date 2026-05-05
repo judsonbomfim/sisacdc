@@ -295,18 +295,51 @@ def clear_cache(request):
 
 @login_required(login_url='/login/')
 def docs_serve(request, path='index.html'):
-    """Serve arquivos da documentação Sphinx apenas para usuários autenticados."""
-    docs_root = os.path.join(settings.BASE_DIR, 'docs', 'build', 'html')
-    file_path = os.path.normpath(os.path.join(docs_root, path))
+    """
+    Serve documentação Sphinx via URLs pré-assinadas do S3 (se configurado)
+    ou diretamente do sistema de arquivos local como fallback.
+    """
+    import boto3
+    import mimetypes
 
     # Proteção contra path traversal
+    safe_path = os.path.normpath(path).lstrip('/')
+    if safe_path.startswith('..'):
+        raise Http404
+
+    # ── Modo S3: redireciona para URL pré-assinada (expira em 1h) ──
+    bucket = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
+    aws_key = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
+    aws_secret = getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
+
+    if bucket and aws_key and aws_key != 'dummy':
+        s3_key = f"docs/{safe_path}"
+        try:
+            s3 = boto3.client(
+                's3',
+                aws_access_key_id=aws_key,
+                aws_secret_access_key=aws_secret,
+            )
+            url = s3.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': bucket, 'Key': s3_key},
+                ExpiresIn=3600,
+            )
+            from django.shortcuts import redirect
+            return redirect(url)
+        except Exception:
+            pass  # fallback para arquivos locais
+
+    # ── Fallback local ──
+    docs_root = os.path.join(settings.BASE_DIR, 'docs', 'build', 'html')
+    file_path = os.path.normpath(os.path.join(docs_root, safe_path))
+
     if not file_path.startswith(docs_root):
         raise Http404
 
     if not os.path.isfile(file_path):
         raise Http404
 
-    import mimetypes
     content_type, _ = mimetypes.guess_type(file_path)
     content_type = content_type or 'application/octet-stream'
 
