@@ -59,3 +59,8 @@ urllib3==2.0.2
 vine==5.1.0
 wcwidth==0.2.13
 WooCommerce==3.0.0
+
+# Documentação
+Sphinx==9.1.0
+sphinx-rtd-theme==3.1.0
+sphinx-autodoc-typehints==3.10.2

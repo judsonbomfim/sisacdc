@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y nano && \
 
 COPY . .
 
+RUN cd /djangoweb/docs && sphinx-build -b html source build/html -q && cd /djangoweb
+
 RUN chmod +x /djangoweb/entrypoint.sh && \
     mkdir -p /djangoweb/logs && \
     touch /djangoweb/logs/django.log && \
