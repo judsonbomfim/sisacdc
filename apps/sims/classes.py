@@ -18,6 +18,7 @@ import hashlib
 import io
 import json
 import random
+import requests
 import time
 import pytz
 from datetime import datetime
@@ -58,29 +59,16 @@ class ApiTC:
         if token_api:
             return token_api
         
-        payload_token = json.dumps({
-            "username": settings.APITC_USERNAME,
-            "password": settings.APITC_PASSWORD
-        })
-        
-        headers_token = {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-        
         try:
-            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=HTTP_TIMEOUT)
-            conn.request("POST", "/api/login", payload_token, headers_token)
-            res_token = conn.getresponse()
-            data_token = json.loads(res_token.read())
-            token_api = data_token["AccessToken"]
-            # Gravar token
+            url = f"https://{settings.APITC_HTTPCONN}/api/login"
+            response = requests.post(url, json={"username": settings.APITC_USERNAME, "password": settings.APITC_PASSWORD}, headers={'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}, timeout=HTTP_TIMEOUT)
+            response.raise_for_status()
+            token_api = response.json()["AccessToken"]
             cache.set('api_tc_token', token_api, timeout=540)
-            conn.close()
             return token_api
         except Exception as e:
             logger.error(f"[API TC] Erro ao obter token: {str(e)}")
-            raise
+            return None
 
 
     # Set headers
@@ -289,6 +277,20 @@ class ApiTC:
         conn.close()
         return mobile_data
 
+    @staticmethod    
+    def balance():
+        token_api = ApiTC.get_token()
+        if not token_api:
+            return None
+        try:
+            url = f"https://{settings.APITC_HTTPCONN}/api/GetCustomerProfile"
+            response = requests.get(url, headers=ApiTC.get_headers(token_api), timeout=HTTP_TIMEOUT)
+            response.raise_for_status()
+            ma_balance = response.json()["Response"]["info"]["basicInfo"]["maBalance"]
+            return round(float(ma_balance) / 100, 2) if ma_balance is not None else None
+        except Exception as e:
+            logger.error(f"[API TC] Erro ao obter saldo: {str(e)}")
+            return None
 
 class ApiTI:
     """
@@ -684,14 +686,30 @@ class ApiCM:
         finally:
             if 'conn' in locals():
                 conn.close()
-
-
-
-        
+                       
         # # Resultado
         # logger.info(f">>>>>>>>>>>>>>>>>>> Status da resposta: {data}")
         # return data
-        
+ 
+ 
+class ApiAT:
+    
+    @staticmethod
+    def balance():
+        try:
+            url = f"{settings.APISM_URL}/api/v1/wallet/balance"
+            headers = {
+                "Accept": "application/json",
+                "Authorization": f"Bearer {settings.APISM_TOKEN}",
+            }
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            balance = response.json().get('balance')
+            return round(float(balance), 2) if balance is not None else None
+        except Exception as e:
+            logger.error(f"[API AT] Erro ao obter saldo: {str(e)}")
+            return None
+    
 
 class operPlan():
     """

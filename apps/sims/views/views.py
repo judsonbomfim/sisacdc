@@ -19,7 +19,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from ..serializers import ConsumoSerializer
-from apps.sims.classes import ApiTC, ApiCM, qrcodeChange
+from apps.sims.classes import ApiAT, ApiTC, ApiCM, qrcodeChange
 from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
 from ..tasks import simDeactivateTC, sims_in_orders
@@ -146,6 +146,17 @@ def sims_list(request):
     esim_or_50gb = sims_all.filter(sim_status='DS',operator='OR', type_sim='esim', data='50gb').count()
     esim_or_world = sims_all.filter(sim_status='DS',operator='OR', type_sim='esim', data='world').count()
     
+    saldo_at = ApiAT.balance()
+    saldo_tc = ApiTC.balance()
+
+    def fmt_brl(value):
+        if value is None:
+            return None
+        return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    saldo_at = fmt_brl(saldo_at)
+    saldo_tc = fmt_brl(saldo_tc)
+    
     url = reverse('sims_index')
     
     context= {
@@ -173,6 +184,8 @@ def sims_list(request):
         'sim_type_f': sim_type_f,
         'sim_status_f': sim_status_f,
         'sim_oper_f': sim_oper_f,
+        'saldo_at': saldo_at,
+        'saldo_tc': saldo_tc,
     }
        
     return render(request, 'painel/sims/index.html', context)

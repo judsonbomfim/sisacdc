@@ -3,6 +3,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from apps.sims.classes import ApiAT, ApiTC
 from apps.sims.models import Sims
 from apps.orders.models import Orders
 from apps.voice_calls.models import VoiceCalls
@@ -220,6 +221,16 @@ def index(request):
     esim_or_50gb = simsAll.filter(sim_status='DS',operator='OR', type_sim='esim', data='50gb').count()
     esim_or_world = simsAll.filter(sim_status='DS',operator='OR', type_sim='esim', data='world').count()
 
+    saldo_at = ApiAT.balance()
+    saldo_tc = ApiTC.balance()
+
+    def fmt_brl(value):
+        if value is None:
+            return None
+        return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    saldo_at = fmt_brl(saldo_at)
+    saldo_tc = fmt_brl(saldo_tc)
 
 
     context= {
@@ -280,7 +291,9 @@ def index(request):
         'yearOperValuesCM': yearOperValuesCM,
         'yearOperValuesTC': yearOperValuesTC,      
         'yearOperValuesTI': yearOperValuesTI,  
-        'yearOperValuesOR': yearOperValuesOR,  
+        'yearOperValuesOR': yearOperValuesOR,
+        'saldo_at': saldo_at,
+        'saldo_tc': saldo_tc,
     }
     
     return render(request, 'painel/dashboard/index.html', context)
