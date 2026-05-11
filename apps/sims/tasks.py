@@ -1662,7 +1662,8 @@ def simActivateSM(id=None): # Orange e AT&T
             elif order.data_day == '30-ilimitado':
                 product_id = 19
             elif order.data_day == 'world':
-                product_id = 7
+                # product_id = 7
+                continue
             elif order.data_day == '20gb':
                 product_id = 9
             elif order.data_day == '50gb':
@@ -1848,7 +1849,7 @@ def simActivateOR(id=None):
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=today).exclude(id_sim__in=[47282, 48138])
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=today)
     else:
         orders_all = Orders.objects.filter(pk=id)
     
@@ -1863,7 +1864,7 @@ def simActivateOR(id=None):
         order_id = order.order_id
         
         # ORANGE: Ativação automática para eSIM específico
-        if order.id_sim.type_sim == 'esim' and order.data_day == 'world':  # SIM específico para ativação automática OR
+        if order.id_sim.type_sim == 'esim' and order.data_day == 'world' and order.id_sim_id==48138:  # SIM específico para ativação automática OR
             sim_ds = Sims.objects.all().order_by('id').filter(operator='OR', type_sim='esim', sim_status='DS', data='world').first()
             sim_put = Sims.objects.get(pk=sim_ds.id)
             sim_put.sim_status = 'AT'
@@ -1873,9 +1874,11 @@ def simActivateOR(id=None):
             
             order_put = Orders.objects.get(pk=order.id)
             order_put.id_sim_id = sim_ds.id            
-            order_put.save()
+            order_put.save()  
+        elif order.id_sim_id == 48138:
+            continue
             
-            send_email_sims.delay(order.id)
+        send_email_sims.delay(order.id)
         
         
         # Alterar status
