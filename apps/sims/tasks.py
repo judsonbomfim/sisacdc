@@ -1644,8 +1644,9 @@ def simActivateSM(id=None): # Orange e AT&T
         orders_to_process = Orders.objects.filter(
             order_status='AA', 
             id_sim__operator__in=['AT', 'OR'], 
+            id_sim__in=[47282, 48138],
             activation_date__lte=activation_limit_date
-        ).exclude(data_day='world')
+        )
     else:
         orders_to_process = Orders.objects.filter(pk=id)
     
@@ -1660,8 +1661,8 @@ def simActivateSM(id=None): # Orange e AT&T
                 product_id = 20
             elif order.data_day == '30-ilimitado':
                 product_id = 19
-            # elif order.data_day == 'world':
-            #     product_id = 7
+            elif order.data_day == 'world':
+                product_id = 7
             elif order.data_day == '20gb':
                 product_id = 9
             elif order.data_day == '50gb':
@@ -1847,7 +1848,7 @@ def simActivateOR(id=None):
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', data_day='world', activation_date__lte=today)
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=today).exclude(id_sim__in=[47282, 48138])
     else:
         orders_all = Orders.objects.filter(pk=id)
     
