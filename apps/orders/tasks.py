@@ -274,10 +274,8 @@ def order_import():
                                     data_day_i = '50gb'
                             else:
                                 data_day_i = 'world'
-                                order_status_i = 'AA'
-                                simOR = Sims.objects.filter(pk=48138).first()  # SIM genérico para ativação OR
-                                time.sleep(2)  # Pequena pausa para garantir que o SIM seja atribuído antes de enviar o e-mail
-                                logger.info(f'Plano OR detectado, atribuindo SIM genérico e enviando para pedido {order_id_i}')
+                            order_status_i = 'AA'
+                            simOR = Sims.objects.filter(pk=48138).first()  # SIM genérico para ativação OR
 
                         elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim':
                             calls_i = False

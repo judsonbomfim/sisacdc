@@ -92,13 +92,13 @@ def sims_in_orders():
             # Select SIM
             if reuso_sim != '-':
                 sim_ds = Sims.objects.filter(sim=reuso_sim).first()
-            elif operator_i == 'OR':
-                sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS', data=data_day_i).first()
-                if sim_ds:
-                    pass
-                else:
-                    logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
-                    continue
+            # elif operator_i == 'OR':
+            #     sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS', data=data_day_i).first()
+            #     if sim_ds:
+            #         pass
+            #     else:
+            #         logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
+            #         continue
             else:
                 sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
                 if sim_ds:
@@ -861,69 +861,6 @@ def simActivateTM(id=None):
 
 
 @shared_task(time_limit=110, soft_time_limit=100)
-def simActivateOR(id=None):
-    """
-    Ativa SIMs da operadora **Orange (OR)** para pedidos com status ``AA``.
-
-    Args:
-        id (int, optional): PK do pedido a ativar. Se ``None``, processa todos
-            os pedidos com status ``AA`` e operadora ``OR`` com data <= hoje.
-
-    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
-    """
-    tz = pytz.timezone(settings.TIME_ZONE)
-    today = datetime.now(tz).date()
-
-    logger.info(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA')
-    
-    # Selecionar pedidos
-    if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=today)
-    else:
-        orders_all = Orders.objects.filter(pk=id)
-    
-    if orders_all.count() == 0:
-        logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
-        return
-           
-    for order in orders_all:
-                                
-        order = Orders.objects.get(pk=order.id)
-        id_item = order.id
-        order_id = order.order_id
-        
-        # ORANGE: Ativação automática para eSIM específico
-        if order.id_sim.type_sim == 'esim' and order.data_day == 'world' and order.id_sim_id == 48138:  # SIM específico para ativação automática OR
-            sim_ds = Sims.objects.all().order_by('id').filter(operator='OR', type_sim='esim', sim_status='DS', data='world').first()
-            sim_put = Sims.objects.get(pk=sim_ds.id)
-            sim_put.sim_status = 'AT'
-            sim_put.save()
-            
-            time.sleep(1)
-            
-            order_put = Orders.objects.get(pk=order.id)
-            order_put.id_sim_id = sim_ds.id            
-            order_put.save()
-            
-            send_email_sims.delay(order.id)
-        
-        
-        # Alterar status
-        UpdateOrder.upStatus(id_item,'AT')
-        UpdateStore.upStore(
-            order_id = order_id,
-            item_id_store = order.item_id_store if order.item_id_store else None,
-            _status = 'AT',
-            status_g = 'AT',
-        )            
-        # Adicionar nota
-        NotesAdd.addNote(order,f'eSIM Ativado - Processo automático')
-        
-                
-    logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
-
-
-@shared_task(time_limit=110, soft_time_limit=100)
 def simActivateCM(id=None):
     """
     Ativa SIMs da operadora **China Mobile (CM)** para pedidos com status ``AA``.
@@ -1683,9 +1620,9 @@ def simActivateMS(id=None):
     
 
 @shared_task(time_limit=110, soft_time_limit=100)
-def simActivateAT(id=None):
+def simActivateSM(id=None): # Orange e AT&T
     """
-    Ativa eSIMs da operadora **AT&T (AT)** para pedidos com status ``AA``.
+    Ativa eSIMs da operadora **AT&T (AT)** e Orange (OR) para pedidos com status ``AA``.
 
     Usado para eSIMs de clientes com celular Samsung ou compatível com AT&T.
 
@@ -1700,15 +1637,15 @@ def simActivateAT(id=None):
     # A lógica original busca até 2 dias no futuro, mantendo isso.
     activation_limit_date = today
     
-    logger.info('>>>>>>>>>> ATIVAÇÂO AT INICIADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO SM INICIADA')
 
     # Selecionar pedidos
     if id is None:
         orders_to_process = Orders.objects.filter(
             order_status='AA', 
-            id_sim__operator='AT', 
+            id_sim__operator__in=['AT', 'OR'], 
             activation_date__lte=activation_limit_date
-        )
+        ).exclude(data_day='world')
     else:
         orders_to_process = Orders.objects.filter(pk=id)
     
@@ -1723,6 +1660,17 @@ def simActivateAT(id=None):
                 product_id = 20
             elif order.data_day == '30-ilimitado':
                 product_id = 19
+            # elif order.data_day == 'world':
+            #     product_id = 7
+            elif order.data_day == '20gb':
+                product_id = 9
+            elif order.data_day == '50gb':
+                product_id = 4
+            else:
+                logger.error(f"Plano de dados desconhecido para o pedido {order.order_id}: {order.data_day}")
+                UpdateOrder.upStatus(order.id, 'EA')
+                NotesAdd.addNote(order, f"Plano de dados desconhecido para ativação na AT&T: {order.data_day}. Verificar manualmente.")
+                continue
                      
             url = f"{settings.APISM_URL}/api/v1/order"
             headers = {
@@ -1743,10 +1691,10 @@ def simActivateAT(id=None):
             order.order_sim = order_sim
             order.save()
 
-            logger.info(f'Pedido {order.order_id} enviado com sucesso na AT&T')
+            logger.info(f'Pedido {order.order_id} enviado com sucesso na AT&T/Orange')
             
             UpdateOrder.upStatus(order.id, 'AO')
-            NotesAdd.addNote(order, f'Pedido {order.order_id} enviado com sucesso na AT&T. Aguardando retorno da operadora. STATUS ATUAL: {status_now}.')
+            NotesAdd.addNote(order, f'Pedido {order.order_id} enviado com sucesso na AT&T/Orange. Aguardando retorno da operadora. STATUS ATUAL: {status_now}.')
 
         except requests.exceptions.HTTPError as e:
             # CORREÇÃO: Captura o erro HTTP para extrair a mensagem da API.
@@ -1789,7 +1737,7 @@ def simActivateAT(id=None):
             UpdateOrder.upStatus(order.id, 'EA')
             NotesAdd.addNote(order, f"Ocorreu um erro interno no sistema ao tentar ativar o SIM {order.id_sim.sim}: {e}")
 
-    logger.info('>>>>>>>>>> ATIVAÇÂO AT FINALIZADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO SM FINALIZADA')
     
     
 @shared_task(time_limit=110, soft_time_limit=100)
@@ -1808,13 +1756,13 @@ def simAgdOperator():
         order_product = order.product
         type_sim = order.type_sim
         data = order.data_day
-        operator = 'AT'  
+        operator = order.id_sim.operator
         
         # Verificar de é AT&T
         if order_product not in operPlan.listPlan(operator):
             continue
         
-        logger.info(f'Processando pedido {order.order_id} para consulta de status na AT&T.')
+        logger.info(f'Processando pedido {order.order_id} para consulta de status na AT&T/Orange.')
         
         try:
             url = f"{settings.APISM_URL}/api/v1/order/{order_sim}"
@@ -1830,10 +1778,10 @@ def simAgdOperator():
             response_data = response.json()
             status_now = response_data['status']['name'] if 'status' in response_data and 'name' in response_data['status'] else 'Status desconhecido'
         except requests.exceptions.HTTPError as e:
-            logger.error(f"Erro HTTP ao consultar o status do pedido {order.order_id} na AT&T: {e}")
+            logger.error(f"Erro HTTP ao consultar o status do pedido {order.order_id} na AT&T/Orange: {e}")
             continue
         except requests.exceptions.RequestException as e:
-            logger.error(f"Erro de conexão ao consultar o status do pedido {order.order_id} na AT&T: {e}")
+            logger.error(f"Erro de conexão ao consultar o status do pedido {order.order_id} na AT&T/Orange: {e}")
             continue
         except Exception as e:
             logger.error(f"Erro inesperado ao consultar o status do pedido {order.order_id} na AT&T: {e}", exc_info=True)
@@ -1844,7 +1792,7 @@ def simAgdOperator():
             lpa_value = response_data['products'][0]['sim_data']['lpa_code']
             
             try:
-                # COnverter e salvaar SIM no estoque            
+                # Converter e salvar SIM no estoque            
                 qr_file = qrcodeChange.build_qr_file(lpa_value, sim_value)
                 fileurl = upload_file_to_s3(qr_file).replace(f'https://{settings.AWS_S3_CUSTOM_DOMAIN}', '')
                 add_sim = Sims(
@@ -1880,6 +1828,69 @@ def simAgdOperator():
         else:
             continue
         
+
+@shared_task(time_limit=110, soft_time_limit=100)
+def simActivateOR(id=None):
+    """
+    Ativa SIMs da operadora **Orange (OR)** para pedidos com status ``AA``.
+
+    Args:
+        id (int, optional): PK do pedido a ativar. Se ``None``, processa todos
+            os pedidos com status ``AA`` e operadora ``OR`` com data <= hoje.
+
+    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
+    """
+    tz = pytz.timezone(settings.TIME_ZONE)
+    today = datetime.now(tz).date()
+
+    logger.info(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA')
+    
+    # Selecionar pedidos
+    if id is None:
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', data_day='world', activation_date__lte=today)
+    else:
+        orders_all = Orders.objects.filter(pk=id)
+    
+    if orders_all.count() == 0:
+        logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
+        return
+           
+    for order in orders_all:
+                                
+        order = Orders.objects.get(pk=order.id)
+        id_item = order.id
+        order_id = order.order_id
         
+        # ORANGE: Ativação automática para eSIM específico
+        if order.id_sim.type_sim == 'esim' and order.data_day == 'world':  # SIM específico para ativação automática OR
+            sim_ds = Sims.objects.all().order_by('id').filter(operator='OR', type_sim='esim', sim_status='DS', data='world').first()
+            sim_put = Sims.objects.get(pk=sim_ds.id)
+            sim_put.sim_status = 'AT'
+            sim_put.save()
+            
+            time.sleep(1)
+            
+            order_put = Orders.objects.get(pk=order.id)
+            order_put.id_sim_id = sim_ds.id            
+            order_put.save()
+            
+            send_email_sims.delay(order.id)
+        
+        
+        # Alterar status
+        UpdateOrder.upStatus(id_item,'AT')
+        UpdateStore.upStore(
+            order_id = order_id,
+            item_id_store = order.item_id_store if order.item_id_store else None,
+            _status = 'AT',
+            status_g = 'AT',
+        )            
+        # Adicionar nota
+        NotesAdd.addNote(order,f'eSIM Ativado - Processo automático')
+        
+                
+    logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
+
+
     
     

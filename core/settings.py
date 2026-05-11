@@ -348,10 +348,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.sims.tasks.simActivateOR',
         'schedule': crontab(minute='3-59/2'),
     },
-    'task__2_min_simActivateAT': {
-        'task': 'apps.sims.tasks.simActivateAT',
+    'task__2_min_simActivateSM': {
+        'task': 'apps.sims.tasks.simActivateSM',
         'schedule': crontab(minute='2-59/2'),
-    },
+    }, # Orange e AT&T
     'task__2_min_simAgdOperator': {
         'task': 'apps.sims.tasks.simAgdOperator',
         'schedule': crontab(minute='2-59/2'),
