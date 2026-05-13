@@ -77,10 +77,10 @@ def sims_in_orders():
                     operator_i = 'TC'
                 else:
                     operator_i = 'CM'
-            elif product_i in operPlan.listPlan('TM') and type_sim_i == 'sim': # EUA Ilimitado
+            elif product_i in operPlan.listPlan('TM'): # EUA Ilimitado
                 operator_i = 'TM'
-            elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim': # EUA Ilimitado
-                operator_i = 'AT'
+            # elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim': # EUA Ilimitado
+            #     operator_i = 'AT'
             elif product_i in operPlan.listPlan('TI'):
                 operator_i = 'TI'
             elif product_i in operPlan.listPlan('TC'):

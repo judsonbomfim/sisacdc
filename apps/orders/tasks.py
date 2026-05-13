@@ -289,6 +289,9 @@ def order_import():
                             send_email_sims.delay(id=order_id_i)  # Enviar e-mail de ativação para planos AT
                         elif product_i in operPlan.listPlan('TM') and type_sim_i == 'sim':
                             calls_i = False
+                        elif product_i in operPlan.listPlan('TM') and type_sim_i == 'esim':
+                            calls_i = False
+                            order_status_i = 'AI'
 
                         shipping_i = shipping_i[:40]
 
