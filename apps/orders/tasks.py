@@ -276,23 +276,22 @@ def order_import():
                                 data_day_i = 'world'
                             order_status_i = 'AA'
                             simOR = Sims.objects.filter(pk=48138).first()  # SIM genérico para ativação OR
-
-                        elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim':
-                            calls_i = False
-                            if days_i <= '10':
-                                data_day_i = '10-ilimitado'
-                            else:
-                                data_day_i = '30-ilimitado'
-                            order_status_i = 'AA'
-                            simAT = Sims.objects.filter(pk=47282).first()  # SIM genérico para ativação AT
-                            time.sleep(2)  # Pequena pausa para garantir que o SIM seja atribuído antes de enviar o e-mail
-                            send_email_sims.delay(id=order_id_i)  # Enviar e-mail de ativação para planos AT
                         elif product_i in operPlan.listPlan('TM') and type_sim_i == 'sim':
                             calls_i = False
                         elif product_i in operPlan.listPlan('TM') and type_sim_i == 'esim':
                             calls_i = False
                             order_status_i = 'AI'
-
+                        # elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim':
+                        #     calls_i = False
+                        #     if days_i <= '10':
+                        #         data_day_i = '10-ilimitado'
+                        #     else:
+                        #         data_day_i = '30-ilimitado'
+                        #     order_status_i = 'AA'
+                        #     simAT = Sims.objects.filter(pk=47282).first()  # SIM genérico para ativação AT
+                        #     time.sleep(2)  # Pequena pausa para garantir que o SIM seja atribuído antes de enviar o e-mail
+                        #     send_email_sims.delay(id=order_id_i)  # Enviar e-mail de ativação para planos AT
+                            
                         shipping_i = shipping_i[:40]
 
                         # USO DE get_or_create - EVITA DUPLICAÇÃO
