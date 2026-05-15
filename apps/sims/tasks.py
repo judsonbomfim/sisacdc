@@ -79,6 +79,8 @@ def sims_in_orders():
                     operator_i = 'CM'
             elif product_i in operPlan.listPlan('TM'): # EUA Ilimitado
                 operator_i = 'TM'
+                sim_ds = Sims.objects.all().get(pk=0)
+                addNote(f'eSIM EUA - SIM padrão adicionado')
             # elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim': # EUA Ilimitado
             #     operator_i = 'AT'
             elif product_i in operPlan.listPlan('TI'):
