@@ -1840,18 +1840,19 @@ def simActivateOR(id=None):
 
     Args:
         id (int, optional): PK do pedido a ativar. Se ``None``, processa todos
-            os pedidos com status ``AA`` e operadora ``OR`` com data <= hoje.
+            os pedidos com status ``AA`` e operadora ``OR`` com data <= amanhã.
 
     Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
     """
     tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
+    tomorrow = today + timedelta(days=1)
 
     logger.info(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA')
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=today)
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=tomorrow)
     else:
         orders_all = Orders.objects.filter(pk=id)
     
