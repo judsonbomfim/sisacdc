@@ -1636,8 +1636,8 @@ def simActivateSM(id=None): # Orange e AT&T
     # Timezone UTC+2h
     tz = pytz.timezone("America/Sao_Paulo")
     today = datetime.now(tz).date()
-    # A lógica original busca até 2 dias no futuro, mantendo isso.
-    activation_limit_date = today
+    tomorrow = today + timedelta(days=1)
+    activation_limit_date = tomorrow
     
     logger.info('>>>>>>>>>> ATIVAÇÂO SM INICIADA')
 
@@ -1664,8 +1664,7 @@ def simActivateSM(id=None): # Orange e AT&T
             elif order.data_day == '30-ilimitado':
                 product_id = 19
             elif order.data_day == 'world':
-                # product_id = 7
-                continue
+                product_id = 7
             elif order.data_day == '20gb':
                 product_id = 9
             elif order.data_day == '50gb':
@@ -1833,112 +1832,112 @@ def simAgdOperator():
             continue
         
 
-@shared_task(time_limit=110, soft_time_limit=100)
-def simActivateOR(id=None):
-    """
-    Ativa SIMs da operadora **Orange (OR)** para pedidos com status ``AA``.
+# @shared_task(time_limit=110, soft_time_limit=100)
+# def simActivateOR(id=None):
+#     """
+#     Ativa SIMs da operadora **Orange (OR)** para pedidos com status ``AA``.
 
-    Args:
-        id (int, optional): PK do pedido a ativar. Se ``None``, processa todos
-            os pedidos com status ``AA`` e operadora ``OR`` com data <= amanhã.
+#     Args:
+#         id (int, optional): PK do pedido a ativar. Se ``None``, processa todos
+#             os pedidos com status ``AA`` e operadora ``OR`` com data <= amanhã.
 
-    Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
-    """
-    tz = pytz.timezone(settings.TIME_ZONE)
-    today = datetime.now(tz).date()
-    tomorrow = today + timedelta(days=1)
+#     Limites: ``soft_time_limit=100s``, ``time_limit=110s``.
+#     """
+#     tz = pytz.timezone(settings.TIME_ZONE)
+#     today = datetime.now(tz).date()
+#     tomorrow = today + timedelta(days=1)
 
-    logger.info(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA')
-    logger.info(
-        'Janela de ativação OR | timezone=%s | today=%s | tomorrow=%s | id=%s',
-        settings.TIME_ZONE,
-        today,
-        tomorrow,
-        id,
-    )
+#     logger.info(f'>>>>>>>>>> ATIVAÇÂO OR INICIADA')
+#     logger.info(
+#         'Janela de ativação OR | timezone=%s | today=%s | tomorrow=%s | id=%s',
+#         settings.TIME_ZONE,
+#         today,
+#         tomorrow,
+#         id,
+#     )
     
-    # Selecionar pedidos
-    if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=tomorrow)
-        logger.info(
-            'Consulta OR executada | filtros: status=AA, operator=OR, activation_date<=%s | total=%s',
-            tomorrow,
-            orders_all.count(),
-        )
-    else:
-        orders_all = Orders.objects.filter(pk=id)
-        logger.info('Consulta OR por id executada | id=%s | encontrado=%s', id, orders_all.exists())
+#     # Selecionar pedidos
+#     if id is None:
+#         orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=tomorrow)
+#         logger.info(
+#             'Consulta OR executada | filtros: status=AA, operator=OR, activation_date<=%s | total=%s',
+#             tomorrow,
+#             orders_all.count(),
+#         )
+#     else:
+#         orders_all = Orders.objects.filter(pk=id)
+#         logger.info('Consulta OR por id executada | id=%s | encontrado=%s', id, orders_all.exists())
     
-    if not orders_all.exists():
-        logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
-        return
+#     if not orders_all.exists():
+#         logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
+#         return
 
-    ids_preview = list(orders_all.values_list('id', flat=True)[:20])
-    logger.info('Pedidos OR selecionados (primeiros 20 ids): %s', ids_preview)
+#     ids_preview = list(orders_all.values_list('id', flat=True)[:20])
+#     logger.info('Pedidos OR selecionados (primeiros 20 ids): %s', ids_preview)
            
-    for order in orders_all:
+#     for order in orders_all:
         
-        logger.info(
-            'Processando OR | order_id=%s | id_item=%s | sim_id=%s | sim=%s | type_sim=%s | data_day=%s | activation_date=%s',
-            order.order_id,
-            order.id,
-            order.id_sim_id,
-            order.id_sim.sim,
-            order.id_sim.type_sim if order.id_sim else None,
-            order.data_day,
-            order.activation_date,
-        )
-        order = Orders.objects.get(pk=order.id)
-        id_item = order.id
-        order_id = order.order_id
+#         logger.info(
+#             'Processando OR | order_id=%s | id_item=%s | sim_id=%s | sim=%s | type_sim=%s | data_day=%s | activation_date=%s',
+#             order.order_id,
+#             order.id,
+#             order.id_sim_id,
+#             order.id_sim.sim,
+#             order.id_sim.type_sim if order.id_sim else None,
+#             order.data_day,
+#             order.activation_date,
+#         )
+#         order = Orders.objects.get(pk=order.id)
+#         id_item = order.id
+#         order_id = order.order_id
         
-        # ORANGE: Ativação automática para eSIM específico
-        if order.id_sim.type_sim == 'esim' and order.data_day == 'world' and order.id_sim_id==48138:  # SIM específico para ativação automática OR
-            logger.info('Branch OR especial acionado | order_id=%s | sim_id=%s', order.order_id, order.id_sim_id)
-            sim_ds = Sims.objects.all().order_by('id').filter(operator='OR', type_sim='esim', sim_status='DS', data='world').first()
-            if sim_ds is None:
-                logger.error(
-                    'Sem SIM DS disponível para branch OR especial | order_id=%s | filtros: operator=OR,type_sim=esim,sim_status=DS,data=world',
-                    order.order_id,
-                )
-                continue
-            sim_put = Sims.objects.get(pk=sim_ds.id)
-            sim_put.sim_status = 'AT'
-            sim_put.save()
-            logger.info('SIM substituto ativado | order_id=%s | novo_sim_id=%s | novo_sim=%s', order.order_id, sim_put.id, sim_put.sim)
+#         # ORANGE: Ativação automática para eSIM específico
+#         if order.id_sim.type_sim == 'esim' and order.data_day == 'world' and order.id_sim_id==48138:  # SIM específico para ativação automática OR
+#             logger.info('Branch OR especial acionado | order_id=%s | sim_id=%s', order.order_id, order.id_sim_id)
+#             sim_ds = Sims.objects.all().order_by('id').filter(operator='OR', type_sim='esim', sim_status='DS', data='world').first()
+#             if sim_ds is None:
+#                 logger.error(
+#                     'Sem SIM DS disponível para branch OR especial | order_id=%s | filtros: operator=OR,type_sim=esim,sim_status=DS,data=world',
+#                     order.order_id,
+#                 )
+#                 continue
+#             sim_put = Sims.objects.get(pk=sim_ds.id)
+#             sim_put.sim_status = 'AT'
+#             sim_put.save()
+#             logger.info('SIM substituto ativado | order_id=%s | novo_sim_id=%s | novo_sim=%s', order.order_id, sim_put.id, sim_put.sim)
             
-            time.sleep(1)
+#             time.sleep(1)
             
-            order_put = Orders.objects.get(pk=order.id)
-            order_put.id_sim_id = sim_ds.id            
-            order_put.save()
-            logger.info('Pedido atualizado com novo SIM OR especial | order_id=%s | novo_sim_id=%s', order.order_id, sim_ds.id)
-        elif order.id_sim_id == 48138:
-            logger.info(
-                'Pedido ignorado por regra OR especial | order_id=%s | sim_id=%s | motivo=data_day/type_sim fora da regra',
-                order.order_id,
-                order.id_sim_id,
-            )
-            continue
+#             order_put = Orders.objects.get(pk=order.id)
+#             order_put.id_sim_id = sim_ds.id            
+#             order_put.save()
+#             logger.info('Pedido atualizado com novo SIM OR especial | order_id=%s | novo_sim_id=%s', order.order_id, sim_ds.id)
+#         elif order.id_sim_id == 48138:
+#             logger.info(
+#                 'Pedido ignorado por regra OR especial | order_id=%s | sim_id=%s | motivo=data_day/type_sim fora da regra',
+#                 order.order_id,
+#                 order.id_sim_id,
+#             )
+#             continue
             
-        send_email_sims.delay(order.id)
-        logger.info('E-mail de ativação enfileirado | order_id=%s', order.order_id)
+#         send_email_sims.delay(order.id)
+#         logger.info('E-mail de ativação enfileirado | order_id=%s', order.order_id)
         
         
-        # Alterar status
-        UpdateOrder.upStatus(id_item,'AT')
-        UpdateStore.upStore(
-            order_id = order_id,
-            item_id_store = order.item_id_store if order.item_id_store else None,
-            _status = 'AT',
-            status_g = 'AT',
-        )            
-        # Adicionar nota
-        NotesAdd.addNote(order,f'eSIM Ativado - Processo automático')
-        logger.info('Pedido finalizado em OR | order_id=%s | status_final=AT', order.order_id)
+#         # Alterar status
+#         UpdateOrder.upStatus(id_item,'AT')
+#         UpdateStore.upStore(
+#             order_id = order_id,
+#             item_id_store = order.item_id_store if order.item_id_store else None,
+#             _status = 'AT',
+#             status_g = 'AT',
+#         )            
+#         # Adicionar nota
+#         NotesAdd.addNote(order,f'eSIM Ativado - Processo automático')
+#         logger.info('Pedido finalizado em OR | order_id=%s | status_final=AT', order.order_id)
         
                 
-    logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
+#     logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
 
 
     
