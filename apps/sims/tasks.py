@@ -1853,15 +1853,17 @@ def simActivateOR(id=None):
     # Selecionar pedidos
     if id is None:
         orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='OR', activation_date__lte=tomorrow)
+        logger.info(f'Pedidos encontrados para ativação: {orders_all.count()}')
     else:
         orders_all = Orders.objects.filter(pk=id)
     
-    if orders_all.count() == 0:
+    if not orders_all.exists():
         logger.info('>>>>>>>>>> ATIVAÇÂO OR FINALIZADA')
         return
            
     for order in orders_all:
-                                
+        
+        logger.info(f'Processando ativação para o pedido {order.order_id} (SIM: {order.id_sim.sim})')                        
         order = Orders.objects.get(pk=order.id)
         id_item = order.id
         order_id = order.order_id
