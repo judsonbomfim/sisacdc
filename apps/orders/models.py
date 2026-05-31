@@ -78,6 +78,7 @@ ORDER_STATUS = [
     ('MB', 'Motoboy'),
     ('PR', 'Processando'),
     ('PV', 'Plano de Voz'),
+    ('SE', 'SIM sem Estoque'),
     ('RB', 'Reembolsado'),
     ('RE', 'Reembolsar'),
     ('RC', 'Reembolso Parcial'),

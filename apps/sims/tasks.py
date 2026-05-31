@@ -93,7 +93,9 @@ def sims_in_orders():
             
             # Select SIM
             if reuso_sim != '-':
-                sim_ds = Sims.objects.filter(sim=reuso_sim).first()
+                # sim_ds = Sims.objects.filter(sim=reuso_sim).first()
+                status_ord = 'RS'
+                addNote(f'SIM de reuso. Verificar')
             # elif operator_i == 'OR':
             #     sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS', data=data_day_i).first()
             #     if sim_ds:
@@ -107,16 +109,19 @@ def sims_in_orders():
                     pass
                 else:
                     logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
+                    order_put = Orders.objects.get(pk=id_id_i)
+                    order_put.order_status = "SE"
+                    order_put.save()
                     continue
             
             # update order
             # Save SIMs
-            if (type_sim_i == 'esim' or reuso_sim != '-'):
+            if type_sim_i == 'esim':
                 status_ord = 'AA'
                 # Enviar e-mail
                 send_email_sims.delay(id=id_id_i)
                 addNote(f'Status alterado para Agd. Ativação')
-                logger.info(f'Pedido {order_id_i} com eSIM ou reuso, status definido para AA e e-mail enviado!')
+                logger.info(f'Pedido {order_id_i} com eSIM, status definido para AA e e-mail enviado!')
             elif type_sim_i == 'sim': status_ord = 'ES'
             
             order_put = Orders.objects.get(pk=id_id_i)
