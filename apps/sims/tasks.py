@@ -96,6 +96,10 @@ def sims_in_orders():
                 # sim_ds = Sims.objects.filter(sim=reuso_sim).first()
                 status_ord = 'RS'
                 addNote(f'SIM de reuso. Verificar')
+                order_put = Orders.objects.get(pk=id_id_i)
+                order_put.order_status = status_ord
+                order_put.save()
+                continue
             # elif operator_i == 'OR':
             #     sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS', data=data_day_i).first()
             #     if sim_ds:
