@@ -10,7 +10,7 @@ from celery import shared_task
 from django.utils.text import slugify
 
 from apps.sims.classes import operPlan
-from .classes import ApiStore, StatusStore, DateFormats, UpdateStore
+from .classes import ApiStore, StatusStore, DateFormats, UpdateStore, ExportClients
 from apps.orders.models import Orders, Notes
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls, VoiceNumbers
@@ -833,3 +833,9 @@ def update_st(*args, **kwargs):
         n_page += 1
 
     logger.info(f'Total de pedidos processados: {total_ord}')
+
+
+@shared_task(time_limit=3600, soft_time_limit=3500)
+def export_clients(export_id):
+    """Exporta clientes do WooCommerce via :class:`ExportClients`."""
+    ExportClients.run(export_id)

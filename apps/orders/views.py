@@ -1,5 +1,4 @@
 import operator
-import os
 from django.contrib.auth.models import User
 from rolepermissions.decorators import has_permission_decorator
 import csv
@@ -15,8 +14,8 @@ from apps.sims.classes import ApiTC, ApiCM
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
-from .classes import ApiStore, NoteStore, StatusStore, DateFormats, UpdateStore
-from .tasks import order_import, orders_up_status, update_st
+from .classes import ApiStore, NoteStore, StatusStore, DateFormats, UpdateStore, ExportClients
+from .tasks import order_import, orders_up_status, update_st, export_clients
 import pandas as pd
 
 
@@ -844,42 +843,34 @@ def update_status(request):
     return HttpResponse('Atualizando status!')
 
 
-# def textImg(request):
-#     # Carrega a imagem em escala de cinza
-#     img = cv2.imread('static/imei2.jpg', cv2.IMREAD_GRAYSCALE)
-#     # Extrai o texto da imagem
-#     texto = pytesseract.image_to_string(img)
-#     textos = texto.split()
-#     txt = []
-#     for t in textos:
-#         txt.append(f'{t}<br>')
-    
-#     return HttpResponse(txt)
+@login_required(login_url='/login/')
+@has_permission_decorator('export_activations')
+def export_client_progress(request):
+    export_id = request.GET.get('export_id')
+    if not export_id:
+        return JsonResponse({'status': 'error', 'message': 'ID de exportação inválido.'}, status=400)
+    return JsonResponse(ExportClients.read_progress(export_id))
 
-# def esimExpSis(request):
-    
-        
-#     apiStore = ApiStore.conectApiStore()
-#     # Get the order
-#     order_id = 54085
-    
-#     # Add the meta data
-#     meta_data_list = {
-#         "meta_data":[
-#             {
-#                 "key": "campo_esims",
-#                 "value": "<img src='https://painel.acasadochip.com/media/8932042000002302486.jpeg' style='width: 300px; margin:40px;'><img src='https://painel.acasadochip.com/media/8932042000002302486.jpeg' style='width: 300px; margin:40px;'>"
-#             },
-#         ]
-#     }
 
-#     # Update the order
-#     apiStore.put(f"orders/{order_id}", meta_data_list).json()    
-#     return HttpResponse('eSIM enviado!')
+@login_required(login_url='/login/')
+@has_permission_decorator('export_activations')
+def export_client_download(request):
+    export_id = request.GET.get('export_id')
+    if not export_id:
+        return HttpResponse('ID de exportação inválido.', status=400)
 
-# # def vendasSem(request):
-# apiStore = conectApiStore()
-# dateNow = datetime.datetime.now()  
+    response = ExportClients.build_download_response(export_id)
+    if response is None:
+        return HttpResponse('Arquivo não encontrado ou exportação ainda em andamento.', status=404)
+    return response
 
-# dateSem = datetime.datetime.now() - datetime.timedelta(days=7)
-# vendasDaSemana = apiStore.get('reports/sales', params={'date_min': dateSem, 'date_max': dateNow})
+
+@login_required(login_url='/login/')
+@has_permission_decorator('export_activations')
+def exportClient(request):
+    if request.method == 'POST':
+        export_id = ExportClients.start()
+        export_clients.delay(export_id)
+        return JsonResponse({'export_id': export_id})
+
+    return render(request, 'painel/orders/export_clients.html')

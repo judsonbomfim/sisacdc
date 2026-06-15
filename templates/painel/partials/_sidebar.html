@@ -35,6 +35,11 @@
                             <a href="{% url 'send_esims' %}">Enviar eSIMs</a>
                         </li>
                         {% endif %}
+                        {% if request.user|can:'import_orders' %}
+                        <li class="{% urL_active request '/pedidos/exportar/clientes/' %}">
+                            <a href="{% url 'export_client' %}">Exportar Clientes</a>
+                        </li>
+                        {% endif %}
                     </ul>
                 </li>
                 {% endif %}
@@ -50,11 +55,6 @@
                         <li class="{% urL_active request '/pedidos/ativacoes/' %}">
                             <a href="{% url 'orders_activations' %}">Listar Ativações</a>
                         </li>
-                        {% if request.user|can:'export_activations' %}
-                        <li class="{% urL_active request '/pedidos/exportar/' %}">
-                            <a href="{% url 'ord_export_op' %}">Exportar para Ativação</a>
-                        </li>
-                        {% endif %}
                     </ul>
                 </li>
                 {% endif %}

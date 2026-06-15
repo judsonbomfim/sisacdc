@@ -12,13 +12,24 @@ Classes:
     - :class:`DateFormats` — Utilitários de formatação de datas.
     - :class:`NotesAdd` — Registro de notas internas no banco.
     - :class:`UpdateOrder` — Atualização de status no banco local.
+    - :class:`ExportClients` — Exportação de clientes WooCommerce para CSV.
 """
 
-from woocommerce import API
-import os
-from apps.orders.models import Orders, Notes
-from django.contrib.auth.models import User
+import csv
+import json
 import logging
+import os
+import time
+import uuid
+from datetime import date
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+from woocommerce import API
+
+from apps.orders.models import Orders, Notes
+
 logger = logging.getLogger(__name__)
 
 class ApiStore():
@@ -260,3 +271,168 @@ class UpdateOrder():
         order = Orders.objects.get(pk=order_id)
         order.order_status = order_st
         order.save()
+
+
+class ExportClients:
+    """Exportação paginada de clientes do WooCommerce com acompanhamento de progresso."""
+
+    CSV_HEADER = ['Nome', 'Sobrenome', 'Billing phone', 'Billing cellphone', 'Email']
+    PER_PAGE = 100
+    PAGE_DELAY = 0.3
+
+    @classmethod
+    def export_dir(cls):
+        export_dir = os.path.join(settings.BASE_DIR, 'tmp', 'exports')
+        os.makedirs(export_dir, exist_ok=True)
+        return export_dir
+
+    @classmethod
+    def progress_path(cls, export_id):
+        return os.path.join(cls.export_dir(), f'{export_id}_progress.json')
+
+    @classmethod
+    def csv_path(cls, export_id):
+        return os.path.join(cls.export_dir(), f'{export_id}.csv')
+
+    @classmethod
+    def write_progress(cls, export_id, data):
+        with open(cls.progress_path(export_id), 'w', encoding='utf-8') as progress_file:
+            json.dump(data, progress_file, ensure_ascii=False)
+
+    @classmethod
+    def read_progress(cls, export_id):
+        progress_path = cls.progress_path(export_id)
+        if not os.path.exists(progress_path):
+            return {
+                'status': 'pending',
+                'message': 'Iniciando exportação...',
+                'processed': 0,
+                'total': 0,
+                'page': 0,
+                'total_pages': 0,
+            }
+        with open(progress_path, encoding='utf-8') as progress_file:
+            return json.load(progress_file)
+
+    @staticmethod
+    def _cellphone(customer):
+        billing = customer.get('billing') or {}
+        cellphone = billing.get('cellphone', '')
+        if cellphone:
+            return cellphone
+        for meta in customer.get('meta_data') or []:
+            if meta.get('key') in ('billing_cellphone', 'cellphone', '_billing_cellphone'):
+                return meta.get('value', '') or ''
+        return ''
+
+    @staticmethod
+    def _customer_row(customer):
+        billing = customer.get('billing') or {}
+        return [
+            billing.get('first_name') or customer.get('first_name', ''),
+            billing.get('last_name') or customer.get('last_name', ''),
+            billing.get('phone', ''),
+            ExportClients._cellphone(customer),
+            billing.get('email') or customer.get('email', ''),
+        ]
+
+    @classmethod
+    def run(cls, export_id):
+        csv_path = cls.csv_path(export_id)
+        api_store = ApiStore.conectApiStore()
+        page = 1
+        total_pages = None
+        total_customers = 0
+        processed = 0
+
+        cls.write_progress(export_id, {
+            'status': 'running',
+            'page': 0,
+            'total_pages': 0,
+            'processed': 0,
+            'total': 0,
+            'message': 'Conectando à loja...',
+        })
+
+        try:
+            with open(csv_path, 'w', newline='', encoding='utf-8-sig') as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerow(cls.CSV_HEADER)
+
+                while True:
+                    response = api_store.get('customers', params={
+                        'per_page': cls.PER_PAGE,
+                        'page': page,
+                        'orderby': 'id',
+                        'order': 'asc',
+                    })
+
+                    if response.status_code >= 500:
+                        raise RuntimeError(f'Erro no servidor da loja: HTTP {response.status_code}')
+                    if response.status_code >= 400:
+                        raise RuntimeError(f'Erro ao buscar clientes: HTTP {response.status_code}')
+
+                    if total_pages is None:
+                        total_pages = int(response.headers.get('X-WP-TotalPages', 1) or 1)
+                        total_customers = int(response.headers.get('X-WP-Total', 0) or 0)
+
+                    customers = response.json()
+                    if not customers:
+                        break
+
+                    for customer in customers:
+                        writer.writerow(cls._customer_row(customer))
+                        processed += 1
+
+                    cls.write_progress(export_id, {
+                        'status': 'running',
+                        'page': page,
+                        'total_pages': total_pages,
+                        'processed': processed,
+                        'total': total_customers,
+                        'message': f'Página {page} de {total_pages} — {processed} clientes exportados',
+                    })
+
+                    if page >= total_pages:
+                        break
+
+                    page += 1
+                    time.sleep(cls.PAGE_DELAY)
+
+            cls.write_progress(export_id, {
+                'status': 'done',
+                'page': page,
+                'total_pages': total_pages or page,
+                'processed': processed,
+                'total': total_customers or processed,
+                'message': f'Exportação concluída — {processed} clientes',
+            })
+            logger.info(f'[ExportClients] Exportação {export_id} concluída: {processed} clientes')
+
+        except Exception as exc:
+            logger.error(f'[ExportClients] Falha na exportação {export_id}: {exc}')
+            cls.write_progress(export_id, {
+                'status': 'error',
+                'processed': processed,
+                'total': total_customers,
+                'message': f'Erro na exportação: {exc}',
+            })
+            if os.path.exists(csv_path):
+                os.remove(csv_path)
+            raise
+
+    @classmethod
+    def start(cls):
+        export_id = str(uuid.uuid4())
+        cls.export_dir()
+        return export_id
+
+    @classmethod
+    def build_download_response(cls, export_id):
+        csv_path = cls.csv_path(export_id)
+        if not os.path.exists(csv_path):
+            return None
+        with open(csv_path, 'rb') as csv_file:
+            response = HttpResponse(csv_file.read(), content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = f'attachment; filename="clientes-{date.today()}.csv"'
+        return response
