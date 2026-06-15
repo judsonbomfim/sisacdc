@@ -837,5 +837,9 @@ def update_st(*args, **kwargs):
 
 @shared_task(time_limit=3600, soft_time_limit=3500)
 def export_clients(export_id):
-    """Exporta clientes do WooCommerce via :class:`ExportClients`."""
-    ExportClients.run(export_id)
+    """Exporta clientes do WooCommerce via :class:`ExportClients` (uso legado via Celery)."""
+    while True:
+        state = ExportClients.process_next_page(export_id)
+        if state.get('status') in ('done', 'error'):
+            break
+        time.sleep(0.3)

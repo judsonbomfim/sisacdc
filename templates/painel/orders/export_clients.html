@@ -5,7 +5,7 @@
 
 {% block content_def %}
     <p>Exporta todos os clientes do WooCommerce com nome, telefone, celular e e-mail.</p>
-    <p class="text-muted">A exportação roda em segundo plano, em lotes de 100 clientes, para não sobrecarregar o servidor.</p>
+    <p class="text-muted">A exportação processa lotes de 100 clientes por vez, para não sobrecarregar o servidor.</p>
 
     <button type="button" id="btn-export-clients" class="btn btn-default btn-rounded color-primary btn-primary">
         <span class="flex items-center">
@@ -42,8 +42,6 @@
         const progressDetail = document.getElementById('export-progress-detail');
         const btnDownload = document.getElementById('btn-download-csv');
 
-        let pollTimer = null;
-
         function getProgressPercent(data) {
             if (data.status === 'done') return 100;
             if (data.total && data.total > 0) {
@@ -52,7 +50,8 @@
             if (data.total_pages && data.page) {
                 return Math.min(99, Math.round((data.page / data.total_pages) * 100));
             }
-            return 5;
+            if (data.status === 'pending') return 2;
+            return 10;
         }
 
         function updateProgressUI(data) {
@@ -69,37 +68,40 @@
             }
         }
 
-        function stopPolling() {
-            if (pollTimer) {
-                clearInterval(pollTimer);
-                pollTimer = null;
-            }
-        }
-
-        function pollProgress(exportId) {
-            fetch(progressUrl + '?export_id=' + encodeURIComponent(exportId), {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            })
-                .then(function (response) { return response.json(); })
-                .then(function (data) {
-                    updateProgressUI(data);
-
-                    if (data.status === 'done') {
-                        stopPolling();
-                        progressBar.classList.remove('progress-bar-animated');
-                        btnStart.disabled = false;
-                        btnDownload.href = downloadUrlBase + '?export_id=' + encodeURIComponent(exportId);
-                        btnDownload.classList.remove('d-none');
-                    } else if (data.status === 'error') {
-                        stopPolling();
-                        progressBar.classList.remove('progress-bar-animated');
-                        progressBar.classList.add('bg-danger');
-                        btnStart.disabled = false;
+        async function runExport(exportId) {
+            while (true) {
+                const response = await fetch(
+                    progressUrl + '?export_id=' + encodeURIComponent(exportId),
+                    {
+                        credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     }
-                })
-                .catch(function () {
-                    progressMessage.textContent = 'Erro ao consultar o progresso. Tentando novamente...';
-                });
+                );
+
+                if (!response.ok) {
+                    throw new Error('Falha ao consultar progresso');
+                }
+
+                const data = await response.json();
+                updateProgressUI(data);
+
+                if (data.status === 'done') {
+                    progressBar.classList.remove('progress-bar-animated');
+                    btnStart.disabled = false;
+                    btnDownload.href = downloadUrlBase + '?export_id=' + encodeURIComponent(exportId);
+                    btnDownload.classList.remove('d-none');
+                    return;
+                }
+
+                if (data.status === 'error') {
+                    progressBar.classList.remove('progress-bar-animated');
+                    progressBar.classList.add('bg-danger');
+                    btnStart.disabled = false;
+                    return;
+                }
+
+                await new Promise(function (resolve) { setTimeout(resolve, 300); });
+            }
         }
 
         btnStart.addEventListener('click', function () {
@@ -114,20 +116,19 @@
 
             fetch(startUrl, {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'X-CSRFToken': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest',
                 },
             })
-                .then(function (response) { return response.json(); })
+                .then(function (response) {
+                    if (!response.ok) throw new Error('Falha ao iniciar');
+                    return response.json();
+                })
                 .then(function (data) {
-                    if (!data.export_id) {
-                        throw new Error('Resposta inválida');
-                    }
-                    pollProgress(data.export_id);
-                    pollTimer = setInterval(function () {
-                        pollProgress(data.export_id);
-                    }, 2000);
+                    if (!data.export_id) throw new Error('Resposta inválida');
+                    return runExport(data.export_id);
                 })
                 .catch(function () {
                     progressMessage.textContent = 'Não foi possível iniciar a exportação.';

@@ -15,7 +15,7 @@ from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
 from .classes import ApiStore, NoteStore, StatusStore, DateFormats, UpdateStore, ExportClients
-from .tasks import order_import, orders_up_status, update_st, export_clients
+from .tasks import order_import, orders_up_status, update_st
 import pandas as pd
 
 
@@ -849,7 +849,7 @@ def export_client_progress(request):
     export_id = request.GET.get('export_id')
     if not export_id:
         return JsonResponse({'status': 'error', 'message': 'ID de exportação inválido.'}, status=400)
-    return JsonResponse(ExportClients.read_progress(export_id))
+    return JsonResponse(ExportClients.process_next_page(export_id))
 
 
 @login_required(login_url='/login/')
@@ -870,7 +870,6 @@ def export_client_download(request):
 def exportClient(request):
     if request.method == 'POST':
         export_id = ExportClients.start()
-        export_clients.delay(export_id)
         return JsonResponse({'export_id': export_id})
 
     return render(request, 'painel/orders/export_clients.html')
