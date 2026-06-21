@@ -79,6 +79,7 @@ def sims_in_orders():
                     operator_i = 'CM'
             elif product_i in operPlan.listPlan('TM'): # EUA Ilimitado
                 operator_i = 'TM'
+                status_ord = 'AI'
                 sim_ds = Sims.objects.all().get(pk=0)
                 addNote(f'eSIM EUA - SIM padrão adicionado')
             # elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim': # EUA Ilimitado
@@ -93,30 +94,23 @@ def sims_in_orders():
             
             # Select SIM
             if reuso_sim != '-':
-                # sim_ds = Sims.objects.filter(sim=reuso_sim).first()
                 status_ord = 'RS'
                 addNote(f'SIM de reuso. Verificar')
                 order_put = Orders.objects.get(pk=id_id_i)
                 order_put.order_status = status_ord
                 order_put.save()
                 continue
-            # elif operator_i == 'OR':
-            #     sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS', data=data_day_i).first()
-            #     if sim_ds:
-            #         pass
-            #     else:
-            #         logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
-            #         continue
             else:
-                sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
-                if sim_ds:
-                    pass
-                else:
-                    logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
-                    order_put = Orders.objects.get(pk=id_id_i)
-                    order_put.order_status = "SE"
-                    order_put.save()
-                    continue
+                if operator_i != 'TM': # Se não for EUA
+                    sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
+                    if sim_ds:
+                        pass
+                    else:
+                        logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
+                        order_put = Orders.objects.get(pk=id_id_i)
+                        order_put.order_status = "SE"
+                        order_put.save()
+                        continue
             
             # update order
             # Save SIMs

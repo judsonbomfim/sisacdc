@@ -754,11 +754,11 @@ class operPlan():
                 'chip-internacional-oceania-franquia-total',
                 'chip-internacional-caribe-franquia-total',
             }
-        elif operator == 'AT':
-            planList = {
-                'chip-internacional-eua',
-                'chip-internacional-eua-30-dias',
-            }
+        # elif operator == 'AT':
+        #     planList = {
+        #         'chip-internacional-eua',
+        #         'chip-internacional-eua-30-dias',
+        #     }
         elif operator == 'TM':
             planList = {
                 'chip-internacional-eua',
