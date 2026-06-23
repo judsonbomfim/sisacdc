@@ -79,9 +79,13 @@ def sims_in_orders():
                     operator_i = 'CM'
             elif product_i in operPlan.listPlan('TM'): # EUA Ilimitado
                 operator_i = 'TM'
-                status_ord = 'AI'
-                sim_ds = Sims.objects.all().get(pk=0)
-                addNote(f'eSIM EUA - SIM padrão adicionado')
+                if type_sim_i == 'esim':
+                    status_ord = 'AI'
+                    sim_ds = Sims.objects.all().get(pk=0)
+                    addNote(f'eSIM EUA - SIM padrão adicionado')
+                else:
+                    status_ord = 'ES'
+
             # elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim': # EUA Ilimitado
             #     operator_i = 'AT'
             elif product_i in operPlan.listPlan('TI'):
@@ -114,7 +118,7 @@ def sims_in_orders():
             
             # update order
             # Save SIMs
-            if type_sim_i == 'esim':
+            if type_sim_i == 'esim' and operator_i != 'TM': # Se não for EUA
                 status_ord = 'AA'
                 # Enviar e-mail
                 send_email_sims.delay(id=id_id_i)
