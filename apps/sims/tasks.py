@@ -1795,6 +1795,7 @@ def simAgdOperator():
         
         if status_now == 'completed':
             sim_value = response_data['products'][0]['sim_data']['iccid']
+            msisdn_value = response_data['products'][0]['sim_data']['msisdn']
             lpa_value = response_data['products'][0]['sim_data']['lpa_code']
             
             try:
@@ -1803,6 +1804,7 @@ def simAgdOperator():
                 fileurl = upload_file_to_s3(qr_file).replace(f'https://{settings.AWS_S3_CUSTOM_DOMAIN}', '')
                 add_sim = Sims(
                     sim=sim_value,
+                    msisdn=msisdn_value,
                     lpa=lpa_value,
                     link=fileurl,
                     type_sim=type_sim,

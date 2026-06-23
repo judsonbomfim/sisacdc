@@ -152,6 +152,7 @@ class Orders(models.Model):
     order_status = models.CharField(max_length=20, choices=ORDER_STATUS, default='PR')
     type_sim = models.CharField(max_length=4, null=True, blank=True, default='sim')
     id_sim = models.ForeignKey(Sims, on_delete=models.DO_NOTHING, null=True, blank=True)
+    msisdn = models.IntegerField(null=True, blank=True)
     order_sim = models.CharField(max_length=25, null=True, blank=True)
     condition = models.CharField(max_length=15, choices=CONDITION, default='novo-sim')
     tracking = models.CharField(max_length=25, null=True, blank=True)
