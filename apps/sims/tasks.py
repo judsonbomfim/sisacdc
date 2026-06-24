@@ -104,9 +104,7 @@ def sims_in_orders():
             else:
                 if not operator_i == 'TM' and type_sim_i == 'esim': # Se não for EUA e SIM não for eSIM
                     sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
-                    if sim_ds:
-                        pass
-                    else:
+                    if not sim_ds: # Se não encontrar SIM disponível
                         logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
                         order_put = Orders.objects.get(pk=id_id_i)
                         order_put.order_status = "SE"
@@ -114,13 +112,12 @@ def sims_in_orders():
                         continue            
                     # update order
                     # Save SIMs
-                    status_ord = 'AA'
+                    if not operator_i == 'TM': status_ord = 'AA'
                     # Enviar e-mail
                     send_email_sims.delay(id=id_id_i)
                     addNote(f'Status alterado para Agd. Ativação')
-                    logger.info(f'Pedido {order_id_i} com eSIM, status definido para AA e e-mail enviado!')
-                    
-                if operator_i == 'TM' and type_sim_i == 'sim': status_ord = 'ES'
+                    logger.info(f'Pedido {order_id_i} com eSIM, status definido para AA e e-mail enviado!')                    
+                
             
             order_put = Orders.objects.get(pk=id_id_i)
             order_put.id_sim_id = sim_ds.id            
@@ -268,7 +265,7 @@ def simActivateTC(id=None):
             UpdateOrder.upStatus(id_item,'EA')
             NotesAdd.addNote(order,f'{iccid} Plano não alterado. Verificar plano {dataDay} - TC: Plano não encontrado.')
             continue
-        NotesAdd.addNote(order,f'{iccid} Plano alterado para {product_name} {dataDay} - TELCOM: {json.loads(data_plan)}')    
+        NotesAdd.addNote(order,f'{iccid} Plano alterado para {product_name} {dataDay}')    
 
         if simStatus == 'Pre-Active':
             # Ativar SIM na operadora
