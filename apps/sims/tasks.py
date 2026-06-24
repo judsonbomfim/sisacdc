@@ -85,9 +85,6 @@ def sims_in_orders():
                     addNote(f'eSIM EUA - SIM padrão adicionado')
                 else:
                     status_ord = 'ES'
-
-            # elif product_i in operPlan.listPlan('AT') and type_sim_i == 'esim': # EUA Ilimitado
-            #     operator_i = 'AT'
             elif product_i in operPlan.listPlan('TI'):
                 operator_i = 'TI'
             elif product_i in operPlan.listPlan('TC'):
@@ -105,7 +102,7 @@ def sims_in_orders():
                 order_put.save()
                 continue
             else:
-                if operator_i != 'TM': # Se não for EUA
+                if not operator_i == 'TM' and type_sim_i == 'esim': # Se não for EUA e SIM não for eSIM
                     sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
                     if sim_ds:
                         pass
@@ -114,17 +111,16 @@ def sims_in_orders():
                         order_put = Orders.objects.get(pk=id_id_i)
                         order_put.order_status = "SE"
                         order_put.save()
-                        continue
-            
-            # update order
-            # Save SIMs
-            if type_sim_i == 'esim' and operator_i != 'TM': # Se não for EUA
-                status_ord = 'AA'
-                # Enviar e-mail
-                send_email_sims.delay(id=id_id_i)
-                addNote(f'Status alterado para Agd. Ativação')
-                logger.info(f'Pedido {order_id_i} com eSIM, status definido para AA e e-mail enviado!')
-            elif type_sim_i == 'sim': status_ord = 'ES'
+                        continue            
+                    # update order
+                    # Save SIMs
+                    status_ord = 'AA'
+                    # Enviar e-mail
+                    send_email_sims.delay(id=id_id_i)
+                    addNote(f'Status alterado para Agd. Ativação')
+                    logger.info(f'Pedido {order_id_i} com eSIM, status definido para AA e e-mail enviado!')
+                    
+                if operator_i == 'TM' and type_sim_i == 'sim': status_ord = 'ES'
             
             order_put = Orders.objects.get(pk=id_id_i)
             order_put.id_sim_id = sim_ds.id            
