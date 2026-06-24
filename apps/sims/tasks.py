@@ -102,23 +102,27 @@ def sims_in_orders():
                 order_put.save()
                 continue
             else:
-                if not operator_i == 'TM' and type_sim_i == 'esim': # Se não for EUA e SIM não for eSIM
-                    sim_ds = Sims.objects.all().order_by('id').filter(operator=operator_i, type_sim=type_sim_i, sim_status='DS').first()
-                    if not sim_ds: # Se não encontrar SIM disponível
+                # Busca SIM no estoque para todas as operadoras exceto TM (TM eSIM já tratado acima)
+                if operator_i != 'TM':
+                    sim_ds = Sims.objects.all().order_by('id').filter(
+                        operator=operator_i, type_sim=type_sim_i, sim_status='DS'
+                    ).first()
+                    if not sim_ds:
                         logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
                         order_put = Orders.objects.get(pk=id_id_i)
                         order_put.order_status = "SE"
                         order_put.save()
-                        continue            
-                    # update order
-                    # Save SIMs
-                    if not operator_i == 'TM': status_ord = 'AA'
-                    # Enviar e-mail
+                        continue
+
+                # Apenas eSIM não-TM: status AA + e-mail (TM eSIM já tratado acima)
+                if type_sim_i == 'esim' and operator_i != 'TM':
+                    status_ord = 'AA'
                     send_email_sims.delay(id=id_id_i)
                     addNote(f'Status alterado para Agd. Ativação')
-                    logger.info(f'Pedido {order_id_i} com eSIM, status definido para AA e e-mail enviado!')                    
-                
-            
+                    logger.info(f'Pedido {order_id_i} com eSIM, status definido para AA e e-mail enviado!')
+                elif type_sim_i == 'sim':
+                    status_ord = 'ES'
+
             order_put = Orders.objects.get(pk=id_id_i)
             order_put.id_sim_id = sim_ds.id            
             order_put.order_status = status_ord
