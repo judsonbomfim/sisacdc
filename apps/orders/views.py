@@ -14,6 +14,7 @@ from apps.sims.classes import ApiTC, ApiCM
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
+from apps.voice_calls.models import VoiceCalls
 from .classes import ApiStore, NoteStore, StatusStore, DateFormats, UpdateStore, ExportClients
 from .tasks import order_import, orders_up_status, update_st
 import pandas as pd
@@ -423,6 +424,11 @@ def ord_edit(request,id):
         # Update Order
         if activation_date == '':
             activation_date = order.activation_date
+        else:
+            voice = VoiceCalls.objects.get(id_item=order.id)
+            voice.activation_date = activation_date
+            voice.save()
+            addNote(f'Data alterada de {DateFormats.dateDMA(str(order.activation_date))} para {DateFormats.dateDMA(str(activation_date))}')
         if email == '':
             email = order.email
         if not product or product == '':
