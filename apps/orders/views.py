@@ -455,9 +455,6 @@ def ord_edit(request,id):
         # Save Notes
         if ord_note:
             addNote(ord_note)
-        # Date Notes
-        if activation_date != order.activation_date:
-            addNote(f'Alteração de {DateFormats.dateDMA(str(order.activation_date))} para {DateFormats.dateDMA(str(activation_date))}')
 
         # Plan Notes
         if up_plan:  # Agora up_plan está inicializado
