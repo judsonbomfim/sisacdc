@@ -94,7 +94,7 @@
                                 <br>
                                 <div class="input-group flex-nowrap">
                                     <span class="input-group-text" id="sim_s"><i class="bi bi-sim"></i></span>
-                                    <input type="text" class="form-control" value="{{ order.id_sim.sim }} {% if order.msisdn %} / {{ order.msisdn }}{% endif %}" disabled>
+                                    <input type="text" class="form-control" value="{{ order.id_sim.sim }} {% if order.id_sim.msisdn %} / {{ order.id_sim.msisdn }}{% endif %}" disabled>
                                     <label class="input-group-text ms-3" id="sim" for="new_sim">Novo SIM</label>
                                     <input type="text" class="form-control" id="new_sim" name="sim" placeholder="SIM"
                                         aria-label="SIM">
