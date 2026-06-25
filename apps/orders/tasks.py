@@ -251,12 +251,10 @@ def order_import():
                             order_status_i = 'MB'
                         elif condition_i == 'reuso-sim':
                             order_status_i = 'RS'
-                        elif type_sim_i == 'esim':
-                            order_status_i = 'AS'
+                        elif activation_date_i == '2001-01-01':
+                            order_status_i = 'EI'
                         else:
                             order_status_i = 'AS'
-                        if activation_date_i == '2001-01-01':
-                            order_status_i = 'EI'
 
                         simOR = None
                         simAT = None
@@ -274,8 +272,6 @@ def order_import():
                                     data_day_i = '50gb'
                             else:
                                 data_day_i = 'world'
-                            order_status_i = 'AA'
-                            simOR = Sims.objects.filter(pk=48138).first()  # SIM genérico para ativação OR
                         elif product_i in operPlan.listPlan('TM'):
                             calls_i = False
                             

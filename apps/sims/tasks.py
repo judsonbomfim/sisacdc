@@ -48,128 +48,133 @@ def sims_in_orders():
     msg_error = []
     
     for ord in orders:
-        
         id_id_i = ord.id
         order_id_i = ord.order_id
         product_i = ord.product
         condition_i = ord.condition
-        type_sim_i = ord.type_sim
-        data_day_i = ord.data_day
-        # celular_samsung = ord.celular_samsung
+        type_sim_i = ord.type_sim or 'sim'
         reuso_sim = ord.ord_chip_nun
         update_store = {}
-        
-        # Se já houver SIM   
-        if ord.id_sim != None:
+        sim_ds = None
+        status_ord = 'AA'
+
+        if ord.id_sim is not None:
             continue
-        else:    
-            # Notes
+
+        try:
             def addNote(t_note):
-                add_sim = Notes( 
-                    id_item = Orders.objects.get(pk=id_id_i),
-                    note = t_note,
-                    type_note = 'S',
+                add_sim = Notes(
+                    id_item=Orders.objects.get(pk=id_id_i),
+                    note=t_note,
+                    type_note='S',
                 )
                 add_sim.save()
 
+            #Definir Operadora
             if product_i == 'chip-internacional-eua-canada-e-mexico':
                 if condition_i == 'novo-sim':
                     operator_i = 'TC'
                 else:
                     operator_i = 'CM'
-            elif product_i in operPlan.listPlan('TM'): # EUA Ilimitado
+            elif product_i in operPlan.listPlan('TM'):
                 operator_i = 'TM'
-                if type_sim_i == 'esim':
-                    status_ord = 'AI'
-                    sim_ds = Sims.objects.all().get(pk=0)
-                    addNote(f'eSIM EUA - SIM padrão adicionado')
-                else:
-                    status_ord = 'ES'
             elif product_i in operPlan.listPlan('TI'):
                 operator_i = 'TI'
             elif product_i in operPlan.listPlan('TC'):
                 operator_i = 'TC'
             elif product_i in operPlan.listPlan('OR'):
                 operator_i = 'OR'
-            else: operator_i = 'CM'
-            
-            # Select SIM
+            else:
+                operator_i = 'CM'
+
+            # Verificar SIM de reuso
             if reuso_sim != '-':
                 status_ord = 'RS'
-                addNote(f'SIM de reuso. Verificar')
+                addNote('SIM de reuso. Verificar')
                 order_put = Orders.objects.get(pk=id_id_i)
                 order_put.order_status = status_ord
                 order_put.save()
                 continue
-            else:
-                # Busca SIM no estoque para todas as operadoras exceto TM (TM eSIM já tratado acima)
-                if operator_i != 'TM':
-                    sim_ds = Sims.objects.all().order_by('id').filter(
-                        operator=operator_i, type_sim=type_sim_i, sim_status='DS'
-                    ).first()
-                    if not sim_ds:
-                        logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
-                        order_put = Orders.objects.get(pk=id_id_i)
-                        order_put.order_status = "SE"
-                        order_put.save()
-                        continue
+            
+            # Atribuir SIM Padrão
+            if operator_i == 'TM' and type_sim_i == 'esim':
+                status_ord = 'AI'
+                sim_ds = Sims.objects.filter(pk=0).first() # Sim padrão TM
+                if sim_ds:
+                    addNote('eSIM EUA - SIM padrão adicionado')
+                else:
+                    logger.error(f'SIM padrão TM (pk=0) não encontrado para pedido {order_id_i}')
+            elif operator_i == 'OR':
+                sim_ds = Sims.objects.filter(pk=48138).first() # Sim padrão TM
+            else: # Atribuir SIM Disponível          
+                sim_ds = Sims.objects.all().order_by('id').filter(
+                    operator=operator_i, type_sim=type_sim_i, sim_status='DS'
+                ).first()
+                if not sim_ds:
+                    logger.info(f'-------------------- SIMs {operator_i} indisponíveis!')
+                    addNote('SIM indisponível. Verificar estoque e SIMs disponíveis')                    
+                    order_put = Orders.objects.get(pk=id_id_i)
+                    order_put.order_status = 'SE'
+                    order_put.save()
+                    continue
 
-                # Apenas eSIM não-TM: status AA + e-mail (TM eSIM já tratado acima)
-                if type_sim_i == 'esim' and operator_i != 'TM':
-                    status_ord = 'AA'
+                if type_sim_i == 'esim':
                     send_email_sims.delay(id=id_id_i)
-                    addNote(f'Status alterado para Agd. Ativação')
+                    addNote('Status alterado para Agd. Ativação')
                     logger.info(f'Pedido {order_id_i} com eSIM, status definido para AA e e-mail enviado!')
-                elif type_sim_i == 'sim':
+                else:
                     status_ord = 'ES'
 
+            if not sim_ds:
+                logger.error(
+                    f'Pedido {order_id_i} (op={operator_i}, type={type_sim_i}): SIM não definido, ignorado.'
+                )
+                continue
+
             order_put = Orders.objects.get(pk=id_id_i)
-            order_put.id_sim_id = sim_ds.id            
+            order_put.id_sim_id = sim_ds.id
             order_put.order_status = status_ord
             order_put.save()
-            
-            # update sim
+
             sim_put = Sims.objects.get(pk=sim_ds.id)
             sim_put.sim_status = 'AT'
             sim_put.save()
             _sim = sim_put.sim
-            _qrcode = sim_put.link  # Usando o campo link que contém a URL do QR code
+            _qrcode = sim_put.link
 
             addNote(f'(e)SIM {_sim} adicionado')
 
-            # Atualizar pedido no site
             status_sis_site = StatusStore.st_sis_site()
             if status_ord in status_sis_site:
                 update_store = {
                     'status': status_sis_site[status_ord]
                 }
-            
-            # Gravar SIM e QRCode no site
+
             if ord.item_id_store:
                 update_store['line_items'] = [
                     {
-                        "id": int(ord.item_id_store),
-                        "meta_data": [
-                            {
-                                "key": "_sim",
-                                "value": _sim,
-                            },
-                            {
-                                "key": "_qrcode",
-                                "value": _qrcode if _qrcode else "",
-                            }
-                        ]
+                        'id': int(ord.item_id_store),
+                        'meta_data': [
+                            {'key': '_sim', 'value': _sim},
+                            {'key': '_qrcode', 'value': _qrcode if _qrcode else ''},
+                        ],
                     }
                 ]
-    
+
             apiStore = ApiStore.conectApiStore()
             apiStore.put(f'orders/{order_id_i}', update_store)
-                             
+
             msg_info.append(f'Pedido {order_id_i} atualizados com sucesso')
-            
             n_item_total += 1
-    
-        logger.info('>>>>>>>>>>>>>>>>>>>>>>> SIMs atribuidos!')
+
+        except Exception as e:
+            logger.error(
+                f'Erro ao atribuir SIM ao pedido {order_id_i} (pk={id_id_i}): {e}',
+                exc_info=True,
+            )
+            continue
+
+    logger.info('>>>>>>>>>>>>>>>>>>>>>>> SIMs atribuidos!')
     
 
 @shared_task(time_limit=110, soft_time_limit=100)
