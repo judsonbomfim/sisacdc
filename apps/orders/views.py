@@ -425,9 +425,10 @@ def ord_edit(request,id):
         if activation_date == '':
             activation_date = order.activation_date
         else:
-            voice = VoiceCalls.objects.get(id_item=order.id)
-            voice.activation_date = activation_date
-            voice.save()
+            voice = VoiceCalls.objects.filter(id_item=order.id).first()
+            if voice:
+                voice.activation_date = activation_date
+                voice.save()
             addNote(f'Data alterada de {DateFormats.dateDMA(str(order.activation_date))} para {DateFormats.dateDMA(str(activation_date))}')
         if email == '':
             email = order.email
