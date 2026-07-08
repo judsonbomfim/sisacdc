@@ -272,8 +272,6 @@ def order_import():
                                     data_day_i = '50gb'
                             else:
                                 data_day_i = 'world'
-                        elif product_i in operPlan.listPlan('TM'):
-                            calls_i = False
                             
                         shipping_i = shipping_i[:40]
 
