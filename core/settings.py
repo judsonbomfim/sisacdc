@@ -11,7 +11,6 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = str(os.getenv('SECRET_KEY'))
@@ -40,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "collectfasta",  # antes de staticfiles
     'storages',
     'rolepermissions',
     'django_celery_beat',
@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'apps.send_email.apps.SendEmailConfig',
     'apps.voice_calls.apps.VoiceCallsConfig',
 ]
+
+COLLECTFASTA_STRATEGY = "collectfasta.strategies.boto3.Boto3Strategy"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -107,7 +109,6 @@ DATABASES = {
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -126,13 +127,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
 DATE_INPUT_FORMATS = ('%d/%m/%Y',)
 USE_I18N = True
-USE_L10N = True
 USE_TZ = False
 
 DATE_FORMAT = '%d/%m/%Y'
@@ -160,17 +159,25 @@ STATIC_LOCATION = 'static'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'core/static'),
 ]
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
 
+STATIC_URL = f'{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
 MEDIA_LOCATION = 'media'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
+MEDIA_URL = f'{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {"location": MEDIA_LOCATION},
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {"location": STATIC_LOCATION},
+    },
+}
 
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
-
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'primary',

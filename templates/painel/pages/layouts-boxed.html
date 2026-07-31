@@ -1,0 +1,56 @@
+{% extends 'painel/layouts/base.html' %}
+{% load static i18n  %}
+
+{% block html_attribute %}data-layout-width="boxed" data-sidenav-size="on-hover"{% endblock html_attribute %}
+
+{% block title %}Boxed{% endblock title %}
+
+{% block styles %}
+
+{% endblock styles %}
+
+{% block content %}
+<div class="wrapper">
+            {% include 'painel/partials/topbar.html' with subtitle='Layouts' title='Boxed' %} {% include 'painel/partials/sidenav.html' %}
+
+            <!-- Start Page Content here -->
+<div class="page-content">
+<main>
+                    {% include 'painel/partials/page-title.html' with subtitle='Layouts' title='Boxed' %}
+
+                    <div class="container">
+<div class="bg-info/10 text-info border-s-3 border-info rounded-md flex items-start gap-3 py-3 px-4 mb-4">
+<div>
+<i class="iconify tabler--info-circle text-xl"></i>
+</div>
+<div>
+                                To enable the boxed layout, add
+                                <code>data-layout-width="boxed"</code>
+                                to the
+                                <code><html></code>
+                                tag. For optimal spacing and usability, we also recommend adding
+                                <code>data-sidenav-size="on-hover"</code>
+                                to make the sidebar compact while keeping more room for content.
+                            </div>
+</div>
+<div class="card">
+<div class="card-body text-center">
+<h4 class="text-lg">Your custom content here</h4>
+</div>
+<!-- end card-body-->
+</div>
+<!-- end card-->
+</div>
+</main>
+
+                {% include 'painel/partials/footer.html' %}
+            </div>
+<!-- End Page content -->
+</div>
+
+        {% include 'painel/partials/customizer.html' %} {% include 'painel/partials/footer-scripts.html' %}
+{% endblock content %}
+
+{% block scripts %}
+
+{% endblock scripts %}

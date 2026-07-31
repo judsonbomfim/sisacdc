@@ -1807,7 +1807,7 @@ def simAgdOperator():
             try:
                 # Converter e salvar SIM no estoque            
                 qr_file = qrcodeChange.build_qr_file(lpa_value, sim_value)
-                fileurl = upload_file_to_s3(qr_file).replace(f'https://{settings.AWS_S3_CUSTOM_DOMAIN}', '')
+                fileurl = upload_file_to_s3(qr_file).replace(f'{settings.AWS_S3_CUSTOM_DOMAIN}', '')
                 add_sim = Sims(
                     sim=sim_value,
                     msisdn=msisdn_value,

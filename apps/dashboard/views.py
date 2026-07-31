@@ -40,7 +40,6 @@ def index(request):
     
     # ACTIVATIONS
     activationOrders = Orders.objects.filter(activation_date=dateTomorrow)
-    activationTomorrow = activationOrders.count()    
     activ_values = activationOrders.values_list('id_sim__operator', flat=True)
     operator_counts = Counter(activ_values)
 
@@ -48,8 +47,6 @@ def index(request):
     countActivCM = operator_counts.get('CM', 0)
     countActivTC = operator_counts.get('TC', 0)
     countActivTI = operator_counts.get('TI', 0)
-    countActivMS = operator_counts.get('MS', 0)
-    countActivOR = operator_counts.get('OR', 0)
     
     # Queries
     simsAll = Sims.objects.all()
@@ -150,8 +147,8 @@ def index(request):
         sims_by_date_type_week[order['order_date']][order['type_sim']] += 1
     
     weekSimsDates = json.dumps([d.strftime('%Y-%m-%d') for d in all_week_dates])
-    weekSimsValuesS = json.dumps([sims_by_date_type_week[d].get('esim', 0) for d in all_week_dates])
-    weekSimsValuesE = json.dumps([sims_by_date_type_week[d].get('sim', 0) for d in all_week_dates])
+    weekSimsValuesS = json.dumps([sims_by_date_type_week[d].get('sim', 0) for d in all_week_dates])
+    weekSimsValuesE = json.dumps([sims_by_date_type_week[d].get('esim', 0) for d in all_week_dates])
 
     # --- Month
     sims_by_date_type_month = defaultdict(lambda: defaultdict(int))
@@ -159,8 +156,8 @@ def index(request):
         sims_by_date_type_month[order['order_date']][order['type_sim']] += 1
 
     monthSimsDates = json.dumps([d.strftime('%Y-%m-%d') for d in all_month_dates])
-    monthSimsValuesS = json.dumps([sims_by_date_type_month[d].get('esim', 0) for d in all_month_dates])
-    monthSimsValuesE = json.dumps([sims_by_date_type_month[d].get('sim', 0) for d in all_month_dates])
+    monthSimsValuesS = json.dumps([sims_by_date_type_month[d].get('sim', 0) for d in all_month_dates])
+    monthSimsValuesE = json.dumps([sims_by_date_type_month[d].get('esim', 0) for d in all_month_dates])
 
     # --- Year
     sims_by_month_type_year = defaultdict(lambda: defaultdict(int))
@@ -168,8 +165,8 @@ def index(request):
         sims_by_month_type_year[order['month']][order['type_sim']] += 1
 
     yearSimsDates = json.dumps([m.strftime('%Y-%m') for m in all_year_months])
-    yearSimsValuesS = json.dumps([sims_by_month_type_year[m].get('esim', 0) for m in all_year_months])
-    yearSimsValuesE = json.dumps([sims_by_month_type_year[m].get('sim', 0) for m in all_year_months])
+    yearSimsValuesS = json.dumps([sims_by_month_type_year[m].get('sim', 0) for m in all_year_months])
+    yearSimsValuesE = json.dumps([sims_by_month_type_year[m].get('esim', 0) for m in all_year_months])
 
     # OPERATOR
     # --- Week
@@ -182,7 +179,6 @@ def index(request):
     weekOperValuesCM = json.dumps([oper_by_date_week[d].get('CM', 0) for d in all_week_dates])
     weekOperValuesTC = json.dumps([oper_by_date_week[d].get('TC', 0) for d in all_week_dates])
     weekOperValuesTI = json.dumps([oper_by_date_week[d].get('TI', 0) for d in all_week_dates])
-    weekOperValuesOR = json.dumps([oper_by_date_week[d].get('OR', 0) for d in all_week_dates])
 
     # --- Month
     oper_by_date_month = defaultdict(lambda: defaultdict(int))
@@ -194,7 +190,6 @@ def index(request):
     monthOperValuesCM = json.dumps([oper_by_date_month[d].get('CM', 0) for d in all_month_dates])
     monthOperValuesTC = json.dumps([oper_by_date_month[d].get('TC', 0) for d in all_month_dates])
     monthOperValuesTI = json.dumps([oper_by_date_month[d].get('TI', 0) for d in all_month_dates])
-    monthOperValuesOR = json.dumps([oper_by_date_month[d].get('OR', 0) for d in all_month_dates])
 
     # --- Year
     oper_by_month_year = defaultdict(lambda: defaultdict(int))
@@ -206,7 +201,6 @@ def index(request):
     yearOperValuesCM = json.dumps([oper_by_month_year[m].get('CM', 0) for m in all_year_months])
     yearOperValuesTC = json.dumps([oper_by_month_year[m].get('TC', 0) for m in all_year_months])
     yearOperValuesTI = json.dumps([oper_by_month_year[m].get('TI', 0) for m in all_year_months])
-    yearOperValuesOR = json.dumps([oper_by_month_year[m].get('OR', 0) for m in all_year_months])
 
     # Verificar estoque de operadoras
     sim_tm = simsAll.filter(sim_status='DS',operator='TM', type_sim='sim').count()
@@ -217,20 +211,37 @@ def index(request):
     esim_tc = simsAll.filter(sim_status='DS',operator='TC', type_sim='esim').count()
     sim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='sim').count()
     esim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='esim').count()
-    esim_or_20gb = simsAll.filter(sim_status='DS',operator='OR', type_sim='esim', data='20gb').count()
-    esim_or_50gb = simsAll.filter(sim_status='DS',operator='OR', type_sim='esim', data='50gb').count()
-    esim_or_world = simsAll.filter(sim_status='DS',operator='OR', type_sim='esim', data='world').count()
 
-    saldo_at = ApiAT.balance()
-    saldo_tc = ApiTC.balance()
+    try:
+        saldo_at_raw = ApiAT.balance()
+    except Exception:
+        saldo_at_raw = None
+    try:
+        saldo_tc_raw = ApiTC.balance()
+    except Exception:
+        saldo_tc_raw = None
 
-    def fmt_brl(value):
+    def fmt_money(value):
         if value is None:
             return None
-        return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        try:
+            return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        except (TypeError, ValueError):
+            return None
 
-    saldo_at = fmt_brl(saldo_at)
-    saldo_tc = fmt_brl(saldo_tc)
+    def money_target(value):
+        """String com ponto decimal para data-target (evita localização pt-BR)."""
+        if value is None:
+            return None
+        try:
+            return f"{float(value):.2f}"
+        except (TypeError, ValueError):
+            return None
+
+    saldo_at = fmt_money(saldo_at_raw)
+    saldo_tc = fmt_money(saldo_tc_raw)
+    saldo_at_target = money_target(saldo_at_raw)
+    saldo_tc_target = money_target(saldo_tc_raw)
 
 
     context= {
@@ -243,9 +254,6 @@ def index(request):
         'esim_tc': esim_tc,
         'sim_ti': sim_ti,
         'esim_ti': esim_ti,
-        'esim_or_20gb': esim_or_20gb,
-        'esim_or_50gb': esim_or_50gb,
-        'esim_or_world': esim_or_world,
         'dateDay': dateDay,
         'dateYesterday': dateYesterday,
         'dateWeek': dateWeek,
@@ -253,12 +261,11 @@ def index(request):
         'dateYear': dateYear,
         'orders_pending': orders_pending,
         'voices_pending': voices_pending,
-        'activationTomorrow': activationTomorrow,
+        'show_activations_card': True,
         'countActivTM': countActivTM,
         'countActivCM': countActivCM,
         'countActivTC': countActivTC,
         'countActivTI': countActivTI,
-        'countActivOR': countActivOR,
         'weekSalesDates': weekSalesDates,
         'weekSalesValues': weekSalesValues,
         'weekSimsDates': weekSimsDates,
@@ -269,7 +276,6 @@ def index(request):
         'weekOperValuesCM': weekOperValuesCM,
         'weekOperValuesTC': weekOperValuesTC,
         'weekOperValuesTI': weekOperValuesTI,
-        'weekOperValuesOR': weekOperValuesOR,
         'monthSalesDates': monthSalesDates,
         'monthSalesValues': monthSalesValues,
         'monthSimsDates': monthSimsDates,
@@ -280,7 +286,6 @@ def index(request):
         'monthOperValuesCM': monthOperValuesCM,
         'monthOperValuesTC': monthOperValuesTC,
         'monthOperValuesTI': monthOperValuesTI,
-        'monthOperValuesOR': monthOperValuesOR,
         'yearSalesDates': yearSalesDates,
         'yearSalesValues': yearSalesValues,
         'yearSimsDates': yearSimsDates,
@@ -289,14 +294,15 @@ def index(request):
         'yearOperDates': yearOperDates,
         'yearOperValuesTM': yearOperValuesTM,
         'yearOperValuesCM': yearOperValuesCM,
-        'yearOperValuesTC': yearOperValuesTC,      
-        'yearOperValuesTI': yearOperValuesTI,  
-        'yearOperValuesOR': yearOperValuesOR,
+        'yearOperValuesTC': yearOperValuesTC,
+        'yearOperValuesTI': yearOperValuesTI,
         'saldo_at': saldo_at,
         'saldo_tc': saldo_tc,
+        'saldo_at_target': saldo_at_target,
+        'saldo_tc_target': saldo_tc_target,
     }
     
-    return render(request, 'painel/dashboard/index.html', context)
+    return render(request, 'painel/dashboard.html', context)
 
 
 @login_required(login_url='/login/')

@@ -1,0 +1,30 @@
+{% extends 'painel/layouts/base.html' %}
+{% load static i18n  %}
+
+
+
+{% block title %}Empty{% endblock title %}
+
+{% block styles %}
+
+{% endblock styles %}
+
+{% block content %}
+<div class="wrapper">
+            {% include 'painel/partials/topbar.html' with subtitle='Pages' title='Empty' %} {% include 'painel/partials/sidenav.html' %}
+
+            <!-- Start Page Content here -->
+<div class="page-content">
+<main>{% include 'painel/partials/page-title.html' with subtitle='Pages' title='Empty' %}</main>
+
+                {% include 'painel/partials/footer.html' %}
+            </div>
+<!-- End Page content -->
+</div>
+
+        {% include 'painel/partials/customizer.html' %} {% include 'painel/partials/footer-scripts.html' %}
+{% endblock content %}
+
+{% block scripts %}
+
+{% endblock scripts %}

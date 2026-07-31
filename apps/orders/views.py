@@ -9,6 +9,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.conf import settings
+from django.db.models import Count, Q
+from django.urls import reverse
+from urllib.parse import urlencode
 from apps.orders.models import Orders, Notes
 from apps.sims.classes import ApiTC, ApiCM
 from apps.sims.models import Sims
@@ -23,6 +26,89 @@ import pandas as pd
 #Date today
 today = datetime.now()
 
+ORDERS_LIST_PER_PAGE_CHOICES = (25, 50, 100, 200)
+ORDERS_LIST_DEFAULT_PER_PAGE = 50
+
+
+def _orders_list_params(request):
+    """Lê filtros da listagem (GET/POST) e normaliza per_page."""
+    src = request.POST if request.method == 'POST' else request.GET
+    q = (src.get('q') or '').strip()
+    oper_f = (src.get('oper') or src.get('oper_f') or '').strip()
+    ord_st_f = (src.get('ord_st') or src.get('ord_st_f') or '').strip()
+    # Compatibilidade com filtros antigos
+    ord_name_f = (src.get('ord_name') or src.get('ord_name_f') or '').strip()
+    ord_order_f = (src.get('ord_order') or src.get('ord_order_f') or '').strip()
+    ord_sim_f = (src.get('ord_sim') or src.get('ord_sim_f') or '').strip()
+
+    try:
+        per_page = int(src.get('per_page') or ORDERS_LIST_DEFAULT_PER_PAGE)
+    except (TypeError, ValueError):
+        per_page = ORDERS_LIST_DEFAULT_PER_PAGE
+    if per_page not in ORDERS_LIST_PER_PAGE_CHOICES:
+        per_page = ORDERS_LIST_DEFAULT_PER_PAGE
+
+    return {
+        'q': q,
+        'oper': oper_f,
+        'ord_st': ord_st_f,
+        'ord_name': ord_name_f,
+        'ord_order': ord_order_f,
+        'ord_sim': ord_sim_f,
+        'per_page': per_page,
+    }
+
+
+def _apply_orders_list_filters(qs, params):
+    q = params.get('q')
+    if q:
+        qs = qs.filter(
+            Q(client__icontains=q)
+            | Q(item_id__icontains=q)
+            | Q(id_sim__sim__icontains=q)
+            | Q(id_sim__lpa__icontains=q)
+        )
+
+    if params.get('ord_name'):
+        qs = qs.filter(client__icontains=params['ord_name'])
+    if params.get('ord_order'):
+        qs = qs.filter(item_id__icontains=params['ord_order'])
+    if params.get('ord_sim'):
+        qs = qs.filter(id_sim__sim__icontains=params['ord_sim'])
+    if params.get('oper'):
+        qs = qs.filter(id_sim__operator=params['oper'])
+    if params.get('ord_st'):
+        qs = qs.filter(order_status=params['ord_st'])
+    return qs
+
+
+def _orders_list_url_filter(params):
+    query = {}
+    if params.get('q'):
+        query['q'] = params['q']
+    if params.get('ord_name'):
+        query['ord_name'] = params['ord_name']
+    if params.get('ord_order'):
+        query['ord_order'] = params['ord_order']
+    if params.get('ord_sim'):
+        query['ord_sim'] = params['ord_sim']
+    if params.get('oper'):
+        query['oper'] = params['oper']
+    if params.get('ord_st'):
+        query['ord_st'] = params['ord_st']
+    if params.get('per_page') and params['per_page'] != ORDERS_LIST_DEFAULT_PER_PAGE:
+        query['per_page'] = params['per_page']
+    return f'&{urlencode(query)}' if query else ''
+
+
+def _orders_list_redirect(params=None):
+    url = reverse('orders_list')
+    if not params:
+        return redirect(url)
+    query = _orders_list_url_filter(params)
+    return redirect(f'{url}?{query[1:]}' if query else url)
+
+
 # Order list
 @login_required(login_url='/login/')
 @has_permission_decorator('view_orders')
@@ -31,130 +117,70 @@ def orders_list(request):
     link_esim_android = settings.LINK_ESIM_ANDROID
     link_esim_ios = settings.LINK_ESIM_IOS
 
-    orders_all = Orders.objects.exclude(product='chamada-de-voz').order_by('-id')
-    sims = Sims.objects.all().order_by('-id')
-    orders_l = orders_all
+    params = _orders_list_params(request)
 
-    # Obter parâmetros de filtro (tanto GET quanto POST)
-    if request.method == 'GET':
-        ord_name_f = request.GET.get('ord_name')
-        ord_order_f = request.GET.get('ord_order')
-        ord_sim_f = request.GET.get('ord_sim')
-        oper_f = request.GET.get('oper')
-        ord_st_f = request.GET.get('ord_st')
+    if request.method == 'POST' and 'up_status' in request.POST:
+        ord_id = request.POST.getlist('ord_id')
+        ord_s = request.POST.get('ord_status')
+        id_user = request.user.id if request.user.is_authenticated else None
 
-    if request.method == 'POST':
-        ord_name_f = request.POST.get('ord_name_f')
-        ord_order_f = request.POST.get('ord_order_f')  
-        ord_sim_f = request.POST.get('ord_sim_f')
-        oper_f = request.POST.get('oper_f')
-        ord_st_f = request.POST.get('ord_st_f')
+        if ord_s and ord_id:
+            print(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
+            orders_up_status.delay(ord_id, ord_s, id_user)
+            messages.success(request, f'Atualizando {len(ord_id)} pedido(s) para status: {ord_s}')
+        else:
+            print(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")
+            messages.error(request, 'Selecione pedidos e status antes de atualizar')
 
-        if 'up_status' in request.POST:
-            ord_id = request.POST.getlist('ord_id')
-            ord_s = request.POST.get('ord_status')  # Pega o valor do select
-            if request.user.is_authenticated:
-                id_user = request.user.id
-            else:
-                id_user = None
-            
-            if ord_s and ord_s != '' and ord_id:
-                print(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
-                orders_up_status.delay(ord_id, ord_s, id_user)
-                messages.success(request, f'Atualizando {len(ord_id)} pedido(s) para status: {ord_s}')
-            else:
-                print(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")
-                messages.error(request, 'Selecione pedidos e status antes de atualizar')
-            
-            return redirect('orders_list')             
+        return _orders_list_redirect(params)
 
-    # Aplicar filtros
-    url_filter = ''
-
-    if ord_name_f:
-        orders_l = orders_l.filter(client__icontains=ord_name_f)
-        url_filter += f"&ord_name={ord_name_f}"
-
-    if ord_order_f: 
-        orders_l = orders_l.filter(item_id__icontains=ord_order_f)   
-        url_filter += f"&ord_order={ord_order_f}"
-
-    if ord_sim_f: 
-        orders_l = orders_l.filter(id_sim__sim__icontains=ord_sim_f)
-        url_filter += f"&ord_sim={ord_sim_f}"
-
-    if oper_f: 
-        orders_l = orders_l.filter(id_sim__operator=oper_f)
-        url_filter += f"&oper={oper_f}"
-
-    if ord_st_f: 
-        orders_l = orders_l.filter(order_status=ord_st_f)
-        url_filter += f"&ord_st={ord_st_f}"
-        
-    # Total de registros
+    orders_base = Orders.objects.exclude(product='chamada-de-voz').order_by('-id')
+    orders_l = _apply_orders_list_filters(orders_base, params)
     orders_count = orders_l.count()
-        
-    # Buscar planos para mapeamento
-    plans = {name: data_day for name, data_day in Orders.product.field.choices}
 
-    # Sessão: salve dados serializáveis (lista de dicts) e calcule return_date
-    qs = orders_l.values(
-        'item_id', 'client', 'id_sim__sim', 'id_sim__operator',
-        'product', 'countries', 'calls', 'days', 'activation_date', 'order_status'
-    )
-    orders_for_export = []
-    for row in qs:
-        ad = row.get('activation_date')
-        days_val = row.get('days') or 0
-        ret = (ad + timedelta(days=days_val - 1)) if (ad and days_val) else None
+    # Guarda só os filtros (leve) para o export montar o CSV sob demanda
+    request.session['orders_list_filters'] = {
+        'q': params['q'],
+        'oper': params['oper'],
+        'ord_st': params['ord_st'],
+        'ord_name': params['ord_name'],
+        'ord_order': params['ord_order'],
+        'ord_sim': params['ord_sim'],
+    }
+    request.session.pop('orders_listing', None)
 
-        # Adicionar data_day a partir do mapeamento de planos
-        product_name = row.get('product')
-        row['data_day'] = plans.get(product_name)
-
-        # deixe datas serializáveis (strings) para a sessão
-        orders_for_export.append({
-            **row,
-            'activation_date': ad.isoformat() if ad else None,
-            'return_date': ret.isoformat() if ret else None,
-        })
-
-    request.session['orders_listing'] = orders_for_export
-
-    ord_status = Orders.order_status.field.choices
+    status_counts = {
+        row['order_status']: row['total']
+        for row in Orders.objects.exclude(product='chamada-de-voz')
+        .values('order_status')
+        .annotate(total=Count('id'))
+    }
+    ord_st_list = [
+        (code, label, status_counts.get(code, 0))
+        for code, label in Orders.order_status.field.choices
+    ]
     oper_list = Sims.operator.field.choices
 
-    # Listar status dos pedidos
-    ord_st_list = []
-    for ord_s in ord_status:
-        ord = orders_all.filter(order_status=ord_s[0]).count()
-        ord_st_list.append((ord_s[0],ord_s[1],ord))
-
-    # Paginação
-    paginator = Paginator(orders_l, 50)
-    page = request.GET.get('page')
-    orders = paginator.get_page(page)
-
-    from rolepermissions.permissions import available_perm_status
+    paginator = Paginator(orders_l.select_related('id_sim'), params['per_page'])
+    orders = paginator.get_page(request.GET.get('page') or request.POST.get('page') or 1)
+    url_filter = _orders_list_url_filter(params)
 
     context = {
         'url_cdn': url_cdn,
         'link_esim_android': link_esim_android,
         'link_esim_ios': link_esim_ios,
-        'orders_l': orders_l,
         'orders': orders,
-        'sims': sims,
         'ord_st_list': ord_st_list,
         'oper_list': oper_list,
         'url_filter': url_filter,
-        'ord_name_f': ord_name_f,
-        'ord_order_f': ord_order_f,
-        'ord_sim_f': ord_sim_f,
-        'oper_f': oper_f,
-        'ord_st_f': ord_st_f,
+        'q': params['q'],
+        'oper_f': params['oper'],
+        'ord_st_f': params['ord_st'],
+        'per_page': params['per_page'],
+        'per_page_choices': ORDERS_LIST_PER_PAGE_CHOICES,
         'orders_count': orders_count,
     }
-    return render(request, 'painel/orders/index.html', context)
+    return render(request, 'painel/index.html', context)
 
 @login_required(login_url='/login/')
 def ord_details(request, order_id):
@@ -173,6 +199,8 @@ def ord_details(request, order_id):
     data_day_d = order.get_data_day_display() if order.data_day else ''
     operator = order.id_sim.operator if order.id_sim else ''
     product = order.get_product_display()
+    mobile_data_f = '0.00'
+    percent_used = 0
         
     if (operator == 'TI' or operator == 'TC') and sim != '':
         # Verificar consumo de dados TC
@@ -197,21 +225,25 @@ def ord_details(request, order_id):
             percent_used = (used_data / total_data) * 100
             percent_used = round(percent_used, 2)
         except Exception:
-            percent_used = None
+            percent_used = 0
     else:
-        percent_used = None  # Não calcula para ilimitado ou dados inválidos        
+        percent_used = 0  # Não calcula para ilimitado ou dados inválidos        
     
+    operator_label = ''
+    if order.id_sim:
+        operator_label = order.id_sim.get_operator_display()
+
     data = {
         'name': name,
         'sim': sim,
         'data_day': data_day,
         'data_day_d': data_day_d,
-        'operator': operator,
+        'operator': operator_label or operator,
         'product': product,
-        'mobile_data': mobile_data_f,        
+        'mobile_data': mobile_data_f,
         'percent_used': percent_used,
-        }    
-    
+        }
+
     return JsonResponse(data)
 
 
@@ -221,7 +253,7 @@ def ord_details(request, order_id):
 def ord_import(request):
     if request.method == 'GET':
 
-        return render(request, 'painel/orders/import.html')    
+        return render(request, 'painel/import.html')    
 
     if request.method == 'POST':
 
@@ -229,7 +261,7 @@ def ord_import(request):
         order_import.delay()
         messages.success(request, f'Processando pedidos... Aguarde alguns minutos e atualize a página de pedidos')        
 
-    return render(request, 'painel/orders/import.html')
+    return render(request, 'painel/import.html')
 
 
 # Order Edit
@@ -240,9 +272,9 @@ def ord_edit(request,id):
             
         order = Orders.objects.get(pk=id)
         ord_status = Orders.order_status.field.choices
-        ord_product = Orders.product.field.choices
-        ord_data_day = Orders.data_day.field.choices
-        ord_operators = Sims.operator.field.choices
+        ord_product = sorted(Orders.product.field.choices, key=lambda c: c[1].lower())
+        ord_data_day = sorted(Orders.data_day.field.choices, key=lambda c: c[1].lower())
+        ord_operators = sorted(Sims.operator.field.choices, key=lambda c: c[1].lower())
 
         days = list(range(1, 31))
         
@@ -254,7 +286,7 @@ def ord_edit(request,id):
             'ord_operators': ord_operators,
             'ord_days': days,
         }
-        return render(request, 'painel/orders/edit.html', context)
+        return render(request, 'painel/edit.html', context)
         
     if request.method == 'POST':
         
@@ -506,49 +538,66 @@ def ord_edit(request,id):
 @login_required(login_url='/login/')
 @has_permission_decorator('export_orders')
 def ord_export(request):
-    
     list_status = dict(Orders.order_status.field.choices)
     list_oper = dict(Sims.operator.field.choices)
 
-    if request.session.get('orders_listing'):
-        orders_all = request.session.get('orders_listing')
-        print(f'>>>>>>>>>>>>>>>>>>>>>< Exportando {len(orders_all)} pedidos')
+    filters = request.session.get('orders_list_filters')
+    if filters is None and request.session.get('orders_listing'):
+        # Compatibilidade com sessão antiga (lista completa em memória)
+        orders_rows = request.session.get('orders_listing')
+    elif filters is not None:
+        qs = _apply_orders_list_filters(
+            Orders.objects.exclude(product='chamada-de-voz').order_by('-id'),
+            filters,
+        )
+        orders_rows = []
+        for row in qs.values(
+            'item_id', 'client', 'id_sim__sim', 'id_sim__operator',
+            'product', 'data_day', 'countries', 'calls', 'days',
+            'activation_date', 'order_status',
+        ):
+            ad = row.get('activation_date')
+            days_val = row.get('days') or 0
+            ret = (ad + timedelta(days=days_val - 1)) if (ad and days_val) else None
+            orders_rows.append({
+                **row,
+                'activation_date': ad.isoformat() if ad else None,
+                'return_date': ret.isoformat() if ret else None,
+            })
     else:
-        messages.error(request, 'Nenhum dado disponível para exportação. Por favor, aplique filtros na lista de pedidos antes de exportar.')
-        return request
+        messages.error(
+            request,
+            'Nenhum dado disponível para exportação. Abra a lista de pedidos antes de exportar.',
+        )
+        return redirect('orders_list')
+
+    print(f'>>>>>>>>>>>>>>>>>>>>>< Exportando {len(orders_rows)} pedidos')
+
     data = [
         ['Pedido', 'Cliente', '(e)SIM', 'Operadora', 'Produto', 'Países', 'Voz', 'Dias', 'Data Aivação', 'Data Término', 'Status']
     ]
-    
-    for ord in orders_all:
-        print(f'Exportando pedido {ord}')
+
+    for ord in orders_rows:
         if ord['id_sim__operator']:
-            ord_operator = list_oper[ord['id_sim__operator']]
-        else: ord_operator = ''
-        if ord['data_day'] != 'Ilimitado': 
-            ord_data = ord['data_day']
-        else: ord_data = ''
-        ord_product = f"{ord['product']} {ord_data}"
+            ord_operator = list_oper.get(ord['id_sim__operator'], '')
+        else:
+            ord_operator = ''
+        ord_data = '' if ord.get('data_day') == 'Ilimitado' else (ord.get('data_day') or '')
+        ord_product = f"{ord['product']} {ord_data}".strip()
         ord_date_start = DateFormats.dateDMA(str(ord['activation_date']))
         ord_date_end = DateFormats.dateDMA(str(ord['return_date']))
-        if ord['calls'] == True:
-            ord_calls = 'SIM'
-        else: ord_calls = ''
-        if ord['countries'] == True:
-            ord_countries = 'SIM'
-        else: ord_countries = ''
-        ord_status = list_status[ord['order_status']]
-        
-        data.append([ord['item_id'],ord['client'],ord['id_sim__sim'],ord_operator,ord_product,ord_countries,ord_calls,ord['days'],ord_date_start,ord_date_end,ord_status])
-        
+        ord_calls = 'SIM' if ord['calls'] else ''
+        ord_countries = 'SIM' if ord['countries'] else ''
+        ord_status = list_status.get(ord['order_status'], ord['order_status'])
+        data.append([
+            ord['item_id'], ord['client'], ord['id_sim__sim'], ord_operator, ord_product,
+            ord_countries, ord_calls, ord['days'], ord_date_start, ord_date_end, ord_status,
+        ])
+
     data_atual = date.today()
-    
-    # Crie um objeto CSVWriter para escrever os dados no formato CSV
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="Ativacoes-{data_atual}.csv"'
     writer = csv.writer(response)
-    
-    # Escreva os dados no objeto CSVWriter
     for row in data:
         writer.writerow(row)
     return response 
@@ -620,13 +669,13 @@ def ord_export_op(request):
         messages.success(request, 'Arquivo CSV baixado com sucesso!')
         return response 
     
-    return render(request, 'painel/orders/export_op.html', context)
+    return render(request, 'painel/export_op.html', context)
 
 
 @login_required(login_url='/login/')
 def send_esims(request):
     if request.method == 'GET':
-        return render(request, 'painel/orders/send_esim.html')
+        return render(request, 'painel/send_esim.html')
     if request.method == 'POST':
         # Orderm Import       
         send_email_sims.delay()
@@ -837,7 +886,7 @@ def orders_activations(request):
         'ord_planos_f': ord_planos_f,
         'orders_count': orders_count,
     }
-    return render(request, 'painel/orders/activations.html', context)
+    return render(request, 'painel/activations.html', context)
 
 
 def update_status(request):
@@ -876,4 +925,4 @@ def exportClient(request):
         export_id = ExportClients.start()
         return JsonResponse({'export_id': export_id})
 
-    return render(request, 'painel/orders/export_clients.html')
+    return render(request, 'painel/export_clients.html')

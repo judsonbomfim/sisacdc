@@ -1,0 +1,618 @@
+{% extends 'painel/layouts/base.html' %}
+{% load static i18n  %}
+
+
+
+{% block title %}Project Dashboard{% endblock title %}
+
+{% block styles %}
+
+{% endblock styles %}
+
+{% block content %}
+<div class="wrapper">
+            {% include 'painel/partials/topbar.html' with subtitle='Dashboard' title='Project Dashboard' %} {% include 'painel/partials/sidenav.html' %}
+
+            <!-- Start Page Content here -->
+<div class="page-content">
+<main>
+<div class="container-fluid">
+<div class="card my-5">
+<div class="grid xl:grid-cols-4 grid-cols-1">
+<div class="col-span-1">
+<div class="p-7.5 border-e border-dashed border-default-300">
+<h4 class="text-base mb-1.25">Welcome to INSPINIA+ Admin Theme.</h4>
+<span class="text-default-400">You have <span class="text-primary font-semibold">42</span> messages and 6 notifications.</span>
+<ul class="mt-5">
+<li class="flex justify-between items-center py-2.5">
+<div>
+<span class="badge size-6 text-white bg-primary me-2.5"><span class="font-medium text-sm">1</span></span>
+                                                    Reviewed project proposal
+                                                </div>
+<span class="text-default-400">09:30 AM</span>
+</li>
+<li class="flex justify-between items-center py-2.5">
+<div>
+<span class="badge size-6 text-white bg-info me-2.5"><span class="font-medium text-sm">2</span></span>
+                                                    Team stand-up meeting
+                                                </div>
+<span class="text-default-400">11:00 AM</span>
+</li>
+<li class="flex justify-between items-center py-2.5">
+<div>
+<span class="badge size-6 text-white bg-secondary me-2.5"><span class="font-medium text-sm">3</span></span>
+                                                    Sent client invoice
+                                                </div>
+<span class="text-default-400">01:15 PM</span>
+</li>
+<li class="flex justify-between items-center py-2.5">
+<div>
+<span class="badge size-6 text-black bg-light me-2.5"><span class="font-medium text-sm">4</span></span>
+                                                    Responded to support tickets
+                                                </div>
+<span class="text-default-400">03:40 PM</span>
+</li>
+<li class="flex justify-between items-center py-2.5">
+<div>
+<span class="badge size-6 text-white bg-warning me-2.5"><span class="font-medium text-sm">5</span></span>
+                                                    Finalized design mockups
+                                                </div>
+<span class="text-default-400">05:10 PM</span>
+</li>
+</ul>
+<div class="text-center mt-2.5">
+<a class="btn bg-secondary text-white rounded-full hover:bg-secondary-hover" href="#!">View Messages</a>
+</div>
+</div>
+</div>
+<div class="col-span-2">
+<div class="py-5 px-7.5 border-e border-dashed border-default-300">
+<div class="flex justify-between mb-5">
+<h4 class="card-title">Revenue</h4>
+<a class="hover:text-primary underline font-semibold flex gap-1 items-center" href="#!">View Reports <i class="iconify tabler--arrow-right"></i></a>
+</div>
+<div class="grid grid-cols-2 gap-base text-center mb-5">
+<div class="col">
+<div class="bg-light/50 p-2.5">
+<h5><span class="text-default-400">Total Revenue:</span>$ <span data-target="40">40</span>M</h5>
+</div>
+</div>
+<div class="col">
+<div class="bg-light/50 p-2.5">
+<h5><span class="text-default-400">Total Orders:</span> <span data-target="50.9">50.90</span>k</h5>
+</div>
+</div>
+</div>
+<div class="relative" dir="ltr">
+<div class="py-2.5 px-5 rounded bg-light/30 border-dashed border border-default-300 text-primary z-10 absolute" style="top: 4.5%; left: 12%">
+<p class="mb-2 uppercase text-2xs font-semibold">Growth Rate</p>
+<h4 class="text-lg font-bold text-primary">89.24% <i class="iconify tabler--trending-up"></i></h4>
+</div>
+<div id="revenue-chart" style="min-height: 252px"></div>
+</div>
+</div>
+</div>
+<div class="col-span-1">
+<div class="card-body">
+<h4 class="card-title mb-1.25">Project Progress</h4>
+<p class="text-default-400 text-xs">You have 21 projects with not completed task.</p>
+<div class="mt-7.5">
+<div dir="ltr">
+<div id="project-progress-chart" style="min-height: 278px"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid xl:grid-cols-5 md:grid-cols-3 grid-cols-1 gap-base mb-5">
+<div class="card">
+<div class="card-body">
+<a class="text-default-400 float-end -mt-1.25 text-xl" href="#!"><i class="iconify tabler--external-link"></i></a>
+<h5 title="Number of Tasks">My Tasks</h5>
+<div class="flex items-center gap-2.5 my-5">
+<div class="shrink-0">
+<span class="size-9 text-default-600 bg-light flex justify-center items-center rounded-full">
+<i class="iconify tabler--checklist size-6"></i>
+</span>
+</div>
+<h3 class="text-xl text-default-800"><span data-target="124">124</span></h3>
+<span class="badge bg-primary/10 text-primary font-medium text-xs! ms-auto">+3 New</span>
+</div>
+<p>
+<span class="text-primary"><i class="iconify tabler--point-filled"></i></span>
+<span class="text-nowrap text-default-400">Total Tasks</span>
+<span class="float-end"><b>12,450</b></span>
+</p>
+</div>
+</div>
+<div class="card">
+<div class="card-body">
+<a class="text-default-400 float-end -mt-1.25 text-xl" href="#!"><i class="iconify tabler--external-link"></i></a>
+<h5 title="Number of Messages">Messages</h5>
+<div class="flex items-center gap-2.5 my-5">
+<div class="shrink-0">
+<span class="size-9 text-default-600 bg-light flex justify-center items-center rounded-full">
+<i class="iconify tabler--message-circle size-6"></i>
+</span>
+</div>
+<h3 class="text-xl text-default-800"><span data-target="69.5">69.50k</span></h3>
+<span class="badge bg-secondary/10 text-secondary font-medium text-xs! ms-auto">+5 New</span>
+</div>
+<p>
+<span class="text-secondary"><i class="iconify tabler--point-filled"></i></span>
+<span class="text-nowrap text-default-400">Total Messages</span>
+<span class="float-end"><b>32.1M</b></span>
+</p>
+</div>
+</div>
+<div class="card">
+<div class="card-body">
+<a class="text-default-400 float-end -mt-1.25 text-xl" href="#!"><i class="iconify tabler--external-link"></i></a>
+<h5 title="Pending Approvals">Approvals</h5>
+<div class="flex items-center gap-2.5 my-5">
+<div class="shrink-0">
+<span class="size-9 text-default-600 bg-light flex justify-center items-center rounded-full">
+<i class="iconify tabler--file-check size-6"></i>
+</span>
+</div>
+<h3 class="text-xl text-default-800"><span data-target="32">32</span></h3>
+<span class="badge bg-light text-text-default-600 font-medium text-xs! ms-auto">+2 New</span>
+</div>
+<p>
+<span class="text-primary"><i class="iconify tabler--point-filled"></i></span>
+<span class="text-nowrap text-default-400">Total Approvals</span>
+<span class="float-end"><b>1,024 </b></span>
+</p>
+</div>
+</div>
+<div class="card">
+<div class="card-body">
+<a class="text-default-400 float-end -mt-1.25 text-xl" href="#!"><i class="iconify tabler--external-link"></i></a>
+<h5 title="Total Clients">Clients</h5>
+<div class="flex items-center gap-2.5 my-5">
+<div class="shrink-0">
+<span class="size-9 text-default-600 bg-light flex justify-center items-center rounded-full">
+<i class="iconify tabler--users size-6"></i>
+</span>
+</div>
+<h3 class="text-xl text-default-800"><span data-target="184">184</span></h3>
+<span class="badge bg-secondary/10 text-secondary font-medium text-xs! ms-auto">+4 New</span>
+</div>
+<p>
+<span class="text-secondary"><i class="iconify tabler--point-filled"></i></span>
+<span class="text-nowrap text-default-400">Total Clients</span>
+<span class="float-end"><b>9,835</b></span>
+</p>
+</div>
+</div>
+<div class="card">
+<div class="card-body">
+<a class="text-default-400 float-end -mt-1.25 text-xl" href="#!"><i class="iconify tabler--external-link"></i></a>
+<h5 title="Revenue Generated">Revenue</h5>
+<div class="flex items-center gap-2.5 my-5">
+<div class="shrink-0">
+<span class="size-9 text-default-600 bg-light flex justify-center items-center rounded-full">
+<i class="iconify tabler--credit-card size-6"></i>
+</span>
+</div>
+<h3 class="text-xl text-default-800"><span data-target="125.5">$125.50</span>k</h3>
+<span class="badge bg-primary/10 text-primary font-medium text-xs! ms-auto">$125.50k</span>
+</div>
+<p>
+<span class="text-primary"><i class="iconify tabler--point-filled"></i></span>
+<span class="text-nowrap text-default-400">Total Revenue</span>
+<span class="float-end"><b>$12.5M</b></span>
+</p>
+</div>
+</div>
+</div>
+<div class="grid xl:grid-cols-3 grid-cols-1 gap-base">
+<div class="flex flex-col gap-base">
+<div class="card">
+<div class="card-header justify-between items-center">
+<h5 class="card-title">Quarterly Reports <span class="badge text-white bg-primary">IN+</span></h5>
+<div class="flex gap-1">
+<a class="btn size-6 rounded-full bg-light text-dark hover:text-primary hover:bg-primary/15" data-action="card-toggle" href="#!">
+<i class="iconify tabler--chevron-up"></i>
+</a>
+<a class="btn size-6 rounded-full bg-light text-dark hover:text-primary hover:bg-primary/15" data-action="card-refresh" href="#!">
+<i class="iconify tabler--refresh"></i>
+</a>
+<a class="btn size-6 rounded-full bg-light text-dark hover:text-primary hover:bg-primary/15" data-action="card-close" href="#!">
+<i class="iconify tabler--x"></i>
+</a>
+</div>
+</div>
+<div class="card-body p-0">
+<div class="table-wrapper whitespace-nowrap">
+<table class="table table-hover">
+<thead class="bg-light/25 thead-sm">
+<tr class="uppercase text-2xs">
+<th class="text-default-400">Quarter</th>
+<th class="text-default-400">Revenue</th>
+<th class="text-default-400">Expense</th>
+<th class="text-default-400">Margin</th>
+<th class="text-default-400">•••</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<h5 class="text-sm mb-1.25 font-normal">Quarter 1</h5>
+<span class="text-default-400 text-xs">January - March 2024</span>
+</td>
+<td>$210k</td>
+<td>$165k</td>
+<td>$45k</td>
+<td style="width: 60px">
+<div dir="ltr">
+<div class="donut-chart" data-chart="donut" style="min-height: 30px"></div>
+</div>
+</td>
+</tr>
+<tr>
+<td>
+<h5 class="text-sm mb-1.25 font-normal">Quarter 2</h5>
+<span class="text-default-400 text-xs">April - June 2024</span>
+</td>
+<td>$225k</td>
+<td>$175k</td>
+<td>$50k</td>
+<td style="width: 60px">
+<div dir="ltr">
+<div class="donut-chart" data-chart="donut" style="min-height: 30px"></div>
+</div>
+</td>
+</tr>
+<tr>
+<td>
+<h5 class="text-sm mb-1.25 font-normal">Quarter 3</h5>
+<span class="text-default-400 text-xs">July - September 2024</span>
+</td>
+<td>$240k</td>
+<td>$190k</td>
+<td>$50k</td>
+<td style="width: 60px">
+<div dir="ltr">
+<div class="donut-chart" data-chart="donut" style="min-height: 30px"></div>
+</div>
+</td>
+</tr>
+<tr>
+<td>
+<h5 class="text-sm mb-1.25 font-normal">Quarter 4</h5>
+<span class="text-default-400 text-xs">October - December 2024</span>
+</td>
+<td>$260k</td>
+<td>$200k</td>
+<td>$60k</td>
+<td style="width: 60px">
+<div dir="ltr">
+<div class="donut-chart" data-chart="donut" style="min-height: 30px"></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- end table-responsive-->
+</div>
+</div>
+<div class="card">
+<div class="card-header justify-between items-center">
+<h5 class="card-title">Project Performance</h5>
+<div class="flex gap-1">
+<a class="btn size-6 rounded-full bg-light text-dark hover:text-primary hover:bg-primary/15" data-action="card-toggle" href="#!">
+<i class="iconify tabler--chevron-up"></i>
+</a>
+<a class="btn size-6 rounded-full bg-light text-dark hover:text-primary hover:bg-primary/15" data-action="card-refresh" href="#!">
+<i class="iconify tabler--refresh"></i>
+</a>
+<a class="btn size-6 rounded-full bg-light text-dark hover:text-primary hover:bg-primary/15" data-action="card-close" href="#!">
+<i class="iconify tabler--x"></i>
+</a>
+</div>
+</div>
+<div class="card-body">
+<div>
+<div class="flex justify-between">
+<h5 class="text-sm mb-2.5">Completed Projects</h5>
+<div class="flex gap-8">
+<span>+ 180</span>
+<span><i class="iconify tabler--circle-filled text-light mx-5 text-[10px]"></i>54.20%</span>
+</div>
+</div>
+<div class="w-full bg-default-200 rounded-full h-1.25 mb-1.25">
+<div class="bg-secondary h-1.25 rounded-full" style="width: 54.2%"></div>
+</div>
+</div>
+<div class="mt-7.5">
+<div class="flex justify-between">
+<h5 class="text-sm mb-2.5">Ongoing Projects</h5>
+<div class="flex gap-8">
+<span>+ 120</span>
+<span><i class="iconify tabler--circle-filled text-light mx-5 text-[10px]"></i>36.15%</span>
+</div>
+</div>
+<div class="w-full bg-default-200 rounded-full h-1.25 mb-1.25">
+<div class="bg-info h-1.25 rounded-full" style="width: 36.15%"></div>
+</div>
+</div>
+<div class="mt-7.5">
+<div class="flex justify-between">
+<h5 class="text-sm mb-2.5">Pending Approvals</h5>
+<div class="flex gap-8">
+<span>+ 32</span>
+<span><i class="iconify tabler--circle-filled text-light mx-5 text-[10px]"></i>9.65%</span>
+</div>
+</div>
+<div class="w-full bg-default-200 rounded-full h-1.25 mb-1.25">
+<div class="bg-secondary h-1.25 rounded-full" style="width: 9.65%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-header justify-between items-center">
+<h5 class="card-title">Latest Project Updates</h5>
+<span class="badge text-white bg-warning text-2xs"> 8 Notifications</span>
+</div>
+<div class="card-body">
+<div class="flex gap-x-base">
+<div class="after:border-default-300 relative after:absolute after:start-1/2 after:top-8 after:bottom-0 after:w-px after:border-e -ms-px after:border-dashed last:after:hidden">
+<div class="relative z-10 flex items-center justify-center">
+<div class="border-default-300 flex size-7.75 items-center justify-center rounded-full border border-dashed">
+<i class="iconify tabler--rocket text-xl text-primary"></i>
+</div>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h5 class="mb-1.25 text-sm">New Feature Released <span class="badge badge-label bg-info/15 text-info text-[10px] ms-2.5">Deploy</span></h5>
+<span class="text-default-400 text-2xs">Today at 3:45 PM</span>
+</div>
+<p class="mb-1.25 text-default-400">Launched the real-time chat feature across all user accounts.</p>
+<div class="flex items-center gap-2.5">
+<img alt="Natalie Brooks" class="rounded-full size-4" src="{% static 'painel/inspina/painel/inspina/images/users/user-6.jpg' %}"/>
+<a class="font-medium text-default-400" href="#!">Natalie Brooks</a>
+</div>
+<hr class="border-dashed border-t border-default-300 my-3"/>
+</div>
+</div>
+<div class="flex gap-x-base">
+<div class="after:border-default-300 relative after:absolute after:start-1/2 after:top-8 after:bottom-0 after:w-px after:border-e -ms-px after:border-dashed last:after:hidden">
+<div class="relative z-10 flex items-center justify-center">
+<div class="border-default-300 flex size-7.75 items-center justify-center rounded-full border border-dashed">
+<i class="iconify tabler--calendar-event text-xl text-warning"></i>
+</div>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h5 class="mb-1.25 text-sm">Team Sync-Up <span class="badge badge-label bg-secondary/15 text-secondary text-[10px] ms-2.5">Meeting</span></h5>
+<span class="text-default-400 text-2xs">Today at 2:00 PM</span>
+</div>
+<p class="mb-1.25 text-default-400">Reviewed sprint progress and discussed remaining tasks with the dev team.</p>
+<div class="flex items-center gap-2.5">
+<img alt="Oliver Grant" class="rounded-full size-4" src="{% static 'painel/inspina/painel/inspina/images/users/user-4.jpg' %}"/>
+<a class="font-medium text-default-400" href="#!">Oliver Grant</a>
+</div>
+<hr class="border-dashed border-t border-default-300 my-3"/>
+</div>
+</div>
+<div class="flex gap-x-base">
+<div class="after:border-default-300 relative after:absolute after:start-1/2 after:top-8 after:bottom-0 after:w-px after:border-e -ms-px after:border-dashed last:after:hidden">
+<div class="relative z-10 flex items-center justify-center">
+<div class="border-default-300 flex size-7.75 items-center justify-center rounded-full border border-dashed">
+<i class="iconify tabler--palette text-xl text-success"></i>
+</div>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h5 class="mb-1.25 text-sm">UI Design Review <span class="badge badge-label bg-success/15 text-success text-[10px] ms-2.5">Design</span></h5>
+<span class="text-default-400 text-2xs">Today at 1:15 PM</span>
+</div>
+<p class="mb-1.25 text-default-400">Updated component spacing and colors for improved accessibility.</p>
+<div class="flex items-center gap-2.5">
+<img alt="Clara Jensen" class="rounded-full size-4" src="{% static 'painel/inspina/painel/inspina/images/users/user-9.jpg' %}"/>
+<a class="font-medium text-default-400" href="#!">Clara Jensen</a>
+</div>
+<hr class="border-dashed border-t border-default-300 my-3"/>
+</div>
+</div>
+<div class="flex gap-x-base">
+<div class="after:border-default-300 relative after:absolute after:start-1/2 after:top-8 after:bottom-0 after:w-px after:border-e -ms-px after:border-dashed last:after:hidden">
+<div class="relative z-10 flex items-center justify-center">
+<div class="border-default-300 flex size-7.75 items-center justify-center rounded-full border border-dashed">
+<i class="iconify tabler--database text-xl text-danger"></i>
+</div>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h5 class="mb-1.25 text-sm">Database Optimization <span class="badge badge-label bg-danger/15 text-danger text-[10px] ms-2.5">Backend</span></h5>
+<span class="text-default-400 text-2xs">Today at 12:30 PM</span>
+</div>
+<p class="mb-1.25 text-default-400">Improved DB query performance, reducing load time by 35%.</p>
+<div class="flex items-center gap-2.5">
+<img alt="Leo Armstrong" class="rounded-full size-4" src="{% static 'painel/inspina/painel/inspina/images/users/user-10.jpg' %}"/>
+<a class="font-medium text-default-400" href="#!">Leo Armstrong</a>
+</div>
+<hr class="border-dashed border-t border-default-300 my-3"/>
+</div>
+</div>
+<div class="flex gap-x-base">
+<div class="after:border-default-300 relative after:absolute after:start-1/2 after:top-8 after:bottom-0 after:w-px after:border-e -ms-px after:border-dashed last:after:hidden">
+<div class="relative z-10 flex items-center justify-center">
+<div class="border-default-300 flex size-7.75 items-center justify-center rounded-full border border-dashed">
+<i class="iconify tabler--shield-check text-xl text-info"></i>
+</div>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h5 class="mb-1.25 text-sm">Security Audit Completed <span class="badge badge-label bg-warning/15 text-warning text-[10px] ms-2.5">Audit</span></h5>
+<span class="text-default-400 text-2xs">Today at 11:00 AM</span>
+</div>
+<p class="mb-1.25 text-default-400">Completed internal security audit with no critical issues found.</p>
+<div class="flex items-center gap-2.5">
+<img alt="Liam Carter" class="rounded-full size-4" src="{% static 'painel/inspina/painel/inspina/images/users/user-8.jpg' %}"/>
+<a class="font-medium text-default-400" href="#!">Liam Carter</a>
+</div>
+<hr class="border-dashed border-t border-default-300 my-3"/>
+</div>
+</div>
+<div class="flex gap-x-base">
+<div class="after:border-default-300 relative after:absolute after:start-1/2 after:top-8 after:bottom-0 after:w-px after:border-e -ms-px after:border-dashed last:after:hidden">
+<div class="relative z-10 flex items-center justify-center">
+<div class="border-default-300 flex size-7.75 items-center justify-center rounded-full border border-dashed">
+<i class="iconify tabler--user-plus text-xl text-success"></i>
+</div>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex justify-between">
+<h5 class="mb-1.25 text-sm">New Team Member Joined <span class="badge badge-label bg-primary/15 text-primary text-[10px] ms-2.5">Onboarding</span></h5>
+<span class="text-default-400 text-2xs">Today at 10:15 AM</span>
+</div>
+<p class="mb-1.25 text-default-400">Michael Lee has joined the development team as a Frontend Engineer.</p>
+<div class="flex items-center gap-2.5">
+<img alt="Emma Davis" class="rounded-full size-4" src="{% static 'painel/inspina/painel/inspina/images/users/user-7.jpg' %}"/>
+<a class="font-medium text-default-400" href="#!">Emma Davis</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-header justify-between items-center">
+<h5 class="card-title">
+                                        Discussions
+                                        <span class="badge bg-primary/15 text-2xs text-primary">Pro+</span>
+</h5>
+<a class="badge text-default-800 bg-light text-xs font-semibold" href="#!">Mark all as read</a>
+</div>
+<div class="card-body bg-light/15! border-b border-default-300 border-dashed">
+<div class="flex gap-2.5">
+<div class="me-2.5 shrink-0">
+<img alt="message img" class="h-9" src="{% static 'painel/inspina/painel/inspina/images/message-mail.png' %}"/>
+</div>
+<div class="grow">
+<h4 class="text-sm mb-1.25">New messages</h4>
+<p class="text-xs text-default-400">You have <span class="text-default-700 font-semibold">22</span> new messages and <span class="text-default-700 font-semibold">16</span> waiting in draft folder.</p>
+</div>
+</div>
+</div>
+<div class="card-body pt-1.25!">
+<ul class="mb-5">
+<!-- User 1 -->
+<li class="py-2.5 border-b border-light">
+<div class="flex gap-2.5">
+<div class="me-2.5 shrink-0">
+<img alt="user-8" class="size-9 rounded-full" src="{% static 'painel/inspina/painel/inspina/images/users/user-8.jpg' %}"/>
+</div>
+<div class="grow text-default-400">
+<h6 class="text-default-800 mb-1.25 text-sm flex justify-between">
+                                                        Alex Johnson
+                                                        <small class="text-xs text-default-500">10m ago</small>
+</h6>
+<p class="mb-1.25">Excited to share our latest project update with everyone!</p>
+<a class="badge bg-primary/15 text-primary text-[10px]" href="#!">Reply</a>
+</div>
+</div>
+</li>
+<!-- User 2 -->
+<li class="py-2.5 border-b border-light">
+<div class="flex gap-2.5">
+<div class="me-2.5 shrink-0">
+<div class="size-9 flex justify-center items-center bg-purple/15 text-purple rounded-full">
+<span class="font-bold">DN</span>
+</div>
+</div>
+<div class="grow text-default-400">
+<h6 class="text-default-800 mb-1.25 text-sm flex justify-between">
+                                                        Den Nowdya
+                                                        <small class="text-xs text-default-500">1h ago</small>
+</h6>
+<p class="mb-1.25">Looking forward to the upcoming team meeting.</p>
+<a class="badge bg-primary/15 text-primary text-[10px]" href="#!">Reply</a>
+</div>
+</div>
+</li>
+<!-- User 3 -->
+<li class="py-2.5 border-b border-light">
+<div class="flex gap-2.5">
+<div class="me-2.5 shrink-0">
+<img alt="user-10" class="size-9 rounded-full" src="{% static 'painel/inspina/painel/inspina/images/users/user-10.jpg' %}"/>
+</div>
+<div class="grow text-default-400">
+<h6 class="text-default-800 mb-1.25 text-sm flex justify-between">
+                                                        Michael Brown
+                                                        <small class="text-xs text-default-500">16h ago</small>
+</h6>
+<p class="mb-1.25">Great insights shared in today's brainstorming session!</p>
+<a class="badge bg-primary/15 text-primary text-[10px]" href="#!">Reply</a>
+</div>
+</div>
+</li>
+<!-- User 4 -->
+<li class="py-2.5 border-b border-light">
+<div class="flex gap-2.5">
+<div class="me-2.5 shrink-0">
+<img alt="user-1" class="size-9 rounded-full" src="{% static 'painel/inspina/painel/inspina/images/users/user-1.jpg' %}"/>
+</div>
+<div class="grow text-default-400">
+<h6 class="text-default-800 mb-1.25 text-sm flex justify-between">
+                                                        Emily Watson
+                                                        <small class="text-xs text-default-500">20h ago</small>
+</h6>
+<p class="mb-1.25">Wrapping up an amazing design concept for the client.</p>
+<a class="badge bg-primary/15 text-primary text-[10px]" href="#!">Reply</a>
+</div>
+</div>
+</li>
+<!-- User 5 -->
+<li class="py-2.5">
+<div class="flex gap-2.5">
+<div class="me-2.5 shrink-0">
+<img alt="user-6" class="size-9 rounded-full" src="{% static 'painel/inspina/painel/inspina/images/users/user-6.jpg' %}"/>
+</div>
+<div class="grow text-default-400">
+<h6 class="text-default-800 mb-1.25 text-sm flex justify-between">
+                                                        Monica Smith
+                                                        <small class="text-xs text-default-500">2 days ago</small>
+</h6>
+<p class="mb-1.25">Testing some new UI enhancements—excited for feedback!</p>
+<a class="badge bg-primary/15 text-primary text-[10px]" href="#!">Reply</a>
+</div>
+</div>
+</li>
+</ul>
+<div class="text-center mt-5">
+<a class="underline flex gap-1 items-center justify-center font-semibold hover:text-primary" href="#!"> Go to Chat Room <i class="iconify tabler--send-2"></i> </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+                {% include 'painel/partials/footer.html' %}
+            </div>
+<!-- End Page content -->
+</div>
+
+        {% include 'painel/partials/customizer.html' %} {% include 'painel/partials/footer-scripts.html' %}
+
+        <!-- E Charts js -->
+
+<!-- Dashboard js -->
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'painel/inspina/painel/inspina/plugins/echarts/echarts.min.js' %}"></script>
+<script src="{% static 'painel/inspina/painel/inspina/js/pages/dashboard-projects.js' %}"></script>
+{% endblock scripts %}

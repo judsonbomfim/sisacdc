@@ -1,0 +1,42 @@
+{% extends 'painel/layouts/base.html' %}
+{% load static i18n  %}
+
+{% block html_attribute %}data-layout="horizontal"{% endblock html_attribute %}
+
+{% block title %}Horizontal{% endblock title %}
+
+{% block styles %}
+
+{% endblock styles %}
+
+{% block content %}
+<div class="wrapper">
+            {% include 'painel/partials/topbar.html' with subtitle='Layouts' title='Horizontal' %} {% include 'painel/partials/horizontal-nav.html' %}
+
+            <!-- Start Page Content here -->
+<div class="page-content">
+<main>
+<div class="container-fluid">
+                        {% include 'painel/partials/page-title.html' with subtitle='Layouts' title='Horizontal' %}
+
+                        <div class="card">
+<div class="card-body text-center">
+<h4 class="text-lg">Your custom content here</h4>
+</div>
+<!-- end card-body-->
+</div>
+<!-- end card -->
+</div>
+</main>
+
+                {% include 'painel/partials/footer.html' %}
+            </div>
+<!-- End Page content -->
+</div>
+
+        {% include 'painel/partials/customizer.html' %} {% include 'painel/partials/footer-scripts.html' %}
+{% endblock content %}
+
+{% block scripts %}
+
+{% endblock scripts %}

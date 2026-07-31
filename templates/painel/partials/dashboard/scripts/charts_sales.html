@@ -1,96 +1,156 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // --- WEEKLY SALES CHART ---
+    function onTabClickOnce(tabId, callback) {
+        const el = document.getElementById(tabId);
+        if (!el) return;
+        const handler = function() {
+            callback();
+            el.removeEventListener("click", handler);
+        };
+        el.addEventListener("click", handler);
+    }
+
+    const fontFamily = getComputedStyle(document.body).fontFamily || 'inherit';
+    const pedidosChartColor = '#23c6c8';
+
+    function pedidosLineOptions({ values, categories, title, xTitle, labelFormat }) {
+        return {
+            series: [{ name: "Pedidos", data: values }],
+            chart: {
+                height: 320,
+                type: 'line',
+                fontFamily: fontFamily,
+                zoom: { enabled: false },
+                toolbar: { show: false }
+            },
+            colors: [pedidosChartColor],
+            dataLabels: {
+                enabled: true,
+                style: {
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    colors: [pedidosChartColor],
+                    fontFamily: fontFamily
+                },
+                background: {
+                    enabled: true,
+                    foreColor: '#fff',
+                    padding: 6,
+                    borderRadius: 4,
+                    borderWidth: 0,
+                    opacity: 0.9
+                },
+                offsetY: -2
+            },
+            stroke: {
+                width: [2.5],
+                curve: 'smooth'
+            },
+            markers: {
+                size: 4,
+                strokeWidth: 2,
+                hover: { size: 6 }
+            },
+            title: {
+                text: title,
+                align: 'left',
+                margin: 8,
+                style: {
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    color: '#8495ab',
+                    fontFamily: fontFamily
+                }
+            },
+            grid: {
+                borderColor: '#edeff3',
+                strokeDashArray: 4,
+                padding: { top: 0, right: 16, bottom: 0, left: 8 }
+            },
+            xaxis: {
+                title: {
+                    text: xTitle,
+                    style: { fontSize: '11px', fontWeight: 500, color: '#8495ab', fontFamily: fontFamily }
+                },
+                type: 'datetime',
+                categories: categories,
+                labels: {
+                    format: labelFormat,
+                    style: { fontSize: '11px', colors: '#8495ab', fontFamily: fontFamily }
+                },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: {
+                    style: { fontSize: '11px', colors: '#8495ab', fontFamily: fontFamily }
+                }
+            },
+            legend: { show: false },
+            tooltip: {
+                theme: 'light',
+                style: { fontSize: '12px', fontFamily: fontFamily }
+            },
+            noData: {
+                text: "Sem dados para exibir",
+                style: { color: '#8495ab', fontSize: '13px', fontFamily: fontFamily }
+            }
+        };
+    }
+
     try {
         const weekSalesValuesRaw = '{{ weekSalesValues|escapejs|safe }}';
         const weekSalesDatesRaw = '{{ weekSalesDates|escapejs|safe }}';
         const weekSalesValues = weekSalesValuesRaw ? JSON.parse(weekSalesValuesRaw) : [];
         const weekSalesDates = weekSalesDatesRaw ? JSON.parse(weekSalesDatesRaw) : [];
-
-        var optionsSalesWeek = {
-            series: [{ name: "Pedidos", data: weekSalesValues }],
-            chart: { height: 350, type: 'area', zoom: { enabled: false } },
-            colors: ['#106394'],
-            dataLabels: { enabled: false },
-            stroke: { curve: 'smooth' },
-            title: { text: 'Vendas de {{dateWeek|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
-            grid: { row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
-            xaxis: {
-                title: { text: 'Dias' },
-                type: 'datetime',
+        const target = document.querySelector("#ttSalesWeek");
+        if (target) {
+            new ApexCharts(target, pedidosLineOptions({
+                values: weekSalesValues,
                 categories: weekSalesDates,
-                labels: { format: 'd/M' }
-            },
-            noData: { text: "Sem dados para exibir" }
-        };
-        var ttSalesWeek = new ApexCharts(document.querySelector("#ttSalesWeek"), optionsSalesWeek);
-        ttSalesWeek.render();
+                title: '{{ dateWeek|date:"d/m/Y" }} — {{ dateYesterday|date:"d/m/Y" }}',
+                xTitle: 'Dias',
+                labelFormat: 'd/M'
+            })).render();
+        }
     } catch (error) {
         console.error("Erro ao renderizar o gráfico de vendas da semana:", error);
     }
 
-    // --- MONTHLY SALES CHART ---
-    $('#total_sales-month-tab').on("shown.bs.tab", function () {
+    onTabClickOnce('total_sales-month-tab', function() {
         try {
             const monthSalesValuesRaw = '{{ monthSalesValues|escapejs|safe }}';
             const monthSalesDatesRaw = '{{ monthSalesDates|escapejs|safe }}';
             const monthSalesValues = monthSalesValuesRaw ? JSON.parse(monthSalesValuesRaw) : [];
             const monthSalesDates = monthSalesDatesRaw ? JSON.parse(monthSalesDatesRaw) : [];
-
-            var optionsSalesMonth = {
-                series: [{ name: "Pedidos", data: monthSalesValues }],
-                chart: { height: 350, type: 'area', zoom: { enabled: false } },
-                colors: ['#106394'],
-                dataLabels: { enabled: false },
-                stroke: { curve: 'smooth' },
-                title: { text: 'Vendas de {{dateMonth|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
-                grid: { row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
-                xaxis: {
-                    title: { text: 'Dias' },
-                    type: 'datetime',
-                    categories: monthSalesDates,
-                    labels: { format: 'd' }
-                },
-                noData: { text: "Sem dados para exibir" }
-            };
-            var ttSalesMonth = new ApexCharts(document.querySelector("#ttSalesMonth"), optionsSalesMonth);
-            ttSalesMonth.render();
+            new ApexCharts(document.querySelector("#ttSalesMonth"), pedidosLineOptions({
+                values: monthSalesValues,
+                categories: monthSalesDates,
+                title: '{{ dateMonth|date:"d/m/Y" }} — {{ dateYesterday|date:"d/m/Y" }}',
+                xTitle: 'Dias',
+                labelFormat: 'd'
+            })).render();
         } catch (error) {
             console.error("Erro ao renderizar o gráfico de vendas do mês:", error);
         }
-        $('#total_sales-month-tab').off();
     });
 
-    // --- YEARLY SALES CHART ---
-    $('#total_sales-year-tab').on("shown.bs.tab", function () {
+    onTabClickOnce('total_sales-year-tab', function() {
         try {
             const yearSalesValuesRaw = '{{ yearSalesValues|escapejs|safe }}';
             const yearSalesDatesRaw = '{{ yearSalesDates|escapejs|safe }}';
             const yearSalesValues = yearSalesValuesRaw ? JSON.parse(yearSalesValuesRaw) : [];
             const yearSalesDates = yearSalesDatesRaw ? JSON.parse(yearSalesDatesRaw) : [];
-
-            var optionsSalesYear = {
-                series: [{ name: "Pedidos", data: yearSalesValues }],
-                chart: { height: 350, type: 'area', zoom: { enabled: false } },
-                colors: ['#106394'],
-                dataLabels: { enabled: false },
-                stroke: { curve: 'smooth' },
-                title: { text: 'Vendas de {{dateYear|date:"d/m/Y"}} a {{dateYesterday|date:"d/m/Y"}}', align: 'left' },
-                grid: { row: { colors: ['#f3f3f3', 'transparent'], opacity: 0.5 } },
-                xaxis: {
-                    title: { text: 'Meses' },
-                    type: 'datetime',
-                    categories: yearSalesDates,
-                    labels: { format: 'MMM' }
-                },
-                noData: { text: "Sem dados para exibir" }
-            };
-            var ttSalesYear = new ApexCharts(document.querySelector("#ttSalesYear"), optionsSalesYear);
-            ttSalesYear.render();
+            new ApexCharts(document.querySelector("#ttSalesYear"), pedidosLineOptions({
+                values: yearSalesValues,
+                categories: yearSalesDates,
+                title: '{{ dateYear|date:"d/m/Y" }} — {{ dateYesterday|date:"d/m/Y" }}',
+                xTitle: 'Meses',
+                labelFormat: 'MMM'
+            })).render();
         } catch (error) {
             console.error("Erro ao renderizar o gráfico de vendas do ano:", error);
         }
-        $('#total_sales-year-tab').off();
     });
 });
 </script>

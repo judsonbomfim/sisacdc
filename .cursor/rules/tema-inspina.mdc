@@ -1,0 +1,37 @@
+---
+description: Caminhos e regras do tema Inspinia Tailwind (migração do painel)
+alwaysApply: true
+---
+
+# Templates do tema Inspinia
+
+| Papel | Caminho |
+|-------|---------|
+| Pacote completo do tema (Docs + demo + starterkit) | `templates/inspina_completo` |
+| Templates antigos (backup / lógica de negócio) | `templates/painel_bk` |
+| Templates de produção | `templates/painel` |
+| Assets de produção | `core/static/painel/inspina/` |
+
+## Estrutura do pacote (`inspina_completo`)
+
+- `Docs/` — documentação (Tailwind + Gulp + Django)
+- `inspinia/` — demo completo (tem `static/css/app.min.css` compilado)
+- `starterkit/` — kit mínimo (sem `app.min.css` até rodar build)
+
+## Build do tema
+
+- Ferramenta: **Gulp** (`bun run build` / `npm run build`), não Vite
+- Fonte: `static/css/app.css` (Tailwind directives)
+- Saída obrigatória no browser: `static/css/app.min.css`
+- Em produção sisacdc usar prefixo: `{% static 'painel/inspina/css/app.min.css' %}`
+
+## Regras de migração
+
+- Visual/layouts: copiar de `inspina_completo` (preferir assets do **inspinia** completo)
+- Forms, URLs e telas de negócio: adaptar a partir de `painel_bk`
+- Publicar em `templates/painel` e `apps/*/templates/painel/`
+- Shell comum: `painel/shared/base.html` e `_content_default.html` já usam layout **Inspinia** (`vertical.html`)
+- **Não** referenciar Hexadash (`painel/theme/hexadash` ou `painel/inspina/painel/theme/...`)
+- Dashboard: template `painel/dashboard.html` (não `painel/index.html` — conflito com orders)
+- Nunca usar `{% url 'pages:dynamic_pages' ... %}` — trocar por rotas reais (`login`, `logout`, `dashboard`, etc.)
+- Não substituir settings/Cookiecutter do tema; manter S3/STATIC do sisacdc (local: `settings_local` + `app.local.min.css`)

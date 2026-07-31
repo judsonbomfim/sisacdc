@@ -1,10 +1,18 @@
 {% if messages %}
-<script>
-    // Alerts
-    window.setTimeout(function() {
-        $(".alert").fadeTo(500, 0).slideUp(500, function(){
-            $(this).remove(); 
-        });
-      }, 5000);    
-</script>
+  {# djlint:off #}
+  <script>
+    (function () {
+      window.setTimeout(function () {
+        document.querySelectorAll("#django-messages .django-alert").forEach(function (alertEl) {
+          alertEl.classList.add("opacity-0", "translate-x-5")
+          window.setTimeout(function () {
+            alertEl.remove()
+            const wrap = document.getElementById("django-messages")
+            if (wrap && !wrap.querySelector(".django-alert")) wrap.remove()
+          }, 300)
+        })
+      }, 5000)
+    })()
+  </script>
+  {# djlint:on #}
 {% endif %}

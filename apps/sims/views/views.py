@@ -140,22 +140,26 @@ def sims_list(request):
     esim_tc = sims_all.filter(sim_status='DS',operator='TC', type_sim='esim').count()
     sim_ti = sims_all.filter(sim_status='DS',operator='TI', type_sim='sim').count()
     esim_ti = sims_all.filter(sim_status='DS',operator='TI', type_sim='esim').count()
-    sim_ms = sims_all.filter(sim_status='DS',operator='MS', type_sim='sim').count()
-    esim_ms = sims_all.filter(sim_status='DS',operator='MS', type_sim='esim').count()
-    esim_or_20gb = sims_all.filter(sim_status='DS',operator='OR', type_sim='esim', data='20gb').count()
-    esim_or_50gb = sims_all.filter(sim_status='DS',operator='OR', type_sim='esim', data='50gb').count()
-    esim_or_world = sims_all.filter(sim_status='DS',operator='OR', type_sim='esim', data='world').count()
     
-    saldo_at = ApiAT.balance()
-    saldo_tc = ApiTC.balance()
+    try:
+        saldo_at = ApiAT.balance()
+    except Exception:
+        saldo_at = None
+    try:
+        saldo_tc = ApiTC.balance()
+    except Exception:
+        saldo_tc = None
 
-    def fmt_brl(value):
+    def fmt_money(value):
         if value is None:
             return None
-        return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        try:
+            return f"{float(value):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        except (TypeError, ValueError):
+            return None
 
-    saldo_at = fmt_brl(saldo_at)
-    saldo_tc = fmt_brl(saldo_tc)
+    saldo_at = fmt_money(saldo_at)
+    saldo_tc = fmt_money(saldo_tc)
     
     url = reverse('sims_index')
     
@@ -174,11 +178,6 @@ def sims_list(request):
         'esim_tc': esim_tc,
         'sim_ti': sim_ti,
         'esim_ti': esim_ti,
-        'sim_ms': sim_ms,
-        'esim_ms': esim_ms,
-        'esim_or_20gb': esim_or_20gb,
-        'esim_or_50gb': esim_or_50gb,
-        'esim_or_world': esim_or_world,
         'url_filter': url_filter,
         'sim_f': sim_f,
         'sim_type_f': sim_type_f,
@@ -188,7 +187,7 @@ def sims_list(request):
         'saldo_tc': saldo_tc,
     }
        
-    return render(request, 'painel/sims/index.html', context)
+    return render(request, 'painel/index.html', context)
 
 @login_required(login_url='/login/')
 @has_permission_decorator('add_sims')
@@ -201,7 +200,7 @@ def sims_add_sim(request):
             'url_cdn': url_cdn,
         }
         
-        return render(request, 'painel/sims/add-sim.html', context)
+        return render(request, 'painel/add-sim.html', context)
         
     if request.method == 'POST':
         
@@ -214,10 +213,10 @@ def sims_add_sim(request):
         # Validations
         if ext != 'csv':
             messages.error(request,'O arquivo está incorreto. Verifique por favor!')
-            return render(request, 'painel/sims/add-sim.html')     
+            return render(request, 'painel/add-sim.html')     
         if type_sim == '' or operator == '' or sim == '':
             messages.error(request,'Preencha todos os campos')
-            return render(request, 'painel/sims/add-sim.html')
+            return render(request, 'painel/add-sim.html')
         
         try:
             arquivo = sim.read().decode("utf-8")
@@ -230,7 +229,7 @@ def sims_add_sim(request):
                         continue
                     else:
                         messages.error(request,'Houve um erro ao gravar a lista. Verifique se o arquivo está no formato correto')
-                        return render(request, 'painel/sims/add-sim.html')
+                        return render(request, 'painel/add-sim.html')
                 
                 sims_all = Sims.objects.all().filter(sim=linha).filter(type_sim='sim')
                 if sims_all:
@@ -246,17 +245,17 @@ def sims_add_sim(request):
                 add_sim.save()
                 
             messages.success(request,'Lista gravada com sucesso')
-            return render(request, 'painel/sims/add-sim.html')
+            return render(request, 'painel/add-sim.html')
         except:
             messages.error(request,'Houve um ero ao gravar a lista. Verifique se o arquivo está no formato correto')
-            return render(request, 'painel/sims/add-sim.html')
+            return render(request, 'painel/add-sim.html')
 
 @login_required(login_url='/login/')
 @has_permission_decorator('edit_sims')
 def sims_add_esim(request):
     if request.method == "GET":
         
-        return render(request, 'painel/sims/add-esim.html')
+        return render(request, 'painel/add-esim.html')
     
     if request.method == 'POST':
                 
@@ -267,27 +266,27 @@ def sims_add_esim(request):
  
         if type_sim == '' or operator == '' or not esim_file:
             messages.error(request,'Preencha todos os campos')
-            return render(request, 'painel/sims/add-esim.html')
+            return render(request, 'painel/add-esim.html')
 
         if not esim_file.name.lower().endswith('.csv'):
             messages.error(request,'O arquivo está incorreto. Envie uma planilha CSV.')
-            return render(request, 'painel/sims/add-esim.html')
+            return render(request, 'painel/add-esim.html')
 
         try:
             decoded_file = esim_file.read().decode('utf-8-sig')
         except UnicodeDecodeError:
             messages.error(request,'Não foi possível ler o CSV. Salve a planilha em UTF-8 e tente novamente.')
-            return render(request, 'painel/sims/add-esim.html')
+            return render(request, 'painel/add-esim.html')
 
         reader = csv.DictReader(io.StringIO(decoded_file))
         if not reader.fieldnames:
             messages.error(request,'A planilha CSV está vazia ou sem cabeçalho.')
-            return render(request, 'painel/sims/add-esim.html')
+            return render(request, 'painel/add-esim.html')
 
         normalized_headers = [header.strip().lower() for header in reader.fieldnames if header]
         if 'lpa' not in normalized_headers or not any(header in normalized_headers for header in ['sim', 'iccid']):
             messages.error(request,'A planilha deve conter as colunas lpa e sim ou iccid.')
-            return render(request, 'painel/sims/add-esim.html')
+            return render(request, 'painel/add-esim.html')
 
         created_total = 0
         skipped_total = 0
@@ -309,7 +308,7 @@ def sims_add_esim(request):
                 continue
 
             qr_file = qrcodeChange.build_qr_file(lpa_value, sim_value)
-            fileurl = upload_file_to_s3(qr_file).replace(f'https://{settings.AWS_S3_CUSTOM_DOMAIN}', '')
+            fileurl = upload_file_to_s3(qr_file).replace(f'{settings.AWS_S3_CUSTOM_DOMAIN}', '')
 
             add_sim = Sims(
                 sim=sim_value,
@@ -324,23 +323,23 @@ def sims_add_esim(request):
 
         if created_total == 0 and skipped_total > 0:
             messages.warning(request, 'Nenhum eSIM novo foi gravado. Verifique as linhas ignoradas.')
-            return render(request, 'painel/sims/add-esim.html')
+            return render(request, 'painel/add-esim.html')
 
         messages.success(request, f'Lista gravada com sucesso. {created_total} eSIM(s) cadastrado(s).')
-        return render(request, 'painel/sims/add-esim.html')
+        return render(request, 'painel/add-esim.html')
 
 @login_required(login_url='/login/')
 @has_permission_decorator('add_ord_sims')
 def sims_ord(request):
     if request.method == "GET":
-        return render(request, 'painel/sims/sim-order.html')
+        return render(request, 'painel/sim-order.html')
     
     if request.method == 'POST':
         
         sims_in_orders.delay()
         messages.success(request, f'Processando SIMs... Aguarde alguns minutos e atualize a página de pedidos')        
         
-    return render(request, 'painel/sims/sim-order.html')
+    return render(request, 'painel/sim-order.html')
 
 @login_required(login_url='/login/')
 @has_permission_decorator('export_activations')
@@ -450,7 +449,7 @@ def lpaChange(request):
         return HttpResponse('Nenhum eSIM sem LPA encontrado para processamento.')
 
     for sim in sims:
-        link_qrcode = F"https://{settings.AWS_S3_CUSTOM_DOMAIN}{sim.link}"
+        link_qrcode = F"{settings.AWS_S3_CUSTOM_DOMAIN}{sim.link}"
         try:
             new_lpa = qrcodeChange.read_qr_code(link_qrcode)
             if new_lpa:

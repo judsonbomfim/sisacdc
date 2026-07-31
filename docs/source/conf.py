@@ -67,7 +67,7 @@ if not settings.configured:
         ],
         SECRET_KEY='sphinx-doc-build-only-not-real-secret-key-for-docs',
         USE_TZ=False,
-        DEFAULT_AUTO_FIELD='django.db.models.AutoField',
+        DEFAULT_AUTO_FIELD='django.db.models.BigAutoField',
         CACHES={'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}},
         STATIC_URL='/static/',
         MEDIA_URL='/media/',

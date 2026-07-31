@@ -1,0 +1,85 @@
+{% extends 'painel/layouts/base.html' %}
+{% load static i18n  %}
+
+
+
+{% block title %}Two Factor{% endblock title %}
+
+{% block styles %}
+
+{% endblock styles %}
+
+{% block content %}
+<!-- Start Page Content here -->
+<div class="flex min-h-screen items-center p-12.5">
+<div class="container">
+<div class="flex justify-center">
+<div class="xl:w-5/6">
+<div class="card rounded-2xl">
+<div class="grid grid-cols-1 lg:grid-cols-2">
+<div class="card-body relative p-12.5">
+<!-- Auth Brand Logo -->
+<div class="mb-7.5 flex flex-col items-center justify-center text-center">
+<a class="auth-logo" href="/">
+<img alt="logo" class="flex dark:hidden" src="{% static 'painel/inspina/images/logo-black.png' %}"/>
+<img alt="dark logo" class="hidden dark:flex" src="{% static 'painel/inspina/images/logo.png' %}"/>
+</a>
+<h4 class="text-default-900 mt-7.5 mb-9 text-base font-bold">Request sent Successfully!</h4>
+<h4 class="text-default-400 mx-auto mb-6">We've emailed you a 6-digit verification code we sent to</h4>
+<div class="text-2xl font-bold">******6789</div>
+</div>
+<form action="index.html">
+<div class="mb-5">
+<label class="form-label" for="userEmail">
+                                                Enter your 6-digit code
+                                                <span class="text-danger">*</span>
+</label>
+<div class="two-factor flex gap-2">
+<input class="form-input text-center" required="" type="text"/>
+<input class="form-input text-center" required="" type="text"/>
+<input class="form-input text-center" required="" type="text"/>
+<input class="form-input text-center" required="" type="text"/>
+<input class="form-input text-center" required="" type="text"/>
+<input class="form-input text-center" required="" type="text"/>
+</div>
+</div>
+<div>
+<button class="btn bg-primary w-full py-3 font-semibold text-white hover:bg-primary-hover" type="submit">Confirm</button>
+</div>
+</form>
+<p class="text-default-400 mt-7.5 text-center">
+                                        Don’t have a code?
+                                        <a class="text-primary font-semibold underline underline-offset-3" href="#">Resend</a>
+                                        or
+                                        <a class="text-primary font-semibold underline underline-offset-3" href="#">Call Us</a>
+</p>
+<p class="text-default-400 mt-7.5 text-center">
+                                        Return to
+                                        <a class="text-primary font-semibold underline underline-offset-4" href="{% url 'pages:dynamic_pages' template_name='auth-card-sign-in' %}">Sign in</a>
+</p>
+<!-- Auth Footer -->
+<p class="text-default-400 mt-7.5 text-center">
+                                        ©
+                                        <script>
+                                            document.write(new Date().getFullYear())
+                                        </script>
+                                        Inspinia - by
+                                        <span>WebAppLayers</span>
+</p>
+</div>
+<div class="relative hidden h-full overflow-hidden rounded-e-2xl bg-cover bg-center object-cover lg:block" style="background-image: url('{% static 'painel/inspina/images/auth.jpg' %}')">
+<div class="absolute inset-0 flex items-end justify-center rounded-e-sm p-9 [background:linear-gradient(to_top,#313a46,rgba(49,58,70,.8),rgba(49,58,70,.5))]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- End Page content -->
+<!-- Two Factor Validator Js -->
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static 'painel/inspina/js/pages/auth-two-factor.js' %}" type="module"></script>
+{% endblock scripts %}

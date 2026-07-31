@@ -1,0 +1,54 @@
+{% extends 'painel/layouts/base.html' %}
+{% load static i18n  %}
+
+{% block html_attribute %}class="sidebar-with-line"{% endblock html_attribute %}
+
+{% block title %}Sidebar with Lines{% endblock title %}
+
+{% block styles %}
+
+{% endblock styles %}
+
+{% block content %}
+<div class="wrapper">
+            {% include 'painel/partials/topbar.html' with subtitle='Base UI' title='Sidebar with Lines' %} {% include 'painel/partials/sidenav.html' %}
+
+            <!-- Start Page Content here -->
+<div class="page-content">
+<main>
+                    {% include 'painel/partials/page-title.html' with subtitle='Base UI' title='Sidebar with Lines' %}
+
+                    <div class="container-fluid">
+<div class="bg-info/10 text-info border-s-3 border-info rounded-md flex items-start gap-3 py-3 px-4 mb-4">
+<div>
+<i class="iconify tabler--info-circle text-xl"></i>
+</div>
+<div>
+                                If you want to display a line with each menu item, add the class
+                                <code>"sidebar-with-line"</code>
+                                to the
+                                <code><html></code>
+                                tag.
+                            </div>
+</div>
+<div class="card">
+<div class="card-body text-center">
+<h4 class="text-lg">Your custom content here</h4>
+</div>
+<!-- end card-body-->
+</div>
+<!-- end card-->
+</div>
+</main>
+
+                {% include 'painel/partials/footer.html' %}
+            </div>
+<!-- End Page content -->
+</div>
+
+        {% include 'painel/partials/customizer.html' %} {% include 'painel/partials/footer-scripts.html' %}
+{% endblock content %}
+
+{% block scripts %}
+
+{% endblock scripts %}
