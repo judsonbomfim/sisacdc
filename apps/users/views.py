@@ -22,7 +22,8 @@ def login(request):
         )
         if user_f is not None:
             auth.login(request, user_f)
-            messages.success(request, f'{name_form} logado com sucesso!')
+            full_name = user_f.get_full_name() or user_f.username
+            messages.success(request, f'{full_name} logado com sucesso!')
             return redirect('dashboard')
         else:
             messages.error(request, 'Usuário ou senha inválidos')

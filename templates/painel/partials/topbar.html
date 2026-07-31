@@ -93,7 +93,7 @@
                      aria-orientation="vertical"
                      aria-labelledby="hs-dropdown-with-icons">
                     <div class="py-2 px-3.5">
-                        <h6 class="text-xs">Olá {{ request.user.first_name }} 👋!</h6>
+                        <h6 class="text-xs">{{ request.user.first_name }} {{ request.user.last_name }}</h6>
                     </div>
                     <a href="{% url 'logout' %}"
                        class="dropdown-item font-semibold text-danger">
