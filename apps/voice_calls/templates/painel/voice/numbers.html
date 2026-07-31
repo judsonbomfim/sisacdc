@@ -1,194 +1,252 @@
-{% extends 'painel/partials/_content_default.html' %}
-{% load permission_tags %}
+{% extends 'painel/layouts/vertical.html' %}
 {% load static %}
-{% load date_day %}
-{% block title_page %}<i class="bi bi-telephone"></i> Números da Voz{% endblock %}
-{% block title_content %}Lista de Números de Voz{% endblock %}
-{% block js_custom %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-{% endblock %}
-{% block content_top %}
-    <!-- Conteúdo do topo -->
-    <!-- {% include 'painel/partials/_sims_stock.html' %} -->
-{% endblock %}
-{% block content_def %}
-    <!-- Conteúdo do Principal -->
-    {% comment %} {% if request.user|can:'edit_sims' %} {% endcomment %}
-    <div class="col-md-12">
-        <div class="dm-button-list d-flex flex-wrap">
-            {% for num_st in num_st_list %}
-                {% if num_st.2 != 0 %}
-                    <button class="btn btn-default btn-squared color-primary btn-outline-primary m-1">
-                        {{ num_st.1 }}
-                        ({{ num_st.2 }})
-                    </button>
-                {% endif %}
+{% block title %}Números de Voz{% endblock title %}
+{% block page_title %}
+  {% include 'painel/partials/page-title.html' with subtitle='Voz' title='Listar Números de Voz' %}
+{% endblock page_title %}
+{% block page_content %}
+  <div class="mb-5 flex flex-wrap gap-2">
+    {% for num_st in num_st_list %}
+      {% if num_st.2 != 0 %}
+        <a href="{% url 'mumber_list' %}?number_status_f={{ num_st.0 }}{% if number_login_f %}&number_login_f={{ number_login_f|urlencode }}{% endif %}{% if number_extension_f %}&number_extension_f={{ number_extension_f|urlencode }}{% endif %}{% if number_number_f %}&number_number_f={{ number_number_f|urlencode }}{% endif %}"
+           class="badge text-sm py-1.5 px-3 font-medium transition hover:opacity-80 {% if number_status_f == num_st.0 %}bg-primary text-white{% else %}bg-primary/10 text-primary{% endif %}"
+           title="Filtrar por {{ num_st.1 }}">{{ num_st.1 }} ({{ num_st.2 }})</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <form action="{% url 'mumber_list' %}" method="post" id="numbersForm">
+    {% csrf_token %}
+    <input type="hidden" name="number_login_f" value="{{ number_login_f|default:'' }}">
+    <input type="hidden" name="number_extension_f" value="{{ number_extension_f|default:'' }}">
+    <input type="hidden" name="number_number_f" value="{{ number_number_f|default:'' }}">
+    <input type="hidden" name="number_status_f" value="{{ number_status_f|default:'' }}">
+  </form>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="w-40 shrink-0">
+          <select class="form-select" name="number_st" id="number_st" form="numbersForm">
+            <option value="" selected>Alterar Status</option>
+            {% for number_st in num_status %}
+              <option value="{{ number_st.0 }}">{{ number_st.1 }}</option>
             {% endfor %}
+          </select>
         </div>
+        <button type="submit"
+                class="btn bg-primary shrink-0 text-white hover:bg-primary-hover"
+                name="up_status"
+                form="numbersForm">Alterar</button>
+        <div class="input-icon-group w-40 max-w-full shrink-0">
+          <i class="iconify tabler--user input-icon"></i>
+          <input class="form-input"
+                 type="search"
+                 id="number-login"
+                 value="{{ number_login_f|default:'' }}"
+                 placeholder="Login"
+                 autocomplete="off" />
+        </div>
+        <div class="input-icon-group w-40 max-w-full shrink-0">
+          <i class="iconify tabler--hash input-icon"></i>
+          <input class="form-input"
+                 type="search"
+                 id="number-extension"
+                 value="{{ number_extension_f|default:'' }}"
+                 placeholder="Ramal"
+                 autocomplete="off" />
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2.5">
+        <span class="hidden font-semibold md:inline">Filtrar:</span>
+        <div class="input-icon-group w-40 shrink-0">
+          <i class="iconify tabler--phone input-icon"></i>
+          <input class="form-input"
+                 type="search"
+                 id="number-number"
+                 value="{{ number_number_f|default:'' }}"
+                 placeholder="Número"
+                 autocomplete="off" />
+        </div>
+        <div class="input-icon-group w-44 shrink-0">
+          <i class="iconify tabler--activity input-icon"></i>
+          <select class="form-select" id="number-status">
+            <option value="">Status</option>
+            {% for number_st in num_status %}
+              <option value="{{ number_st.0 }}"
+                      {% if number_status_f == number_st.0 %}selected{% endif %}>{{ number_st.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <a class="btn btn-icon border border-default-300 hover:border-default-400"
+           href="{% url 'mumber_list' %}"
+           title="Limpar filtros">
+          <i class="iconify tabler--refresh text-lg"></i>
+        </a>
+      </div>
     </div>
-    {% comment %} {% endif %} {% endcomment %}
-<div class="row">
-    <form class="row g-3" action="{% url 'mumber_list' %}" method="post">
-        {% csrf_token %}
-        <div class="col-md-1">
-            <div class="dm-select">
-                <select class="form-control form-control-lg ps-3 pe-5" name="number_st">
-                    <option value="" selected>Alterar Status</option>
-                    {% for number_st in num_status %}
-                        <option value="{{ number_st.0 }}">{{ number_st.1 }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="col-md-1">
-            <button type="submit"
-                    class="btn btn-default btn-rounded color-primary btn-primary"
-                    name="up_status">Alterar</button>
-        </div>
-        <div class="col-md-2">
-            <input type="text"
-                   class="form-control form-control-lg"
-                   placeholder="Login"
-                   name="number_login_f">
-        </div>
-        <div class="col-md-2">
-            <input type="text"
-                   class="form-control form-control-lg"
-                   placeholder="Ramal"
-                   name="number_extension_f">
-        </div>
-        <div class="col-md-2">
-            <input type="text"
-                   class="form-control form-control-lg"
-                   placeholder="Número"
-                   name="number_number_f">
-        </div>
-        <div class="col-md-2">
-            <div class="dm-select">
-                <select class="form-control form-control-lg ps-3 pe-5" name="number_status_f">
-                    <option value="" selected>Filtrar Status - Todos</option>
-                    {% for number_st in num_status %}
-                        <option value="{{ number_st.0 }}">{{ number_st.1 }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <div class="col-md-1">
-            <button type="submit"
-                    class="btn btn-default btn-rounded color-primary btn-primary"
-                    name="up_filter">Filtrar</button>
-        </div>
-        <div class="col-md-1 p-2">
-            <a class="btn-default btn-rounded" href="{% url 'mumber_list' %}">
-                <i class="bi bi-arrow-clockwise"></i>Limpar
-            </a>
-        </div>
-        <div class="table-responsive">
-            <table class="table mb-0 table-hover table-responsive">
-                <thead>
-                    <tr class="userDatatable-header">
-                        <th>
-                            <input class="form-check-input" type="checkbox" id="checkAll">
-                        </th>
-                        <th class="userDatatable-title">Login</th>
-                        <th class="userDatatable-title">Ramal</th>
-                        <th class="userDatatable-title">Número</th>
-                        <th class="userDatatable-title">Senha</th>
-                        <th class="userDatatable-title">QrCode</th>
-                        <th class="userDatatable-title">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if numbers %}
-                        {% for num in numbers %}
-                            <tr class="table-tr">
-                                <td>
-                                    <div class="userDatatable-content">
-                                        <input class="checkItem form-check-input"
-                                               type="checkbox"
-                                               value="{{ num.id }}"
-                                               name="number_id">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="userDatatable-content">{{ num.login }}</div>
-                                </td>
-                                <td>
-                                    <div class="userDatatable-content">{{ num.extension }}</div>
-                                </td>
-                                <td>
-                                    <div class="userDatatable-content">{{ num.number }}</div>
-                                </td>
-                                <td>
-                                    <div class="userDatatable-content">{{ num.password|default:"---" }}</div>
-                                </td>
-                                <td>
-                                    <div class="userDatatable-content">
-                                        {% comment %} {{ num.number_qrcode|default:"---" }} {% endcomment %}
-                                        {% if num.number_qrcode %}
-                                            <a href="{{ url_cdn }}/{{ num.number_qrcode }}" target="_blank">
-                                                <i class="bi bi-qr-code text-primary"
-                                                   data-bs-toggle="tooltip"
-                                                   data-bs-placement="top"
-                                                   data-bs-custom-class="custom-tooltip"
-                                                   data-bs-title="Ver QRCode">
-                                                </i>
-                                            </a>
-                                        {% else %}
-                                            ---
-                                        {% endif %}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="userDatatable-content">{{ num.get_number_status_display }}</div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr class="table-tr">
-                            <td>
-                                <div class="userDatatable-content">Nenhum (e)SIM encontrado.</div>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-            <nav aria-label="navigation">
-                <ul class="pagination">
-                    {% if numbers.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link"
-                               href="?page={{ numbers.previous_page_number }}{{ url_filter }}"
-                               aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                    {% endif %}
-                    <li class="page-item">
-                        <a class="page-link" href="">{{ numbers.number }} de {{ numbers.paginator.num_pages }}</a>
-                    </li>
-                    {% if numbers.has_next %}
-                        <li class="page-item">
-                            <a class="page-link"
-                               href="?page={{ numbers.next_page_number }}{{ url_filter }}"
-                               aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-    </form>
-</div>
-{% endblock %}
-{% block script_custom %}
-    <script>
-    $(document).ready(function () {
-        // Ação do botão "Marcar Todos"
-        $('#checkAll').on('change', function () {
-            $('.checkItem').prop('checked', this.checked);
-        });
-    });
-    </script>
-{% endblock %}
+    <div class="table-wrapper">
+      <table class="table table-hover">
+        <thead class="thead-sm">
+          <tr class="bg-light/25 text-2xs uppercase">
+            <th class="w-[1%]">
+              <input class="form-checkbox form-checkbox-light size-4.5"
+                     type="checkbox"
+                     id="checkAll" />
+            </th>
+            <th>Login</th>
+            <th>Ramal</th>
+            <th>Número</th>
+            <th>Senha</th>
+            <th class="text-center">QR Code</th>
+            <th class="text-center">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for num in numbers %}
+            <tr>
+              <td>
+                <input class="form-checkbox form-checkbox-light size-4.5 checkItem"
+                       type="checkbox"
+                       value="{{ num.id }}"
+                       name="number_id"
+                       form="numbersForm" />
+              </td>
+              <td>
+                <span class="text-sm font-semibold text-default-800">{{ num.login }}</span>
+              </td>
+              <td>{{ num.extension }}</td>
+              <td>{{ num.number }}</td>
+              <td>{{ num.password|default:"-" }}</td>
+              <td class="text-center">
+                {% if num.number_qrcode %}
+                  <a href="{{ url_cdn }}/{{ num.number_qrcode }}"
+                     target="_blank"
+                     class="btn btn-icon btn-sm border border-default-300 hover:border-default-400"
+                     title="Ver QRCode">
+                    <i class="iconify tabler--qrcode text-base"></i>
+                  </a>
+                {% else %}
+                  <span class="text-default-400">-</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                <span class="badge py-0 font-semibold text-2xs bg-secondary/15 text-secondary">
+                  {{ num.get_number_status_display }}
+                </span>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="py-8 text-center text-default-400">Nenhum número encontrado.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer flex flex-wrap items-center justify-between gap-3">
+      <div class="text-sm text-default-500">
+        {% if numbers.paginator.count %}
+          Página {{ numbers.number }} de {{ numbers.paginator.num_pages }}
+        {% else %}
+          Nenhum registro
+        {% endif %}
+      </div>
+      <nav aria-label="Paginação de números">
+        <ul class="pagination mb-0">
+          {% if numbers.has_previous %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?page={{ numbers.previous_page_number }}{{ url_filter }}"
+                 aria-label="Anterior">«</a>
+            </li>
+          {% endif %}
+          <li class="page-item disabled">
+            <span class="page-link">{{ numbers.number }} / {{ numbers.paginator.num_pages }}</span>
+          </li>
+          {% if numbers.has_next %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?page={{ numbers.next_page_number }}{{ url_filter }}"
+                 aria-label="Próxima">»</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+{% endblock page_content %}
+{% block scripts %}
+  <script>
+  (function () {
+    const listUrl = "{% url 'mumber_list' %}"
+    let searchTimer = null
+    let navigating = false
+
+    function buildListUrl(overrides = {}) {
+      const params = new URLSearchParams()
+      const login = overrides.number_login_f !== undefined
+        ? overrides.number_login_f
+        : (document.getElementById('number-login')?.value || '')
+      const extension = overrides.number_extension_f !== undefined
+        ? overrides.number_extension_f
+        : (document.getElementById('number-extension')?.value || '')
+      const number = overrides.number_number_f !== undefined
+        ? overrides.number_number_f
+        : (document.getElementById('number-number')?.value || '')
+      const status = overrides.number_status_f !== undefined
+        ? overrides.number_status_f
+        : (document.getElementById('number-status')?.value || '')
+
+      if (String(login).trim()) params.set('number_login_f', String(login).trim())
+      if (String(extension).trim()) params.set('number_extension_f', String(extension).trim())
+      if (String(number).trim()) params.set('number_number_f', String(number).trim())
+      if (status) params.set('number_status_f', status)
+
+      const query = params.toString()
+      return query ? `${listUrl}?${query}` : listUrl
+    }
+
+    function navigateWithFilters(overrides) {
+      if (navigating) return
+      const nextUrl = buildListUrl(overrides)
+      if (nextUrl === window.location.pathname + window.location.search) return
+      navigating = true
+      window.location.href = nextUrl
+    }
+
+    function bindSearch(id, key) {
+      const input = document.getElementById(id)
+      if (!input) return
+      input.addEventListener('input', () => {
+        window.clearTimeout(searchTimer)
+        searchTimer = window.setTimeout(() => navigateWithFilters({ [key]: input.value }), 400)
+      })
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          window.clearTimeout(searchTimer)
+          navigateWithFilters({ [key]: input.value })
+        }
+      })
+    }
+
+    bindSearch('number-login', 'number_login_f')
+    bindSearch('number-extension', 'number_extension_f')
+    bindSearch('number-number', 'number_number_f')
+
+    document.getElementById('number-status')?.addEventListener('change', (event) => {
+      navigateWithFilters({ number_status_f: event.target.value })
+    })
+
+    const checkAll = document.getElementById('checkAll')
+    if (checkAll) {
+      checkAll.addEventListener('change', () => {
+        document.querySelectorAll('.checkItem').forEach((checkbox) => {
+          checkbox.checked = checkAll.checked
+        })
+      })
+    }
+  })()
+  </script>
+{% endblock scripts %}

@@ -200,7 +200,7 @@
               </td>
               <td class="text-center">
                 <div class="flex justify-center gap-1">
-                  {% if order.cell_mod and order.cell_mod != 'False' and order.cell_mod != 'false' and order.cell_mod|length > 0 %}
+                  {% if order.cell_mod != '-' %}
                     <div class="hs-tooltip inline-block [--placement:top] [--trigger:click]">
                       <button type="button"
                               class="hs-tooltip-toggle inline-flex items-center justify-center"

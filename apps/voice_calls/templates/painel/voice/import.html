@@ -1,0 +1,47 @@
+{% extends 'painel/layouts/vertical.html' %}
+{% load static %}
+{% block title %}Importar Linhas{% endblock title %}
+{% block page_title %}
+  {% include 'painel/partials/page-title.html' with subtitle='Voz' title='Adicionar Linhas' %}
+{% endblock page_title %}
+{% block page_content %}
+  <div class="card max-w-3xl">
+    <div class="card-header">
+      <div>
+        <h4 class="card-title mb-1.25">Importar linhas de voz</h4>
+        <p class="mb-0 text-default-400">Envie um arquivo CSV no formato padrão do sistema.</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <form action="{% url 'voice_import' %}"
+            method="post"
+            enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-5">
+          <label class="form-label" for="formFile">Enviar arquivo CSV</label>
+          <input class="form-input"
+                 type="file"
+                 id="formFile"
+                 name="voice"
+                 accept=".csv,text/csv"
+                 required>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5">
+          <button type="submit"
+                  class="btn bg-primary text-white hover:bg-primary-hover">
+            <i class="iconify tabler--upload me-1"></i>
+            Inserir Linhas
+          </button>
+          {% if url_cdn %}
+            <a href="{{ url_cdn }}/files/adicionar_linhas.csv"
+               target="_blank"
+               class="btn border border-default-300 hover:border-default-400">
+              <i class="iconify tabler--download me-1"></i>
+              Download do arquivo padrão
+            </a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock page_content %}

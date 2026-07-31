@@ -1,283 +1,350 @@
-{% extends 'painel/partials/_content_default.html' %}
-{% load permission_tags %}
-{% load static %}
-{% load my_tags %}
-{% block title_page %}
-  <i class="bi bi-telephone"></i> Chamadas da Voz
-{% endblock %}
-{% block title_content %}
-  Lista de Chamadas de Voz
-{% endblock %}
-{% block css_custom %}
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@iconscout/unicons@4.0.8/css/line.min.css" />
-{% endblock %}
-{% block js_custom %}
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-{% endblock %}
-{% block content_top %}
-  <!-- Conteúdo do topo -->
-  <!-- {% include 'painel/partials/_sims_stock.html' %} -->
-{% endblock %}
-{% block content_def %}
-  <!-- Conteúdo do Principal -->
-  {% comment %} {% if request.user|can:'edit_sims' %}
-  {% endcomment %}
-  <div class="col-md-12">
-    <div class="dm-button-list d-flex flex-wrap">
-      {% for vox_st in vox_st_list %}
-        {% if vox_st.2 != 0 %}
-          <button class="btn btn-default btn-squared color-primary btn-outline-primary m-1">
-            {{ vox_st.1 }}
-            ({{ vox_st.2 }})
-          </button>
-        {% endif %}
-      {% endfor %}
-    </div>
+{% extends 'painel/layouts/vertical.html' %}
+{% load static permission_tags %}
+{% block title %}Chamadas de Voz{% endblock title %}
+{% block page_title %}
+  {% include 'painel/partials/page-title.html' with subtitle='Voz' title='Listar Chamadas de Voz' %}
+{% endblock page_title %}
+{% block page_content %}
+  <div class="mb-5 flex flex-wrap gap-2">
+    {% for vox_st in vox_st_list %}
+      {% if vox_st.2 != 0 %}
+        <a href="{% url 'voice_index' %}?voice_status_f={{ vox_st.1|urlencode }}{% if voice_item_f %}&voice_item_f={{ voice_item_f|urlencode }}{% endif %}{% if voice_number_f %}&voice_number_f={{ voice_number_f|urlencode }}{% endif %}{% if voice_going_1 %}&voice_going_1={{ voice_going_1|urlencode }}{% endif %}{% if voice_going_2 %}&voice_going_2={{ voice_going_2|urlencode }}{% endif %}{% if voice_return_1 %}&voice_return_1={{ voice_return_1|urlencode }}{% endif %}{% if voice_return_2 %}&voice_return_2={{ voice_return_2|urlencode }}{% endif %}"
+           class="badge text-sm py-1.5 px-3 font-medium transition hover:opacity-80 {% if voice_status_f == vox_st.1 %}bg-primary text-white{% else %}bg-primary/10 text-primary{% endif %}"
+           title="Filtrar por {{ vox_st.1 }}">{{ vox_st.1 }} ({{ vox_st.2 }})</a>
+      {% endif %}
+    {% endfor %}
   </div>
-  {% comment %}
-  {% endif %} {% endcomment %}
-  <div class="row">
-    <form class="row g-3" action="{% url 'voice_index' %}" method="post">
-      {% csrf_token %}
-      <div class="col-md-1">
-        <div class="dm-select">
-          <select class="form-control form-control-lg ps-3 pe-5" name="voice_st">
+
+  <form action="{% url 'voice_index' %}" method="post" id="voiceForm">
+    {% csrf_token %}
+    <input type="hidden" name="voice_item_f" value="{{ voice_item_f|default:'' }}">
+    <input type="hidden" name="voice_number_f" value="{{ voice_number_f|default:'' }}">
+    <input type="hidden" name="voice_status_f" value="{{ voice_status_f|default:'' }}">
+    <input type="hidden" name="voice_going_1" value="{{ voice_going_1|default:'' }}">
+    <input type="hidden" name="voice_going_2" value="{{ voice_going_2|default:'' }}">
+    <input type="hidden" name="voice_return_1" value="{{ voice_return_1|default:'' }}">
+    <input type="hidden" name="voice_return_2" value="{{ voice_return_2|default:'' }}">
+  </form>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="w-40 shrink-0">
+          <select class="form-select" name="voice_st" id="voice_st" form="voiceForm">
             <option value="" selected>Alterar Status</option>
             {% for vox_st in vox_status %}
               <option value="{{ vox_st.0 }}">{{ vox_st.1 }}</option>
             {% endfor %}
           </select>
         </div>
-      </div>
-      <div class="col-md-1">
         <button type="submit"
-                class="btn btn-default btn-rounded color-primary btn-primary"
-                name="up_status">Alterar</button>
-      </div>
-      <div class="col-md-1">
-        <input type="text"
-               class="form-control form-control-lg"
-               placeholder="Pedido"
-               name="voice_item_f" />
-      </div>
-      <div class="col-md-1">
-        <input type="text"
-               class="form-control form-control-lg"
-               placeholder="Número"
-               name="voice_number_f" />
-      </div>
-      <div class="col-md-2">
-        <div class="dm-date-picker">
-          <div class="form-group mb-0 form-group-calender">
-            <div class="position-relative">
-              <input type="text"
-                     class="form-control form-control-lg"
-                     id="voice_going_f"
-                     name="voice_going_f"
-                     placeholder="Ida"
-                     autocomplete="off" />
-              <a href="#"><i class="iconify tabler--calendar size-5"></i></a>
-            </div>
-          </div>
+                class="btn bg-primary shrink-0 text-white hover:bg-primary-hover"
+                name="up_status"
+                form="voiceForm">Alterar</button>
+        <div class="input-icon-group w-40 max-w-full shrink-0">
+          <i class="iconify tabler--search input-icon"></i>
+          <input class="form-input"
+                 type="search"
+                 id="voice-item"
+                 value="{{ voice_item_f|default:'' }}"
+                 placeholder="Pedido"
+                 autocomplete="off" />
+        </div>
+        <div class="input-icon-group w-40 max-w-full shrink-0">
+          <i class="iconify tabler--phone input-icon"></i>
+          <input class="form-input"
+                 type="search"
+                 id="voice-number"
+                 value="{{ voice_number_f|default:'' }}"
+                 placeholder="Número"
+                 autocomplete="off" />
         </div>
       </div>
-      <div class="col-md-2">
-        <div class="dm-date-picker">
-          <div class="form-group mb-0 form-group-calender">
-            <div class="position-relative">
-              <input type="text"
-                     class="form-control form-control-lg"
-                     id="voice_return_f"
-                     name="voice_return_f"
-                     placeholder="Volta"
-                     autocomplete="off" />
-              <a href="#"><i class="iconify tabler--calendar size-5"></i></a>
-            </div>
-          </div>
+      <div class="flex flex-wrap items-center gap-2.5">
+        <span class="hidden font-semibold md:inline">Filtrar:</span>
+        <div class="input-icon-group w-44 shrink-0">
+          <i class="iconify tabler--calendar input-icon"></i>
+          <input class="form-input"
+                 type="text"
+                 id="voice-going"
+                 placeholder="Ida"
+                 autocomplete="off" />
         </div>
-      </div>
-      <div class="col-md-2">
-        <div class="dm-select">
-          <select class="form-control form-control-lg ps-3 pe-5" name="voice_status_f">
-            <option value="" selected>Filtrar Status - Todos</option>
+        <div class="input-icon-group w-44 shrink-0">
+          <i class="iconify tabler--calendar-event input-icon"></i>
+          <input class="form-input"
+                 type="text"
+                 id="voice-return"
+                 placeholder="Volta"
+                 autocomplete="off" />
+        </div>
+        <div class="input-icon-group w-44 shrink-0">
+          <i class="iconify tabler--activity input-icon"></i>
+          <select class="form-select" id="voice-status">
+            <option value="">Status</option>
             {% for voice_st in vox_status %}
-              <option value="{{ voice_st.1 }}">{{ voice_st.1 }}</option>
+              <option value="{{ voice_st.1 }}"
+                      {% if voice_status_f == voice_st.1 %}selected{% endif %}>{{ voice_st.1 }}</option>
             {% endfor %}
           </select>
         </div>
+        <a class="btn btn-icon border border-default-300 hover:border-default-400"
+           href="{% url 'voice_index' %}"
+           title="Limpar filtros">
+          <i class="iconify tabler--refresh text-lg"></i>
+        </a>
       </div>
-      <div class="col-md-1">
-        <button type="submit"
-                class="btn btn-default btn-rounded color-primary btn-primary"
-                name="up_filter">Filtrar</button>
-      </div>
-      <div class="col-md-1 p-2">
-        <a class="btn-default btn-rounded" href="{% url 'voice_index' %}"><i class="bi bi-arrow-clockwise"></i>Limpar</a>
-      </div>
-      <div class="table-responsive">
-        <table class="table mb-0 table-hover table-responsive">
-          <thead>
-            <tr class="userDatatable-header">
-              <th>
-                <input class="form-check-input" type="checkbox" id="checkAll" />
-              </th>
-              <th class="userDatatable-title">Pedido</th>
-              <th class="userDatatable-title">Nome</th>
-              <th class="userDatatable-title">Número</th>
-              <th class="userDatatable-title">Login</th>
-              <th class="userDatatable-title">Senha</th>
-              <th class="userDatatable-title">QR Code</th>
-              <th class="userDatatable-title">Dias</th>
-              <th class="userDatatable-title">Ida</th>
-              <th class="userDatatable-title">Volta</th>
-              <th class="userDatatable-title">Status</th>
-              <th class="userDatatable-title">Ações</th>
+    </div>
+    <div class="table-wrapper">
+      <table class="table table-hover">
+        <thead class="thead-sm">
+          <tr class="bg-light/25 text-2xs uppercase">
+            <th class="w-[1%]">
+              <input class="form-checkbox form-checkbox-light size-4.5"
+                     type="checkbox"
+                     id="checkAll" />
+            </th>
+            <th>Pedido</th>
+            <th>Nome</th>
+            <th>Número</th>
+            <th>Login</th>
+            <th>Senha</th>
+            <th class="text-center">QR Code</th>
+            <th class="text-center">Dias</th>
+            <th class="text-center">Ida</th>
+            <th class="text-center">Volta</th>
+            <th class="text-center">Status</th>
+            <th class="text-center w-[1%]">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for voice in voices %}
+            <tr>
+              <td>
+                <input class="form-checkbox form-checkbox-light size-4.5 checkItem"
+                       type="checkbox"
+                       value="{{ voice.id }}"
+                       name="voice_id"
+                       form="voiceForm" />
+              </td>
+              <td>
+                <h5 class="mb-0 text-sm font-semibold">{{ voice.order_id }}</h5>
+              </td>
+              <td>
+                <span class="text-default-700">{{ voice.client }}</span>
+              </td>
+              <td>{{ voice.num_number|default:'-' }}</td>
+              <td>{{ voice.num_login|default:'-' }}</td>
+              <td>{{ voice.num_password|default:'-' }}</td>
+              <td class="text-center">
+                {% if voice.num_qrcode %}
+                  <a href="{{ url_cdn }}/{{ voice.num_qrcode }}"
+                     target="_blank"
+                     class="btn btn-icon btn-sm border border-default-300 hover:border-default-400"
+                     title="Ver QRCode">
+                    <i class="iconify tabler--qrcode text-base"></i>
+                  </a>
+                {% else %}
+                  <span class="text-default-400">-</span>
+                {% endif %}
+              </td>
+              <td class="text-center">{{ voice.days }}</td>
+              <td class="text-center whitespace-nowrap">{{ voice.activation_date|date:'d/m/Y' }}</td>
+              <td class="text-center whitespace-nowrap">{{ voice.return_date|date:'d/m/Y' }}</td>
+              <td class="text-center">
+                <span class="badge py-0 font-semibold text-2xs bg-primary/15 text-primary">{{ voice.call_status }}</span>
+              </td>
+              <td>
+                {% if request.user|can:'actions_voice' %}
+                  {% if voice.number_id != 0 %}
+                    <div class="flex justify-center gap-1.25">
+                      <a class="btn btn-icon btn-sm border border-default-300 hover:border-default-400"
+                         href="{% url 'voice_edit' voice.id %}"
+                         title="Editar">
+                        <i class="iconify tabler--edit text-base"></i>
+                      </a>
+                      <a class="btn btn-icon btn-sm border border-default-300 hover:border-default-400"
+                         href="{% url 'up_password' voice.number_id %}"
+                         title="Redefinir senha">
+                        <i class="iconify tabler--key text-base"></i>
+                      </a>
+                      <a class="btn btn-icon btn-sm border border-default-300 hover:border-default-400"
+                         href="{% url 'send_email_voices' voice.id %}"
+                         title="Enviar e-mail">
+                        <i class="iconify tabler--mail text-base"></i>
+                      </a>
+                    </div>
+                  {% else %}
+                    <span class="text-default-400">-</span>
+                  {% endif %}
+                {% endif %}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {% if voices %}
-              {% for voice in voices %}
-                <tr class="table-tr">
-                  <td>
-                    <div class="userDatatable-content">
-                      <input class="checkItem form-check-input"
-                             type="checkbox"
-                             value="{{ voice.id }}"
-                             name="voice_id" />
-                    </div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">{{ voice.order_id }}</div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">{{ voice.client }}</div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">{{ voice.num_number|default:'' }}</div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">{{ voice.num_login|default:'' }}</div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">{{ voice.num_password|default:'' }}</div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">
-                      {% if voice.num_qrcode %}
-                        <a href="{{ url_cdn }}/{{ voice.num_qrcode }}" target="_blank"><i class="bi bi-qr-code text-primary ps-2"
-   data-bs-toggle="tooltip"
-   data-bs-placement="top"
-   data-bs-custom-class="custom-tooltip"
-   data-bs-title="Ver QRCode"></i></a>
-                      {% endif %}
-                    </div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">{{ voice.days }}</div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">{{ voice.activation_date|date:'d/m/Y' }}</div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">{{ voice.return_date|date:'d/m/Y' }}</div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">{{ voice.call_status }}</div>
-                  </td>
-                  <td>
-                    <div class="userDatatable-content">
-                      {% if request.user|can:'actions_voice' %}
-                        {% if voice.number_id != 0 %}
-                          <a href="{% url 'voice_edit' voice.id %}"><i class="bi bi-pencil-square pe-1 text-info"
-   data-bs-toggle="tooltip"
-   data-bs-placement="top"
-   data-bs-custom-class="custom-tooltip"
-   data-bs-title="Editar"></i></a>
-                          <a href="{% url 'up_password' voice.number_id %}"><i class="bi bi-key pe-1 text-info"
-   data-bs-toggle="tooltip"
-   data-bs-placement="top"
-   data-bs-custom-class="custom-tooltip"
-   data-bs-title="Redefinir senha"></i></a>
-                          <a href="{% url 'send_email_voices' voice.id %}"><i class="bi bi-envelope-at pe-1 text-primary"
-   data-bs-toggle="tooltip"
-   data-bs-placement="top"
-   data-bs-custom-class="custom-tooltip"
-   data-bs-title="Enviar e-amil"></i></a>
-                        {% else %}
-                          ---
-                        {% endif %}
-                      {% endif %}
-                    </div>
-                  </td>
-                </tr>
-              {% endfor %}
-            {% else %}
-              <tr class="table-tr">
-                <td colspan="12">
-                  <div class="userDatatable-content">Nenhuma chamada de voz encontrado.</div>
-                </td>
-              </tr>
-            {% endif %}
-          </tbody>
-        </table>
-        <nav aria-label="navigation">
-          <ul class="pagination">
-            {% if voices.has_previous %}
-              <li class="page-item">
-                <a class="page-link"
-                   href="?page={{ voices.previous_page_number }}{{ url_filter }}"
-                   aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
-              </li>
-            {% endif %}
-            <li class="page-item">
-              <a class="page-link" href="">{{ voices.number }} de {{ voices.paginator.num_pages }}</a>
-            </li>
-            {% if voices.has_next %}
-              <li class="page-item">
-                <a class="page-link"
-                   href="?page={{ voices.next_page_number }}{{ url_filter }}"
-                   aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
-              </li>
-            {% endif %}
-          </ul>
-        </nav>
-        <br>
-        <br>
-        {% if voice_count %}Total de Registros: {{ voice_count }}{% endif %}
+          {% empty %}
+            <tr>
+              <td colspan="12" class="py-8 text-center text-default-400">Nenhuma chamada de voz encontrada.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer flex flex-wrap items-center justify-between gap-3">
+      <div class="text-sm text-default-500">
+        {% if voice_count %}
+          Total de registros: {{ voice_count }}
+        {% else %}
+          Nenhum registro
+        {% endif %}
       </div>
-    </form>
+      <nav aria-label="Paginação de voz">
+        <ul class="pagination mb-0">
+          {% if voices.has_previous %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?page={{ voices.previous_page_number }}{{ url_filter }}"
+                 aria-label="Anterior">«</a>
+            </li>
+          {% endif %}
+          <li class="page-item disabled">
+            <span class="page-link">{{ voices.number }} / {{ voices.paginator.num_pages }}</span>
+          </li>
+          {% if voices.has_next %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?page={{ voices.next_page_number }}{{ url_filter }}"
+                 aria-label="Próxima">»</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
   </div>
-{% endblock %}
-{% block script_custom %}
+{% endblock page_content %}
+{% block scripts %}
   <script>
-    ;(function ($) {
-      $(document).ready(function () {
-        // Ação do botão "Marcar Todos"
-        $('#checkAll').on('change', function () {
-          $('.checkItem').prop('checked', this.checked)
+  (function () {
+    const listUrl = "{% url 'voice_index' %}"
+    let searchTimer = null
+    let navigating = false
+
+    function formatISO(date) {
+      const y = date.getFullYear()
+      const m = String(date.getMonth() + 1).padStart(2, '0')
+      const d = String(date.getDate()).padStart(2, '0')
+      return `${y}-${m}-${d}`
+    }
+
+    function buildListUrl(overrides = {}) {
+      const params = new URLSearchParams()
+      const item = overrides.voice_item_f !== undefined
+        ? overrides.voice_item_f
+        : (document.getElementById('voice-item')?.value || '')
+      const number = overrides.voice_number_f !== undefined
+        ? overrides.voice_number_f
+        : (document.getElementById('voice-number')?.value || '')
+      const status = overrides.voice_status_f !== undefined
+        ? overrides.voice_status_f
+        : (document.getElementById('voice-status')?.value || '')
+      const going1 = overrides.voice_going_1 !== undefined
+        ? overrides.voice_going_1
+        : '{{ voice_going_1|default:""|escapejs }}'
+      const going2 = overrides.voice_going_2 !== undefined
+        ? overrides.voice_going_2
+        : '{{ voice_going_2|default:""|escapejs }}'
+      const return1 = overrides.voice_return_1 !== undefined
+        ? overrides.voice_return_1
+        : '{{ voice_return_1|default:""|escapejs }}'
+      const return2 = overrides.voice_return_2 !== undefined
+        ? overrides.voice_return_2
+        : '{{ voice_return_2|default:""|escapejs }}'
+
+      if (String(item).trim()) params.set('voice_item_f', String(item).trim())
+      if (String(number).trim()) params.set('voice_number_f', String(number).trim())
+      if (status) params.set('voice_status_f', status)
+      if (going1) params.set('voice_going_1', going1)
+      if (going2) params.set('voice_going_2', going2)
+      if (return1) params.set('voice_return_1', return1)
+      if (return2) params.set('voice_return_2', return2)
+
+      const query = params.toString()
+      return query ? `${listUrl}?${query}` : listUrl
+    }
+
+    function navigateWithFilters(overrides) {
+      if (navigating) return
+      const nextUrl = buildListUrl(overrides)
+      if (nextUrl === window.location.pathname + window.location.search) return
+      navigating = true
+      window.location.href = nextUrl
+    }
+
+    function bindSearch(id, key) {
+      const input = document.getElementById(id)
+      if (!input) return
+      input.addEventListener('input', () => {
+        window.clearTimeout(searchTimer)
+        searchTimer = window.setTimeout(() => navigateWithFilters({ [key]: input.value }), 400)
+      })
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          window.clearTimeout(searchTimer)
+          navigateWithFilters({ [key]: input.value })
+        }
+      })
+    }
+
+    bindSearch('voice-item', 'voice_item_f')
+    bindSearch('voice-number', 'voice_number_f')
+
+    document.getElementById('voice-status')?.addEventListener('change', (event) => {
+      navigateWithFilters({ voice_status_f: event.target.value })
+    })
+
+    function initRangePicker(selector, key1, key2, default1, default2) {
+      if (typeof flatpickr === 'undefined') return
+      const defaults = []
+      if (default1) defaults.push(default1)
+      if (default2) defaults.push(default2)
+      flatpickr(selector, {
+        mode: 'range',
+        dateFormat: 'd/m/Y',
+        disableMobile: true,
+        allowInput: true,
+        locale: { rangeSeparator: ' - ' },
+        defaultDate: defaults.length ? defaults : undefined,
+        onClose: function (selectedDates) {
+          const overrides = {}
+          overrides[key1] = selectedDates[0] ? formatISO(selectedDates[0]) : ''
+          overrides[key2] = selectedDates[1] ? formatISO(selectedDates[1]) : ''
+          navigateWithFilters(overrides)
+        },
+      })
+    }
+
+    initRangePicker(
+      '#voice-going',
+      'voice_going_1',
+      'voice_going_2',
+      '{{ voice_going_1|default:""|escapejs }}',
+      '{{ voice_going_2|default:""|escapejs }}'
+    )
+    initRangePicker(
+      '#voice-return',
+      'voice_return_1',
+      'voice_return_2',
+      '{{ voice_return_1|default:""|escapejs }}',
+      '{{ voice_return_2|default:""|escapejs }}'
+    )
+
+    const checkAll = document.getElementById('checkAll')
+    if (checkAll) {
+      checkAll.addEventListener('change', () => {
+        document.querySelectorAll('.checkItem').forEach((checkbox) => {
+          checkbox.checked = checkAll.checked
         })
       })
-    })(jQuery)
+    }
+  })()
   </script>
-  <script>
-        (function ($) {
-            $(document).ready(function () {
-                $("#voice_going_f").dateRangePicker({
-                    showOn: "focus",
-                    rangeSeparator: " - ",
-                    dateFormat: "dd/mm/yy",
-                    useHiddenAltFields: true,
-                    constrainInput: true,
-                });
-                $("#voice_return_f").dateRangePicker({
-                    showOn: "focus",
-                    rangeSeparator: " - ",
-                    dateFormat: "dd/mm/yy",
-                    useHiddenAltFields: true,
-                    constrainInput: true,
-                });
-            });
-        })(jQuery);
-  </script>
-{% endblock %}
+{% endblock scripts %}

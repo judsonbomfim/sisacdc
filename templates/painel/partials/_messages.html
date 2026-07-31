@@ -2,12 +2,12 @@
   <div class="mb-5 space-y-2.5" id="django-messages">
     {% for message in messages %}
       <div id="django-alert-{{ forloop.counter }}"
-           class="django-alert hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 flex items-start gap-3 rounded-md border px-4 py-3 {% if message.tags == 'success' %}border-success/30 bg-success/15 text-success {% elif message.tags == 'danger' or message.tags == 'error' %}border-danger/30 bg-danger/15 text-danger {% elif message.tags == 'warning' %}border-warning/30 bg-warning/15 text-warning {% elif message.tags == 'info' %}border-info/30 bg-info/15 text-info {% elif message.tags == 'primary' %}border-primary/30 bg-primary/15 text-primary {% else %}border-default-300 bg-default-100 text-default-700 {% endif %}"
+           class="django-alert hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 flex items-center gap-3 rounded-md border px-4 py-3 {% if message.tags == 'success' %}border-success/30 bg-success/15 text-success {% elif message.tags == 'danger' or message.tags == 'error' %}border-danger/30 bg-danger/15 text-danger {% elif message.tags == 'warning' %}border-warning/30 bg-warning/15 text-warning {% elif message.tags == 'info' %}border-info/30 bg-info/15 text-info {% elif message.tags == 'primary' %}border-primary/30 bg-primary/15 text-primary {% else %}border-default-300 bg-default-100 text-default-700 {% endif %}"
            role="alert"
            tabindex="-1">
-        <i class="iconify mt-0.5 shrink-0 text-xl {% if message.tags == 'success' %}tabler--circle-check {% elif message.tags == 'danger' or message.tags == 'error' %}tabler--alert-circle {% elif message.tags == 'warning' %}tabler--alert-triangle {% elif message.tags == 'info' %}tabler--info-circle {% else %}tabler--bell {% endif %}"
+        <i class="iconify shrink-0 text-xl {% if message.tags == 'success' %}tabler--circle-check {% elif message.tags == 'danger' or message.tags == 'error' %}tabler--alert-circle {% elif message.tags == 'warning' %}tabler--alert-triangle {% elif message.tags == 'info' %}tabler--info-circle {% else %}tabler--bell {% endif %}"
            aria-hidden="true"></i>
-        <div class="grow text-sm font-medium leading-5">{{ message }}</div>
+        <div class="grow text-sm font-medium leading-none">{{ message }}</div>
         <button type="button"
                 class="ms-auto -me-1 inline-flex size-7 shrink-0 items-center justify-center rounded opacity-60 transition hover:opacity-100"
                 data-hs-remove-element="#django-alert-{{ forloop.counter }}"

@@ -1,120 +1,114 @@
-{% extends 'painel/shared/base.html' %}
+{% extends 'painel/layouts/vertical.html' %}
 {% load static %}
-{% block title_page %}
-  <i class="bi bi-shop" style="font-size: 1.2em;"></i> Pedidos
-{% endblock %}
-{% block content %}
-  <div class="crm mb-25">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="breadcrumb-main">
-            <h4 class="fw-normal">Editar Plano de Voz</h4>
+{% block title %}Editar Plano de Voz{% endblock title %}
+{% block page_title %}
+  {% include 'painel/partials/page-title.html' with subtitle='Voz' title='Editar Plano de Voz' %}
+{% endblock page_title %}
+{% block page_content %}
+  <div class="grid grid-cols-1 gap-base lg:grid-cols-3">
+    <div class="space-y-base lg:col-span-2">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h4 class="card-title mb-1.25">Pedido #{{ vox.id_item.item_id }}</h4>
+            <p class="mb-0 text-default-400">Atualize os dados do plano de voz.</p>
           </div>
         </div>
-        <div class="col-md-6 col-xl-8">
-          <div class="card shadow">
-            <div class="card-header py-3">
-              <h6 class="text-uppercase fw-normal color-gray">PEDIDO #{{ vox.id_item.item_id }}</h6>
-            </div>
-            <div class="card-body">
-              <div class="card">
-                <div class="card-body">
-                  <span>NOME - {{ vox.id_item.client }}</span>
-                  <br />
-                  <span>E-MAIL - {{ vox.id_item.email }}</span>
-                  <br />
+        <div class="card-body">
+          <div class="mb-5 rounded border border-dashed border-default-300 bg-light/40 p-4">
+            <h5 class="mb-2 text-base font-semibold text-default-800">{{ vox.id_item.client }}</h5>
+            <p class="mb-0 text-sm text-default-500">E-mail — {{ vox.id_item.email }}</p>
+          </div>
+          <form action="{% url 'voice_edit' vox.id %}" method="post">
+            {% csrf_token %}
+            <div class="grid gap-base md:grid-cols-2">
+              <div>
+                <label class="form-label" for="days">Dias</label>
+                <select class="form-select" id="days" name="days" required>
+                  {% for day in vox_days %}
+                    <option value="{{ day }}" {% if vox.days == day %}selected{% endif %}>{{ day }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label class="form-label" for="ord_st_f">Status</label>
+                <select class="form-select" id="ord_st_f" name="ord_st_f">
+                  {% for ord_s in vox_status %}
+                    <option value="{{ ord_s.0 }}"
+                            {% if ord_s.0 == vox.call_status %}selected{% endif %}>{{ ord_s.1 }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="form-label" for="activation_date">Data de ativação</label>
+                <div class="grid gap-2.5 md:grid-cols-2">
+                  <div class="input-icon-group">
+                    <i class="iconify tabler--calendar input-icon"></i>
+                    <input class="form-input"
+                           type="text"
+                           value="{{ vox.activation_date|date:'d/m/Y' }}"
+                           disabled
+                           readonly>
+                  </div>
+                  <div class="input-icon-group">
+                    <i class="iconify tabler--calendar-event input-icon"></i>
+                    <input class="form-input"
+                           type="date"
+                           id="activation_date"
+                           name="activation_date">
+                  </div>
                 </div>
               </div>
-              <br />
-              <form action="{% url 'voice_edit' vox.id %}" method="post">
-                {% csrf_token %}
-                <div class="col-md-6 col-xl-9">
-                  <label class="form-label">Dias</label>
-                  <div class="row">
-                    {% for day in vox_days %}
-                      <input type="radio"
-                             class="btn-check"
-                             name="days"
-                             id="days{{ day }}"
-                             value="{{ day }}"
-                             {% if vox.days == day %}checked{% endif %}>
-                      <label class="btn btn-outline-primary m-1" for="days{{ day }}">{{ day }}</label>
-                    {% endfor %}
-                  </div>
+              <div class="md:col-span-2">
+                <label class="form-label" for="ord_note">Nota do pedido</label>
+                <div class="input-icon-group">
+                  <i class="iconify tabler--notes input-icon"></i>
+                  <input class="form-input"
+                         type="text"
+                         id="ord_note"
+                         name="ord_note"
+                         placeholder="Descreva todas as alterações feitas no pedido">
                 </div>
-                <br />
-                <div class="col-md-6 col-xl-10">
-                  <label class="form-label">Data de ativação</label>
-                  <br />
-                  <div class="input-group flex-nowrap">
-                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
-                    <input type="type"
-                           class="form-control"
-                           value="{{ vox.activation_date|date:'d/m/Y' }}"
-                           disabled />
-                    <span class="input-group-text ms-3" id="activation_date">Nova data</span>
-                    <input type="date" class="form-control" name="activation_date" />
-                  </div>
-                </div>
-                <br />
-                <div class="col-md-6 col-xl-3">
-                  <label class="form-label">Status</label>
-                  <select class="form-select" name="ord_st_f">
-                    {% for ord_s in vox_status %}
-                      {% if ord_s.0 == vox.call_status %}
-                        <option value="{{ ord_s.0 }}" selected>{{ ord_s.1 }}</option>
-                      {% else %}
-                        <option value="{{ ord_s.0 }}">{{ ord_s.1 }}</option>
-                      {% endif %}
-                    {% endfor %}
-                  </select>
-                </div>
-                <br />
-                <div class="col-md-6 col-xl-12">
-                  <label class="form-label">Nota do pedido*</label>
-                  <br />
-                  <div class="input-group flex-nowrap">
-                    <span class="input-group-text" id="ord_note"><i class="bi bi-card-checklist"></i></span>
-                    <input type="text"
-                           class="form-control"
-                           name="ord_note"
-                           placeholder="Descreva todas as alterações feitas no pedido"
-                           value="{% if vox.tracking %}{{ vox.tracking }}{% endif %}" />
-                  </div>
-                </div>
-                <br />
-                <div class="form-group">
-                  <button type="submit" class="btn btn-primary mb-3">Salvar Plano</button>
-                </div>
-              </form>
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="col-md-6 col-xl-4">
-          <div class="card shadow">
-            <div class="card-header py-3">
-              <h6 class="text-uppercase fw-normal color-gray">Notas do pedido</h6>
+            <div class="mt-5 flex flex-wrap items-center gap-2.5">
+              <button type="submit" class="btn bg-primary text-white hover:bg-primary-hover">
+                <i class="iconify tabler--check me-1"></i>
+                Salvar Plano
+              </button>
+              <a href="{% url 'voice_index' %}"
+                 class="btn border border-default-300 hover:border-default-400">Cancelar</a>
             </div>
-            <div class="card-body">
-              {% for note in vox.order_voice_notes.all %}
-                <div class="card border-left-secondary"
-                     style="background-color: {% if note.type_note == 'S' %}#f4ebeb{% else %}#F3F3F3{% endif %}">
-                  <div class="card-body">{{ note.note }}</div>
-                </div>
-                <div class="mb-2">
-                  <span class="fw-light fst-italic">{{ note.created_at|date:'d/m/Y H:i' }}h - <strong>{{ note.id_user.first_name }} {{ note.id_user.last_name }}</strong></span>
-                </div>
-              {% empty %}
-                <div class="mb-2">
-                  <span class="fw-light fst-italic">Não há notas neste pedido</span>
-                </div>
-              {% endfor %}
-            </div>
-          </div>
+          </form>
         </div>
       </div>
-      <!-- ends: .row -->
+    </div>
+    <div class="space-y-base">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title">Notas do pedido</h4>
+        </div>
+        <div class="card-body space-y-3">
+          {% for note in vox.order_voice_notes.all %}
+            <div class="rounded border p-3 {% if note.type_note == 'S' %}border-info/15 bg-info/10{% else %}border-default-200 bg-light/50{% endif %}">
+              <div class="mb-2 flex items-start justify-between gap-2">
+                <p class="mb-0 text-sm text-default-700">{{ note.note }}</p>
+                {% if note.type_note == 'S' %}
+                  <span class="badge shrink-0 bg-info/15 py-0 text-2xs font-semibold text-info">Sistema</span>
+                {% endif %}
+              </div>
+              <p class="mb-0 text-xs text-default-400">
+                {{ note.created_at|date:"d/m/Y H:i" }}h
+                {% if note.id_user %}
+                  <span class="font-semibold text-default-600">— {{ note.id_user.first_name }} {{ note.id_user.last_name }}</span>
+                {% endif %}
+              </p>
+            </div>
+          {% empty %}
+            <p class="mb-0 text-sm italic text-default-400">Não há notas neste pedido</p>
+          {% endfor %}
+        </div>
+      </div>
     </div>
   </div>
-{% endblock %}
+{% endblock page_content %}

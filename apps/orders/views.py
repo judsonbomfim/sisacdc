@@ -29,7 +29,6 @@ today = datetime.now()
 ORDERS_LIST_PER_PAGE_CHOICES = (25, 50, 100, 200)
 ORDERS_LIST_DEFAULT_PER_PAGE = 50
 
-@login_required(login_url='/login/')
 def _orders_list_params(request):
     """Lê filtros da listagem (GET/POST) e normaliza per_page."""
     src = request.POST if request.method == 'POST' else request.GET
@@ -58,7 +57,6 @@ def _orders_list_params(request):
         'per_page': per_page,
     }
 
-@login_required(login_url='/login/')
 def _apply_orders_list_filters(qs, params):
     q = params.get('q')
     if q:
@@ -81,7 +79,6 @@ def _apply_orders_list_filters(qs, params):
         qs = qs.filter(order_status=params['ord_st'])
     return qs
 
-@login_required(login_url='/login/')
 def _orders_list_url_filter(params):
     query = {}
     if params.get('q'):
@@ -100,7 +97,6 @@ def _orders_list_url_filter(params):
         query['per_page'] = params['per_page']
     return f'&{urlencode(query)}' if query else ''
 
-@login_required(login_url='/login/')
 def _orders_list_redirect(params=None):
     url = reverse('orders_list')
     if not params:
