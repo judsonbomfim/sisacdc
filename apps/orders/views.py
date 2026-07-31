@@ -346,7 +346,7 @@ def ord_edit(request,id):
         # Verificar Usuário
         try:
             id_user = User.objects.get(pk=request.user.id)
-            type_note_i = 'U'
+            type_note_i = 'P'
         except:
             id_user = None
             type_note_i = 'S'

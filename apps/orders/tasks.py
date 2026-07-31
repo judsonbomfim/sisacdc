@@ -54,29 +54,43 @@ def order_import():
     global msg_error
     msg_error = []
 
-    # Pedidos com status 'processing'
-    response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing'})
-    
-    # Verificar status HTTP antes de tentar decodificar JSON
-    if response.status_code >= 500:
-        logger.error(f"Erro de servidor da API Store: {response.status_code} - {response.reason}")
-        logger.error(f"A API está temporariamente indisponível. Tentando novamente na próxima execução.")
-        return
-    elif response.status_code >= 400:
-        logger.error(f"Erro de cliente da API Store: {response.status_code} - {response.reason}")
-        logger.error(f"Conteúdo da resposta: {response.text[:500]}")
-        return
-    
-    try:
-        ord = response.json()            
-    except Exception as e:
-        logger.error(f"Erro ao decodificar JSON da resposta da API: {e}")
-        logger.error(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
-        logger.error('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA COM ERRO')
-        return
-    
+    # Pedidos com status 'processing' (paginado)
+    per_page = 100
+    n_page = 1
+    ord = []
+    while True:
+        response = apiStore.get(
+            'orders',
+            params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page},
+        )
+
+        # Verificar status HTTP antes de tentar decodificar JSON
+        if response.status_code >= 500:
+            logger.error(f"Erro de servidor da API Store: {response.status_code} - {response.reason}")
+            logger.error(f"A API está temporariamente indisponível. Tentando novamente na próxima execução.")
+            return
+        elif response.status_code >= 400:
+            logger.error(f"Erro de cliente da API Store: {response.status_code} - {response.reason}")
+            logger.error(f"Conteúdo da resposta: {response.text[:500]}")
+            return
+
+        try:
+            page_orders = response.json()
+        except Exception as e:
+            logger.error(f"Erro ao decodificar JSON da resposta da API: {e}")
+            logger.error(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
+            logger.error('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA COM ERRO')
+            return
+
+        if not page_orders:
+            break
+        ord.extend(page_orders)
+        if len(page_orders) < per_page:
+            break
+        n_page += 1
+
     # Verificar se há pedidos para importar
-    if not ord or len(ord) == 0:
+    if not ord:
         logger.info('>>>>>>>>>> Nenhum pedido novo encontrado na API Store')
         logger.info('>>>>>>>>>> IMPORTAÇÃO DE PEDIDOS FINALIZADA')
         return
@@ -96,8 +110,8 @@ def order_import():
             n_item = 1
             id_ord = order["id"]
 
-            # Verificar pedido repetido - se order_id já existe, pula
-            if Orders.objects.filter(order_id=id_ord).exists():
+            # Verificar pedido repetido (chip) — ignora linhas só de voz
+            if Orders.objects.filter(order_id=id_ord).exclude(product='chamada-de-voz').exists():
                 logger.error(f'Pedido {id_ord} já importado, pulando')
                 continue
 
@@ -161,7 +175,9 @@ def order_import():
 
                         if not email_i:
                             log_data_error(order_id_i, item_id_store_i, 'billing.email', 'email ausente')
-                            break
+                            q_i += 1
+                            n_item += 1
+                            continue
 
                         client_i = f'{first_name} {last_name}'.strip() or 'Cliente sem nome'
 
@@ -261,10 +277,11 @@ def order_import():
 
                         if product_i in operPlan.listPlan('OR'):
                             if product_i == 'chip-internacional-europa-ilimitado':
-                                if days_i <= '12':
-                                    data_day_i = '20gb'
-                                else:
-                                    data_day_i = '50gb'
+                                try:
+                                    days_num = int(days_i)
+                                except (TypeError, ValueError):
+                                    days_num = 0
+                                data_day_i = '20gb' if days_num <= 12 else '50gb'
                             elif product_i == 'chip-internacional-europa-franquia-total':
                                 if data_day_i <= '20gb-30-dias':
                                     data_day_i = '20gb'
@@ -393,26 +410,40 @@ def order_import_voice():
     global msg_error
     msg_error = []
        
-    # Pedidos com status 'processing'
-    response = apiStore.get('orders', params={'order': 'asc', 'status': 'processing'})
-    
-    # Verificar status HTTP antes de tentar decodificar JSON
-    if response.status_code >= 500:
-        logger.error(f"Erro de servidor da API Store: {response.status_code} - {response.reason}")
-        logger.error(f"A API está temporariamente indisponível. Tentando novamente na próxima execução.")
-        return
-    elif response.status_code >= 400:
-        logger.error(f"Erro de cliente da API Store: {response.status_code} - {response.reason}")
-        logger.error(f"Conteúdo da resposta: {response.text[:500]}")
-        return
-    
-    try:
-        ord = response.json()            
-    except Exception as e:
-        logger.error(f"Erro ao decodificar JSON da resposta da API: {e}")
-        logger.error(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
-        return
-    
+    # Pedidos com status 'processing' (paginado)
+    per_page = 100
+    n_page = 1
+    ord = []
+    while True:
+        response = apiStore.get(
+            'orders',
+            params={'order': 'asc', 'status': 'processing', 'per_page': per_page, 'page': n_page},
+        )
+
+        # Verificar status HTTP antes de tentar decodificar JSON
+        if response.status_code >= 500:
+            logger.error(f"Erro de servidor da API Store: {response.status_code} - {response.reason}")
+            logger.error(f"A API está temporariamente indisponível. Tentando novamente na próxima execução.")
+            return
+        elif response.status_code >= 400:
+            logger.error(f"Erro de cliente da API Store: {response.status_code} - {response.reason}")
+            logger.error(f"Conteúdo da resposta: {response.text[:500]}")
+            return
+
+        try:
+            page_orders = response.json()
+        except Exception as e:
+            logger.error(f"Erro ao decodificar JSON da resposta da API: {e}")
+            logger.error(f"Status code: {response.status_code}, Conteúdo: {response.text[:500]}")
+            return
+
+        if not page_orders:
+            break
+        ord.extend(page_orders)
+        if len(page_orders) < per_page:
+            break
+        n_page += 1
+
     # Listar pedidos         
     for order in ord:
         
@@ -423,9 +454,9 @@ def order_import_voice():
         n_item = 1
         id_ord = order["id"]
 
-        # Verificar pedido repetido
-        if Orders.objects.filter(order_id=id_ord).exists():
-            logger.info(f'Pedido {id_ord} já importado, pulando')
+        # Verificar pedido repetido (só voz)
+        if Orders.objects.filter(order_id=id_ord, product='chamada-de-voz').exists():
+            logger.info(f'Pedido {id_ord} (voz) já importado, pulando')
             continue
         
         # Verificar se line_items existe
@@ -598,7 +629,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
     for o_id in ord_id:
         
         if o_id is None:
-            logger.error(f"Item de pedido inválido ou sem ID: {order}")
+            logger.error(f"Item de pedido inválido ou sem ID: {o_id}")
             continue
                
         order = Orders.objects.get(pk=o_id)
@@ -653,14 +684,14 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
                 order_reemb += 1 
         
         # Só cancelar se todos os itens estiverem cancelados / reembolsados
-        if (order_canc == 0 and ord_s == 'CC') or (order_reemb == 0 and ord_s == 'RB') or ord_s != 'DE':
+        if (order_canc == 0 and ord_s == 'CC') or (order_reemb == 0 and ord_s == 'RB'):
             logger.info('--------------------------- Alterar STATUS Loja')        
             if ord_s in StatusStore.st_sis_site():
                 UpdateStore.upStore(
                     order_id = order.order_id,
                     item_id_store = order.item_id_store if order.item_id_store else None,
-                    _status = ord_v.order_status if ord_v.order_status else None,
-                    status_g = ord_s if ord_s else None,
+                    _status = ord_s,
+                    status_g = ord_s,
                 ) 
         elif ord_s not in ['CC', 'RB', 'DE']:
             logger.info('--------------------------- Alterar STATUS Loja')        
@@ -683,7 +714,7 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         # Save Notes
         if id_user != None:
             user = User.objects.get(pk=id_user)
-            type_note = 'U'
+            type_note = 'P'
         else:   
             user = None
             type_note = 'S'

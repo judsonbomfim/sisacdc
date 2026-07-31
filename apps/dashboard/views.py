@@ -312,11 +312,12 @@ def clear_cache(request):
     return HttpResponse("Cache cleared")
 
 
+@login_required(login_url='/login/')
 def docs_static(request, path):
     """
     Serve assets estáticos da documentação (_static/, _sources/) via Django.
     Cacheados no Redis por 24h para desempenho.
-    Sem @login_required pois o HTML já exigiu autenticação para chegar aqui.
+    Requer autenticação (mesma regra de docs_serve).
     """
     import mimetypes
     from django.core.cache import cache
