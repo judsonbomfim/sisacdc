@@ -14,6 +14,7 @@ from django.core.files.storage import default_storage
 from django.db.models import Q
 from django.db.models.functions import Length, Trim
 from django.http import JsonResponse
+from django.utils.http import urlencode
 from datetime import date
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -70,77 +71,92 @@ def get_csv_value(row, *keys):
             return value.strip()
     return ''
 
+def _sims_list_params(request):
+    """Lê filtros da listagem (GET/POST) com nomes híbridos."""
+    src = request.POST if request.method == 'POST' else request.GET
+    return {
+        'sim': (src.get('sim') or src.get('sim_f') or '').strip(),
+        'sim_type': (src.get('sim_type') or src.get('sim_type_f') or '').strip(),
+        'sim_status': (src.get('sim_status') or src.get('sim_status_f') or '').strip(),
+        'sim_oper': (src.get('sim_oper') or src.get('sim_oper_f') or '').strip(),
+    }
+
+
+def _sims_list_url_filter(params):
+    query = {}
+    if params.get('sim'):
+        query['sim'] = params['sim']
+    if params.get('sim_type'):
+        query['sim_type'] = params['sim_type']
+    if params.get('sim_status'):
+        query['sim_status'] = params['sim_status']
+    if params.get('sim_oper'):
+        query['sim_oper'] = params['sim_oper']
+    return f'&{urlencode(query)}' if query else ''
+
+
+def _sims_list_redirect(params=None):
+    url = reverse('sims_index')
+    if not params:
+        return redirect(url)
+    query = _sims_list_url_filter(params)
+    return redirect(f'{url}?{query[1:]}' if query else url)
+
+
 @login_required(login_url='/login/')
 @has_permission_decorator('view_sims')
 def sims_list(request):
     sims_all = Sims.objects.all().order_by('-id')
     sims_l = sims_all
     url_cdn = settings.URL_CDN
-    
-    # Obter parâmetros de filtro (tanto GET quanto POST)
-    if request.method == 'GET':
-        sim_f = request.GET.get('sim')
-        sim_type_f = request.GET.get('sim_type')    
-        sim_status_f = request.GET.get('sim_status')
-        sim_oper_f = request.GET.get('sim_oper')
-    
-    if request.method == 'POST':
-        sim_f = request.POST.get('sim_f')
-        sim_type_f = request.POST.get('sim_type_f')       
-        sim_status_f = request.POST.get('sim_status_f')
-        sim_oper_f = request.POST.get('sim_oper_f')
-            
-        if 'up_status' in request.POST:
-                sim_id = request.POST.getlist('sim_id')
-                sim_st = request.POST.get('sim_st')
-                if sim_id and sim_st:
-                    for o_id in sim_id:
-                        sim = Sims.objects.get(pk=o_id)
-                        sim.sim_status = sim_st
-                        sim.save()
-                        
-                    messages.success(request,f'SIM(s) atualizado(s) com sucesso!')
-                else:
-                    messages.info(request,f'Você precisa marcar alguma opção')
-    
-    # Aplicar filtros
-    url_filter = ''
-    
+    params = _sims_list_params(request)
+
+    if request.method == 'POST' and 'up_status' in request.POST:
+        sim_id = request.POST.getlist('sim_id')
+        sim_st = request.POST.get('sim_st')
+        if sim_id and sim_st:
+            for o_id in sim_id:
+                sim = Sims.objects.get(pk=o_id)
+                sim.sim_status = sim_st
+                sim.save()
+            messages.success(request, 'SIM(s) atualizado(s) com sucesso!')
+        else:
+            messages.info(request, 'Você precisa marcar alguma opção')
+        return _sims_list_redirect(params)
+
+    sim_f = params['sim']
+    sim_type_f = params['sim_type']
+    sim_status_f = params['sim_status']
+    sim_oper_f = params['sim_oper']
+
     if sim_f:
         sims_l = sims_l.filter(sim__icontains=sim_f)
-        url_filter += f"&sim={sim_f}"
-
-    if sim_type_f: 
-        sims_l = sims_l.filter(type_sim=sim_type_f)        
-        url_filter += f"&sim_type={sim_type_f}"
-    
-    if sim_status_f: 
+    if sim_type_f:
+        sims_l = sims_l.filter(type_sim=sim_type_f)
+    if sim_status_f:
         sims_l = sims_l.filter(sim_status=sim_status_f)
-        url_filter += f"&sim_status={sim_status_f}"
-    
-    if sim_oper_f: 
+    if sim_oper_f:
         sims_l = sims_l.filter(operator=sim_oper_f)
-        url_filter += f"&sim_oper={sim_oper_f}"
-        
-    
+
+    url_filter = _sims_list_url_filter(params)
     sims_types = Sims.type_sim.field.choices
     sims_status = Sims.sim_status.field.choices
     sims_oper = Sims.operator.field.choices
-    
+
     paginator = Paginator(sims_l, 50)
     page = request.GET.get('page')
     sims = paginator.get_page(page)
-    
+
     # Verificar estoque de operadoras
-    sim_tm = sims_all.filter(sim_status='DS',operator='TM', type_sim='sim').count()
-    esim_tm = sims_all.filter(sim_status='DS',operator='TM', type_sim='esim').count()
-    sim_cm = sims_all.filter(sim_status='DS',operator='CM', type_sim='sim').count()
-    esim_cm = sims_all.filter(sim_status='DS',operator='CM', type_sim='esim').count()
-    sim_tc = sims_all.filter(sim_status='DS',operator='TC', type_sim='sim').count()
-    esim_tc = sims_all.filter(sim_status='DS',operator='TC', type_sim='esim').count()
-    sim_ti = sims_all.filter(sim_status='DS',operator='TI', type_sim='sim').count()
-    esim_ti = sims_all.filter(sim_status='DS',operator='TI', type_sim='esim').count()
-    
+    sim_tm = sims_all.filter(sim_status='DS', operator='TM', type_sim='sim').count()
+    esim_tm = sims_all.filter(sim_status='DS', operator='TM', type_sim='esim').count()
+    sim_cm = sims_all.filter(sim_status='DS', operator='CM', type_sim='sim').count()
+    esim_cm = sims_all.filter(sim_status='DS', operator='CM', type_sim='esim').count()
+    sim_tc = sims_all.filter(sim_status='DS', operator='TC', type_sim='sim').count()
+    esim_tc = sims_all.filter(sim_status='DS', operator='TC', type_sim='esim').count()
+    sim_ti = sims_all.filter(sim_status='DS', operator='TI', type_sim='sim').count()
+    esim_ti = sims_all.filter(sim_status='DS', operator='TI', type_sim='esim').count()
+
     try:
         saldo_at = ApiAT.balance()
     except Exception:
@@ -158,12 +174,25 @@ def sims_list(request):
         except (TypeError, ValueError):
             return None
 
-    saldo_at = fmt_money(saldo_at)
-    saldo_tc = fmt_money(saldo_tc)
-    
+    def money_target(value):
+        """String com ponto decimal para data-target (evita localização pt-BR)."""
+        if value is None:
+            return None
+        try:
+            return f"{float(value):.2f}"
+        except (TypeError, ValueError):
+            return None
+
+    saldo_at_raw = saldo_at
+    saldo_tc_raw = saldo_tc
+    saldo_at = fmt_money(saldo_at_raw)
+    saldo_tc = fmt_money(saldo_tc_raw)
+    saldo_at_target = money_target(saldo_at_raw)
+    saldo_tc_target = money_target(saldo_tc_raw)
+
     url = reverse('sims_index')
-    
-    context= {
+
+    context = {
         'url': url,
         'url_cdn': url_cdn,
         'sims': sims,
@@ -185,9 +214,11 @@ def sims_list(request):
         'sim_oper_f': sim_oper_f,
         'saldo_at': saldo_at,
         'saldo_tc': saldo_tc,
+        'saldo_at_target': saldo_at_target,
+        'saldo_tc_target': saldo_tc_target,
     }
-       
-    return render(request, 'painel/index.html', context)
+
+    return render(request, 'painel/sims/sims_list.html', context)
 
 @login_required(login_url='/login/')
 @has_permission_decorator('add_sims')
@@ -200,7 +231,7 @@ def sims_add_sim(request):
             'url_cdn': url_cdn,
         }
         
-        return render(request, 'painel/add-sim.html', context)
+        return render(request, 'painel/sims/add-sim.html', context)
         
     if request.method == 'POST':
         
@@ -213,10 +244,10 @@ def sims_add_sim(request):
         # Validations
         if ext != 'csv':
             messages.error(request,'O arquivo está incorreto. Verifique por favor!')
-            return render(request, 'painel/add-sim.html')     
+            return render(request, 'painel/sims/add-sim.html')     
         if type_sim == '' or operator == '' or sim == '':
             messages.error(request,'Preencha todos os campos')
-            return render(request, 'painel/add-sim.html')
+            return render(request, 'painel/sims/add-sim.html')
         
         try:
             arquivo = sim.read().decode("utf-8")
@@ -229,7 +260,7 @@ def sims_add_sim(request):
                         continue
                     else:
                         messages.error(request,'Houve um erro ao gravar a lista. Verifique se o arquivo está no formato correto')
-                        return render(request, 'painel/add-sim.html')
+                        return render(request, 'painel/sims/add-sim.html')
                 
                 sims_all = Sims.objects.all().filter(sim=linha).filter(type_sim='sim')
                 if sims_all:
@@ -245,17 +276,17 @@ def sims_add_sim(request):
                 add_sim.save()
                 
             messages.success(request,'Lista gravada com sucesso')
-            return render(request, 'painel/add-sim.html')
+            return render(request, 'painel/sims/add-sim.html')
         except:
             messages.error(request,'Houve um ero ao gravar a lista. Verifique se o arquivo está no formato correto')
-            return render(request, 'painel/add-sim.html')
+            return render(request, 'painel/sims/add-sim.html')
 
 @login_required(login_url='/login/')
 @has_permission_decorator('edit_sims')
 def sims_add_esim(request):
     if request.method == "GET":
         
-        return render(request, 'painel/add-esim.html')
+        return render(request, 'painel/sims/add-esim.html')
     
     if request.method == 'POST':
                 
@@ -266,27 +297,27 @@ def sims_add_esim(request):
  
         if type_sim == '' or operator == '' or not esim_file:
             messages.error(request,'Preencha todos os campos')
-            return render(request, 'painel/add-esim.html')
+            return render(request, 'painel/sims/add-esim.html')
 
         if not esim_file.name.lower().endswith('.csv'):
             messages.error(request,'O arquivo está incorreto. Envie uma planilha CSV.')
-            return render(request, 'painel/add-esim.html')
+            return render(request, 'painel/sims/add-esim.html')
 
         try:
             decoded_file = esim_file.read().decode('utf-8-sig')
         except UnicodeDecodeError:
             messages.error(request,'Não foi possível ler o CSV. Salve a planilha em UTF-8 e tente novamente.')
-            return render(request, 'painel/add-esim.html')
+            return render(request, 'painel/sims/add-esim.html')
 
         reader = csv.DictReader(io.StringIO(decoded_file))
         if not reader.fieldnames:
             messages.error(request,'A planilha CSV está vazia ou sem cabeçalho.')
-            return render(request, 'painel/add-esim.html')
+            return render(request, 'painel/sims/add-esim.html')
 
         normalized_headers = [header.strip().lower() for header in reader.fieldnames if header]
         if 'lpa' not in normalized_headers or not any(header in normalized_headers for header in ['sim', 'iccid']):
             messages.error(request,'A planilha deve conter as colunas lpa e sim ou iccid.')
-            return render(request, 'painel/add-esim.html')
+            return render(request, 'painel/sims/add-esim.html')
 
         created_total = 0
         skipped_total = 0
@@ -323,23 +354,10 @@ def sims_add_esim(request):
 
         if created_total == 0 and skipped_total > 0:
             messages.warning(request, 'Nenhum eSIM novo foi gravado. Verifique as linhas ignoradas.')
-            return render(request, 'painel/add-esim.html')
+            return render(request, 'painel/sims/add-esim.html')
 
         messages.success(request, f'Lista gravada com sucesso. {created_total} eSIM(s) cadastrado(s).')
-        return render(request, 'painel/add-esim.html')
-
-@login_required(login_url='/login/')
-@has_permission_decorator('add_ord_sims')
-def sims_ord(request):
-    if request.method == "GET":
-        return render(request, 'painel/sim-order.html')
-    
-    if request.method == 'POST':
-        
-        sims_in_orders.delay()
-        messages.success(request, f'Processando SIMs... Aguarde alguns minutos e atualize a página de pedidos')        
-        
-    return render(request, 'painel/sim-order.html')
+        return render(request, 'painel/sims/add-esim.html')
 
 @login_required(login_url='/login/')
 @has_permission_decorator('export_activations')

@@ -1,0 +1,168 @@
+{% extends 'painel/layouts/vertical.html' %}
+{% load static %}
+{% block title %}Exportar Clientes{% endblock title %}
+{% block page_title %}
+  {% include 'painel/partials/page-title.html' with subtitle='Pedidos' title='Exportar Clientes da Loja' %}
+{% endblock page_title %}
+{% block page_content %}
+  <div class="card max-w-2xl">
+    <div class="card-header">
+      <div>
+        <h4 class="card-title mb-1.25">Exportar clientes</h4>
+        <p class="mb-0 text-default-400">Nome, telefone, celular e e-mail dos clientes do site.</p>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="mb-2 text-sm text-default-600">
+        Exporta todos os clientes do site com nome, telefone, celular e e-mail.
+      </p>
+      <p class="mb-5 text-sm text-default-400">
+        A exportação processa lotes de 100 clientes por vez, para não sobrecarregar o servidor.
+      </p>
+      <button type="button"
+              id="btn-export-clients"
+              class="btn bg-primary text-white hover:bg-primary-hover">
+        <i class="iconify tabler--download me-1"></i>
+        Iniciar exportação
+      </button>
+      <div id="export-progress-wrap" class="mt-5 hidden">
+        <p id="export-progress-message" class="mb-2 text-sm text-default-700">Preparando...</p>
+        <div class="mb-1 flex items-center gap-3">
+          <div id="export-progress"
+               class="bg-default-100 flex h-3 w-full overflow-hidden rounded"
+               role="progressbar"
+               aria-valuemin="0"
+               aria-valuemax="100"
+               aria-valuenow="0">
+            <div id="export-progress-bar"
+                 class="bg-primary h-full transition duration-500"
+                 style="width: 0%"></div>
+          </div>
+          <span id="export-progress-percent"
+                class="shrink-0 text-sm font-semibold text-default-700">0%</span>
+        </div>
+        <p id="export-progress-detail" class="mb-0 text-xs text-default-400"></p>
+      </div>
+      <a id="btn-download-csv"
+         href="#"
+         class="btn mt-4 hidden bg-success text-white hover:bg-success-hover">
+        <i class="iconify tabler--file-spreadsheet me-1"></i>
+        Baixar CSV
+      </a>
+    </div>
+  </div>
+{% endblock page_content %}
+{% block scripts %}
+  <script>
+  (function () {
+    const csrfToken = '{{ csrf_token }}'
+    const progressUrl = '{% url "export_client_progress" %}'
+    const downloadUrlBase = '{% url "export_client_download" %}'
+    const startUrl = '{% url "export_client" %}'
+
+    const btnStart = document.getElementById('btn-export-clients')
+    const progressWrap = document.getElementById('export-progress-wrap')
+    const progress = document.getElementById('export-progress')
+    const progressBar = document.getElementById('export-progress-bar')
+    const progressPercent = document.getElementById('export-progress-percent')
+    const progressMessage = document.getElementById('export-progress-message')
+    const progressDetail = document.getElementById('export-progress-detail')
+    const btnDownload = document.getElementById('btn-download-csv')
+
+    function getProgressPercent(data) {
+      if (data.status === 'done') return 100
+      if (data.total && data.total > 0) {
+        return Math.min(99, Math.round((data.processed / data.total) * 100))
+      }
+      if (data.total_pages && data.page) {
+        return Math.min(99, Math.round((data.page / data.total_pages) * 100))
+      }
+      if (data.status === 'pending') return 2
+      return 10
+    }
+
+    function updateProgressUI(data) {
+      const percent = getProgressPercent(data)
+      progressBar.style.width = percent + '%'
+      progress.setAttribute('aria-valuenow', percent)
+      progressPercent.textContent = percent + '%'
+      progressMessage.textContent = data.message || 'Processando...'
+
+      if (data.total) {
+        progressDetail.textContent = data.processed + ' de ' + data.total + ' clientes'
+      } else if (data.total_pages) {
+        progressDetail.textContent = 'Página ' + (data.page || 0) + ' de ' + data.total_pages
+      }
+    }
+
+    async function runExport(exportId) {
+      while (true) {
+        const response = await fetch(
+          progressUrl + '?export_id=' + encodeURIComponent(exportId),
+          {
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('Falha ao consultar progresso')
+        }
+
+        const data = await response.json()
+        updateProgressUI(data)
+
+        if (data.status === 'done') {
+          progressBar.classList.remove('bg-primary')
+          progressBar.classList.add('bg-success')
+          btnStart.disabled = false
+          btnDownload.href = downloadUrlBase + '?export_id=' + encodeURIComponent(exportId)
+          btnDownload.classList.remove('hidden')
+          return
+        }
+
+        if (data.status === 'error') {
+          progressBar.classList.remove('bg-primary')
+          progressBar.classList.add('bg-danger')
+          btnStart.disabled = false
+          return
+        }
+
+        await new Promise(function (resolve) { setTimeout(resolve, 300) })
+      }
+    }
+
+    btnStart.addEventListener('click', function () {
+      btnStart.disabled = true
+      btnDownload.classList.add('hidden')
+      progressWrap.classList.remove('hidden')
+      progressBar.classList.remove('bg-danger', 'bg-success')
+      progressBar.classList.add('bg-primary')
+      progressMessage.textContent = 'Iniciando exportação...'
+      progressDetail.textContent = ''
+      updateProgressUI({ status: 'pending', processed: 0, total: 0 })
+
+      fetch(startUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error('Falha ao iniciar')
+          return response.json()
+        })
+        .then(function (data) {
+          if (!data.export_id) throw new Error('Resposta inválida')
+          return runExport(data.export_id)
+        })
+        .catch(function () {
+          progressMessage.textContent = 'Não foi possível iniciar a exportação.'
+          btnStart.disabled = false
+        })
+    })
+  })()
+  </script>
+{% endblock scripts %}

@@ -10,7 +10,7 @@ def login(request):
     
     if request.method == 'GET':
         
-        return render(request, 'painel/login.html')
+        return render(request, 'painel/users/login.html')
 
     if request.method == 'POST':
         name_form = request.POST['name_form']
@@ -32,4 +32,4 @@ def login(request):
 def logout(request):
     auth.logout(request)
     messages.success(request, 'Logout efetuado com sucesso!')
-    return render(request, 'painel/login.html')
+    return render(request, 'painel/users/login.html')

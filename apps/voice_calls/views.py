@@ -173,7 +173,7 @@ def voice_index(request):
         'url_filter': url_filter,
         'voice_count': voice_count,
     }
-    return render(request, 'painel/index.html', context)
+    return render(request, 'painel/voice/index.html', context)
 
 
 @login_required(login_url='/login/')
@@ -190,7 +190,7 @@ def voice_edit(request,id):
             'vox_status': vox_status,
             'vox_days': vox_days,
         }
-        return render(request, 'painel/edit.html', context)
+        return render(request, 'painel/voice/edit.html', context)
     
     if request.method == 'POST':
                 
@@ -234,7 +234,7 @@ def voice_import(request):
             'url_cdn': url_cdn,
         }
         
-        return render(request, 'painel/import.html', context)
+        return render(request, 'painel/voice/import.html', context)
  
     if request.method == 'POST':
         try:
@@ -246,10 +246,10 @@ def voice_import(request):
         # Validations File
         if ext != 'csv':
             messages.error(request,'O arquivo está incorreto. Verifique por favor!')
-            return render(request, 'painel/import.html')     
+            return render(request, 'painel/voice/import.html')     
         if voice == '':
             messages.error(request,'Campo obrigatório!')
-            return render(request, 'painel/import.html')
+            return render(request, 'painel/voice/import.html')
 
         # Validation field empty
         if voice != '':
@@ -278,7 +278,7 @@ def voice_import(request):
                         continue
                     else:
                         messages.error(request,'Houve um erro ao gravar a lista. Verifique se o arquivo está no formato correto')
-                        return render(request, 'painel/import.html')
+                        return render(request, 'painel/voice/import.html')
                 
                 # Validate fields
                 if f_login == '' or f_extension == '' or f_number == '':
@@ -300,10 +300,10 @@ def voice_import(request):
                 add_voice.save()
                 
             messages.success(request,f'Lista {line} gravada com sucesso')
-            return render(request, 'painel/import.html')
+            return render(request, 'painel/voice/import.html')
         else:
             messages.error(request,'Houve um ero ao gravar a lista. Verifique se o arquivo está no formato correto')
-            return render(request, 'painel/import.html')
+            return render(request, 'painel/voice/import.html')
 
 
 @login_required(login_url='/login/')
@@ -383,7 +383,7 @@ def mumber_list(request):
         'url_filter': url_filter,
         'url_cdn': url_cdn,
     }
-    return render(request, 'painel/numbers.html', context)
+    return render(request, 'painel/voice/numbers.html', context)
 
 
 @login_required(login_url='/login/')

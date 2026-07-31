@@ -109,20 +109,8 @@
                 </li>
                 {% if request.user|can:'import_orders' %}
                   <li class="menu-item">
-                    <a href="{% url 'ord_import' %}" class="menu-link">
-                      <span class="menu-text">Importar Pedidos</span>
-                    </a>
-                  </li>
-                  <li class="menu-item">
                     <a href="{% url 'export_client' %}" class="menu-link">
                       <span class="menu-text">Exportar Clientes</span>
-                    </a>
-                  </li>
-                {% endif %}
-                {% if request.user|can:'send_esims' %}
-                  <li class="menu-item">
-                    <a href="{% url 'send_esims' %}" class="menu-link">
-                      <span class="menu-text">Enviar eSIMs</span>
                     </a>
                   </li>
                 {% endif %}
@@ -178,11 +166,6 @@
                 <li class="menu-item">
                   <a href="{% url 'sims_add_esim' %}" class="menu-link">
                     <span class="menu-text">Adicionar eSIMs</span>
-                  </a>
-                </li>
-                <li class="menu-item">
-                  <a href="{% url 'sims_ord' %}" class="menu-link">
-                    <span class="menu-text">Adicionar aos Pedidos</span>
                   </a>
                 </li>
               </ul>

@@ -25,13 +25,27 @@ alwaysApply: true
 - Saída obrigatória no browser: `static/css/app.min.css`
 - Em produção sisacdc usar prefixo: `{% static 'painel/inspina/css/app.min.css' %}`
 
+## Organização de templates (namespace por app)
+
+O Django resolve pelo **caminho relativo**, não pela pasta do app. Templates de negócio devem ficar namespaced:
+
+| Tipo | Caminho físico | Referência |
+|------|----------------|------------|
+| Shell do tema (layouts, partials, erros, demos) | `templates/painel/...` | `painel/layouts/...`, `painel/partials/...` |
+| Telas de um app | `apps/<app>/templates/painel/<ns>/...` | `painel/<ns>/...` |
+
+Namespaces em uso: `orders`, `voice`, `sims`, `dashboard`, `emails`, `users`.
+
+Exemplos: `painel/orders/index.html`, `painel/voice/index.html`, `painel/dashboard/dashboard.html`, `painel/emails/send_email.html`.
+
+Não colocar templates de negócio flat em `apps/*/templates/painel/*.html` (conflito entre apps). Não duplicar o mesmo path em `templates/painel/<ns>/` e no app (DIRS ganha).
+
 ## Regras de migração
 
 - Visual/layouts: copiar de `inspina_completo` (preferir assets do **inspinia** completo)
 - Forms, URLs e telas de negócio: adaptar a partir de `painel_bk`
-- Publicar em `templates/painel` e `apps/*/templates/painel/`
+- Publicar shell em `templates/painel/`; telas de app em `apps/*/templates/painel/<ns>/`
 - Shell comum: `painel/shared/base.html` e `_content_default.html` já usam layout **Inspinia** (`vertical.html`)
 - **Não** referenciar Hexadash (`painel/theme/hexadash` ou `painel/inspina/painel/theme/...`)
-- Dashboard: template `painel/dashboard.html` (não `painel/index.html` — conflito com orders)
 - Nunca usar `{% url 'pages:dynamic_pages' ... %}` — trocar por rotas reais (`login`, `logout`, `dashboard`, etc.)
 - Não substituir settings/Cookiecutter do tema; manter S3/STATIC do sisacdc (local: `settings_local` + `app.local.min.css`)

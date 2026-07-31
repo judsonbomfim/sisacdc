@@ -1,0 +1,237 @@
+{% extends 'painel/layouts/vertical.html' %}
+{% load static %}
+{% block title %}SIMs{% endblock title %}
+{% block page_title %}
+  {% include 'painel/partials/page-title.html' with subtitle='SIMs' title='Estoque SIMs' %}
+{% endblock page_title %}
+{% block page_content %}
+  {% include 'painel/partials/_sims_stock.html' %}
+  <form action="{% url 'sims_index' %}" method="post" id="simsForm">
+    {% csrf_token %}
+    <input type="hidden" name="sim" value="{{ sim_f|default:'' }}">
+    <input type="hidden" name="sim_type" value="{{ sim_type_f|default:'' }}">
+    <input type="hidden" name="sim_status" value="{{ sim_status_f|default:'' }}">
+    <input type="hidden" name="sim_oper" value="{{ sim_oper_f|default:'' }}">
+  </form>
+  <div class="card">
+    <div class="card-header">
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="w-40 shrink-0">
+          <select class="form-select" name="sim_st" id="sim_st" form="simsForm">
+            <option value="" selected>Alterar Status</option>
+            {% for sim_st in sims_status %}
+              <option value="{{ sim_st.0 }}">{{ sim_st.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit"
+                class="btn bg-primary shrink-0 text-white hover:bg-primary-hover"
+                name="up_status"
+                form="simsForm">Alterar</button>
+        <div class="input-icon-group w-52 max-w-full shrink-0">
+          <i class="iconify tabler--search input-icon"></i>
+          <input class="form-input"
+                 type="search"
+                 id="sims-search"
+                 name="sim"
+                 value="{{ sim_f|default:'' }}"
+                 placeholder="Pesquisar (e)SIM..."
+                 autocomplete="off" />
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2.5">
+        <span class="hidden font-semibold md:inline">Filtrar:</span>
+        <div class="input-icon-group w-40 shrink-0">
+          <i class="iconify tabler--device-sim input-icon"></i>
+          <select class="form-select" id="sims-type" name="sim_type">
+            <option value="">Tipo</option>
+            {% for sim_t in sims_types %}
+              <option value="{{ sim_t.0 }}"
+                      {% if sim_type_f == sim_t.0 %}selected{% endif %}>{{ sim_t.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="input-icon-group w-40 shrink-0">
+          <i class="iconify tabler--activity input-icon"></i>
+          <select class="form-select" id="sims-status" name="sim_status">
+            <option value="">Status</option>
+            {% for sim_s in sims_status %}
+              <option value="{{ sim_s.0 }}"
+                      {% if sim_status_f == sim_s.0 %}selected{% endif %}>{{ sim_s.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="input-icon-group w-44 shrink-0">
+          <i class="iconify tabler--antenna-bars-5 input-icon"></i>
+          <select class="form-select" id="sims-oper" name="sim_oper">
+            <option value="">Operadora</option>
+            {% for sim_o in sims_oper %}
+              <option value="{{ sim_o.0 }}"
+                      {% if sim_oper_f == sim_o.0 %}selected{% endif %}>{{ sim_o.1 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <a class="btn btn-icon border border-default-300 hover:border-default-400"
+           href="{% url 'sims_index' %}"
+           title="Limpar filtros">
+          <i class="iconify tabler--refresh text-lg"></i>
+        </a>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table class="table table-hover">
+        <thead class="thead-sm">
+          <tr class="bg-light/25 text-2xs uppercase">
+            <th class="w-[1%]">
+              <input class="form-checkbox form-checkbox-light size-4.5"
+                     type="checkbox"
+                     id="checkAll" />
+            </th>
+            <th>SIM</th>
+            <th>Link</th>
+            <th>Tipo Sim</th>
+            <th>Operadora</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sim in sims %}
+            <tr>
+              <td>
+                <input class="form-checkbox form-checkbox-light size-4.5 checkItem"
+                       type="checkbox"
+                       value="{{ sim.id }}"
+                       name="sim_id"
+                       form="simsForm" />
+              </td>
+              <td>
+                <span class="text-sm font-semibold text-default-800">{{ sim.sim }}</span>
+                {% if sim.data %}
+                  <span class="text-default-400">({{ sim.data }})</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if sim.type_sim == 'esim' and sim.link %}
+                  <a href="{{ url_cdn }}{{ sim.link }}"
+                     target="_blank"
+                     class="inline-flex items-center gap-1 text-sm hover:underline"
+                     title="Ver QRCode">
+                    <i class="iconify tabler--qrcode text-base"></i>
+                    {{ sim.sim }}
+                  </a>
+                {% else %}
+                  <span class="text-default-400">-</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge py-0 font-semibold text-2xs {% if sim.type_sim == 'esim' %}bg-info/15 text-info{% else %}bg-secondary/15 text-secondary{% endif %}">
+                  {{ sim.get_type_sim_display }}
+                </span>
+              </td>
+              <td>{{ sim.get_operator_display }}</td>
+              <td>
+                <span class="badge py-0 font-semibold text-2xs bg-secondary/15 text-secondary">{{ sim.get_sim_status_display }}</span>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="py-8 text-center text-default-400">Nenhum (e)SIM encontrado.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer flex flex-wrap items-center justify-between gap-3">
+      <div class="text-sm text-default-500">
+        {% if sims.paginator.count %}
+          Página {{ sims.number }} de {{ sims.paginator.num_pages }}
+        {% else %}
+          Nenhum registro
+        {% endif %}
+      </div>
+      <nav aria-label="Paginação de SIMs">
+        <ul class="pagination mb-0">
+          {% if sims.has_previous %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?page={{ sims.previous_page_number }}{{ url_filter }}"
+                 aria-label="Anterior">«</a>
+            </li>
+          {% endif %}
+          <li class="page-item disabled">
+            <span class="page-link">{{ sims.number }} / {{ sims.paginator.num_pages }}</span>
+          </li>
+          {% if sims.has_next %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?page={{ sims.next_page_number }}{{ url_filter }}"
+                 aria-label="Próxima">»</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </div>
+{% endblock page_content %}
+{% block scripts %}
+  <script>
+  (function () {
+    const listUrl = "{% url 'sims_index' %}"
+    let searchTimer = null
+
+    function buildListUrl(overrides = {}) {
+      const params = new URLSearchParams()
+      const sim = overrides.sim !== undefined ? overrides.sim : (document.getElementById('sims-search')?.value || '')
+      const simType = overrides.sim_type !== undefined ? overrides.sim_type : (document.getElementById('sims-type')?.value || '')
+      const simStatus = overrides.sim_status !== undefined ? overrides.sim_status : (document.getElementById('sims-status')?.value || '')
+      const simOper = overrides.sim_oper !== undefined ? overrides.sim_oper : (document.getElementById('sims-oper')?.value || '')
+
+      if (sim.trim()) params.set('sim', sim.trim())
+      if (simType) params.set('sim_type', simType)
+      if (simStatus) params.set('sim_status', simStatus)
+      if (simOper) params.set('sim_oper', simOper)
+
+      const query = params.toString()
+      return query ? `${listUrl}?${query}` : listUrl
+    }
+
+    function navigateWithFilters(overrides) {
+      window.location.href = buildListUrl(overrides)
+    }
+
+    const searchInput = document.getElementById('sims-search')
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        window.clearTimeout(searchTimer)
+        searchTimer = window.setTimeout(() => navigateWithFilters({ sim: searchInput.value }), 400)
+      })
+      searchInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          window.clearTimeout(searchTimer)
+          navigateWithFilters({ sim: searchInput.value })
+        }
+      })
+    }
+
+    document.getElementById('sims-type')?.addEventListener('change', (event) => {
+      navigateWithFilters({ sim_type: event.target.value })
+    })
+    document.getElementById('sims-status')?.addEventListener('change', (event) => {
+      navigateWithFilters({ sim_status: event.target.value })
+    })
+    document.getElementById('sims-oper')?.addEventListener('change', (event) => {
+      navigateWithFilters({ sim_oper: event.target.value })
+    })
+
+    const checkAll = document.getElementById('checkAll')
+    if (checkAll) {
+      checkAll.addEventListener('change', () => {
+        document.querySelectorAll('.checkItem').forEach((checkbox) => {
+          checkbox.checked = checkAll.checked
+        })
+      })
+    }
+  })()
+  </script>
+{% endblock scripts %}

@@ -18,10 +18,10 @@
                     <div class="mb-5 rounded border border-dashed border-default-300 bg-light/40 p-4">
                         <h5 class="mb-2 text-base font-semibold text-default-800">{{ order.client }}</h5>
                         <p class="mb-1 text-sm text-default-500">E-mail — {{ order.email }}</p>
-                        {% if order.ord_chip_nun %}
+                        {% if order.ord_chip_nun != '-' %}
                             <p class="mb-1 text-sm text-default-500">Ped/SIM — {{ order.ord_chip_nun }}</p>
                         {% endif %}
-                        {% if order.cell_mod %}
+                        {% if order.cell_mod != '-' %}
                             <p class="mb-0 text-sm text-default-500">Modelo de celular — {{ order.cell_mod }}</p>
                         {% endif %}
                     </div>

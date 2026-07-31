@@ -200,7 +200,7 @@ def order_import():
                         countries_i = False
                         activation_date_i = '2001-01-01'
                         data_day_i = '1gb'
-                        cell_mod_i = False
+                        cell_mod_i = '-'
                         celular_samsung_i = False
                         type_sim_i = 'sim'
                         days_i = '30'
@@ -492,7 +492,7 @@ def order_import_voice():
                 # Definir valor padrão para variáveis
                 ord_chip_nun_i = '-'
                 countries_i = False
-                cell_mod_i = False
+                cell_mod_i = '-'
                 condition_i = "novo-sim"
                 activation_date_i = '2001-01-01'
                 data_day_i = 'ilimitado'

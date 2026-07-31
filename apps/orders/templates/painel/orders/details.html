@@ -1,0 +1,126 @@
+{% extends 'painel/layouts/vertical.html' %}
+{% load static %}
+{% block title %}Detalhes do Pedido{% endblock title %}
+{% block page_title %}
+  {% include 'painel/partials/page-title.html' with subtitle='Pedidos' title='Detalhes do Pedido' %}
+{% endblock page_title %}
+{% block page_content %}
+  <div class="card mb-5">
+    <div class="card-header">
+      <div>
+        <h4 class="card-title mb-1.25">Pedido #{{ ord.id }}</h4>
+        <p class="mb-0 text-default-400">{{ ord.billing.first_name }} {{ ord.billing.last_name }}</p>
+      </div>
+    </div>
+    <div class="card-body space-y-base">
+      <div class="grid grid-cols-1 gap-base md:grid-cols-2 xl:grid-cols-3">
+        <div class="rounded border border-default-200 bg-light/40 p-4">
+          <h5 class="mb-3 text-sm font-semibold uppercase tracking-wide text-default-500">Faturamento</h5>
+          <address class="mb-0 not-italic text-sm text-default-700">
+            <strong class="text-default-800">{{ ord.billing.first_name }} {{ ord.billing.last_name }}</strong><br>
+            {{ ord.billing.address_1 }}, {{ ord.billing.number }}<br>
+            {{ ord.billing.neighborhood }}, {{ ord.billing.city }}, {{ ord.billing.state }}<br>
+            CEP: {{ ord.billing.postcode }}
+          </address>
+        </div>
+        <div class="rounded border border-default-200 bg-light/40 p-4">
+          <h5 class="mb-3 text-sm font-semibold uppercase tracking-wide text-default-500">Entrega</h5>
+          <address class="mb-0 not-italic text-sm text-default-700">
+            <strong class="text-default-800">{{ ord.shipping.first_name }} {{ ord.shipping.last_name }}</strong><br>
+            {{ ord.shipping.address_1 }}, {{ ord.shipping.number }}<br>
+            {{ ord.shipping.neighborhood }}, {{ ord.shipping.city }}, {{ ord.shipping.state }}<br>
+            CEP: {{ ord.shipping.postcode }}
+          </address>
+        </div>
+        <div class="rounded border border-default-200 bg-light/40 p-4">
+          <h5 class="mb-3 text-sm font-semibold uppercase tracking-wide text-default-500">Cliente</h5>
+          <div class="space-y-1 text-sm text-default-700">
+            <p class="mb-0"><span class="font-semibold text-default-800">CPF:</span> {{ ord.billing.cpf }}</p>
+            <p class="mb-0"><span class="font-semibold text-default-800">E-mail:</span> {{ ord.billing.email }}</p>
+            <p class="mb-0"><span class="font-semibold text-default-800">Telefone:</span> {{ ord.billing.phone }}</p>
+            <p class="mb-0"><span class="font-semibold text-default-800">Celular:</span> {{ ord.billing.cellphone }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="table table-hover">
+          <thead class="thead-sm">
+            <tr class="bg-light/25 text-2xs uppercase">
+              <th>Qty</th>
+              <th>Produto</th>
+              <th>Descrição</th>
+              <th>Dias</th>
+              <th>Dt. Ativação</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for items in ord.line_items %}
+              <tr>
+                <td>{{ items.quantity }}</td>
+                <td class="font-medium">{{ items.name }}</td>
+                <td class="text-sm text-default-600">
+                  {% for desc in items.meta_data %}
+                    {% if desc.key != '_WCPA_order_meta_data' and desc.key != 'pa_dias' %}
+                      {% if 'Visitará' in desc.key %}
+                        <span class="font-medium text-default-800">Países</span>: {{ desc.display_value }}<br>
+                      {% else %}
+                        <span class="font-medium text-default-800">{{ desc.display_key }}</span>: {{ desc.display_value }}<br>
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                </td>
+                <td>
+                  {% for desc in items.meta_data %}
+                    {% if desc.key == 'pa_dias' %}{{ desc.display_value }}{% endif %}
+                  {% endfor %}
+                </td>
+                <td class="whitespace-nowrap">
+                  {% for desc in items.meta_data %}
+                    {% if desc.key == 'Data de Ativação' %}{{ desc.display_value }}{% endif %}
+                  {% endfor %}
+                </td>
+                <td>{{ items.subtotal }}</td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="py-8 text-center text-default-400">Nenhum item encontrado.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="grid grid-cols-1 gap-base md:grid-cols-2">
+        <div>
+          <h5 class="mb-2 text-sm font-semibold text-default-800">Métodos de Pagamento</h5>
+          <p class="mb-4 text-sm text-default-600">{{ ord.payment_method_title }} ({{ ord.payment_method }})</p>
+          <h5 class="mb-2 text-sm font-semibold text-default-800">Frete</h5>
+          <p class="mb-0 text-sm text-default-600">{{ ord.shipping_lines.0.method_title }}</p>
+        </div>
+        <div>
+          <h5 class="mb-3 text-sm font-semibold text-default-800">Totais</h5>
+          <div class="overflow-x-auto rounded border border-default-200">
+            <table class="table mb-0">
+              <tbody>
+                {% if ord.fee_lines %}
+                  <tr>
+                    <th class="text-default-600">{{ ord.fee_lines.0.name }}:</th>
+                    <td class="text-end">R$ {{ ord.fee_lines.0.total }}</td>
+                  </tr>
+                {% endif %}
+                <tr>
+                  <th class="text-default-600">Frete ({{ ord.shipping_lines.0.method_title }}):</th>
+                  <td class="text-end">R$ {{ ord.shipping_lines.0.total }}</td>
+                </tr>
+                <tr>
+                  <th class="text-default-800">Total:</th>
+                  <td class="text-end font-semibold text-default-800">R$ {{ ord.total }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock page_content %}

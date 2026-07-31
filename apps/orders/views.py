@@ -29,7 +29,7 @@ today = datetime.now()
 ORDERS_LIST_PER_PAGE_CHOICES = (25, 50, 100, 200)
 ORDERS_LIST_DEFAULT_PER_PAGE = 50
 
-
+@login_required(login_url='/login/')
 def _orders_list_params(request):
     """Lê filtros da listagem (GET/POST) e normaliza per_page."""
     src = request.POST if request.method == 'POST' else request.GET
@@ -58,7 +58,7 @@ def _orders_list_params(request):
         'per_page': per_page,
     }
 
-
+@login_required(login_url='/login/')
 def _apply_orders_list_filters(qs, params):
     q = params.get('q')
     if q:
@@ -81,7 +81,7 @@ def _apply_orders_list_filters(qs, params):
         qs = qs.filter(order_status=params['ord_st'])
     return qs
 
-
+@login_required(login_url='/login/')
 def _orders_list_url_filter(params):
     query = {}
     if params.get('q'):
@@ -100,7 +100,7 @@ def _orders_list_url_filter(params):
         query['per_page'] = params['per_page']
     return f'&{urlencode(query)}' if query else ''
 
-
+@login_required(login_url='/login/')
 def _orders_list_redirect(params=None):
     url = reverse('orders_list')
     if not params:
@@ -180,7 +180,7 @@ def orders_list(request):
         'per_page_choices': ORDERS_LIST_PER_PAGE_CHOICES,
         'orders_count': orders_count,
     }
-    return render(request, 'painel/index.html', context)
+    return render(request, 'painel/orders/index.html', context)
 
 @login_required(login_url='/login/')
 def ord_details(request, order_id):
@@ -247,24 +247,6 @@ def ord_details(request, order_id):
     return JsonResponse(data)
 
 
-# Update orders
-@login_required(login_url='/login/')
-@has_permission_decorator('import_orders')
-def ord_import(request):
-    if request.method == 'GET':
-
-        return render(request, 'painel/import.html')    
-
-    if request.method == 'POST':
-
-        # Orderm Import       
-        order_import.delay()
-        messages.success(request, f'Processando pedidos... Aguarde alguns minutos e atualize a página de pedidos')        
-
-    return render(request, 'painel/import.html')
-
-
-# Order Edit
 @login_required(login_url='/login/')
 @has_permission_decorator('edit_orders')
 def ord_edit(request,id):
@@ -286,7 +268,7 @@ def ord_edit(request,id):
             'ord_operators': ord_operators,
             'ord_days': days,
         }
-        return render(request, 'painel/edit.html', context)
+        return render(request, 'painel/orders/edit.html', context)
         
     if request.method == 'POST':
         
@@ -669,18 +651,7 @@ def ord_export_op(request):
         messages.success(request, 'Arquivo CSV baixado com sucesso!')
         return response 
     
-    return render(request, 'painel/export_op.html', context)
-
-
-@login_required(login_url='/login/')
-def send_esims(request):
-    if request.method == 'GET':
-        return render(request, 'painel/send_esim.html')
-    if request.method == 'POST':
-        # Orderm Import       
-        send_email_sims.delay()
-        messages.success(request, 'Processando emails... Aguarde alguns minutos e atualize a página de pedidos')
-        return redirect('send_esims')
+    return render(request, 'painel/orders/export_op.html', context)
 
 
 @login_required(login_url='/login/')
@@ -886,9 +857,10 @@ def orders_activations(request):
         'ord_planos_f': ord_planos_f,
         'orders_count': orders_count,
     }
-    return render(request, 'painel/activations.html', context)
+    return render(request, 'painel/orders/activations.html', context)
 
 
+@login_required(login_url='/login/')
 def update_status(request):
     # Atualizar status dos pedidos
     update_st.delay()
@@ -925,4 +897,4 @@ def exportClient(request):
         export_id = ExportClients.start()
         return JsonResponse({'export_id': export_id})
 
-    return render(request, 'painel/export_clients.html')
+    return render(request, 'painel/orders/export_clients.html')

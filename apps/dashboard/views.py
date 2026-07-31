@@ -302,7 +302,7 @@ def index(request):
         'saldo_tc_target': saldo_tc_target,
     }
     
-    return render(request, 'painel/dashboard.html', context)
+    return render(request, 'painel/dashboard/dashboard.html', context)
 
 
 @login_required(login_url='/login/')
