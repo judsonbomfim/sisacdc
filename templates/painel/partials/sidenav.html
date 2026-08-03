@@ -1,4 +1,4 @@
-{% load static i18n permission_tags %}
+{% load static i18n permission_tags iconify_icons %}
 {# djlint:off #}
 <style>
   /* Light: primary | Dark: mesmo fundo das demais áreas */
@@ -84,7 +84,7 @@
           <li class="menu-item">
             <a href="{% url 'dashboard' %}" class="menu-link">
               <span class="menu-icon"><i class="iconify"
-   style="--svg: url('{% static 'painel/inspina/icons/chart-bar-square-up.svg' %}')"></i></span>
+   style="--svg: {% icon_svg 'painel/inspina/icons/chart-bar-square-up.svg' %}"></i></span>
               <span class="menu-text">Dashboard</span>
             </a>
           </li>
@@ -95,7 +95,7 @@
                  aria-controls="menu-pedidos"
                  class="hs-accordion-toggle menu-link">
                 <span class="menu-icon"><i class="iconify"
-   style="--svg: url('{% static 'painel/inspina/icons/shopping-bag-check.svg' %}')"
+   style="--svg: {% icon_svg 'painel/inspina/icons/shopping-bag-check.svg' %}"
    aria-hidden="true"></i></span>
                 <span class="menu-text">Pedidos</span>
                 <span class="menu-arrow"></span>
@@ -124,7 +124,7 @@
                  aria-controls="menu-ativacoes"
                  class="hs-accordion-toggle menu-link">
                 <span class="menu-icon"><i class="iconify"
-   style="--svg: url('{% static 'painel/inspina/icons/esim.svg' %}')"
+   style="--svg: {% icon_svg 'painel/inspina/icons/esim.svg' %}"
    aria-hidden="true"></i></span>
                 <span class="menu-text">Ativações</span>
                 <span class="menu-arrow"></span>
@@ -146,7 +146,7 @@
                  aria-controls="menu-sims"
                  class="hs-accordion-toggle menu-link">
                 <span class="menu-icon"><i class="iconify"
-   style="--svg: url('{% static 'painel/inspina/icons/sim-card.svg' %}')"
+   style="--svg: {% icon_svg 'painel/inspina/icons/sim-card.svg' %}"
    aria-hidden="true"></i></span>
                 <span class="menu-text">SIMs</span>
                 <span class="menu-arrow"></span>
@@ -178,7 +178,7 @@
                  aria-controls="menu-voz"
                  class="hs-accordion-toggle menu-link">
                 <span class="menu-icon"><i class="iconify"
-   style="--svg: url('{% static 'painel/inspina/icons/phone.svg' %}')"
+   style="--svg: {% icon_svg 'painel/inspina/icons/phone.svg' %}"
    aria-hidden="true"></i></span>
                 <span class="menu-text">Chamadas de Voz</span>
                 <span class="menu-arrow"></span>

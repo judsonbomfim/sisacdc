@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n iconify_icons %}
 <header class="app-header">
     <div class="container-fluid flex items-center justify-between">
         <div class="flex items-center gap-2.5">
@@ -81,7 +81,7 @@
                         aria-expanded="false"
                         aria-label="Dropdown">
                     <i class="iconify size-8 rounded-full lg:me-3"
-                       style="--svg: url('{% static 'painel/inspina/icons/user-circle.svg' %}')"
+                       style="--svg: {% icon_svg 'painel/inspina/icons/user-circle.svg' %}"
                        aria-hidden="true"></i>
                     <div class="hidden lg:flex items-center gap-1.5">
                         <h5 class="pro-username">{{ request.user.first_name|default:request.user.username }}</h5>
