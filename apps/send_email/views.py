@@ -7,8 +7,9 @@ from apps.voice_calls.models import VoiceCalls
 
 @login_required(login_url='/login/')
 def send_email(request,id):
-    send_email_sims.delay(id=id)    
-    return redirect('orders_list')    
+    send_email_sims.delay(id=id)
+    messages.success(request, 'E-mail enviado com sucesso!')
+    return redirect('orders_list') 
 
 @login_required(login_url='/login/')
 def send_email_esims():
