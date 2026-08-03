@@ -3,15 +3,15 @@
   <script>
     (function () {
       window.setTimeout(function () {
-        document.querySelectorAll("#django-messages .django-alert").forEach(function (alertEl) {
-          alertEl.classList.add("opacity-0", "translate-x-5")
+        document.querySelectorAll("#django-messages .django-toast").forEach(function (toastEl) {
+          toastEl.classList.add("opacity-0", "translate-x-5")
           window.setTimeout(function () {
-            alertEl.remove()
+            toastEl.remove()
             const wrap = document.getElementById("django-messages")
-            if (wrap && !wrap.querySelector(".django-alert")) wrap.remove()
+            if (wrap && !wrap.querySelector(".django-toast")) wrap.remove()
           }, 300)
         })
-      }, 5000)
+      }, 7000)
     })()
   </script>
   {# djlint:on #}

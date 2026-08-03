@@ -58,7 +58,6 @@
             </a>
           </div>
           <div class="card p-7.5 rounded-2xl">
-            {% include 'painel/partials/_messages.html' %}
             <form action="{% url 'login' %}" method="post">
               {% csrf_token %}
               <div class="mb-5">
@@ -116,6 +115,7 @@
     </div>
   </div>
   <!-- End Page content -->
+  {% include 'painel/partials/_messages.html' %}
 {% endblock content %}
 {% block scripts %}
   {% include 'painel/partials/_messages_script.html' %}

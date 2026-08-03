@@ -25,7 +25,6 @@
       {% block page_title %}{% endblock page_title %}
 
       <div class="container-fluid">
-        {% include 'painel/partials/_messages.html' %}
         {% block page_content %}{% endblock page_content %}
       </div>
     </main>
@@ -37,6 +36,7 @@
 
 </div>
 
+{% include 'painel/partials/_messages.html' %}
 {% include 'painel/partials/footer-scripts.html' %}
 {% include 'painel/partials/_messages_script.html' %}
 
