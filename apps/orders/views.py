@@ -121,7 +121,7 @@ def orders_list(request):
         id_user = request.user.id if request.user.is_authenticated else None
 
         if ord_s and ord_id:
-            status = Orders.order_status.field.choices[ord_s][1]
+            status = dict(Orders.order_status.field.choices).get(ord_s, ord_s)
             print(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
             orders_up_status.delay(ord_id, ord_s, id_user)
             messages.success(request, f'Atualizando {len(ord_id)} pedido(s) para status: {status}')
