@@ -26,7 +26,8 @@ def _svg_data_uri(static_path: str) -> str:
     svg = Path(absolute).read_text(encoding='utf-8').strip()
     # Masks need opaque black; currentColor is unreliable inside CSS mask SVGs.
     svg = svg.replace('currentColor', '#000')
-    return f'url("data:image/svg+xml,{quote(svg, safe="")}")'
+    # Single quotes: style="--svg: ..." cannot contain unescaped double quotes.
+    return f"url('data:image/svg+xml,{quote(svg, safe='')}')"
 
 
 @register.simple_tag
