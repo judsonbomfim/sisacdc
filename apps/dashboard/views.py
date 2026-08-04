@@ -2,6 +2,7 @@ import os
 from django.http import HttpResponse, Http404
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.conf import settings
 from apps.sims.classes import ApiAT, ApiTC
 from apps.sims.models import Sims
@@ -306,6 +307,7 @@ def index(request):
 
 
 @login_required(login_url='/login/')
+@require_POST
 def clear_cache(request):
     from django.core.cache import cache
     cache.clear()

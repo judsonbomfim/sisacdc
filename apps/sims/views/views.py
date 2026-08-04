@@ -3,6 +3,7 @@ import io
 import boto3
 from django.contrib.auth.decorators import login_required
 from rolepermissions.decorators import has_permission_decorator
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.urls import reverse
@@ -383,6 +384,7 @@ def exportSIMs(request):
     return response
 
 @login_required(login_url='/login/')
+@require_POST
 def alterarOperadora(request):
     sims = Sims.objects.all().filter(operator='TC', type_sim='sim', sim_status='DS')
     
@@ -439,10 +441,15 @@ def testeMobileData(request, iccid):
         }, status=500)
 
 
+@login_required(login_url='/login/')
+@require_POST
 def desativarTM(request):
     simDeactivateTC.delay()
     return HttpResponse('Processando desativações... Aguarde alguns minutos e atualize a página de pedidos')
 
+
+@login_required(login_url='/login/')
+@require_POST
 def lpaChange(request):
     sims = Sims.objects.filter(
         type_sim='esim',
@@ -487,6 +494,8 @@ def lpaChange(request):
     print(finish_message, flush=True)
     return HttpResponse('Processando atualização de LPA... Aguarde alguns minutos e atualize a página de pedidos')
 
+@login_required(login_url='/login/')
+@require_POST
 def deleteSIM(request):
     sims = Sims.objects.filter(sim_status='IN', operator='CM')
     s3 = get_s3_client()

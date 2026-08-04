@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from apps.send_email.tasks import send_email_sims, send_email_voice
 from apps.voice_calls.classes import NoteVoiceCall
@@ -12,7 +13,8 @@ def send_email(request,id):
     return redirect('orders_list') 
 
 @login_required(login_url='/login/')
-def send_email_esims():
+@require_POST
+def send_email_esims(request):
     send_email_sims.delay()
     # return redirect('send_esims')
     

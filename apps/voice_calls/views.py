@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.urls import reverse
@@ -408,6 +409,7 @@ def mumber_list(request):
 
 
 @login_required(login_url='/login/')
+@require_POST
 def up_password(request,id):
 
     update_password.delay(number_id=[id])   
@@ -417,6 +419,7 @@ def up_password(request,id):
 
 
 @login_required(login_url='/login/')
+@require_POST
 def atualizarDataVoz(request):
     voxs = VoiceCalls.objects.all()
 

@@ -607,6 +607,13 @@ def simDeactivateTC(id=None):
             )
             continue
 
+        # Lote: reserva o pedido (AT→DE) para execução concorrente não chamar a Telcon de novo
+        if id is None:
+            claimed = Orders.objects.filter(pk=order.id, order_status='AT').update(order_status='DE')
+            if claimed == 0:
+                logger.info(f'Pedido {order.order_id} já reservado por outra execução. Ignorando.')
+                continue
+
         try:
             # Gerar token de acesso a API
             time.sleep(0.5)
@@ -639,7 +646,7 @@ def simDeactivateTC(id=None):
             if resultCode == 0:
                 logger.info(f'Pedido {order.order_id} desativado com sucesso.')
                 if id is None:
-                    UpdateOrder.upStatus(order.id, 'DE')
+                    # status já foi para DE no claimed
                     UpdateStore.upStore(
                         order_id=order.order_id,
                         item_id_store=order.item_id_store if order.item_id_store else None,
