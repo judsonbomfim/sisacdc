@@ -10,7 +10,6 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from django.db.models import Q
 from django.db.models.functions import Length, Trim
 from django.http import JsonResponse
@@ -36,13 +35,43 @@ def get_s3_client():
     )
 
 def upload_file_to_s3(file):
+    """
+    Envia o arquivo para ``media/<nome>`` no S3 e devolve o path relativo
+    (ex.: ``/media/iccid.jpg``) para concatenar com ``URL_CDN``.
+
+    Não use ``default_storage.url('media/...')``: o storage já tem
+    ``location=media``, o que gerava ``/media/media/...``. Tampouco faça
+    ``.replace(AWS_S3_CUSTOM_DOMAIN)`` quando o domínio vem sem ``https://`` —
+    isso gravava ``https:///media/media/...``.
+    """
     s3 = get_s3_client()
     bucket_name = settings.AWS_STORAGE_BUCKET_NAME
-    file_path = f"{settings.MEDIA_LOCATION}/{file.name}"
+    object_key = f"{settings.MEDIA_LOCATION}/{file.name}"
     if hasattr(file, 'seek'):
         file.seek(0)
-    s3.upload_fileobj(file, bucket_name, file_path)
-    return default_storage.url(file_path)
+    s3.upload_fileobj(file, bucket_name, object_key)
+    return f'/{object_key}'
+
+
+def normalize_sim_qr_link(link):
+    """Normaliza links de QR gravados com path/domínio incorretos."""
+    if not link or link == '-':
+        return link
+    value = str(link).strip()
+    # https:///media/media/x.jpg  ou  https:///media/x.jpg
+    value = value.replace('https:///', '/').replace('http:///', '/')
+    # /media/media/x.jpg → /media/x.jpg
+    while '/media/media/' in value:
+        value = value.replace('/media/media/', '/media/', 1)
+    # URL absoluta do próprio CDN/S3 → só o path
+    if value.startswith('http://') or value.startswith('https://'):
+        from urllib.parse import urlparse
+        path = urlparse(value).path or ''
+        if path.startswith('/media/'):
+            value = path
+    if value and not value.startswith('/'):
+        value = f'/{value.lstrip("/")}'
+    return value
 
 
 def get_operator_data(oper_val):
@@ -339,7 +368,7 @@ def sims_add_esim(request):
                 continue
 
             qr_file = qrcodeChange.build_qr_file(lpa_value, sim_value)
-            fileurl = upload_file_to_s3(qr_file).replace(f'{settings.AWS_S3_CUSTOM_DOMAIN}', '')
+            fileurl = normalize_sim_qr_link(upload_file_to_s3(qr_file))
 
             add_sim = Sims(
                 sim=sim_value,

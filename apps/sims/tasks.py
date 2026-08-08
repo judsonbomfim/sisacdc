@@ -1763,7 +1763,7 @@ def simActivateSM(id=None): # Orange e AT&T
 @shared_task(time_limit=110, soft_time_limit=100)
 @periodic_task_lock(timeout=140)
 def simAgdOperator():
-    from apps.sims.views.views import upload_file_to_s3
+    from apps.sims.views.views import upload_file_to_s3, normalize_sim_qr_link
     
     orders = Orders.objects.filter(order_status='AO')
     
@@ -1816,7 +1816,7 @@ def simAgdOperator():
             try:
                 # Converter e salvar SIM no estoque            
                 qr_file = qrcodeChange.build_qr_file(lpa_value, sim_value)
-                fileurl = upload_file_to_s3(qr_file).replace(f'{settings.AWS_S3_CUSTOM_DOMAIN}', '')
+                fileurl = normalize_sim_qr_link(upload_file_to_s3(qr_file))
                 add_sim = Sims(
                     sim=sim_value,
                     msisdn=msisdn_value,
