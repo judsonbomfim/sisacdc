@@ -18,6 +18,7 @@ import time, requests
 from apps.sims.tasks import sims_in_orders, simDeactivateTC
 from apps.send_email.tasks import send_email_sims
 from apps.voice_calls.tasks import number_in_voice
+from core.celery_locks import periodic_task_lock
 
 import logging
 logger = logging.getLogger(__name__)
@@ -607,6 +608,7 @@ def order_import_voice():
 
 
 @shared_task(time_limit=110, soft_time_limit=100)
+@periodic_task_lock(timeout=140)
 def orders_auto():
     order_import.delay()
     time.sleep(10)

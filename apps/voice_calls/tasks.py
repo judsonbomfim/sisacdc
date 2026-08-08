@@ -22,6 +22,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.core.files.storage import default_storage
 from celery import shared_task
+from core.celery_locks import periodic_task_lock
 
 logger = logging.getLogger(__name__)
 from apps.voice_calls.classes import NoteVoiceCall, UpdateVoice
@@ -177,6 +178,7 @@ def number_in_voice():
         # send_email_voice.delay(id_vox)
         
 @shared_task(time_limit=110, soft_time_limit=100)
+@periodic_task_lock(timeout=140)
 def voiceActivate(id=None):
              
     tz = pytz.timezone(settings.TIME_ZONE)
@@ -265,6 +267,7 @@ def voiceActivate(id=None):
     logger.info('>>>>>>>>>> ATIVAÇÂO VOICE FINALIZADA')
     
 @shared_task(time_limit=300, soft_time_limit=270)
+@periodic_task_lock(timeout=330)
 def voiceDesactivate(id=None):
              
     timezone = pytz.timezone(settings.TIME_ZONE)

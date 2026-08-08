@@ -83,6 +83,7 @@ services:
     mem_limit: 900m
     restart: unless-stopped
 
+  # Nunca escalar celery_beat: um único processo evita disparos duplicados.
   celery_beat:
     container_name: celery_beat
     image: djangoweb:latest
@@ -90,7 +91,10 @@ services:
       context: .
       dockerfile: Dockerfile
     init: true
-    command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command:
+      - sh
+      - -c
+      - python manage.py sync_celery_beat && celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     networks:
       - internal
     environment:
@@ -109,6 +113,8 @@ services:
         max-file: "3"
     cpus: "0.25"
     mem_limit: 256m
+    deploy:
+      replicas: 1
     restart: unless-stopped
     
   redis:

@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 import pytz
 import requests
 from django.core.exceptions import ObjectDoesNotExist
+from core.celery_locks import periodic_task_lock
 import logging
 logger = logging.getLogger(__name__)
 
@@ -178,6 +179,7 @@ def sims_in_orders():
     
 
 @shared_task(time_limit=110, soft_time_limit=100)
+@periodic_task_lock(timeout=140)
 def simActivateTC(id=None):
     """
     Ativa SIMs da operadora **TelCom (TC)** para pedidos com status ``AA``.
@@ -368,6 +370,7 @@ def simActivateTC(id=None):
 
 
 @shared_task(time_limit=110, soft_time_limit=100)
+@periodic_task_lock(timeout=140)
 def simActivateTI(id=None):
     """
     Ativa SIMs da operadora **TelCom IMSI (TI)** para pedidos com status ``AA``.
@@ -547,6 +550,7 @@ def simActivateTI(id=None):
 
 
 @shared_task(time_limit=300, soft_time_limit=270)
+@periodic_task_lock(timeout=330)
 def simDeactivateTC(id=None):
     """
     Desativa SIMs das operadoras **TelCom (TC)** e **TelCom IMSI (TI)** com plano expirado.
@@ -568,7 +572,7 @@ def simDeactivateTC(id=None):
 
     # Selecionar pedidos
     if id is None:       
-        orders_to_process = Orders.objects.filter(order_status='AT', id_sim__operator__in=['TC', 'TI']).order_by('-id')
+        orders_to_process = Orders.objects.filter(order_status='AT', id_sim__operator__in=['TC', 'TI']).order_by('id')
     else:
         orders_to_process = Orders.objects.filter(pk=id)
 
@@ -607,13 +611,6 @@ def simDeactivateTC(id=None):
             )
             continue
 
-        # Lote: reserva o pedido (AT→DE) para execução concorrente não chamar a Telcon de novo
-        if id is None:
-            claimed = Orders.objects.filter(pk=order.id, order_status='AT').update(order_status='DE')
-            if claimed == 0:
-                logger.info(f'Pedido {order.order_id} já reservado por outra execução. Ignorando.')
-                continue
-
         try:
             # Gerar token de acesso a API
             time.sleep(0.5)
@@ -646,7 +643,7 @@ def simDeactivateTC(id=None):
             if resultCode == 0:
                 logger.info(f'Pedido {order.order_id} desativado com sucesso.')
                 if id is None:
-                    # status já foi para DE no claimed
+                    UpdateOrder.upStatus(order.id, 'DE')
                     UpdateStore.upStore(
                         order_id=order.order_id,
                         item_id_store=order.item_id_store if order.item_id_store else None,
@@ -675,6 +672,7 @@ def simDeactivateTC(id=None):
 
 
 @shared_task(time_limit=300, soft_time_limit=270)
+@periodic_task_lock(timeout=330)
 def simDeactivateAll(id=None):
     """
     Desativa SIMs de **todas as operadoras exceto TC/TI** com plano expirado.
@@ -735,6 +733,7 @@ def simDeactivateAll(id=None):
 
 
 @shared_task(time_limit=110, soft_time_limit=100)
+@periodic_task_lock(timeout=140)
 def simActivateTM(id=None):
     """
     Ativa SIMs da operadora **T-Mobile (TM)** para pedidos com status ``AA``.
@@ -879,6 +878,7 @@ def simActivateTM(id=None):
 
 
 @shared_task(time_limit=110, soft_time_limit=100)
+@periodic_task_lock(timeout=140)
 def simActivateCM(id=None):
     """
     Ativa SIMs da operadora **China Mobile (CM)** para pedidos com status ``AA``.
@@ -1638,6 +1638,7 @@ def simActivateMS(id=None):
     
 
 @shared_task(time_limit=110, soft_time_limit=100)
+@periodic_task_lock(timeout=140)
 def simActivateSM(id=None): # Orange e AT&T
     """
     Ativa eSIMs da operadora **AT&T (AT)** e Orange (OR) para pedidos com status ``AA``.
@@ -1760,6 +1761,7 @@ def simActivateSM(id=None): # Orange e AT&T
     
     
 @shared_task(time_limit=110, soft_time_limit=100)
+@periodic_task_lock(timeout=140)
 def simAgdOperator():
     from apps.sims.views.views import upload_file_to_s3
     

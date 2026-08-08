@@ -6,7 +6,6 @@ from django.http import HttpResponse, JsonResponse
 from datetime import date, datetime, timedelta
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.conf import settings
@@ -17,6 +16,7 @@ from apps.orders.models import Orders, Notes
 from apps.sims.classes import ApiTC, ApiCM
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
+from apps.sims.tasks import simDeactivateTC, simActivateTC
 from apps.voice_calls.models import VoiceCalls
 from .classes import ApiStore, NoteStore, StatusStore, DateFormats, UpdateStore, ExportClients
 from .tasks import order_import, orders_up_status, update_st
@@ -488,6 +488,10 @@ def ord_edit(request,id):
                 addNote(f'E-mail enviado com sucesso!')
                 messages.success(request,'E-mail enviado com sucesso!')
 
+        if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
+            print('----------------- Alterar/desativar TC/TI -----------------')
+            simDeactivateTC(id=order.id)
+
         # Atualizar site
         try:
             UpdateStore.upStore(
@@ -854,7 +858,6 @@ def orders_activations(request):
 
 
 @login_required(login_url='/login/')
-@require_POST
 def update_status(request):
     # Atualizar status dos pedidos
     update_st.delay()
