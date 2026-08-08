@@ -816,5 +816,25 @@ class qrcodeChange():
         qr.make(fit=True)
         img = qr.make_image(fill='black', back_color='white')
         return img
+
+    @staticmethod
+    def build_provisioning_links(lpa):
+        """
+        Monta links universais iOS/Android para instalação do eSIM.
+
+        Formato oficial (Apple iOS 17.5 / Google):
+        ``.../esim_qrcode_provisioning?carddata=LPA:1$SMDP$CODE``
+
+        O LPA deve permanecer literal (``$`` e ``:`` sem percent-encode).
+        Encode quebra o Universal Link e não abre o instalador no dispositivo.
+        """
+        lpa = (lpa or '').strip()
+        if not lpa:
+            return {'ios': '', 'android': '', 'lpa': ''}
+        return {
+            'ios': f'{settings.LINK_ESIM_IOS}{lpa}',
+            'android': f'{settings.LINK_ESIM_ANDROID}{lpa}',
+            'lpa': lpa,
+        }
     
 

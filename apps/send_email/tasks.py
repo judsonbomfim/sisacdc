@@ -13,6 +13,7 @@ from django.utils.html import strip_tags
 from django.conf import settings
 from apps.orders.models import Orders, Notes, User
 from apps.orders.classes import ApiStore, StatusStore, UpdateStore
+from apps.sims.classes import qrcodeChange
 from apps.voice_calls.models import VoiceCalls
 from apps.voice_calls.classes import NumberFormatter
 import time
@@ -65,8 +66,7 @@ def send_email_sims(id=None):
         sim = order.id_sim.sim if order.id_sim else None
         lpa = order.id_sim.lpa if order.id_sim and order.id_sim.lpa else ''
         countries = order.countries if order.countries else None
-        link_esim_android = settings.LINK_ESIM_ANDROID
-        link_esim_ios = settings.LINK_ESIM_IOS
+        esim_links = qrcodeChange.build_provisioning_links(lpa)
         
         context = {
             'url_site': url_site,
@@ -82,10 +82,10 @@ def send_email_sims(id=None):
             'product_plan': product_plan,
             'type_sim': type_sim,
             'sim': sim,
-            'lpa': lpa,
+            'lpa': esim_links['lpa'],
             'countries': countries,
-            'link_esim_android': link_esim_android,
-            'link_esim_ios': link_esim_ios,
+            'link_esim_android': esim_links['android'],
+            'link_esim_ios': esim_links['ios'],
         }        
         try:
             html_content = render_to_string('painel/emails/send_email.html', context)

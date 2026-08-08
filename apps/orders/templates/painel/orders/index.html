@@ -170,7 +170,8 @@
                         <a class="btn btn-icon btn-sm border border-default-300 hover:border-default-400"
                            href="#"
                            title="Copiar link Android"
-                           data-copy-text="{{ link_esim_android }}{{ order.id_sim.lpa }}"
+                           data-esim-prefix="{{ link_esim_android }}"
+                           data-esim-lpa="{{ order.id_sim.lpa }}"
                            data-copy-label="Link Android copiado"
                            onclick="return copyActivationLink(this);">
                           <i class="iconify tabler--brand-android text-base"></i>
@@ -178,7 +179,8 @@
                         <a class="btn btn-icon btn-sm border border-default-300 hover:border-default-400"
                            href="#"
                            title="Copiar link iOS"
-                           data-copy-text="{{ link_esim_ios }}{{ order.id_sim.lpa }}"
+                           data-esim-prefix="{{ link_esim_ios }}"
+                           data-esim-lpa="{{ order.id_sim.lpa }}"
                            data-copy-label="Link iOS copiado"
                            onclick="return copyActivationLink(this);">
                           <i class="iconify tabler--brand-apple text-base"></i>
@@ -540,7 +542,13 @@
       showClipboardFeedback('Não foi possível copiar o link.', true)
       return false
     }
-    copyTextToClipboard(element.dataset.copyText, element.dataset.copyLabel)
+    // LPA deve ficar literal (sem encodeURIComponent): Apple/Google exigem $ e : no carddata.
+    const text = `${element.dataset.esimPrefix || ''}${element.dataset.esimLpa || ''}`
+    if (!text) {
+      showClipboardFeedback('Não foi possível copiar o link.', true)
+      return false
+    }
+    copyTextToClipboard(text, element.dataset.copyLabel)
     return false
   }
   </script>
