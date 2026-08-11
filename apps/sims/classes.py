@@ -39,6 +39,10 @@ logger = logging.getLogger(__name__)
 HTTP_TIMEOUT = 10  # segundos
 
 
+class RateLimitExceeded(Exception):
+    """BICS/Telcon retornou HTTP 429 ou mensagem de rate limit."""
+
+
 class ApiTC:
     """
     Cliente HTTP para a API da operadora **TelCom (TC)**.
@@ -50,22 +54,88 @@ class ApiTC:
     Host: ``settings.APITC_HTTPCONN``.
     """
 
+    # Default BICS = 2 TPS por conta; 1 req/s deixa margem para outras tasks
+    RATE_MIN_INTERVAL = 1.0
+    RATE_RETRY_WAIT = 2.0
+
+    @staticmethod
+    def is_rate_limit_message(value):
+        return 'rate limit' in str(value or '').lower()
+
+    @staticmethod
+    def throttle(min_interval=None):
+        """Espaça chamadas à API TC/TI no nível da conta (cache compartilhado)."""
+        interval = ApiTC.RATE_MIN_INTERVAL if min_interval is None else min_interval
+        last_key = 'api_tc_last_request'
+        lock_key = 'api_tc_throttle_lock'
+
+        for _ in range(100):
+            now = time.time()
+            last = cache.get(last_key)
+            if last is not None:
+                wait = interval - (now - float(last))
+                if wait > 0:
+                    time.sleep(wait)
+                    continue
+
+            if cache.add(lock_key, '1', timeout=5):
+                try:
+                    now = time.time()
+                    last = cache.get(last_key)
+                    if last is not None:
+                        wait = interval - (now - float(last))
+                        if wait > 0:
+                            time.sleep(wait)
+                            now = time.time()
+                    cache.set(last_key, str(now), timeout=120)
+                finally:
+                    cache.delete(lock_key)
+                return
+
+            time.sleep(0.05)
+
+        time.sleep(interval)
+
+    @staticmethod
+    def _raise_if_rate_limited(status, body, context=''):
+        text = body.decode('utf-8', errors='replace') if isinstance(body, (bytes, bytearray)) else str(body or '')
+        if status == 429 or ApiTC.is_rate_limit_message(text):
+            raise RateLimitExceeded(
+                f'API rate limit exceeded{f" em {context}" if context else ""}'
+            )
+
     # Get tokem de acesso a API
     @staticmethod
     def get_token():
-        time.sleep(0.5)        
         # Verificar token
         token_api = cache.get('api_tc_token')
         if token_api:
             return token_api
         
         try:
+            ApiTC.throttle()
             url = f"https://{settings.APITC_HTTPCONN}/api/login"
-            response = requests.post(url, json={"username": settings.APITC_USERNAME, "password": settings.APITC_PASSWORD}, headers={'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}, timeout=HTTP_TIMEOUT)
+            response = requests.post(
+                url,
+                json={
+                    "username": settings.APITC_USERNAME,
+                    "password": settings.APITC_PASSWORD,
+                },
+                headers={
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                timeout=HTTP_TIMEOUT,
+            )
+            ApiTC._raise_if_rate_limited(
+                response.status_code, response.text, context='login'
+            )
             response.raise_for_status()
             token_api = response.json()["AccessToken"]
             cache.set('api_tc_token', token_api, timeout=540)
             return token_api
+        except RateLimitExceeded:
+            raise
         except Exception as e:
             logger.error(f"[API TC] Erro ao obter token: {str(e)}")
             return None
@@ -87,21 +157,104 @@ class ApiTC:
     # Get EndPointID / Status
     @staticmethod
     def get_iccid(iccid, headers):
-        time.sleep(0.5)
         payload_endpointId = ''
+        ApiTC.throttle()
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=HTTP_TIMEOUT)
         try:
-            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=HTTP_TIMEOUT)
             conn.request(
                 "GET", f"/api/fetchSIM?iccid={iccid}", payload_endpointId, headers)
             res_endpointId = conn.getresponse()
-            data_endpointId = json.loads(res_endpointId.read())
-            simStatus = data_endpointId["Response"]["responseParam"]["rows"][0]['simStatus']
-            endpointId = data_endpointId["Response"]["responseParam"]["rows"][0]['endPointId']
+            status = res_endpointId.status
+            body = res_endpointId.read()
+        finally:
             conn.close()
+
+        try:
+            ApiTC._raise_if_rate_limited(status, body, context=f'fetchSIM/{iccid}')
+
+            try:
+                data_endpointId = json.loads(body)
+            except json.JSONDecodeError as e:
+                preview = body[:300].decode('utf-8', errors='replace')
+                raise ValueError(
+                    f'fetchSIM não retornou JSON (HTTP {status}): {preview}'
+                ) from e
+
+            response = data_endpointId.get("Response") or {}
+            result_code = str(response.get("resultCode", "1"))
+            result_param = response.get("resultParam") or {}
+            result_description = result_param.get(
+                "resultDescription", data_endpointId
+            )
+
+            if ApiTC.is_rate_limit_message(result_description):
+                raise RateLimitExceeded(
+                    f'API rate limit exceeded em fetchSIM/{iccid}'
+                )
+
+            # responseParam é opcional na API BICS; só existe em sucesso
+            if result_code != "0":
+                raise ValueError(
+                    f'fetchSIM falhou para ICCID {iccid}: {result_description}'
+                )
+
+            rows = (response.get("responseParam") or {}).get("rows") or []
+            if not rows:
+                raise ValueError(
+                    f'fetchSIM sem SIM para ICCID {iccid}: {result_description}'
+                )
+
+            simStatus = rows[0]['simStatus']
+            endpointId = rows[0]['endPointId']
             return endpointId, simStatus
+        except RateLimitExceeded:
+            raise
         except Exception as e:
             logger.error(f"[API TC] Erro ao buscar ICCID {iccid}: {str(e)}")
             raise
+
+    @staticmethod
+    def endpoint_lifecycle_change(endpoint_id, headers, life_cycle='S', reason='1'):
+        payload = json.dumps({
+            "Request": {
+                "endPointId": f"{endpoint_id}",
+                "requestParam": {
+                    "lifeCycle": life_cycle,
+                    "reason": reason,
+                }
+            }
+        })
+        ApiTC.throttle()
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=HTTP_TIMEOUT)
+        try:
+            conn.request("POST", "/api/EndPointLifeCycleChange", payload, headers)
+            res = conn.getresponse()
+            status = res.status
+            body = res.read()
+        finally:
+            conn.close()
+
+        ApiTC._raise_if_rate_limited(
+            status, body, context=f'EndPointLifeCycleChange/{endpoint_id}'
+        )
+
+        try:
+            data = json.loads(body)
+        except json.JSONDecodeError as e:
+            preview = body[:300].decode('utf-8', errors='replace')
+            raise ValueError(
+                f'EndPointLifeCycleChange não retornou JSON (HTTP {status}): {preview}'
+            ) from e
+
+        response = data.get("Response") or {}
+        result_param = response.get("resultParam") or {}
+        result_description = result_param.get("resultDescription", data)
+        if ApiTC.is_rate_limit_message(result_description):
+            raise RateLimitExceeded(
+                f'API rate limit exceeded em EndPointLifeCycleChange/{endpoint_id}'
+            )
+
+        return data
 
 
     # Pl0an Change
@@ -305,7 +458,6 @@ class ApiTI:
     # Get tokem de acesso a API
     @staticmethod
     def get_token():
-        time.sleep(0.5)
         # Verificar token
         token_api = cache.get('api_ti_token')
         if token_api:
@@ -320,14 +472,21 @@ class ApiTI:
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
         }
-        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)
-        conn.request("POST", "/api/login", payload_token, headers_token)
-        res_token = conn.getresponse()
-        data_token = json.loads(res_token.read())
+        ApiTC.throttle()
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=HTTP_TIMEOUT)
+        try:
+            conn.request("POST", "/api/login", payload_token, headers_token)
+            res_token = conn.getresponse()
+            status = res_token.status
+            body = res_token.read()
+        finally:
+            conn.close()
+
+        ApiTC._raise_if_rate_limited(status, body, context='login/TI')
+        data_token = json.loads(body)
         token_api = data_token["AccessToken"]
         # Gravar token
         cache.set('api_ti_token', token_api, timeout=540)
-        conn.close()
         return token_api
 
 
@@ -347,16 +506,53 @@ class ApiTI:
     # Get EndPointID / Status
     @staticmethod
     def get_iccid(iccid, headers):
-        time.sleep(0.5)
         payload_endpointId = ''
-        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)
-        conn.request(
-            "GET", f"/api/fetchSIM?iccid={iccid}", payload_endpointId, headers)
-        res_endpointId = conn.getresponse()
-        data_endpointId = json.loads(res_endpointId.read())
-        simStatus = data_endpointId["Response"]["responseParam"]["rows"][0]['simStatus']
-        endpointId = data_endpointId["Response"]["responseParam"]["rows"][0]['endPointId']
-        conn.close()
+        ApiTC.throttle()
+        conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=HTTP_TIMEOUT)
+        try:
+            conn.request(
+                "GET", f"/api/fetchSIM?iccid={iccid}", payload_endpointId, headers)
+            res_endpointId = conn.getresponse()
+            status = res_endpointId.status
+            body = res_endpointId.read()
+        finally:
+            conn.close()
+
+        ApiTC._raise_if_rate_limited(status, body, context=f'fetchSIM/TI/{iccid}')
+
+        try:
+            data_endpointId = json.loads(body)
+        except json.JSONDecodeError as e:
+            preview = body[:300].decode('utf-8', errors='replace')
+            raise ValueError(
+                f'fetchSIM TI não retornou JSON (HTTP {status}): {preview}'
+            ) from e
+
+        response = data_endpointId.get("Response") or {}
+        result_code = str(response.get("resultCode", "1"))
+        result_param = response.get("resultParam") or {}
+        result_description = result_param.get(
+            "resultDescription", data_endpointId
+        )
+
+        if ApiTC.is_rate_limit_message(result_description):
+            raise RateLimitExceeded(
+                f'API rate limit exceeded em fetchSIM/TI/{iccid}'
+            )
+
+        if result_code != "0":
+            raise ValueError(
+                f'fetchSIM TI falhou para ICCID {iccid}: {result_description}'
+            )
+
+        rows = (response.get("responseParam") or {}).get("rows") or []
+        if not rows:
+            raise ValueError(
+                f'fetchSIM TI sem SIM para ICCID {iccid}: {result_description}'
+            )
+
+        simStatus = rows[0]['simStatus']
+        endpointId = rows[0]['endPointId']
         return endpointId, simStatus
 
 

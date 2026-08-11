@@ -622,7 +622,7 @@ def orders_auto():
 
 
 @shared_task
-def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
+def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None, skip_sim_deactivate=False):
     
     # Verificar se ord_id é uma lista
     if not isinstance(ord_id, list):
@@ -651,8 +651,12 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None):
         # Desativar (e)SIM
         if (ord_s == 'CC' or ord_s == 'DE' or ord_s == 'RE'):
             if order.id_sim:                
-                # Change TC                
-                if (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_s == 'DE':
+                # Change TC (evita loop: simDeactivateTC → orders_up_status → simDeactivateTC)
+                if (
+                    not skip_sim_deactivate
+                    and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC')
+                    and ord_s == 'DE'
+                ):
                     simDeactivateTC(id=order.id)
                 
                 if ord_s_prev != 'ED':

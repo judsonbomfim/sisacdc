@@ -7,7 +7,7 @@ import json
 import time
 from django.conf import settings
 
-from .classes import ApiTC, ApiTI, ApiCM, operPlan, qrcodeChange
+from .classes import ApiTC, ApiTI, ApiCM, operPlan, qrcodeChange, RateLimitExceeded
 from apps.orders.models import Orders, Notes
 from apps.orders.classes import ApiStore, StatusStore, NotesAdd, UpdateOrder, UpdateStore
 from apps.send_email.tasks import send_email_sims
@@ -580,10 +580,70 @@ def simDeactivateTC(id=None):
         logger.info('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
         return
     
-    def error_api(order_item, iccid_val):
+    def error_api(order_item, iccid_val, detail=None):
         logger.error(f'>>>>>>>>>> ERRO API PARA O PEDIDO {order_item.order_id} <<<<<<<<<<')
         UpdateOrder.upStatus(order_item.id, 'ED')
-        NotesAdd.addNote(order_item, f'ERRO API: {iccid_val} com erro na Telcon. Verificar erro.')
+        detail_msg = f' TC: {detail}' if detail else ''
+        NotesAdd.addNote(
+            order_item,
+            f'ERRO API: {iccid_val} com erro na Telcon. Verificar erro.{detail_msg}'
+        )
+
+    def rate_limit_skip(order_item, iccid_val, detail=None):
+        # Não marca ED: pedido permanece AT para nova tentativa no próximo ciclo
+        detail_msg = f' TC: {detail}' if detail else ''
+        logger.warning(
+            f'Rate limit Telcon no pedido {order_item.order_id}; mantendo AT.{detail_msg}'
+        )
+        NotesAdd.addNote(
+            order_item,
+            f'RATE LIMIT: {iccid_val} — desativação adiada por limite da API Telcon.{detail_msg}'
+        )
+
+    def mark_deactivated(order_item, iccid_val, result_description):
+        logger.info(f'Pedido {order_item.order_id} desativado com sucesso.')
+        order_item.refresh_from_db()
+        already_deactivated = order_item.order_status == 'DE'
+
+        if id is None and not already_deactivated:
+            UpdateOrder.upStatus(order_item.id, 'DE')
+            UpdateStore.upStore(
+                order_id=order_item.order_id,
+                item_id_store=order_item.item_id_store if order_item.item_id_store else None,
+                _status='DE',
+                status_g='DE',
+            )
+            sim_put = Sims.objects.get(pk=order_item.id_sim.id)
+            sim_put.sim_status = 'DE'
+            sim_put.save()
+
+        # Evita nota duplicada quando orders_up_status reentrava na desativação
+        if already_deactivated:
+            logger.info(
+                f'Pedido {order_item.order_id} já estava DE; nota de sucesso omitida'
+            )
+            return
+
+        NotesAdd.addNote(
+            order_item,
+            f'{iccid_val} desativado com sucesso na Telcon. TC: {result_description}'
+        )
+
+    # Token único para o lote (evita login extra por pedido)
+    try:
+        token_api = ApiTC.get_token()
+        if not token_api:
+            logger.error('Falha ao obter token TC para desativação (token vazio)')
+            return
+        headers = ApiTC.get_headers(token_api, cookie=True)
+    except RateLimitExceeded as e:
+        logger.error(f'Rate limit ao obter token TC: {e}')
+        return
+    except Exception as e:
+        logger.error(f'Falha ao obter token TC para desativação: {e}', exc_info=True)
+        return
+
+    max_retries = 3
 
     for order in orders_to_process:
         # Garante que activation_date e days não são nulos
@@ -611,62 +671,63 @@ def simDeactivateTC(id=None):
             )
             continue
 
-        try:
-            # Gerar token de acesso a API
-            time.sleep(0.5)
-            token_api = ApiTC.get_token()
-            conn = http.client.HTTPSConnection(settings.APITC_HTTPCONN, timeout=10)
-            headers = ApiTC.get_headers(token_api, cookie=True)
-            
-            get_iccid_result = ApiTC.get_iccid(iccid, headers)
-            endpointId = get_iccid_result[0]
+        data = None
+        last_error = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                get_iccid_result = ApiTC.get_iccid(iccid, headers)
+                endpointId = get_iccid_result[0]
+                data = ApiTC.endpoint_lifecycle_change(
+                    endpointId, headers, life_cycle='S', reason='1'
+                )
+                last_error = None
+                break
+            except RateLimitExceeded as e:
+                last_error = e
+                logger.warning(
+                    f'Rate limit no pedido {order.order_id} '
+                    f'(tentativa {attempt}/{max_retries}): {e}'
+                )
+                time.sleep(ApiTC.RATE_RETRY_WAIT * attempt)
+            except Exception as e:
+                last_error = e
+                logger.error(
+                    f"Erro inesperado ao processar desativação do pedido {order.order_id}: {e}",
+                    exc_info=True
+                )
+                error_api(order, iccid, detail=str(e))
+                data = None
+                break
 
-            payload = json.dumps({
-                "Request": {
-                    "endPointId": f"{endpointId}",
-                    "requestParam": {
-                        "lifeCycle": "S",
-                        "reason": "1"
-                    }
-                }
-            })
-            
-            time.sleep(0.5)
-            conn.request("POST", "/api/EndPointLifeCycleChange", payload, headers)
-            
-            res = conn.getresponse()
-            data = json.loads(res.read())
-            
-            resultCode = int(data.get("Response", {}).get("resultCode", -1))
-            resultDescription = data.get("Response", {}).get("resultParam", {}).get("resultDescription", str(data))
+        if isinstance(last_error, RateLimitExceeded):
+            rate_limit_skip(order, iccid, detail=str(last_error))
+            continue
 
-            if resultCode == 0:
-                logger.info(f'Pedido {order.order_id} desativado com sucesso.')
-                if id is None:
-                    UpdateOrder.upStatus(order.id, 'DE')
-                    UpdateStore.upStore(
-                        order_id=order.order_id,
-                        item_id_store=order.item_id_store if order.item_id_store else None,
-                        _status='DE',
-                        status_g='DE',
-                    )
-                    sim_put = Sims.objects.get(pk=order.id_sim.id)
-                    sim_put.sim_status = 'DE'
-                    sim_put.save()
-                NotesAdd.addNote(order, f'{iccid} desativado com sucesso na Telcon. TC: {resultDescription}')
-            else:
-                logger.error(f'Erro ao desativar pedido {order.order_id}.')
-                if id is None:
-                    UpdateOrder.upStatus(order.id, 'ED')
-                NotesAdd.addNote(order, f'ERRO DESATIVADO: {iccid} com erro na Telcon. TC: {resultDescription}')
+        if data is None:
+            continue
 
-        except Exception as e:
-            logger.error(f"Erro inesperado ao processar desativação do pedido {order.order_id}: {e}", exc_info=True)
-            error_api(order, iccid if 'iccid' in locals() else 'N/A')
-        
-        finally:
-            if 'conn' in locals() and conn:
-                conn.close()
+        # Verificar resultado da desativação
+        response = data.get("Response") or {}
+        resultCode = int(response.get("resultCode", -1))
+        resultParam = response.get("resultParam") or {}
+        resultDescription = resultParam.get("resultDescription", str(data))
+        apiResultCode = str(resultParam.get("resultCode", ""))
+
+        if ApiTC.is_rate_limit_message(resultDescription):
+            rate_limit_skip(order, iccid, detail=resultDescription)
+            continue
+
+        # 0 = sucesso; 1254 = já está no mesmo lifecycle (já suspenso)
+        if resultCode == 0 or apiResultCode == "1254":
+            mark_deactivated(order, iccid, resultDescription)
+        else:
+            logger.error(f'Erro ao desativar pedido {order.order_id}.')
+            if id is None:
+                UpdateOrder.upStatus(order.id, 'ED')
+            NotesAdd.addNote(
+                order,
+                f'ERRO DESATIVADO: {iccid} com erro na Telcon. TC: {resultDescription}'
+            )
                 
     logger.info('>>>>>>>>>> DESATIVAÇÃO TC FINALIZADA <<<<<<<<<<')
 

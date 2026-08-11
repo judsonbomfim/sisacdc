@@ -19,6 +19,7 @@ SIM_STATUS = [
 SIM_OPERATOR = [
     ('TM', 'T-Mobile'), 
     ('CM', 'China Mobile'),
+    ('CMHK', 'CMHK'),
     ('TC', 'Telcom'),
     ('TI', 'Telcom IMSI'),
     ('MS', 'MoviStar'),
