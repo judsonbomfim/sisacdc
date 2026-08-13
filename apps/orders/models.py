@@ -13,28 +13,25 @@ PRODUCT = [
     ('chamada-de-voz', 'Plano de Voz'),
     ('chip-internacional-eua', 'USA'),
     ('chip-internacional-eua-30-dias', 'USA 30 Dias'),
-    ('chip-internacional-eua-e-canada', 'USA/CANADA'),
     ('chip-internacional-eua-canada-e-mexico', 'USA/CAN/MEX'),
+    ('chip-internacional-eua-premium', 'EUA Premium'),    
     ('chip-internacional-america-do-norte-franquia-total', 'América do Norte F. Total'),
-    ('chip-internacional-europa-plus', 'Europa Plus'),
+    
     ('chip-internacional-europa', 'Europa'),
-    ('chip-internacional-europa-ilimitado', 'Europa Ilimitado'),
-    ('chip-fisico-internacional-europa-ilimitado', 'Europa F. Ilimitado'),    
-    ('chip-internacional-europa-premium', 'Europa Premium'),
     ('chip-internacional-europa-1gb-total-05', 'Europa Total'),
     ('chip-internacional-europa-1gb-total', 'Europa Total'),
     ('chip-internacional-europa-franquia-total', 'Europa F. Total'),
+    ('chip-internacional-europa-ilimitado', 'Europa Ilimitado'),
+    ('chip-fisico-internacional-europa-ilimitado', 'Europa F. Ilimitado'),    
+    ('chip-internacional-europa-premium', 'Europa Premium'),    
+    
     ('chip-internacional-global', 'Global'),
     ('chip-internacional-global-franquia-total', 'Global F. Total'),
+    
     ('chip-internacional-america-do-sul', 'América do Sul'),
     ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
     ('chip-internacional-america-do-sul-franquia-total', 'Am. do Sul F. Total'),
-    ('chip-internacional-israel-premium', 'Israel Premium'),
-    ('chip-internacional-tunisia-premium', 'Tunísia Premium'),
-    ('chip-internacional-marrocos-premium', 'Marrocos Premium'),
-    ('chip-internacional-egito-premium', 'Egito Premium'),
-    ('chip-internacional-indonesia-premium', 'Indonésia Premium'),    
-    ('chip-internacional-eua-premium', 'EUA Premium'),    
+        
     ('chip-internacional-africa-premium', 'África Premium'),
     ('chip-internacional-africa-franquia-total', 'África F. Total'),
     ('chip-internacional-asia-premium', 'Ásia Premium'),
@@ -44,6 +41,15 @@ PRODUCT = [
     ('chip-internacional-oceania-premium', 'Oceania Premium'),
     ('chip-internacional-oceania-franquia-total', 'Oceania F. Total'),
     ('chip-internacional-caribe-franquia-total', 'Caribe F. Total'),
+
+    # ('chip-internacional-europa-plus', 'Europa Plus'),
+    # ('chip-internacional-eua-e-canada', 'USA/CANADA'),
+    # ('chip-internacional-israel-premium', 'Israel Premium'),
+    # ('chip-internacional-tunisia-premium', 'Tunísia Premium'),
+    # ('chip-internacional-marrocos-premium', 'Marrocos Premium'),
+    # ('chip-internacional-egito-premium', 'Egito Premium'),
+    # ('chip-internacional-indonesia-premium', 'Indonésia Premium'),    
+
 ]
 
 DATA = [
