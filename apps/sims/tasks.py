@@ -76,7 +76,10 @@ def sims_in_orders():
                 if condition_i == 'novo-sim':
                     operator_i = 'TC'
                 else:
-                    operator_i = 'CM'
+                    if type_sim_i == 'esim':
+                        operator_i = 'CMHK'
+                    else:
+                        operator_i = 'CM'
             elif product_i in operPlan.listPlan('TM'):
                 operator_i = 'TM'
             elif product_i in operPlan.listPlan('TI'):
@@ -86,7 +89,10 @@ def sims_in_orders():
             elif product_i in operPlan.listPlan('OR'):
                 operator_i = 'OR'
             else:
-                operator_i = 'CM'
+                if type_sim_i == 'esim':
+                    operator_i = 'CMHK'
+                else:
+                    operator_i = 'CM'
 
             # Verificar SIM de reuso
             if reuso_sim != '-':
