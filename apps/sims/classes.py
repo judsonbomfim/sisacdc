@@ -918,8 +918,6 @@ class operPlan():
     def listPlan(operator):
         if operator == 'TI':
             planList = {
-                'chip-internacional-america-do-sul',
-                # 'chip-internacional-america-do-sul-premium',
                 'chip-internacional-israel-premium',
                 'chip-internacional-tunisia-premium',
                 'chip-internacional-marrocos-premium',
@@ -929,7 +927,6 @@ class operPlan():
         elif operator == 'TC':            
             planList = {
                 'chip-internacional-europa-premium',
-                'chip-internacional-europa-1gb-total',
                 'chip-fisico-internacional-europa-ilimitado',
                 'chip-internacional-eua-premium',
                 'chip-internacional-africa-premium',
@@ -940,9 +937,6 @@ class operPlan():
         elif operator == 'OR':
             planList = {
                 'chip-internacional-europa-ilimitado',
-                'chip-internacional-europa-franquia-total',
-                'chip-internacional-america-do-sul-franquia-total',
-                'chip-internacional-global-franquia-total',
                 'chip-internacional-asia-franquia-total',
                 'chip-internacional-africa-franquia-total',
                 'chip-internacional-america-do-norte-franquia-total',
@@ -950,15 +944,21 @@ class operPlan():
                 'chip-internacional-oceania-franquia-total',
                 'chip-internacional-caribe-franquia-total',
             }
-        # elif operator == 'AT':
-        #     planList = {
-        #         'chip-internacional-eua',
-        #         'chip-internacional-eua-30-dias',
-        #     }
         elif operator == 'TM':
             planList = {
                 'chip-internacional-eua',
                 'chip-internacional-eua-30-dias',
+            }
+        elif operator == 'CMHK':
+            planList = {
+                'chip-internacional-europa-ilimitado',
+                'chip-internacional-europa-premium',
+                'chip-internacional-europa-1gb-total',
+                'chip-internacional-europa-franquia-total',
+                'chip-internacional-global',
+                'chip-internacional-global-franquia-total',
+                'chip-internacional-america-do-sul',
+                'chip-internacional-america-do-sul-franquia-total',
             }
         
         return planList

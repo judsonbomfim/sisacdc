@@ -32,14 +32,22 @@ PRODUCT = [
     ('chip-internacional-america-do-sul-premium', 'América do Sul Premium'),
     ('chip-internacional-america-do-sul-franquia-total', 'Am. do Sul F. Total'),
         
+    ('chip-internacional-africa', 'África'),
     ('chip-internacional-africa-premium', 'África Premium'),
     ('chip-internacional-africa-franquia-total', 'África F. Total'),
+    
+    ('chip-internacional-asia', 'Ásia'),
     ('chip-internacional-asia-premium', 'Ásia Premium'),
     ('chip-internacional-asia-franquia-total', 'Ásia F. Total'),
+    
+    ('chip-internacional-oriente-medio', 'Oriente Médio'),
     ('chip-internacional-oriente-medio-premium', 'Oriente Médio Premium'),
     ('chip-internacional-oriente-medio-franquia-total', 'Oriente Médio F. Total'),
+    
+    ('chip-internacional-oceania', 'Oceania'),
     ('chip-internacional-oceania-premium', 'Oceania Premium'),
     ('chip-internacional-oceania-franquia-total', 'Oceania F. Total'),
+    
     ('chip-internacional-caribe-franquia-total', 'Caribe F. Total'),
 
     # ('chip-internacional-europa-plus', 'Europa Plus'),
