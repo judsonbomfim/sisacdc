@@ -84,8 +84,6 @@ def sims_in_orders():
                 operator_i = 'CMHK'
             elif product_i in operPlan.listPlan('TM'):
                 operator_i = 'TM'
-            elif product_i in operPlan.listPlan('TI'):
-                operator_i = 'TI'
             elif product_i in operPlan.listPlan('TC'):
                 operator_i = 'TC'
             elif product_i in operPlan.listPlan('OR'):

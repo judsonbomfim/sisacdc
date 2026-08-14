@@ -66,9 +66,10 @@
                             <div>
                                 <label class="form-label" for="operator">Operadora</label>
                                 <select class="form-select" id="operator" name="operator">
+                                    <option value="" {% if not order.id_sim %}selected{% endif %}></option>
                                     {% for oper_p in ord_operators %}
                                         <option value="{{ oper_p.0 }}"
-                                                {% if order.id_sim.operator == oper_p.0 or order.oper_sim == oper_p.0 %}selected{% endif %}>{{ oper_p.1 }}</option>
+                                                {% if order.id_sim.operator == oper_p.0 %}selected{% endif %}>{{ oper_p.1 }}</option>
                                     {% endfor %}
                                 </select>
                                 <label class="mt-3 flex items-center gap-2 text-sm text-default-600">
