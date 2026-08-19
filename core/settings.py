@@ -331,10 +331,6 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.sims.tasks.simActivateTC',
         'schedule': crontab(minute='2-59/2'),
     },
-    'task__2_min_activate_TI': {
-        'task': 'apps.sims.tasks.simActivateTI',
-        'schedule': crontab(minute='2-59/2'),
-    },
     'task__2_min_activate_TM': {
         'task': 'apps.sims.tasks.simActivateTM',
         'schedule': crontab(minute='3-59/2'),
@@ -351,10 +347,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'apps.sims.tasks.simActivateCM',
         'schedule': crontab(minute='4-59/2'),
     },
-    # 'task__2_min_activateOR': {
-    #     'task': 'apps.sims.tasks.simActivateOR',
-    #     'schedule': crontab(minute='3-59/2'),
-    # },
+    'task__2_min_activate_CMHK': {
+        'task': 'apps.sims.tasks.simActivateCMHK',
+        'schedule': crontab(minute='3-59/2'),
+    },
     'task__2_min_simActivateSM': {
         'task': 'apps.sims.tasks.simActivateSM',
         'schedule': crontab(minute='2-59/2'),
