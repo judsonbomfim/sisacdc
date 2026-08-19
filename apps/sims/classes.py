@@ -1001,6 +1001,7 @@ class operPlan():
                 'chip-internacional-oceania',
                 'chip-internacional-america-central',
                 'chip-internacional-global',
+                'chip-internacional-eua-premium',
                 # Legado
                 'chip-internacional-europa-ilimitado',
                 'chip-internacional-europa-premium',
