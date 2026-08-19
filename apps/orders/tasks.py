@@ -277,20 +277,14 @@ def order_import():
                         simAT = None
 
                         if product_i in operPlan.listPlan('OR'):
-                            if product_i == 'chip-internacional-europa-ilimitado':
-                                try:
-                                    days_num = int(days_i)
-                                except (TypeError, ValueError):
-                                    days_num = 0
-                                data_day_i = '20gb' if days_num <= 12 else '50gb'
-                            elif product_i == 'chip-internacional-europa-franquia-total':
+                            if "chip-internacional-global-franquia-total":
+                                data_day_i = 'world'
+                            else:
                                 if data_day_i <= '20gb-30-dias':
                                     data_day_i = '20gb'
                                 elif data_day_i == '50gb-30-dias':
                                     data_day_i = '50gb'
-                            else:
-                                data_day_i = 'world'
-                            
+                                                        
                         shipping_i = shipping_i[:40]
 
                         # USO DE get_or_create - EVITA DUPLICAÇÃO
@@ -752,48 +746,6 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None, skip_sim_deactivat
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
             send_email_sims.delay(id=order.id)
 
-
-# @shared_task
-# def update_st():
-    
-#     total_ord = 0
-    
-#     # Importar pedidos   
-#     while True:
-#         from datetime import date
-#         try:
-#             data_inicio = date(2025, 8, 10)  # exemplo de data
-
-#             ord = Orders.objects.filter(order_date__gte=data_inicio)
-#             logger.info('ORD >>>>>>>>>> ',ord)
-            
-#             # Se não houver mais pedidos, sair do loop
-#             if not ord:
-#                 break
-#         except requests.exceptions.RequestException as e:
-#             logger.error(f"Erro ao obter pedidos na página {n_page}: {e}")
-#             break
-#         except ValueError as e:
-#             logger.error(f"Erro ao decodificar JSON na página {n_page}: {e}")
-#             break
-
-#         # Listar pedidos         
-#         for order_store in ord:
-#             n_item = 1
-#             id_ord = order_store.id            
-#             id_sis = Orders.objects.filter(id=id_ord).first()
-            
-#             if id_sis != None:
-#                 order_id = id_sis.order_id
-#                 order_status = id_sis.order_status
-#                 UpdateStore.upStore(order_id, _status='AT', status_g='AT')                
-#                 total_ord += 1
-#                 logger.error(f'>>>>>>>>>> Pedidos {id_ord} = TOTAL {total_ord}')
-
-#         n_page += 1
-
-#     logger.error(f'Total de pedidos processados: {total_ord}')
-    
     
 @shared_task(time_limit=300)
 def update_st(*args, **kwargs):

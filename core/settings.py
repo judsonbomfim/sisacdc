@@ -395,10 +395,15 @@ APITC_USERNAME = str(os.getenv('APITC_USERNAME'))
 APITC_PASSWORD = str(os.getenv('APITC_PASSWORD'))
 APITC_HTTPCONN = str(os.getenv('APITC_HTTPCONN'))
 
-# API CHINA MOBILE
+# API CM
 APICM_KEY = str(os.getenv('APICM_KEY'))
 APICM_SECRET = str(os.getenv('APICM_SECRET'))
 APICM_URL = str(os.getenv('APICM_URL'))
+
+# API CMHK
+APICMHK_KEY = str(os.getenv('APICMHK_KEY'))
+APICMHK_SECRET = str(os.getenv('APICMHK_SECRET'))
+APICMHK_URL = str(os.getenv('APICMHK_URL'))
 
 # API TM
 APITM_TOKEN = str(os.getenv('APITM_TOKEN'))
