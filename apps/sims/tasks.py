@@ -203,7 +203,7 @@ def simActivateCMHK(id=None):
     from urllib.parse import urlparse
     import time 
    
-    tz = pytz.timezone("Europe/Lisbon")
+    tz = pytz.timezone(settings.TIME_ZONE)
     today = datetime.now(tz).date()
     tomorrow = today + timedelta(days=1)
 
@@ -216,7 +216,7 @@ def simActivateCMHK(id=None):
         orders_all = Orders.objects.filter(pk=id)    
     
     if orders_all.count() == 0:
-        logger.info('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
+        logger.info('>>>>>>>>>> ATIVAÇÂO CMHK FINALIZADA')
         return    
     
     if orders_all != None:
@@ -242,7 +242,7 @@ def simActivateCMHK(id=None):
         order_sim = order.id_sim.sim
         list_plan = []
         
-        logger.info(f'>>>>>>>>>> ATIVANDO SIM {order_sim} - {order_id}')
+        logger.info(f'>>>>>>>>>> ATIVANDO SIM CMHK {order_sim} - {order_id}')
         
         def errorData(data_dict=None):
             # Adicionar Nota
@@ -312,7 +312,7 @@ def simActivateCMHK(id=None):
                 errorData(data_dict)
             else:
                 # Adicionar Nota
-                note = f'SIM {order_sim} ativado na China Mobile.'
+                note = f'SIM {order_sim} ativado na CMHK com sucesso'
                 NotesAdd.addNote(order, note)
                 # Alterar status do sistema
                 UpdateOrder.upStatus(order_item, 'AT')
