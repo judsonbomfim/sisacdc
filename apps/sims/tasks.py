@@ -204,13 +204,14 @@ def simActivateCMHK(id=None):
     import time 
    
     tz = pytz.timezone("Europe/Lisbon")
-    today = datetime.now(tz).date() - timedelta(days=1)
+    today = datetime.now(tz).date()
+    tomorrow = today + timedelta(days=1)
 
     logger.info('>>>>>>>>>> ATIVAÇÂO CMHK INICIADA')
     
     # Selecionar pedidos
     if id is None:
-        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='CMHK', activation_date__lte=today)
+        orders_all = Orders.objects.filter(order_status='AA', id_sim__operator='CMHK', activation_date__lte=tomorrow)
     else:
         orders_all = Orders.objects.filter(pk=id)    
     
