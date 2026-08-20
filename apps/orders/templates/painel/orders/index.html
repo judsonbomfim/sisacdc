@@ -197,6 +197,7 @@
                 {{ order.get_product_display }}
                 {% if order.data_day == '20gb' %}A
                 {% elif order.data_day == '50gb' %}B
+                {% elif order.data_day == 'ilimitado' %}
                 {% else %}{{ order.get_data_day_display }}
                 {% endif %}
               </td>
@@ -269,7 +270,7 @@
                        title="Editar Pedido">
                       <i class="iconify tabler--edit text-base"></i>
                     </a>
-                    {% if order.id_sim.operator == 'TI' and order.order_status == 'AT' or order.id_sim.operator == 'TC' and order.order_status == 'AT' or order.id_sim.operator == 'CM' and order.order_status == 'AT' %}
+                    {% if order.id_sim.operator == 'TI' and order.order_status == 'AT' or order.id_sim.operator == 'TC' and order.order_status == 'AT' or order.id_sim.operator == 'CM' and order.order_status == 'AT' or order.id_sim.operator == 'CMHK' and order.order_status == 'AT' %}
                       <button type="button"
                               class="btn btn-icon btn-sm border border-default-300 hover:border-default-400"
                               title="Detalhes do pedido"

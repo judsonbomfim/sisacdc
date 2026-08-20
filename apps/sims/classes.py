@@ -770,6 +770,118 @@ class ApiCMHK:
             
         return result_token
 
+    @staticmethod
+    def childOrderId(iccid):
+
+        logger.info(f">>>>>>>>>>>>>>>>>>> Acessando childOrderId {iccid}")
+
+        url_api = f'{settings.APICM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
+        parsed_url = urlparse(url_api)
+        api_token = ApiCMHK.get_token()
+        
+        # Verificar se token foi obtido com sucesso
+        if api_token == 'error' or not api_token:
+            logger.info(f">>>>>>>>>>>>>>>>>>> Erro ao obter token de acesso para API CM")
+            return 0
+
+        # Gerar PasswordDigest
+        nonce, created, password_digest = ApiCMHK.generate_password_digest(ApiCMHK.app_secret)
+
+        # Cabeçalhos da requisição
+        headers = {
+            'Content-Type': 'application/json',
+            "Accept": "application/json",
+            "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
+            "X-WSSE": f'UsernameToken Username="{ApiCMHK.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
+        }
+
+        # Corpo da requisição
+        payload = json.dumps({
+            "accessToken": api_token,
+            "iccid": iccid,
+            "language": 2,
+        })
+
+        # Fazer a requisição POST com tempo limite
+        try:
+            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
+            conn.request("POST", parsed_url.path, payload, headers)
+            res = conn.getresponse()
+
+            # Verificar o status da resposta               
+            try:
+                data = res.read()
+                data_dict = json.loads(data)
+                orderId = data_dict["userDataBundles"][0]["subscriptionKey"]
+                return orderId
+            except (json.JSONDecodeError, KeyError, IndexError, TypeError):
+                return 0
+                
+        except Exception as e:
+            return 0
+        finally:
+            if 'conn' in locals():
+                conn.close()
+               
+    @staticmethod
+    def mobileData(iccid):
+                
+        url_api = f'{settings.APICMHK_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
+        parsed_url = urlparse(url_api)
+        api_token = ApiCMHK.get_token()
+        childOrderId = ApiCMHK.childOrderId(iccid)
+
+        # Verificar se token foi obtido com sucesso
+        if api_token == 'error' or not api_token:
+            return 0
+
+        # Gerar data atual Pequim
+        beijing_tz = pytz.timezone("Asia/Shanghai")
+        date_today = datetime.now(beijing_tz).strftime("%Y%m%d")
+
+        # Gerar PasswordDigest
+        nonce, created, password_digest = ApiCMHK.generate_password_digest(ApiCMHK.app_secret)
+
+        # Cabeçalhos da requisição
+        headers = {
+            'Content-Type': 'application/json',
+            "Accept": "application/json",
+            "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
+            "X-WSSE": f'UsernameToken Username="{ApiCMHK.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
+        }
+
+        # Corpo da requisição
+        payload = json.dumps({
+            "accessToken": api_token,
+            "iccid": iccid,
+            "childOrderId": childOrderId,
+            "ext": {"todayFlow": 2}
+        })
+
+        # Fazer a requisição POST com tempo limite
+        try:
+            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
+            conn.request("POST", parsed_url.path, payload, headers)
+            res = conn.getresponse()            
+            # Verificar o status da resposta
+            data = res.read()
+            data_dict = json.loads(data)
+            
+            try:
+                history_quota = data_dict["historyQuota"]
+                times_x = [entry for entry in history_quota if entry["time"] == date_today]
+                soma_qtaconsumption = sum(float(entry["qtaconsumption"]) for entry in times_x)
+                mobile_data = soma_qtaconsumption
+                return mobile_data
+            except (KeyError, IndexError, TypeError) as e:
+                logger.error(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso: {e}")
+                return 0
+                            
+        except Exception as e:
+            return 0
+        finally:
+            if 'conn' in locals():
+                conn.close()
 
 class ApiCM:
     """
