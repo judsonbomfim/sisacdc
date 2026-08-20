@@ -342,7 +342,7 @@
             <i class="iconify tabler--x text-xl"></i>
           </button>
         </div>
-        <div class="overflow-y-auto card-body">
+        <div class="overflow-x-hidden overflow-y-auto card-body">
           <div id="loadingSpinner" class="hidden text-center py-6">
             <div class="inline-block size-8 animate-spin rounded-full border-2 border-primary border-r-transparent"></div>
             <p class="mt-3 text-default-400">Carregando detalhes...</p>
@@ -351,9 +351,9 @@
             <p class="mb-4 text-base font-semibold text-default-800">
               <span id="detalhe-nome">-</span>
             </p>
-            <div class="grid items-center gap-6 sm:grid-cols-2">
-              <div class="space-y-3 text-sm text-default-700">
-                <p class="mb-0">
+            <div class="grid min-w-0 items-center gap-4 sm:grid-cols-2">
+              <div class="min-w-0 space-y-3 text-sm text-default-700">
+                <p class="mb-0 break-all">
                   <strong>SIM:</strong> <span id="detalhe-sim">-</span>
                 </p>
                 <p class="mb-0">
@@ -381,8 +381,8 @@
                   </div>
                 </div>
               </div>
-              <div id="detalhe-consumo-chart-wrap" class="flex flex-col items-center justify-center">
-                <div id="detalhe-consumo-chart" class="w-[220px]"></div>
+              <div id="detalhe-consumo-chart-wrap" class="flex min-w-0 items-center justify-center overflow-hidden">
+                <div id="detalhe-consumo-chart" class="w-44"></div>
               </div>
             </div>
           </div>
@@ -496,9 +496,10 @@
       labels,
       chart: {
         type: 'donut',
-        height: 220,
-        width: 220,
+        height: 176,
+        width: '100%',
         fontFamily,
+        parentHeightOffset: 0,
         toolbar: { show: false },
         animations: { enabled: true, speed: 600 }
       },

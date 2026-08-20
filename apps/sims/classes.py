@@ -63,23 +63,44 @@ def _cm_subscription_key(data_dict):
     return (activated or others or [None])[0]
 
 
-def _cm_daily_quota(data_dict, date_today):
-    """Consumo do dia em ``historyQuota`` (entrada total, sem apps direcionados)."""
+def _cm_quota_node(data_dict):
+    """Raiz da cota: resposta plana ou ``quotaList[0]``."""
     if not isinstance(data_dict, dict):
-        return 0
+        return {}
+    if data_dict.get("subscriberQuota") or data_dict.get("historyQuota"):
+        return data_dict
+    quota_list = data_dict.get("quotaList")
+    if isinstance(quota_list, list) and quota_list:
+        first = quota_list[0]
+        return first if isinstance(first, dict) else {}
+    if isinstance(quota_list, dict):
+        return quota_list
+    return data_dict
 
-    quota = data_dict
-    history_quota = quota.get("historyQuota")
-    if not history_quota:
-        quota_list = data_dict.get("quotaList")
-        if isinstance(quota_list, list) and quota_list:
-            quota = quota_list[0]
-        elif isinstance(quota_list, dict):
-            quota = quota_list
-        history_quota = quota.get("historyQuota") or []
+
+def _cm_float(value):
+    if value in (None, ""):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _cm_daily_quota(data_dict, date_today):
+    """Data Used For The Day da CMI: ``subscriberQuota.qtaconsumption``."""
+    quota = _cm_quota_node(data_dict)
+    subscriber = quota.get("subscriberQuota") or {}
+    if not isinstance(subscriber, dict):
+        subscriber = {}
+
+    used_today = _cm_float(subscriber.get("qtaconsumption"))
+    if used_today is not None:
+        return used_today
+
+    history_quota = quota.get("historyQuota") or []
     if isinstance(history_quota, dict):
         history_quota = [history_quota]
-
     today_total = [
         entry for entry in history_quota
         if isinstance(entry, dict)
@@ -91,16 +112,20 @@ def _cm_daily_quota(data_dict, date_today):
             return sum(float(entry["qtaconsumption"]) for entry in today_total)
         except (TypeError, ValueError, KeyError):
             pass
-
-    # Com beginTime=endTime=hoje, qtaconsumptionTotal é o total do dia
-    subscriber_quota = quota.get("subscriberQuota") or {}
-    total = subscriber_quota.get("qtaconsumptionTotal")
-    if total not in (None, ""):
-        try:
-            return float(total)
-        except (TypeError, ValueError):
-            pass
     return 0
+
+
+def _cm_quota_payload(api_token, iccid, date_today, child_order_id=None):
+    body = {
+        "accessToken": api_token,
+        "iccid": iccid,
+        "beginTime": date_today,
+        "endTime": date_today,
+        "ext": {"todayFlow": "2"},
+    }
+    if child_order_id:
+        body["childOrderId"] = child_order_id
+    return json.dumps(body)
 
 
 class RateLimitExceeded(Exception):
@@ -892,7 +917,11 @@ class ApiCMHK:
                 
         url_api = f'{ApiCMHK.app_url}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
+        api_token = ApiCMHK.get_token()
         childOrderId = ApiCMHK.childOrderId(iccid)
+
+        if api_token == 'error' or not api_token:
+            return 0
 
         # Gerar data atual Pequim
         beijing_tz = pytz.timezone("Asia/Shanghai")
@@ -909,14 +938,7 @@ class ApiCMHK:
             "X-WSSE": f'UsernameToken Username="{ApiCMHK.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
-        payload_body = {
-            "iccid": iccid,
-            "beginTime": date_today,
-            "endTime": date_today,
-        }
-        if childOrderId:
-            payload_body["childOrderId"] = childOrderId
-        payload = json.dumps(payload_body)
+        payload = _cm_quota_payload(api_token, iccid, date_today, childOrderId)
 
         # Fazer a requisição POST com tempo limite
         try:
@@ -1070,7 +1092,11 @@ class ApiCM:
                 
         url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
+        api_token = ApiCM.get_token()
         childOrderId = ApiCM.childOrderId(iccid)
+
+        if api_token == 'error' or not api_token:
+            return 0
 
         # Gerar data atual Pequim
         beijing_tz = pytz.timezone("Asia/Shanghai")
@@ -1087,14 +1113,7 @@ class ApiCM:
             "X-WSSE": f'UsernameToken Username="{ApiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
-        payload_body = {
-            "iccid": iccid,
-            "beginTime": date_today,
-            "endTime": date_today,
-        }
-        if childOrderId:
-            payload_body["childOrderId"] = childOrderId
-        payload = json.dumps(payload_body)
+        payload = _cm_quota_payload(api_token, iccid, date_today, childOrderId)
 
         # Fazer a requisição POST com tempo limite
         try:
