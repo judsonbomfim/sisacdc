@@ -39,6 +39,70 @@ logger = logging.getLogger(__name__)
 HTTP_TIMEOUT = 10  # segundos
 
 
+def _cm_subscription_key(data_dict):
+    """Child order (``subscriptionKey``) do pacote ativo na resposta CMI."""
+    bundles = data_dict.get("userDataBundles") or []
+    if isinstance(bundles, dict):
+        bundles = [bundles]
+    if not isinstance(bundles, list):
+        return None
+
+    activated = []
+    others = []
+    for bundle in bundles:
+        if not isinstance(bundle, dict):
+            continue
+        key = bundle.get("subscriptionKey")
+        if not key:
+            continue
+        # Resposta: 1=não ativado, 2=expirado, 3=ativado, 99=reembolsado
+        if str(bundle.get("status")) == "3":
+            activated.append(key)
+        else:
+            others.append(key)
+    return (activated or others or [None])[0]
+
+
+def _cm_daily_quota(data_dict, date_today):
+    """Consumo do dia em ``historyQuota`` (entrada total, sem apps direcionados)."""
+    if not isinstance(data_dict, dict):
+        return 0
+
+    quota = data_dict
+    history_quota = quota.get("historyQuota")
+    if not history_quota:
+        quota_list = data_dict.get("quotaList")
+        if isinstance(quota_list, list) and quota_list:
+            quota = quota_list[0]
+        elif isinstance(quota_list, dict):
+            quota = quota_list
+        history_quota = quota.get("historyQuota") or []
+    if isinstance(history_quota, dict):
+        history_quota = [history_quota]
+
+    today_total = [
+        entry for entry in history_quota
+        if isinstance(entry, dict)
+        and str(entry.get("time")) == date_today
+        and not entry.get("appName")
+    ]
+    if today_total:
+        try:
+            return sum(float(entry["qtaconsumption"]) for entry in today_total)
+        except (TypeError, ValueError, KeyError):
+            pass
+
+    # Com beginTime=endTime=hoje, qtaconsumptionTotal é o total do dia
+    subscriber_quota = quota.get("subscriberQuota") or {}
+    total = subscriber_quota.get("qtaconsumptionTotal")
+    if total not in (None, ""):
+        try:
+            return float(total)
+        except (TypeError, ValueError):
+            pass
+    return 0
+
+
 class RateLimitExceeded(Exception):
     """BICS/Telcon retornou HTTP 429 ou mensagem de rate limit."""
 
@@ -720,11 +784,11 @@ class ApiCMHK:
     @staticmethod
     def get_token():
         
-        api_token = cache.get('api_cm_token')
+        api_token = cache.get('api_cmhk_token')
         if api_token:
             return api_token
         
-        logger.info(">>>>>>>>>>>>>>>>>>> Obtendo token de acesso para API CM...")
+        logger.info(">>>>>>>>>>>>>>>>>>> Obtendo token de acesso para API CMHK...")
         # URL do endpoint
         url_api = f'{ApiCMHK.app_url}/aep/APP_getAccessToken_SBO/v1'
         parsed_url = urlparse(url_api)
@@ -760,7 +824,7 @@ class ApiCMHK:
                     data_dict = json.loads(data)
                     result_token = data_dict.get('accessToken')
                     if result_token:
-                        cache.set('api_cm_token', result_token, timeout=540)
+                        cache.set('api_cmhk_token', result_token, timeout=540)
                 else:
                     result_token = 'error: resposta vazia'
             except json.JSONDecodeError:
@@ -773,16 +837,16 @@ class ApiCMHK:
     @staticmethod
     def childOrderId(iccid):
 
-        logger.info(f">>>>>>>>>>>>>>>>>>> Acessando childOrderId {iccid}")
+        logger.info(f">>>>>>>>>>>>>>>>>>> Acessando childOrderId CMHK {iccid}")
 
-        url_api = f'{settings.APICM_URL}/aep/APP_getSubedUserDataBundle_SBO/v1'
+        url_api = f'{ApiCMHK.app_url}/aep/APP_getSubedUserDataBundle_SBO/v1'
         parsed_url = urlparse(url_api)
         api_token = ApiCMHK.get_token()
         
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
-            logger.info(f">>>>>>>>>>>>>>>>>>> Erro ao obter token de acesso para API CM")
-            return 0
+            logger.info(f">>>>>>>>>>>>>>>>>>> Erro ao obter token de acesso para API CMHK")
+            return None
 
         # Gerar PasswordDigest
         nonce, created, password_digest = ApiCMHK.generate_password_digest(ApiCMHK.app_secret)
@@ -795,11 +859,12 @@ class ApiCMHK:
             "X-WSSE": f'UsernameToken Username="{ApiCMHK.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
-        # Corpo da requisição
+        # Pedido status=1: em uso (spec 3.2.6)
         payload = json.dumps({
             "accessToken": api_token,
             "iccid": iccid,
-            "language": 2,
+            "status": "1",
+            "language": "2",
         })
 
         # Fazer a requisição POST com tempo limite
@@ -812,13 +877,12 @@ class ApiCMHK:
             try:
                 data = res.read()
                 data_dict = json.loads(data)
-                orderId = data_dict["userDataBundles"][0]["subscriptionKey"]
-                return orderId
+                return _cm_subscription_key(data_dict)
             except (json.JSONDecodeError, KeyError, IndexError, TypeError):
-                return 0
+                return None
                 
         except Exception as e:
-            return 0
+            return None
         finally:
             if 'conn' in locals():
                 conn.close()
@@ -826,14 +890,9 @@ class ApiCMHK:
     @staticmethod
     def mobileData(iccid):
                 
-        url_api = f'{settings.APICMHK_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
+        url_api = f'{ApiCMHK.app_url}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
-        api_token = ApiCMHK.get_token()
         childOrderId = ApiCMHK.childOrderId(iccid)
-
-        # Verificar se token foi obtido com sucesso
-        if api_token == 'error' or not api_token:
-            return 0
 
         # Gerar data atual Pequim
         beijing_tz = pytz.timezone("Asia/Shanghai")
@@ -850,13 +909,14 @@ class ApiCMHK:
             "X-WSSE": f'UsernameToken Username="{ApiCMHK.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
-        # Corpo da requisição
-        payload = json.dumps({
-            "accessToken": api_token,
+        payload_body = {
             "iccid": iccid,
-            "childOrderId": childOrderId,
-            "ext": {"todayFlow": 2}
-        })
+            "beginTime": date_today,
+            "endTime": date_today,
+        }
+        if childOrderId:
+            payload_body["childOrderId"] = childOrderId
+        payload = json.dumps(payload_body)
 
         # Fazer a requisição POST com tempo limite
         try:
@@ -868,13 +928,9 @@ class ApiCMHK:
             data_dict = json.loads(data)
             
             try:
-                history_quota = data_dict["historyQuota"]
-                times_x = [entry for entry in history_quota if entry["time"] == date_today]
-                soma_qtaconsumption = sum(float(entry["qtaconsumption"]) for entry in times_x)
-                mobile_data = soma_qtaconsumption
-                return mobile_data
+                return _cm_daily_quota(data_dict, date_today)
             except (KeyError, IndexError, TypeError) as e:
-                logger.error(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso: {e}")
+                logger.error(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso CMHK: {e}")
                 return 0
                             
         except Exception as e:
@@ -968,7 +1024,7 @@ class ApiCM:
         # Verificar se token foi obtido com sucesso
         if api_token == 'error' or not api_token:
             logger.info(f">>>>>>>>>>>>>>>>>>> Erro ao obter token de acesso para API CM")
-            return 0
+            return None
 
         # Gerar PasswordDigest
         nonce, created, password_digest = ApiCM.generate_password_digest(ApiCM.app_secret)
@@ -981,11 +1037,12 @@ class ApiCM:
             "X-WSSE": f'UsernameToken Username="{ApiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
-        # Corpo da requisição
+        # Pedido status=1: em uso (spec 3.2.6)
         payload = json.dumps({
             "accessToken": api_token,
             "iccid": iccid,
-            "language": 2,
+            "status": "1",
+            "language": "2",
         })
 
         # Fazer a requisição POST com tempo limite
@@ -998,13 +1055,12 @@ class ApiCM:
             try:
                 data = res.read()
                 data_dict = json.loads(data)
-                orderId = data_dict["userDataBundles"][0]["subscriptionKey"]
-                return orderId
+                return _cm_subscription_key(data_dict)
             except (json.JSONDecodeError, KeyError, IndexError, TypeError):
-                return 0
+                return None
                 
         except Exception as e:
-            return 0
+            return None
         finally:
             if 'conn' in locals():
                 conn.close()
@@ -1014,12 +1070,7 @@ class ApiCM:
                 
         url_api = f'{settings.APICM_URL}/aep/APP_getSubscriberAllQuota_SBO/v1'
         parsed_url = urlparse(url_api)
-        api_token = ApiCM.get_token()
         childOrderId = ApiCM.childOrderId(iccid)
-
-        # Verificar se token foi obtido com sucesso
-        if api_token == 'error' or not api_token:
-            return 0
 
         # Gerar data atual Pequim
         beijing_tz = pytz.timezone("Asia/Shanghai")
@@ -1036,13 +1087,14 @@ class ApiCM:
             "X-WSSE": f'UsernameToken Username="{ApiCM.app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"'
         }
 
-        # Corpo da requisição
-        payload = json.dumps({
-            "accessToken": api_token,
+        payload_body = {
             "iccid": iccid,
-            "childOrderId": childOrderId,
-            "ext": {"todayFlow": 2}
-        })
+            "beginTime": date_today,
+            "endTime": date_today,
+        }
+        if childOrderId:
+            payload_body["childOrderId"] = childOrderId
+        payload = json.dumps(payload_body)
 
         # Fazer a requisição POST com tempo limite
         try:
@@ -1054,11 +1106,7 @@ class ApiCM:
             data_dict = json.loads(data)
             
             try:
-                history_quota = data_dict["historyQuota"]
-                times_x = [entry for entry in history_quota if entry["time"] == date_today]
-                soma_qtaconsumption = sum(float(entry["qtaconsumption"]) for entry in times_x)
-                mobile_data = soma_qtaconsumption
-                return mobile_data
+                return _cm_daily_quota(data_dict, date_today)
             except (KeyError, IndexError, TypeError) as e:
                 logger.error(f">>>>>>>>>>>>>>>>>>> Erro ao processar dados de uso: {e}")
                 return 0

@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from ..serializers import ConsumoSerializer
-from ..classes import ApiTC, ApiCM
+from ..classes import ApiTC, ApiCM, ApiCMHK
 from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
 import logging
@@ -21,6 +21,8 @@ class ConsumoView(APIView):
                 mobile_data = ApiTC.mobileData(iccid)
             elif sim_operator == 'CM':
                 mobile_data = ApiCM.mobileData(iccid)
+            elif sim_operator == 'CMHK':
+                mobile_data = ApiCMHK.mobileData(iccid)
             serializer = ConsumoSerializer(data={
                 "iccid": iccid,
                 "mobile_data": mobile_data

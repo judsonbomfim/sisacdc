@@ -13,7 +13,7 @@ from django.db.models import Count, Q
 from django.urls import reverse
 from urllib.parse import urlencode
 from apps.orders.models import Orders, Notes
-from apps.sims.classes import ApiTC, ApiCM
+from apps.sims.classes import ApiTC, ApiCM, ApiCMHK
 from apps.sims.models import Sims
 from apps.send_email.tasks import send_email_sims
 from apps.sims.tasks import simDeactivateTC, simActivateTC
@@ -205,6 +205,8 @@ def ord_details(request, order_id):
     elif operator == 'CM':
         # Verificar consumo de dados CM
         mobile_data = ApiCM.mobileData(sim)
+    elif operator == 'CMHK':
+        mobile_data = ApiCMHK.mobileData(sim)
     else:
         mobile_data = ''
     
