@@ -119,8 +119,6 @@ def order_import():
                 log_data_error(id_ord, '-', 'line_items', f'tipo inválido: {type(line_items).__name__}')
                 continue
             
-            logger.info(f'---------- Importando pedido {order["id"]}')
-
             # Listar itens do pedido
             for item in line_items:
                 try:
@@ -163,8 +161,12 @@ def order_import():
                         continue
                         
                     q_i = 1
-                        
+                    
+                    
                     while q_i <= qtd:
+
+                        logger.info(f'---------- Importando pedido {order["id"]} - item {item.get("id", "-")}')
+                        
                         order_id_i = order['id']
                         item_id_i = f'{order_id_i}-{n_item}'
                         item_id_store_i = item['id']
