@@ -206,7 +206,7 @@ def simActivateCMHK(id=None):
     tz = pytz.timezone("Europe/Lisbon")
     today = datetime.now(tz).date() - timedelta(days=1)
 
-    logger.info('>>>>>>>>>> ATIVAÇÂO CM INICIADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO CMHK INICIADA')
     
     # Selecionar pedidos
     if id is None:
@@ -324,7 +324,7 @@ def simActivateCMHK(id=None):
 
         conn.close()
 
-    logger.info('>>>>>>>>>> ATIVAÇÂO CM FINALIZADA')
+    logger.info('>>>>>>>>>> ATIVAÇÂO CMHK FINALIZADA')
     
 
 @shared_task(time_limit=110, soft_time_limit=100)
