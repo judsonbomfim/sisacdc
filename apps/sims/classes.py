@@ -1006,7 +1006,6 @@ class operPlan():
                 'chip-internacional-europa-ilimitado',
                 'chip-internacional-europa-premium',
                 'chip-internacional-europa-1gb-total',
-                
             }
         elif operator == 'TM':
             planList = {
@@ -1024,6 +1023,8 @@ class operPlan():
                 'chip-internacional-oceania-franquia-total',
                 'chip-internacional-america-central-franquia-total',
                 'chip-internacional-global-franquia-total',
+                # legado
+                'chip-internacional-eua-canada-e-mexico',
             }
         elif operator == 'TC':
             planList = {
@@ -1034,6 +1035,8 @@ class operPlan():
                 'chip-internacional-asia-premium',
                 'chip-internacional-oceania-premium',
                 'chip-internacional-oriente-medio-premium',
+                # legado
+                'chip-internacional-eua-canada-e-mexico',
             }
         return planList
     
@@ -1094,27 +1097,23 @@ class selectPlanCMHK():
     """
     @staticmethod
     def selectPlanList(selList):
-        plans = [
-            ["chip-internacional-europa", "list_cmhk_europe"],
-            ["chip-internacional-america-do-sul", "list_cmhk_south_america"],
-            ["chip-internacional-asia", "list_cmhk_asia"],
-            ["chip-internacional-america-do-norte", "list_cmhk_north_america"],
-            ["chip-internacional-africa", "list_cmhk_africa"],
-            ["chip-internacional-oriente-medio", "list_cmhk_middle_east"],
-            ["chip-internacional-oceania", "list_cmhk_oceania"],
-            ["chip-internacional-america-central", "list_cmhk_central_america"],
-            ["chip-internacional-global", "list_cmhk_global"],
-            ["chip-internacional-eua-premium", "list_cmhk_eua_premium"],
+        plans = {
+            "chip-internacional-europa": "list_cmhk_europe",
+            "chip-internacional-america-do-sul": "list_cmhk_south_america",
+            "chip-internacional-asia": "list_cmhk_asia",
+            "chip-internacional-america-do-norte": "list_cmhk_north_america",
+            "chip-internacional-africa": "list_cmhk_africa",
+            "chip-internacional-oriente-medio": "list_cmhk_middle_east",
+            "chip-internacional-oceania": "list_cmhk_oceania",
+            "chip-internacional-america-central": "list_cmhk_central_america",
+            "chip-internacional-global": "list_cmhk_global",
+            "chip-internacional-eua-premium": "list_cmhk_eua_premium",
             # legado
-            ["chip-internacional-europa-ilimitado", "list_cmhk_europe"],
-            ["chip-internacional-europa-premium", "list_cmhk_europe"],
-        ]
-        if not selList:
-            return None
-        for product, list_name in sorted(plans, key=lambda item: len(item[0]), reverse=True):
-            if selList == product or selList.startswith(product + "-"):
-                return list_name
-        return None
+            "chip-internacional-europa-ilimitado": "list_cmhk_europe",
+            "chip-internacional-europa-premium": "list_cmhk_europe",
+            "chip-internacional-europa-1gb-total": "list_cmhk_europe_1gb_total",
+        }
+        return plans.get(selList)
 
     @staticmethod
     def selectPlanCod(plan, day, data):
@@ -1214,6 +1213,9 @@ class selectPlanCMHK():
                 ["29", "ilimitado", "D2608172236272257877"],
                 ["30", "ilimitado", "D2608172236524364868"],
                 ["31", "ilimitado", "D2608120120391706913"],
+            ],
+            "list_cmhk_europe_1gb_total": [
+                ["5", "1gb", "D2608120938062723580"],
             ],
             "list_cmhk_south_america": [
                 ["2", "500mb-dia", "D2608172355494440297"],
