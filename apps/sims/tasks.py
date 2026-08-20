@@ -86,6 +86,8 @@ def sims_in_orders():
                 operator_i = 'TM'
             elif product_i in operPlan.listPlan('TC'):
                 operator_i = 'TC'
+            elif product_i in operPlan.listPlan('OR'):
+                operator_i = 'OR'
             else:
                 if type_sim_i == 'esim':
                     operator_i = 'CMHK'
@@ -263,7 +265,7 @@ def simActivateCMHK(id=None):
         # Verificar se plan_code foi definido
         if plan_code is None:
             # Inserir nota e alterar status do sistema
-            NotesAdd.addNote(f'>>>>>>>>>> ERRO AO DEFINIR PLANO {order_product} - {order_day} - {order_data}')
+            NotesAdd.addNote(f'>>>>>>>>>> ERRO AO DEFINIR PLANO {order_product} - {order_day} - {order_data}. Vrrificar plano e franquia corretos')
             errorData()
             continue
 
