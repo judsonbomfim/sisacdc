@@ -106,8 +106,6 @@ def order_import():
                 logger.info('Sem itens para importar: payload de pedido inválido')
                 continue
 
-            logger.info(f'---------- Importando pedido {order["id"]}')
-
             n_item = 1
             id_ord = order["id"]
 
@@ -120,6 +118,8 @@ def order_import():
             if not isinstance(line_items, list):
                 log_data_error(id_ord, '-', 'line_items', f'tipo inválido: {type(line_items).__name__}')
                 continue
+            
+            logger.info(f'---------- Importando pedido {order["id"]}')
 
             # Listar itens do pedido
             for item in line_items:
