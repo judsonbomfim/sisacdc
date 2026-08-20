@@ -334,7 +334,7 @@
        role="dialog"
        tabindex="-1"
        aria-labelledby="produtoModalLabel">
-    <div class="hs-overlay-animation-target m-3 sm:mx-auto sm:w-full sm:max-w-lg">
+    <div class="hs-overlay-animation-target m-3 sm:mx-auto sm:w-full sm:max-w-xl">
       <div class="border-default-300 pointer-events-auto flex flex-col rounded-md border card">
         <div class="border-default-300 flex items-center justify-between border-b p-6">
           <h3 class="text-base font-semibold" id="produtoModalLabel">Detalhes do plano — consumo de dados</h3>
@@ -348,34 +348,42 @@
             <p class="mt-3 text-default-400">Carregando detalhes...</p>
           </div>
           <div id="produtoDetalhes" class="hidden">
-            <p class="mb-2 text-base font-semibold text-default-800">
+            <p class="mb-4 text-base font-semibold text-default-800">
               <span id="detalhe-nome">-</span>
             </p>
-            <p class="mb-1 text-sm text-default-700">
-              <strong>SIM:</strong> <span id="detalhe-sim">-</span>
-            </p>
-            <p class="mb-1 text-sm text-default-700">
-              <strong>Operadora:</strong> <span id="detalhe-operadora">-</span>
-            </p>
-            <p class="mb-1 text-sm text-default-700">
-              <strong>Dados Diário:</strong> <span id="detalhe-dados-diario">-</span>
-            </p>
-            <p class="mb-4 text-sm text-default-700">
-              <strong>Dados Consumidos:</strong> <span id="detalhe-dados-consumidos">0.00</span> MB
-            </p>
-            <div class="mb-1 flex items-center gap-3">
-              <div id="detalhe-progress"
-                   class="bg-default-100 flex h-3 w-full overflow-hidden rounded"
-                   role="progressbar"
-                   aria-valuemin="0"
-                   aria-valuemax="100"
-                   aria-valuenow="0">
-                <div id="detalhe-progress-bar"
-                     class="bg-success h-full transition duration-500"
-                     style="width: 0%"></div>
+            <div class="grid items-center gap-6 sm:grid-cols-2">
+              <div class="space-y-3 text-sm text-default-700">
+                <p class="mb-0">
+                  <strong>SIM:</strong> <span id="detalhe-sim">-</span>
+                </p>
+                <p class="mb-0">
+                  <strong>Operadora:</strong> <span id="detalhe-operadora">-</span>
+                </p>
+                <p class="mb-0">
+                  <strong>Dados Diário:</strong> <span id="detalhe-dados-diario">-</span>
+                </p>
+                <div class="border-default-200 mt-4 space-y-2.5 border-t pt-4">
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="flex items-center gap-2">
+                      <span id="detalhe-consumo-dot" class="bg-success size-2.5 rounded-full"></span>
+                      Consumido
+                    </span>
+                    <span class="font-semibold text-default-800">
+                      <span id="detalhe-dados-consumidos">0.00</span> MB
+                    </span>
+                  </div>
+                  <div id="detalhe-disponivel-row" class="flex items-center justify-between gap-3">
+                    <span class="flex items-center gap-2">
+                      <span class="bg-default-200 size-2.5 rounded-full"></span>
+                      Disponível
+                    </span>
+                    <span id="detalhe-dados-disponiveis" class="font-semibold text-default-800">-</span>
+                  </div>
+                </div>
               </div>
-              <span id="detalhe-percent"
-                    class="shrink-0 text-sm font-semibold text-default-700">0%</span>
+              <div id="detalhe-consumo-chart-wrap" class="flex flex-col items-center justify-center">
+                <div id="detalhe-consumo-chart" class="w-[220px]"></div>
+              </div>
             </div>
           </div>
           <div id="produtoDetalhesErro" class="hidden">
@@ -392,6 +400,7 @@
   </div>
 {% endblock page_content %}
 {% block scripts %}
+  <script src="{% static 'painel/inspina/plugins/apexcharts/apexcharts.min.js' %}"></script>
   <script>
   (function () {
     const listUrl = "{% url 'orders_list' %}"
@@ -452,6 +461,96 @@
     }
   })()
 
+  let consumoChart = null
+
+  function consumoChartColor(percent) {
+    if (percent >= 90) return typeof theme === 'function' ? theme('danger') : '#fa5c7c'
+    if (percent >= 70) return typeof theme === 'function' ? theme('warning') : '#f7b84b'
+    return typeof theme === 'function' ? theme('success') : '#0acf97'
+  }
+
+  function destroyConsumoChart() {
+    if (consumoChart) {
+      consumoChart.destroy()
+      consumoChart = null
+    }
+  }
+
+  function renderConsumoChart(percentSafe, percentLabel) {
+    const chartEl = document.getElementById('detalhe-consumo-chart')
+    const wrap = document.getElementById('detalhe-consumo-chart-wrap')
+    if (!chartEl || typeof ApexCharts === 'undefined') return
+
+    destroyConsumoChart()
+
+    const used = percentSafe
+    const remaining = Math.max(100 - percentSafe, 0)
+    const colorUsed = consumoChartColor(percentSafe)
+    const colorRest = typeof theme === 'function' ? theme('secondary', 0.18) : '#d7dee8'
+    const fontFamily = getComputedStyle(document.body).fontFamily || 'inherit'
+    const series = remaining > 0 ? [used, remaining] : [used]
+    const labels = remaining > 0 ? ['Consumido', 'Disponível'] : ['Consumido']
+
+    consumoChart = new ApexCharts(chartEl, {
+      series,
+      labels,
+      chart: {
+        type: 'donut',
+        height: 220,
+        width: 220,
+        fontFamily,
+        toolbar: { show: false },
+        animations: { enabled: true, speed: 600 }
+      },
+      colors: remaining > 0 ? [colorUsed, colorRest] : [colorUsed],
+      stroke: { width: 0 },
+      legend: { show: false },
+      dataLabels: { enabled: false },
+      tooltip: {
+        y: {
+          formatter: (value) => `${Number(value).toFixed(2)}%`
+        }
+      },
+      plotOptions: {
+        pie: {
+          expandOnClick: false,
+          donut: {
+            size: '74%',
+            labels: {
+              show: true,
+              name: {
+                show: true,
+                fontSize: '12px',
+                fontWeight: 500,
+                color: '#8495ab',
+                offsetY: 18
+              },
+              value: {
+                show: true,
+                fontSize: '22px',
+                fontWeight: 700,
+                color: '#334155',
+                offsetY: -12,
+                formatter: () => `${percentLabel}%`
+              },
+              total: {
+                show: true,
+                showAlways: true,
+                label: 'Consumido',
+                fontSize: '12px',
+                fontWeight: 500,
+                color: '#8495ab',
+                formatter: () => `${percentLabel}%`
+              }
+            }
+          }
+        }
+      }
+    })
+    wrap?.classList.remove('hidden')
+    consumoChart.render()
+  }
+
   function carregarDetalhes(produtoId) {
     const loadingSpinner = document.getElementById('loadingSpinner')
     const produtoDetalhes = document.getElementById('produtoDetalhes')
@@ -460,6 +559,7 @@
     loadingSpinner.classList.remove('hidden')
     produtoDetalhes.classList.add('hidden')
     produtoDetalhesErro.classList.add('hidden')
+    destroyConsumoChart()
 
     fetch(`/pedidos/detalhes/${produtoId}`)
       .then((response) => {
@@ -470,24 +570,47 @@
         const percent = Number(data.percent_used)
         const percentSafe = Number.isFinite(percent) ? Math.min(Math.max(percent, 0), 100) : 0
         const percentLabel = Number.isFinite(percent) ? percent : 0
+        const unlimited = String(data.data_day || '').toLowerCase() === 'ilimitado'
+        const usedMb = Number.parseFloat(data.mobile_data)
+        const totalMb = Number.parseFloat(data.data_day)
+        const remainingMb = Number.isFinite(totalMb) && Number.isFinite(usedMb)
+          ? Math.max(totalMb - usedMb, 0)
+          : null
 
         document.getElementById('detalhe-nome').textContent = data.name || '-'
         document.getElementById('detalhe-sim').textContent = data.sim || '-'
         document.getElementById('detalhe-operadora').textContent = data.operator || '-'
         document.getElementById('detalhe-dados-diario').textContent = data.data_day_d || '-'
         document.getElementById('detalhe-dados-consumidos').textContent = data.mobile_data || '0.00'
-        document.getElementById('detalhe-percent').textContent = `${percentLabel}%`
 
-        const progress = document.getElementById('detalhe-progress')
-        const progressBar = document.getElementById('detalhe-progress-bar')
-        progress.setAttribute('aria-valuenow', String(percentSafe))
-        progressBar.style.width = `${percentSafe}%`
+        const disponivelRow = document.getElementById('detalhe-disponivel-row')
+        const disponivelEl = document.getElementById('detalhe-dados-disponiveis')
+        const chartWrap = document.getElementById('detalhe-consumo-chart-wrap')
+        const consumoDot = document.getElementById('detalhe-consumo-dot')
+
+        if (unlimited || remainingMb === null) {
+          disponivelRow?.classList.add('hidden')
+          chartWrap?.classList.add('hidden')
+        } else {
+          disponivelRow?.classList.remove('hidden')
+          chartWrap?.classList.remove('hidden')
+          if (disponivelEl) disponivelEl.textContent = `${remainingMb.toFixed(2)} MB`
+          if (consumoDot) {
+            consumoDot.classList.remove('bg-success', 'bg-warning', 'bg-danger')
+            consumoDot.classList.add(percentSafe >= 90 ? 'bg-danger' : percentSafe >= 70 ? 'bg-warning' : 'bg-success')
+          }
+        }
 
         loadingSpinner.classList.add('hidden')
         produtoDetalhes.classList.remove('hidden')
+
+        if (!unlimited && remainingMb !== null) {
+          window.requestAnimationFrame(() => renderConsumoChart(percentSafe, percentLabel))
+        }
       })
       .catch((error) => {
         console.error('Erro ao carregar detalhes:', error)
+        destroyConsumoChart()
         loadingSpinner.classList.add('hidden')
         produtoDetalhesErro.classList.remove('hidden')
       })
