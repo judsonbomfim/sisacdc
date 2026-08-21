@@ -20,6 +20,7 @@ services:
       - GUNICORN_MAX_REQUESTS=300
       - GUNICORN_MAX_REQUESTS_JITTER=30
       - MIGRATE_ON_STARTUP=true
+      - COLLECTSTATIC_ON_STARTUP=false
       - HEALTHCHECK_HOST=${HEALTHCHECK_HOST:-painel.acasadochip.com}
     depends_on:
       redis:

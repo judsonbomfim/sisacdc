@@ -16,8 +16,12 @@ else
     echo "MIGRATE_ON_STARTUP=false: migrações ignoradas no startup"
 fi
 
-echo "Pulando collectstatic (desenvolvimento)..."
-# python manage.py collectstatic --noinput
+if [ "${COLLECTSTATIC_ON_STARTUP:-false}" = "true" ]; then
+    echo "Executando collectstatic..."
+    python manage.py collectstatic --noinput
+else
+    echo "COLLECTSTATIC_ON_STARTUP=false: collectstatic ignorado no startup"
+fi
 
 echo "Sincronizando documentação com S3..."
 python scripts/upload_docs_s3.py || echo "Aviso: upload da documentação falhou (continuando inicialização)"
