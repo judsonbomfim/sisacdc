@@ -209,8 +209,8 @@ def index(request):
     esim_cm = simsAll.filter(sim_status='DS',operator='CM', type_sim='esim').count()
     sim_tc = simsAll.filter(sim_status='DS',operator='TC', type_sim='sim').count()
     esim_tc = simsAll.filter(sim_status='DS',operator='TC', type_sim='esim').count()
-    sim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='sim').count()
-    esim_ti = simsAll.filter(sim_status='DS',operator='TI', type_sim='esim').count()
+    sim_cmhk = simsAll.filter(sim_status='DS',operator='CMHK', type_sim='sim').count()
+    esim_cmhk = simsAll.filter(sim_status='DS',operator='CMHK', type_sim='esim').count()
 
     try:
         saldo_at_raw = ApiAT.balance()
@@ -252,8 +252,8 @@ def index(request):
         'esim_cm': esim_cm,
         'sim_tc': sim_tc,
         'esim_tc': esim_tc,
-        'sim_ti': sim_ti,
-        'esim_ti': esim_ti,
+        'sim_cmhk': sim_cmhk,
+        'esim_cmhk': esim_cmhk,
         'dateDay': dateDay,
         'dateYesterday': dateYesterday,
         'dateWeek': dateWeek,

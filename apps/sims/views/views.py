@@ -183,8 +183,8 @@ def sims_list(request):
     esim_cm = sims_all.filter(sim_status='DS', operator='CM', type_sim='esim').count()
     sim_tc = sims_all.filter(sim_status='DS', operator='TC', type_sim='sim').count()
     esim_tc = sims_all.filter(sim_status='DS', operator='TC', type_sim='esim').count()
-    sim_ti = sims_all.filter(sim_status='DS', operator='TI', type_sim='sim').count()
-    esim_ti = sims_all.filter(sim_status='DS', operator='TI', type_sim='esim').count()
+    sim_cmhk = sims_all.filter(sim_status='DS', operator='CMHK', type_sim='sim').count()
+    esim_cmhk = sims_all.filter(sim_status='DS', operator='CMHK', type_sim='esim').count()
 
     try:
         saldo_at = ApiAT.balance()
@@ -234,8 +234,8 @@ def sims_list(request):
         'esim_cm': esim_cm,
         'sim_tc': sim_tc,
         'esim_tc': esim_tc,
-        'sim_ti': sim_ti,
-        'esim_ti': esim_ti,
+        'sim_cmhk': sim_cmhk,
+        'esim_cmhk': esim_cmhk,
         'url_filter': url_filter,
         'sim_f': sim_f,
         'sim_type_f': sim_type_f,
