@@ -230,11 +230,12 @@ def simActivateCMHK(id=None):
         order_id = order.order_id
         order_item = order.id
         order_product = order.product
-        order_country = order.countries
         order_day = str(order.days + 1)
         order_data = str(order.data_day)
         order_sim = order.id_sim.sim
         list_plan = []
+        
+        if order_data == '2gb': order_data = 'ilimitado'
         
         logger.info(f'>>>>>>>>>> ATIVANDO SIM CMHK {order_sim} - {order_id}')
         
@@ -251,73 +252,69 @@ def simActivateCMHK(id=None):
             digest = base64.b64encode(hashlib.sha256((nonce + created + app_secret).encode('utf-8')).digest()).decode('utf-8')
             return nonce, created, digest
         
-        # Definir plano
-        plan_code = selectPlanCMHK.selectPlanCod(order_product, order_day, order_data)        
-        
-        # Verificar se plan_code foi definido
-        if plan_code is None:
-            # Inserir nota e alterar status do sistema
-            NotesAdd.addNote(f'>>>>>>>>>> ERRO AO DEFINIR PLANO {order_product} - {order_day} - {order_data}. Vrrificar plano e franquia corretos')
-            errorData()
-            continue
+        conn = None
+        try:
+            plan_code = selectPlanCMHK.selectPlanCod(order_product, order_day, order_data)
 
-        # URL do endpoint
-        url_api = f'{settings.APICMHK_URL}/aep/APP_createOrder_SBO/v1'
-        parsed_url = urlparse(url_api)
-        app_key = settings.APICMHK_KEY
-        app_secret = settings.APICMHK_SECRET
+            if plan_code is None:
+                NotesAdd.addNote(order, f'ERRO AO DEFINIR PLANO {order_product} - {order_day} - {order_data}. Verificar plano e franquia corretos')
+                errorData()
+                continue
 
-        # Gerar PasswordDigest
-        nonce, created, password_digest = generate_password_digest(app_secret)
+            url_api = f'{settings.APICMHK_URL}/aep/APP_createOrder_SBO/v1'
+            parsed_url = urlparse(url_api)
+            app_key = settings.APICMHK_KEY
+            app_secret = settings.APICMHK_SECRET
 
-        # Cabeçalhos da requisição
-        headers = {
-            'Content-Type': 'application/json',
-            "Accept": "application/json",
-            "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
-            "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
-        }
+            nonce, created, password_digest = generate_password_digest(app_secret)
 
-        # Corpo da requisição
-        payload = json.dumps({
-            "accessToken": api_token,
-            "dataBundleId": plan_code,
-            "ICCID": order_sim,
-            "thirdOrderId": order_item,
-            "includeCard":"0",
-            "is_Refuel":"1",
-            "quantity":"1",
-        })
-        
-        # Fazer a requisição POST com tempo limite
-        conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
-        conn.request("POST", parsed_url.path, payload, headers)
-        res = conn.getresponse()
+            headers = {
+                'Content-Type': 'application/json',
+                "Accept": "application/json",
+                "Authorization": 'WSSE realm="SDP", profile="UsernameToken", type="Appkey"',
+                "X-WSSE": f'UsernameToken Username="{app_key}", PasswordDigest="{password_digest}", Nonce="{nonce}", Created="{created}"',
+            }
 
-        # Verificar o status da resposta
-        data = res.read()
-        
-        if res.status != 200:
-            errorData(data.decode("utf-8"))
-        else:
-            data_dict = json.loads(data)
-            result_data = data_dict.get('description')
-            if result_data != 'Success':
-                errorData(data_dict)
+            payload = json.dumps({
+                "accessToken": api_token,
+                "dataBundleId": plan_code,
+                "ICCID": order_sim,
+                "thirdOrderId": order_item,
+                "includeCard": "0",
+                "is_Refuel": "1",
+                "quantity": "1",
+            })
+
+            conn = http.client.HTTPSConnection(parsed_url.hostname, parsed_url.port, timeout=10)
+            conn.request("POST", parsed_url.path, payload, headers)
+            res = conn.getresponse()
+            data = res.read()
+
+            if res.status != 200:
+                errorData(data.decode("utf-8"))
             else:
-                # Adicionar Nota
-                note = f'SIM {order_sim} ativado na CMHK com sucesso'
-                NotesAdd.addNote(order, note)
-                # Alterar status do sistema
-                UpdateOrder.upStatus(order_item, 'AT')
-                UpdateStore.upStore(
-                    order_id = order_id,
-                    item_id_store = order.item_id_store if order.item_id_store else None,
-                    _status = 'AT',
-                    status_g = 'AT',
-                )
-
-        conn.close()
+                data_dict = json.loads(data)
+                result_data = data_dict.get('description')
+                if result_data != 'Success':
+                    errorData(data_dict)
+                else:
+                    NotesAdd.addNote(order, f'SIM {order_sim} ativado na CMHK com sucesso')
+                    UpdateOrder.upStatus(order_item, 'AT')
+                    UpdateStore.upStore(
+                        order_id=order_id,
+                        item_id_store=order.item_id_store if order.item_id_store else None,
+                        _status='AT',
+                        status_g='AT',
+                    )
+        except Exception as e:
+            logger.error(
+                f'Erro ao ativar pedido {order_id} SIM {order_sim}: {e}',
+                exc_info=True,
+            )
+            errorData(str(e))
+        finally:
+            if conn is not None:
+                conn.close()
 
     logger.info('>>>>>>>>>> ATIVAÇÂO CMHK FINALIZADA')
     

@@ -1185,6 +1185,7 @@ class operPlan():
                 'chip-internacional-europa-ilimitado',
                 'chip-internacional-europa-premium',
                 'chip-internacional-europa-1gb-total',
+                'chip-internacional-europa-1gb-total-05',
             }
         elif operator == 'TM':
             planList = {
@@ -1291,6 +1292,7 @@ class selectPlanCMHK():
             "chip-internacional-europa-ilimitado": "list_cmhk_europe",
             "chip-internacional-europa-premium": "list_cmhk_europe",
             "chip-internacional-europa-1gb-total": "list_cmhk_europe_1gb_total",
+            "chip-internacional-europa-1gb-total-05": "list_cmhk_europe_1gb_total",
         }
         return plans.get(selList)
 
@@ -1393,8 +1395,12 @@ class selectPlanCMHK():
                 ["30", "ilimitado", "D2608172236524364868"],
                 ["31", "ilimitado", "D2608120120391706913"],
             ],
+            "list_cmhk_europe_ft": [
+                ["31", "20gb", "D2608120706515270186"],
+                ["31", "50gb", "D2608120706087558161"],
+            ],
             "list_cmhk_europe_1gb_total": [
-                ["5", "1gb", "D2608120938062723580"],
+                ["6", "1gb", "D2608120938062723580"],
             ],
             "list_cmhk_south_america": [
                 ["2", "500mb-dia", "D2608172355494440297"],
