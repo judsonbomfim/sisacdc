@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     const fontFamily = getComputedStyle(document.body).fontFamily || 'inherit';
-    // TM, CM, TC, TI
-    const operColors = ['#6366f1', '#38bdf8', '#f59e0b', '#a78bfa'];
+    // TM, CM, CMHK, TC, TI — indigo, sky, emerald, amber, violet
+    const operColors = ['#6366f1', '#38bdf8', '#34d399', '#f59e0b', '#a78bfa'];
 
     function parseSeries(raw) {
         try {
@@ -144,6 +144,7 @@ document.addEventListener("DOMContentLoaded", function() {
             series: [
                 { name: 'T-Mobile', data: values.TM },
                 { name: 'China Mobile', data: values.CM },
+                { name: 'CMHK', data: values.CMHK },
                 { name: 'Telcom', data: values.TC },
                 { name: 'Telcom IMSI', data: values.TI }
             ],
@@ -159,6 +160,7 @@ document.addEventListener("DOMContentLoaded", function() {
             {
                 TM: parseSeries('{{ weekOperValuesTM|escapejs|safe }}'),
                 CM: parseSeries('{{ weekOperValuesCM|escapejs|safe }}'),
+                CMHK: parseSeries('{{ weekOperValuesCMHK|escapejs|safe }}'),
                 TC: parseSeries('{{ weekOperValuesTC|escapejs|safe }}'),
                 TI: parseSeries('{{ weekOperValuesTI|escapejs|safe }}')
             },
@@ -177,6 +179,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 {
                     TM: parseSeries('{{ monthOperValuesTM|escapejs|safe }}'),
                     CM: parseSeries('{{ monthOperValuesCM|escapejs|safe }}'),
+                    CMHK: parseSeries('{{ monthOperValuesCMHK|escapejs|safe }}'),
                     TC: parseSeries('{{ monthOperValuesTC|escapejs|safe }}'),
                     TI: parseSeries('{{ monthOperValuesTI|escapejs|safe }}')
                 },
@@ -196,6 +199,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 {
                     TM: parseSeries('{{ yearOperValuesTM|escapejs|safe }}'),
                     CM: parseSeries('{{ yearOperValuesCM|escapejs|safe }}'),
+                    CMHK: parseSeries('{{ yearOperValuesCMHK|escapejs|safe }}'),
                     TC: parseSeries('{{ yearOperValuesTC|escapejs|safe }}'),
                     TI: parseSeries('{{ yearOperValuesTI|escapejs|safe }}')
                 },

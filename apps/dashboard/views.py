@@ -27,7 +27,7 @@ def index(request):
     
     # Ativações pendentes
     orders_pending = Orders.objects.filter(
-        activation_date__lte=dateDay
+        activation_date__lte=dateTomorrow
     ).exclude(
         order_status__in=['AT', 'CC', 'CN', 'DE', 'DA', 'ED', 'PV', 'RB', 'RE', 'RC']
     ).order_by('activation_date') 
@@ -47,6 +47,7 @@ def index(request):
     countActivCM = operator_counts.get('CM', 0)
     countActivTC = operator_counts.get('TC', 0)
     countActivTI = operator_counts.get('TI', 0)
+    countActivCMHK = operator_counts.get('CMHK', 0)    
     
     # Queries
     simsAll = Sims.objects.all()
@@ -177,6 +178,7 @@ def index(request):
     weekOperDates = json.dumps([d.strftime('%Y-%m-%d') for d in all_week_dates])
     weekOperValuesTM = json.dumps([oper_by_date_week[d].get('TM', 0) for d in all_week_dates])
     weekOperValuesCM = json.dumps([oper_by_date_week[d].get('CM', 0) for d in all_week_dates])
+    weekOperValuesCMHK = json.dumps([oper_by_date_week[d].get('CMHK', 0) for d in all_week_dates])
     weekOperValuesTC = json.dumps([oper_by_date_week[d].get('TC', 0) for d in all_week_dates])
     weekOperValuesTI = json.dumps([oper_by_date_week[d].get('TI', 0) for d in all_week_dates])
 
@@ -188,6 +190,7 @@ def index(request):
     monthOperDates = json.dumps([d.strftime('%Y-%m-%d') for d in all_month_dates])
     monthOperValuesTM = json.dumps([oper_by_date_month[d].get('TM', 0) for d in all_month_dates])
     monthOperValuesCM = json.dumps([oper_by_date_month[d].get('CM', 0) for d in all_month_dates])
+    monthOperValuesCMHK = json.dumps([oper_by_date_month[d].get('CMHK', 0) for d in all_month_dates])
     monthOperValuesTC = json.dumps([oper_by_date_month[d].get('TC', 0) for d in all_month_dates])
     monthOperValuesTI = json.dumps([oper_by_date_month[d].get('TI', 0) for d in all_month_dates])
 
@@ -199,6 +202,7 @@ def index(request):
     yearOperDates = json.dumps([m.strftime('%Y-%m') for m in all_year_months])
     yearOperValuesTM = json.dumps([oper_by_month_year[m].get('TM', 0) for m in all_year_months])
     yearOperValuesCM = json.dumps([oper_by_month_year[m].get('CM', 0) for m in all_year_months])
+    yearOperValuesCMHK = json.dumps([oper_by_month_year[m].get('CMHK', 0) for m in all_year_months])
     yearOperValuesTC = json.dumps([oper_by_month_year[m].get('TC', 0) for m in all_year_months])
     yearOperValuesTI = json.dumps([oper_by_month_year[m].get('TI', 0) for m in all_year_months])
 
@@ -266,6 +270,7 @@ def index(request):
         'countActivCM': countActivCM,
         'countActivTC': countActivTC,
         'countActivTI': countActivTI,
+        'countActivCMHK': countActivCMHK,
         'weekSalesDates': weekSalesDates,
         'weekSalesValues': weekSalesValues,
         'weekSimsDates': weekSimsDates,
@@ -274,6 +279,7 @@ def index(request):
         'weekOperDates': weekOperDates,
         'weekOperValuesTM': weekOperValuesTM,
         'weekOperValuesCM': weekOperValuesCM,
+        'weekOperValuesCMHK': weekOperValuesCMHK,
         'weekOperValuesTC': weekOperValuesTC,
         'weekOperValuesTI': weekOperValuesTI,
         'monthSalesDates': monthSalesDates,
@@ -284,6 +290,7 @@ def index(request):
         'monthOperDates': monthOperDates,
         'monthOperValuesTM': monthOperValuesTM,
         'monthOperValuesCM': monthOperValuesCM,
+        'monthOperValuesCMHK': monthOperValuesCMHK,
         'monthOperValuesTC': monthOperValuesTC,
         'monthOperValuesTI': monthOperValuesTI,
         'yearSalesDates': yearSalesDates,
@@ -294,6 +301,7 @@ def index(request):
         'yearOperDates': yearOperDates,
         'yearOperValuesTM': yearOperValuesTM,
         'yearOperValuesCM': yearOperValuesCM,
+        'yearOperValuesCMHK': yearOperValuesCMHK,
         'yearOperValuesTC': yearOperValuesTC,
         'yearOperValuesTI': yearOperValuesTI,
         'saldo_at': saldo_at,

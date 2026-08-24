@@ -793,7 +793,7 @@ def orders_activations(request):
     sims = Sims.objects.all()
     oper_list = Sims.operator.field.choices
     ord_status = Orders.order_status.field.choices
-    plan_list = Orders.product.field.choices
+    plan_list = sorted(Orders.product.field.choices, key=lambda c: c[1].lower())
 
     # Listar status dos pedidos
     ord_st_list = []

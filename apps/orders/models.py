@@ -13,7 +13,6 @@ PRODUCT = [
     ('chamada-de-voz', 'Plano de Voz'),
     ('chip-internacional-eua', 'USA'),
     ('chip-internacional-eua-30-dias', 'USA 30 Dias'),
-    ('chip-internacional-eua-premium', 'EUA Premium'),    
     ('chip-internacional-america-do-norte', 'América do Norte'),
     ('chip-internacional-america-do-norte-franquia-total', 'América do Norte F. Total'),    
     ('chip-internacional-america-central', 'América Central'),
@@ -31,6 +30,7 @@ PRODUCT = [
     ('chip-internacional-oriente-medio', 'Oriente Médio'),
     ('chip-internacional-oriente-medio-franquia-total', 'Oriente Médio F. Total'),    
     # Legado
+    ('chip-internacional-eua-premium', 'EUA Premium'),    
     ('chip-internacional-eua-canada-e-mexico', 'USA/CAN/MEX'),
     ('chip-internacional-europa-premium', 'Europa Premium'),    
     ('chip-internacional-europa-1gb-total-05', 'Europa Total'),

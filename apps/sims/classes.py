@@ -1287,12 +1287,18 @@ class selectPlanCMHK():
             "chip-internacional-oceania": "list_cmhk_oceania",
             "chip-internacional-america-central": "list_cmhk_central_america",
             "chip-internacional-global": "list_cmhk_global",
-            "chip-internacional-eua-premium": "list_cmhk_eua_premium",
             # legado
+            "chip-internacional-eua-premium": "list_cmhk_eua_premium",
+            "chip-internacional-eua-canada-e-mexico": "list_cmhk_north_america",
             "chip-internacional-europa-ilimitado": "list_cmhk_europe",
             "chip-internacional-europa-premium": "list_cmhk_europe",
             "chip-internacional-europa-1gb-total": "list_cmhk_europe_1gb_total",
             "chip-internacional-europa-1gb-total-05": "list_cmhk_europe_1gb_total",
+            "chip-internacional-africa-premium": "list_cmhk_africa",
+            "chip-internacional-america-do-sul-premium": "list_cmhk_south_america",
+            "chip-internacional-asia-premium": "list_cmhk_asia",            
+            "chip-internacional-oriente-medio-premium": "list_cmhk_middle_east",
+            "chip-internacional-oceania-premium": "list_cmhk_oceania",            
         }
         return plans.get(selList)
 
