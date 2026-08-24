@@ -25,10 +25,13 @@ def index(request):
     dateMonth = dateDay - timedelta(days=30)
     dateYear = dateDay - timedelta(days=365)
     
-    # Ativações pendentes
+    # Ativações pendentes: demais operadoras até amanhã; China Mobile (CM) só na data de hoje
     orders_pending = Orders.objects.filter(
         activation_date__lte=dateTomorrow,
         order_status__in=['AA', 'AO', 'AG', 'AS', 'AI', 'EA', 'ES', 'MB', 'RS', 'RP', 'RT', 'VS'],
+    ).exclude(
+        id_sim__operator='CM',
+        activation_date__gt=dateDay,
     ).order_by('activation_date') 
     
     voices_pending = VoiceCalls.objects.filter(
