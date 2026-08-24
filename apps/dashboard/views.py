@@ -28,7 +28,7 @@ def index(request):
     # Ativações pendentes
     orders_pending = Orders.objects.filter(
         activation_date__lte=dateTomorrow,
-        order_status__in=['AA', 'EA'],
+        order_status__in=['AA', 'AO', 'AG', 'AS', 'AI', 'EA', 'ES', 'MB', 'RS', 'RP', 'RT', 'VS'],
     ).order_by('activation_date') 
     
     voices_pending = VoiceCalls.objects.filter(
@@ -48,18 +48,21 @@ def index(request):
     countActivTI = operator_counts.get('TI', 0)
     countActivCMHK = operator_counts.get('CMHK', 0)    
     
-    # Queries
+    # Queries — vendas até o fim de hoje; exclui cancelados/reembolsos
     simsAll = Sims.objects.all()
-    ordersWeek = Orders.objects.filter(order_date__range=(dateWeek, dateDay))
-    ordersMonth = Orders.objects.filter(order_date__range=(dateMonth, dateDay))
-    ordersYear = Orders.objects.filter(order_date__range=(dateYear, dateDay))     
+    non_sale_status = ['CC', 'RB', 'RE', 'RC']
+    chart_orders = Orders.objects.exclude(order_status__in=non_sale_status)
+    ordersWeek = chart_orders.filter(order_date__gte=dateWeek, order_date__lt=dateTomorrow)
+    ordersMonth = chart_orders.filter(order_date__gte=dateMonth, order_date__lt=dateTomorrow)
+    ordersYear = chart_orders.filter(order_date__gte=dateYear, order_date__lt=dateTomorrow)
     
-    fields = ['order_id', 'order_date', 'id_sim__type_sim', 'id_sim__operator']
+    fields = ['item_id', 'order_id', 'order_date', 'id_sim__type_sim', 'id_sim__operator']
 
     def process_orders(orders_qs):
         processed = []
         for order in orders_qs.values(*fields):
             processed.append({
+                'item_id': order['item_id'],
                 'order_id': order['order_id'],
                 'order_date': order['order_date'].date(),
                 'type_sim': order['id_sim__type_sim'],
@@ -74,6 +77,7 @@ def index(request):
     for order in ordersYear.values(*fields):
         order_date = order['order_date'].date()
         year_orders.append({
+            'item_id': order['item_id'],
             'order_id': order['order_id'],
             'order_date': order_date,
             'month': order_date.replace(day=1),
@@ -168,10 +172,11 @@ def index(request):
     yearSimsValuesS = json.dumps([sims_by_month_type_year[m].get('sim', 0) for m in all_year_months])
     yearSimsValuesE = json.dumps([sims_by_month_type_year[m].get('esim', 0) for m in all_year_months])
 
-    # OPERATOR
+    # OPERATOR — um ponto por item (item_id), não por pedido (order_id)
     # --- Week
+    unique_week_oper = {order['item_id']: order for order in week_orders}.values()
     oper_by_date_week = defaultdict(lambda: defaultdict(int))
-    for order in week_orders:
+    for order in unique_week_oper:
         oper_by_date_week[order['order_date']][order['operator']] += 1
 
     weekOperDates = json.dumps([d.strftime('%Y-%m-%d') for d in all_week_dates])
@@ -182,8 +187,9 @@ def index(request):
     weekOperValuesTI = json.dumps([oper_by_date_week[d].get('TI', 0) for d in all_week_dates])
 
     # --- Month
+    unique_month_oper = {order['item_id']: order for order in month_orders}.values()
     oper_by_date_month = defaultdict(lambda: defaultdict(int))
-    for order in month_orders:
+    for order in unique_month_oper:
         oper_by_date_month[order['order_date']][order['operator']] += 1
 
     monthOperDates = json.dumps([d.strftime('%Y-%m-%d') for d in all_month_dates])
@@ -194,8 +200,9 @@ def index(request):
     monthOperValuesTI = json.dumps([oper_by_date_month[d].get('TI', 0) for d in all_month_dates])
 
     # --- Year
+    unique_year_oper = {order['item_id']: order for order in year_orders}.values()
     oper_by_month_year = defaultdict(lambda: defaultdict(int))
-    for order in year_orders:
+    for order in unique_year_oper:
         oper_by_month_year[order['month']][order['operator']] += 1
 
     yearOperDates = json.dumps([m.strftime('%Y-%m') for m in all_year_months])
