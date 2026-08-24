@@ -27,9 +27,8 @@ def index(request):
     
     # Ativações pendentes
     orders_pending = Orders.objects.filter(
-        activation_date__lte=dateTomorrow
-    ).exclude(
-        order_status__in=['AT', 'CC', 'CN', 'DE', 'DA', 'ED', 'PV', 'RB', 'RE', 'RC']
+        activation_date__lte=dateTomorrow,
+        order_status__in=['AA', 'EA'],
     ).order_by('activation_date') 
     
     voices_pending = VoiceCalls.objects.filter(
