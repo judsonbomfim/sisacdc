@@ -72,7 +72,7 @@ def sims_in_orders():
                 add_sim.save()
 
             #Definir Operadora
-            if product_i in operPlan.listPlan('CMHK') and type_sim_i == 'esim':
+            if product_i in operPlan.listPlan('CMHK'):
                 operator_i = 'CMHK'
             elif product_i in operPlan.listPlan('TM'):
                 operator_i = 'TM'
