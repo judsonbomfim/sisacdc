@@ -425,7 +425,7 @@
                                    padding-top:10px;
                                    padding-bottom:10px">
                           {% if type_sim == 'esim' %}
-                            {% if product_plan == 'USA' or product_plan == 'USA 30 Dias' %}
+                            {% if product == 'chip-internacional-eua' or product == 'chip-internacional-eua-30-dias' %}
                               {% if order_st == 'AT' %}
                                 {% include 'painel/emails/partials/esim_eua_conf.html' %}
                               {% else %}
@@ -444,7 +444,7 @@
                             {% endif %}
                             {% include 'painel/emails/partials/sim_all.html' %}
                           {% endif %}
-                          {% if countries == True and product_plan == 'GLOBAL' %}
+                          {% if hong_kong == True %}
                             {% include 'painel/emails/partials/hong_kong.html' %}
                           {% endif %}
                           <p style="margin: 0;">&nbsp;</p>

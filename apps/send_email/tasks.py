@@ -61,12 +61,18 @@ def send_email_sims(id=None):
         product = f'{order.get_product_display()} {order.get_data_day_display() if operator != "OR" else ""}'
         days = order.days if order.days else None
         product_plan = order.get_product_display() if order.get_product_display() else None
+        product_s = order.product if order.product else None
         type_sim = order.id_sim.type_sim if order.id_sim else None
         sim = order.id_sim.sim if order.id_sim else None
         lpa = order.id_sim.lpa if order.id_sim and order.id_sim.lpa else ''
         countries = order.countries if order.countries else None
         link_esim_android = settings.LINK_ESIM_ANDROID
         link_esim_ios = settings.LINK_ESIM_IOS
+        
+        if (countries == True and product_s == 'chip-internacional-global') or product_s == 'chip-internacional-asia':
+            hong_kong = True
+        else:
+            hong_kong = False
         
         context = {
             'url_site': url_site,
@@ -80,12 +86,14 @@ def send_email_sims(id=None):
             'product': product,
             'days': days,
             'product_plan': product_plan,
+            'product_s': product_s,
             'type_sim': type_sim,
             'sim': sim,
             'lpa': lpa,
             'countries': countries,
             'link_esim_android': link_esim_android,
             'link_esim_ios': link_esim_ios,
+            'hong_kong': hong_kong,
         }        
         try:
             html_content = render_to_string('painel/emails/send_email.html', context)
