@@ -37,12 +37,11 @@ def send_email_sims(id=None, troca=None):
     if id == None:
         orders_all = Orders.objects.filter(order_status='EE')
     else:
-        try:
-            orders_all = Orders.objects.filter(pk=id)
-            logger.info(f'Enviando e-mail para o pedido {id}...')
-        except:
-            logger.error(f'Pedido {id} não encontrado!')
+        orders_all = Orders.objects.filter(pk=id)
+        if not orders_all.exists():
+            logger.error(f'Pedido pk={id} não encontrado para envio de e-mail!')
             return None
+        logger.info(f'Enviando e-mail para o pedido pk={id}...')
         
     url_site = settings.URL_CDN
     url_img = f'{url_site}/email/'
@@ -94,6 +93,7 @@ def send_email_sims(id=None, troca=None):
             'link_esim_android': link_esim_android,
             'link_esim_ios': link_esim_ios,
             'hong_kong': hong_kong,
+            'troca': bool(troca),
         }        
         try:
             html_content = render_to_string('painel/emails/send_email.html', context)
