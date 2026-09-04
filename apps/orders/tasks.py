@@ -737,6 +737,18 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None, skip_sim_deactivat
             try:
                 old_status = ord_status.get(old_status_code, f'Status {old_status_code} desconhecido')
                 new_status = ord_status.get(ord_s, f'Status {ord_s} desconhecido')
+                #Envio de e-mails de troca de SIM para o cliente
+                if new_status == 'ET':
+                    new_status = 'AA'
+                    send_email_sims(id=order_id, troca=True)
+                
+                    addNote(f'E-mail de troca enviado com sucesso!')
+                    # alterar status do pedido
+                    order_put = Orders.objects.get(pk=order.id)
+                    order_put.order_status = new_status
+                    order_put.save()
+                    addNote(f'Status do pedido alterado para Ativado!')               
+                
                 addNote(f'Alterado de {old_status} para {new_status}')
                 # Enviar e-mail de ativação
                 if ord_s == 'AA':

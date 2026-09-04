@@ -489,6 +489,17 @@ def ord_edit(request,id):
                 
                 addNote(f'E-mail enviado com sucesso!')
                 messages.success(request,'E-mail enviado com sucesso!')
+            elif ord_st == 'ET':
+                send_email_sims(id=order_id, troca=True)
+                
+                addNote(f'E-mail de troca enviado com sucesso!')
+                messages.success(request,'E-mail enviado com sucesso!')
+                # alterar status do pedido
+                order_put = Orders.objects.get(pk=order.id)
+                order_put.order_status = 'AA'
+                order_put.save()
+                addNote(f'Status do pedido alterado para Ativado!')
+                messages.success(request,'Status do pedido alterado para Ativado!')
 
         if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
             print('----------------- Alterar/desativar TC/TI -----------------')

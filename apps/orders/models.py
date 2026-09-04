@@ -83,6 +83,7 @@ ORDER_STATUS = [
     ('EA', 'Erro Ativação'),
     ('ED', 'Erro Desativação'),
     ('EE', 'Enviar E-mail'),
+    ('ET', 'E-mail - Troca'),
     ('EI', 'Erro Importação'),
     ('ES', 'Em Separação'),
     ('MB', 'Motoboy'),

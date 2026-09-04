@@ -21,7 +21,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 @shared_task
-def send_email_sims(id=None):
+def send_email_sims(id=None, troca=None):
     """
     Envia e-mail de ativação/desativação de SIM para o cliente.
 
@@ -98,7 +98,9 @@ def send_email_sims(id=None):
         try:
             html_content = render_to_string('painel/emails/send_email.html', context)
             text_content = strip_tags(html_content)
-            if type_sim == 'esim':
+            if troca == True:
+                subject = f"ATENÇÃO! Alteração de Chip do PEDIDO #{order_id}"
+            elif type_sim == 'esim':
                 subject = f"Entrega do eSIM PEDIDO #{order_id}"
             else:
                 subject = f"Informações PEDIDO #{order_id}"
