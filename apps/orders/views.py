@@ -489,11 +489,6 @@ def ord_edit(request,id):
                 
                 addNote(f'E-mail enviado com sucesso!')
                 messages.success(request,'E-mail enviado com sucesso!')
-            # Envio de e-mail de troca: orders_up_status já envia e muda para AA.
-            # Aqui só o feedback na tela (send_email_sims exige o PK do pedido, não o order_id da loja).
-            elif ord_st == 'ET':
-                messages.success(request,'E-mail enviado com sucesso!')
-                messages.success(request,'Status do pedido alterado para Ativado!')
 
         if order.id_sim and (order.id_sim.operator == 'TI' or order.id_sim.operator == 'TC') and ord_st == 'DE':
             print('----------------- Alterar/desativar TC/TI -----------------')
