@@ -145,6 +145,9 @@ SESSION_COOKIE_AGE = 36000
 URL_PAINEL = str(os.getenv('URL_PAINEL'))
 URL_CDN = 'https://'+str(os.getenv('URL_CDN'))
 
+# Webhook WooCommerce (evento ae_data_ativacao_alterada)
+WOO_WEBHOOK_SECRET = os.getenv('WOO_WEBHOOK_SECRET', '')
+
 
 AWS_ACCESS_KEY_ID = str(os.getenv('AWS_ACCESS_KEY_ID'))
 AWS_SECRET_ACCESS_KEY = str(os.getenv('AWS_SECRET_ACCESS_KEY'))

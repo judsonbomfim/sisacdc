@@ -292,7 +292,7 @@ poetry.toml
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/python,django,visualstudiocode
-.env.bak
+.env.production
 .env.local
 staticfiles/
 

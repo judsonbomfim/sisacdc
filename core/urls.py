@@ -33,6 +33,7 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Obter token
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Renovar token   
     path('api/sims/', include('apps.sims.urls_api')),
+    path('api/orders/', include('apps.orders.urls_api')),
 ]
 
 if settings.DEBUG:
