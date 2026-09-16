@@ -26,8 +26,8 @@ def send_email_sims(id=None, troca=None):
     Envia e-mail de ativação/desativação de SIM para o cliente.
 
     Seleciona pedidos com status ``EE`` (Enviar E-mail) ou um pedido específico
-    pelo PK. Renderiza template HTML, envia via SMTP e atualiza o status
-    do pedido para ``CN`` (Conluído) após envio.
+    pelo PK. Renderiza template HTML, envia via SMTP e, se o pedido estava em
+    ``EE``, atualiza para ``AA`` (Agd. Ativação) para não reenviar.
 
     Args:
         id (int, optional): PK do pedido. Se ``None``, processa todos os pedidos
@@ -94,7 +94,22 @@ def send_email_sims(id=None, troca=None):
             'link_esim_ios': link_esim_ios,
             'hong_kong': hong_kong,
             'troca': bool(troca),
-        }        
+        }
+
+        claimed_from_ee = False
+        if order_st == 'EE':
+            claimed_from_ee = (
+                Orders.objects.filter(pk=order.pk, order_status='EE').update(order_status='AA') == 1
+            )
+            if not claimed_from_ee:
+                logger.info(
+                    'Pedido pk=%s já saiu de EE, e-mail duplicado ignorado',
+                    order.pk,
+                )
+                continue
+            order_st = 'AA'
+            order.order_status = 'AA'
+
         try:
             html_content = render_to_string('painel/emails/send_email.html', context)
             text_content = strip_tags(html_content)
@@ -118,10 +133,9 @@ def send_email_sims(id=None, troca=None):
             email.send()
         except Exception as e:
             logger.error(f'Erro ao enviar e-mail para o pedido {id}: {e}')
+            if claimed_from_ee:
+                Orders.objects.filter(pk=order.pk, order_status='AA').update(order_status='EE')
             continue
-        
-        # if order_st != 'CN' or order_st != 'AT':
-        # ...
         
         id_user = None
         type_note = 'S'
@@ -134,6 +148,21 @@ def send_email_sims(id=None, troca=None):
             type_note = type_note,
         )
         add_note.save()
+
+        if claimed_from_ee:
+            try:
+                UpdateStore.upStore(
+                    order_id=ord_id,
+                    item_id_store=order.item_id_store if order.item_id_store else None,
+                    _status='AA',
+                    status_g='AA',
+                )
+            except Exception as e:
+                logger.error(
+                    'E-mail enviado, mas falhou ao sincronizar status AA na loja | pk=%s | erro=%s',
+                    order.pk,
+                    e,
+                )
 
 
 @shared_task
