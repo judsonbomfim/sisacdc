@@ -1,4 +1,5 @@
 from pathlib import Path
+from urllib.parse import urlparse
 import os
 import boto3
 from django.contrib.messages import constants as messages
@@ -27,6 +28,24 @@ CSRF_TRUSTED_ORIGINS = [
     a.strip() for a in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
     if a.strip()
 ]
+
+
+def _trust_panel_origin(host_or_url):
+    raw = (host_or_url or '').strip().strip("'\"")
+    if not raw:
+        return
+    if '://' not in raw:
+        raw = f'https://{raw}'
+    parsed = urlparse(raw)
+    if parsed.hostname and parsed.hostname not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(parsed.hostname)
+    origin = f'{parsed.scheme}://{parsed.netloc}'
+    if parsed.scheme and parsed.netloc and origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
+
+
+_trust_panel_origin(os.getenv('URL_PAINEL', ''))
+_trust_panel_origin(os.getenv('DOMAIN', ''))
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
