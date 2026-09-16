@@ -21,7 +21,7 @@ services:
       - GUNICORN_MAX_REQUESTS_JITTER=30
       - MIGRATE_ON_STARTUP=true
       - COLLECTSTATIC_ON_STARTUP=false
-      - HEALTHCHECK_HOST=${HEALTHCHECK_HOST:-painel.acasadochip.com}
+      - HEALTHCHECK_HOST=${HEALTHCHECK_HOST:-127.0.0.1}
     depends_on:
       redis:
         condition: service_healthy
@@ -36,7 +36,7 @@ services:
     cpus: "1.0"
     mem_limit: 800m
     healthcheck:
-      test: ["CMD", "python", "-c", "import os, urllib.request; req = urllib.request.Request('http://127.0.0.1:8000/health/'); req.add_header('Host', os.getenv('HEALTHCHECK_HOST', 'painel.acasadochip.com')); urllib.request.urlopen(req, timeout=5)"]
+      test: ["CMD", "python", "-c", "import os, urllib.request; req = urllib.request.Request('http://127.0.0.1:8000/health/'); req.add_header('Host', os.getenv('HEALTHCHECK_HOST', '127.0.0.1')); urllib.request.urlopen(req, timeout=5)"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -44,10 +44,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=public"
-      - "traefik.http.routers.django-http.rule=Host(`painel.acasadochip.com`)"
+      - "traefik.http.routers.django-http.rule=Host(`${DOMAIN:-painel.acasadochip.com}`)"
       - "traefik.http.routers.django-http.entrypoints=web"
       - "traefik.http.routers.django-http.middlewares=https-redirect"
-      - "traefik.http.routers.django-https.rule=Host(`painel.acasadochip.com`)"
+      - "traefik.http.routers.django-https.rule=Host(`${DOMAIN:-painel.acasadochip.com}`)"
       - "traefik.http.routers.django-https.entrypoints=websecure"
       - "traefik.http.routers.django-https.tls=true"
       - "traefik.http.routers.django-https.tls.certresolver=leresolver"
