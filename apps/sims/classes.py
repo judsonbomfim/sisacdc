@@ -1171,6 +1171,7 @@ class operPlan():
     def listPlan(operator):
         if operator == 'CMHK':
             planList = {
+                'chip-internacional-eua',
                 'chip-internacional-europa',
                 'chip-internacional-america-do-sul',
                 'chip-internacional-asia',
@@ -1287,8 +1288,9 @@ class selectPlanCMHK():
             "chip-internacional-oceania": "list_cmhk_oceania",
             "chip-internacional-america-central": "list_cmhk_central_america",
             "chip-internacional-global": "list_cmhk_global",
-            # legado
             "chip-internacional-eua-premium": "list_cmhk_eua_premium",
+            "chip-internacional-eua": "list_cmhk_eua_premium",
+            # legado
             "chip-internacional-eua-canada-e-mexico": "list_cmhk_north_america",
             "chip-internacional-europa-ilimitado": "list_cmhk_europe",
             "chip-internacional-europa-premium": "list_cmhk_europe",

@@ -55,6 +55,7 @@ def sims_in_orders():
         condition_i = ord.condition
         type_sim_i = ord.type_sim or 'sim'
         reuso_sim = ord.ord_chip_nun
+        data_day_i = ord.data_day
         update_store = {}
         sim_ds = None
         status_ord = 'AA'
@@ -72,10 +73,10 @@ def sims_in_orders():
                 add_sim.save()
 
             #Definir Operadora
-            if product_i in operPlan.listPlan('CMHK'):
-                operator_i = 'CMHK'
-            elif product_i in operPlan.listPlan('TM'):
+            if (product_i in operPlan.listPlan('TM')) and data_day_i == 'ilimitado':
                 operator_i = 'TM'
+            elif product_i in operPlan.listPlan('CMHK'):
+                operator_i = 'CMHK'
             elif product_i in operPlan.listPlan('TC'):
                 operator_i = 'TC'
             elif product_i in operPlan.listPlan('OR'):
