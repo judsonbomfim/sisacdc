@@ -1,11 +1,12 @@
 from datetime import date, datetime
 
-from django.test import override_settings
+from django.test import SimpleTestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from apps.orders.models import Notes, Orders
+from apps.orders.tasks import normalize_type_sim
 from apps.sims.models import Sims
 from apps.voice_calls.models import VoiceCalls
 
@@ -170,3 +171,18 @@ class DataAtivacaoWebhookTests(APITestCase):
             **self.headers,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class NormalizeTypeSimTests(SimpleTestCase):
+    def test_esim_variants(self):
+        for raw in ('esim', 'eSIM', 'e-sim', 'E-SIM', 'chip-esim', ' e-sim '):
+            self.assertEqual(normalize_type_sim(raw), 'esim', raw)
+
+    def test_sim_variants_and_unknown(self):
+        self.assertEqual(normalize_type_sim('sim'), 'sim')
+        self.assertEqual(normalize_type_sim('sim-fisico'), 'sim')
+        self.assertEqual(normalize_type_sim('físico'), 'sim')
+        self.assertEqual(normalize_type_sim(None), 'sim')
+        self.assertEqual(normalize_type_sim(''), 'sim')
+        self.assertLessEqual(len(normalize_type_sim('sim-fisico')), 4)
+        self.assertLessEqual(len(normalize_type_sim('e-sim')), 4)

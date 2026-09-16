@@ -23,6 +23,27 @@ from core.celery_locks import periodic_task_lock
 import logging
 logger = logging.getLogger(__name__)
 
+
+def normalize_type_sim(value, default='sim'):
+    """Mapeia o meta ``_tipo_chip`` da loja para ``sim`` ou ``esim`` (varchar(4))."""
+    if value is None:
+        return default
+    text = str(value).strip().lower()
+    if not text:
+        return default
+    compact = text.replace('-', '').replace('_', '').replace(' ', '')
+    if 'esim' in compact:
+        normalized = 'esim'
+    else:
+        normalized = default
+    if normalized != text and text not in ('sim', 'esim'):
+        logger.warning(
+            '[order_import] _tipo_chip=%r normalizado para %s',
+            value,
+            normalized,
+        )
+    return normalized
+
 @shared_task(time_limit=110, soft_time_limit=100)
 def order_import():
     """
@@ -221,7 +242,7 @@ def order_import():
                             value = i.get('value')
 
                             if key == '_tipo_chip':
-                                type_sim_i = value
+                                type_sim_i = normalize_type_sim(value)
                             if key == '_condicao_chip':
                                 if value == 'novo':
                                     condition_i = 'novo-sim'
