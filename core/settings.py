@@ -46,6 +46,7 @@ def _trust_panel_origin(host_or_url):
 
 _trust_panel_origin(os.getenv('URL_PAINEL', ''))
 _trust_panel_origin(os.getenv('DOMAIN', ''))
+_trust_panel_origin(os.getenv('url_site', ''))
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
