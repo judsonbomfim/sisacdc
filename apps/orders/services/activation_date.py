@@ -115,8 +115,17 @@ def apply_activation_date_from_store(payload: dict) -> ActivationDateApplyResult
         order.pk,
     )
 
+    order_pk = order.pk
+    transaction.on_commit(lambda: _notify_activation_date_changed(order_pk))
+
     return ActivationDateApplyResult(
         updated=True,
         order_pk=order.pk,
         activation_date=new_date.isoformat(),
     )
+
+
+def _notify_activation_date_changed(order_pk: int) -> None:
+    from apps.send_email.tasks import send_email_sims
+
+    send_email_sims.delay(id=order_pk, data_alterada=True)

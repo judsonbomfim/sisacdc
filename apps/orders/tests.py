@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from unittest.mock import patch
 
 from django.test import SimpleTestCase, override_settings
 from django.urls import reverse
@@ -57,6 +58,11 @@ class DataAtivacaoWebhookTests(APITestCase):
     def setUp(self):
         self.url = reverse('orders_webhook_data_ativacao')
         self.headers = {'HTTP_X_WEBHOOK_SECRET': WEBHOOK_SECRET}
+        notify_patcher = patch(
+            'apps.orders.services.activation_date._notify_activation_date_changed'
+        )
+        self.notify_email = notify_patcher.start()
+        self.addCleanup(notify_patcher.stop)
 
     def test_unauthorized_without_secret(self):
         response = self.client.post(self.url, _base_payload(), format='json')
@@ -99,6 +105,7 @@ class DataAtivacaoWebhookTests(APITestCase):
                 note__contains='Data alterada de',
             ).exists()
         )
+        self.notify_email.assert_called_once_with(order.pk)
 
     def test_idempotent_second_request(self):
         order = _create_order()
@@ -115,6 +122,7 @@ class DataAtivacaoWebhookTests(APITestCase):
             Notes.objects.filter(id_item=order, note__contains='Data alterada de').count(),
             1,
         )
+        self.notify_email.assert_called_once_with(order.pk)
 
     def test_promotes_ei_to_as(self):
         order = _create_order(order_status='EI')

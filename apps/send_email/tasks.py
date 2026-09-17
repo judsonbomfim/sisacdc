@@ -21,7 +21,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 @shared_task
-def send_email_sims(id=None, troca=None):
+def send_email_sims(id=None, troca=None, data_alterada=None):
     """
     Envia e-mail de ativação/desativação de SIM para o cliente.
 
@@ -32,6 +32,8 @@ def send_email_sims(id=None, troca=None):
     Args:
         id (int, optional): PK do pedido. Se ``None``, processa todos os pedidos
             com status ``EE``.
+        troca (bool, optional): E-mail de troca de chip.
+        data_alterada (bool, optional): E-mail de alteração da data de ativação.
     """
     orders_all = None
     if id == None:
@@ -94,6 +96,7 @@ def send_email_sims(id=None, troca=None):
             'link_esim_ios': link_esim_ios,
             'hong_kong': hong_kong,
             'troca': bool(troca),
+            'data_alterada': bool(data_alterada),
         }
 
         claimed_from_ee = False
@@ -115,6 +118,8 @@ def send_email_sims(id=None, troca=None):
             text_content = strip_tags(html_content)
             if troca == True:
                 subject = f"ATENÇÃO! Alteração de Chip do PEDIDO #{order_id}"
+            elif data_alterada:
+                subject = f"Alteração da data de ativação PEDIDO #{order_id}"
             elif type_sim == 'esim':
                 subject = f"Entrega do eSIM PEDIDO #{order_id}"
             else:
@@ -141,10 +146,14 @@ def send_email_sims(id=None, troca=None):
         type_note = 'S'
             
         # Add note
+        if data_alterada:
+            email_note = 'E-mail de alteração de data enviado com sucesso!'
+        else:
+            email_note = 'E-mail enviado com sucesso!!'
         add_note = Notes( 
             id_item = order,
             id_user = id_user,
-            note = 'E-mail enviado com sucesso!!',
+            note = email_note,
             type_note = type_note,
         )
         add_note.save()

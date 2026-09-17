@@ -435,14 +435,17 @@ def ord_edit(request,id):
                 qrcode = order.id_sim.link if order.id_sim.link else None
 
         # Update Order
+        date_changed = False
         if activation_date == '':
             activation_date = order.activation_date
         else:
+            date_changed = str(activation_date) != str(order.activation_date)
             voice = VoiceCalls.objects.filter(id_item=order.id).first()
             if voice:
                 voice.activation_date = activation_date
                 voice.save()
-            addNote(f'Data alterada de {DateFormats.dateDMA(str(order.activation_date))} para {DateFormats.dateDMA(str(activation_date))}')
+            if date_changed:
+                addNote(f'Data alterada de {DateFormats.dateDMA(str(order.activation_date))} para {DateFormats.dateDMA(str(activation_date))}')
         if email == '':
             email = order.email
         if not product or product == '':
@@ -465,6 +468,9 @@ def ord_edit(request,id):
         order_put.type_sim = type_sim
         order_put.oper_sim = operator
         order_put.save()
+
+        if date_changed:
+            send_email_sims.delay(id=order.id, data_alterada=True)
         
         # Save Notes
         if ord_note:
