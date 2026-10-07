@@ -291,7 +291,7 @@ def order_import():
                             order_status_i = 'MB'
                         elif condition_i == 'reuso-sim':
                             order_status_i = 'RS'
-                        elif activation_date_i is None or activation_date_i == '':
+                        elif activation_date_i is None and type_sim_i == 'esim':
                             order_status_i = 'DA'
                         else:
                             order_status_i = 'AS'
