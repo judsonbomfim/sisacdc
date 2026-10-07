@@ -227,6 +227,8 @@ class DateFormats():
         Returns:
             str: Data no formato ``'17/05/23'``.
         """
+        if not isinstance(dma, str) or len(dma) < 10:
+            return ''
         ano = dma[2:4]
         mes = dma[5:7]
         dia = dma[8:10]

@@ -255,9 +255,11 @@
               <td class="text-center">{{ order.days }}</td>
               <td class="text-center whitespace-nowrap">{{ order.activation_date|date:'d/m/Y' }}</td>
               <td class="text-center whitespace-nowrap">
-                {% with a=order.activation_date b=order.days %}
-                  {% dateaddday a b %}
-                {% endwith %}
+                {% if order.activation_date %}
+                  {% dateaddday order.activation_date order.days %}
+                {% else %}
+                  <span class="text-default-400">-</span>
+                {% endif %}
               </td>
               <td class="text-center">
                 <span class="badge py-0 font-semibold text-2xs bg-primary/15 text-primary">{{ order.get_order_status_display }}</span>

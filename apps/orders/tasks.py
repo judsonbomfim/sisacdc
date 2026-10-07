@@ -300,13 +300,12 @@ def order_import():
                         simAT = None
 
                         if product_i in operPlan.listPlan('OR'):
-                            if "chip-internacional-global-franquia-total":
+                            if product_i == 'chip-internacional-global-franquia-total':
                                 data_day_i = 'world'
-                            else:
-                                if data_day_i <= '20gb-30-dias':
-                                    data_day_i = '20gb'
-                                elif data_day_i == '50gb-30-dias':
-                                    data_day_i = '50gb'
+                            elif data_day_i == '50gb-30-dias':
+                                data_day_i = '50gb'
+                            elif data_day_i == '20gb-30-dias':
+                                data_day_i = '20gb'
                                                         
                         shipping_i = shipping_i[:40]
 
