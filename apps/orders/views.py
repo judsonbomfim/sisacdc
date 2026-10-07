@@ -184,15 +184,27 @@ def ord_details(request, order_id):
     
     data_d = {
         '500mb-dia': '500',
+        '1gb-dia': '1000',
+        '2gb-dia': '2000',
+        '3gb-dia': '3000',
         '1gb': '1000',
         '2gb': '2000',
         'ilimitado': 'Ilimitado',
-        }
+        '1gb-periodo': '1000',
+        '2gb-periodo': '2000',
+        '3gb-periodo': '3000',
+        '5gb-periodo': '5000',
+        '7gb-periodo': '7000',
+        '10gb-periodo': '10000',
+        '15gb-periodo': '15000',
+        '20gb-periodo': '20000',
+        '30gb-periodo': '30000',
+    }
     
     order = Orders.objects.get(pk=order_id)
     name = order.client
     sim = order.id_sim.sim if order.id_sim else ''
-    data_day = data_d[order.data_day] if order.data_day else ''
+    data_day = data_d.get(order.data_day, '') if order.data_day else ''
     data_day_d = order.get_data_day_display() if order.data_day else ''
     operator = order.id_sim.operator if order.id_sim else ''
     product = order.get_product_display()
@@ -203,10 +215,9 @@ def ord_details(request, order_id):
         # Verificar consumo de dados TC
         mobile_data = ApiTC.mobileData(sim)
     elif operator == 'CM':
-        # Verificar consumo de dados CM
-        mobile_data = ApiCM.mobileData(sim)
+        mobile_data = ApiCM.mobileData(sim, order.data_day)
     elif operator == 'CMHK':
-        mobile_data = ApiCMHK.mobileData(sim)
+        mobile_data = ApiCMHK.mobileData(sim, order.data_day)
     else:
         mobile_data = ''
     
@@ -454,6 +465,8 @@ def ord_edit(request,id):
             data_day = order.data_day
         if not days or days == '':
             days = order.days
+        if ord_st == 'DA':
+            activation_date = None
                 
         order_put = Orders.objects.get(pk=order.id)
         order_put.days = days

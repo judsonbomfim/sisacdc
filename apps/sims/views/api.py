@@ -5,8 +5,21 @@ from ..serializers import ConsumoSerializer
 from ..classes import ApiTC, ApiCM, ApiCMHK
 from rest_framework.permissions import IsAuthenticated
 from apps.sims.models import Sims
+from apps.orders.models import Orders
 import logging
 logger = logging.getLogger(__name__)
+
+
+def _consumo_data_day_for_sim(sim):
+    if not sim:
+        return None
+    order = (
+        Orders.objects.filter(id_sim=sim)
+        .exclude(order_status__in=('CC', 'RB', 'CN'))
+        .order_by('-activation_date', '-id')
+        .first()
+    )
+    return order.data_day if order else None
 
 
 class ConsumoView(APIView):
@@ -20,9 +33,9 @@ class ConsumoView(APIView):
             if sim_operator == 'TC' or sim_operator == 'TI':
                 mobile_data = ApiTC.mobileData(iccid)
             elif sim_operator == 'CM':
-                mobile_data = ApiCM.mobileData(iccid)
+                mobile_data = ApiCM.mobileData(iccid, _consumo_data_day_for_sim(sim))
             elif sim_operator == 'CMHK':
-                mobile_data = ApiCMHK.mobileData(iccid)
+                mobile_data = ApiCMHK.mobileData(iccid, _consumo_data_day_for_sim(sim))
             serializer = ConsumoSerializer(data={
                 "iccid": iccid,
                 "mobile_data": mobile_data

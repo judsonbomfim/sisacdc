@@ -222,7 +222,7 @@ def order_import():
                         condition_i = 'novo-sim'
                         calls_i = False
                         countries_i = False
-                        activation_date_i = '2001-01-01'
+                        activation_date_i = None
                         data_day_i = '1gb'
                         cell_mod_i = '-'
                         celular_samsung_i = False
@@ -291,8 +291,8 @@ def order_import():
                             order_status_i = 'MB'
                         elif condition_i == 'reuso-sim':
                             order_status_i = 'RS'
-                        elif activation_date_i == '2001-01-01':
-                            order_status_i = 'EI'
+                        elif activation_date_i is None or activation_date_i == '':
+                            order_status_i = 'DA'
                         else:
                             order_status_i = 'AS'
 
@@ -354,14 +354,6 @@ def order_import():
                                 note='Pedido importado para o sistema',
                                 type_note='S',
                             )
-
-                            if activation_date_i == '2001-01-01':
-                                Notes.objects.create(
-                                    id_item=obj,
-                                    id_user=None,
-                                    note='Pedido sem data de ativação. Verificar com cliente.',
-                                    type_note='S',
-                                )
 
                             # Insert Voice Calls
                             if calls_i:
@@ -512,7 +504,7 @@ def order_import_voice():
                 countries_i = False
                 cell_mod_i = '-'
                 condition_i = "novo-sim"
-                activation_date_i = '2001-01-01'
+                activation_date_i = None
                 data_day_i = 'ilimitado'
                 type_sim_i = 'sim'  # default
                 days_i = '0'  # default
@@ -530,8 +522,8 @@ def order_import_voice():
                 order_date_i = DateFormats.dateHour(order['date_created'])
                 calls_i = True
          
-                if activation_date_i == '2001-01-01':
-                    order_status_i = 'EI'
+                if activation_date_i == '' or activation_date_i is None:
+                    order_status_i = 'DA'
                 else:
                     order_status_i = 'PV'
                     
@@ -576,14 +568,6 @@ def order_import_voice():
                         note='Pedido importado para o sistema',
                         type_note='S',
                     )
-                    
-                    if activation_date_i == '2001-01-01':
-                        Notes.objects.create(
-                            id_item=obj,
-                            id_user=None,
-                            note='Pedido sem data de ativação. Verificar com cliente.',
-                            type_note='S',
-                        )
                     
                     # Insert Voice Calls
                     if calls_i:

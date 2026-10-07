@@ -159,7 +159,7 @@ class Orders(models.Model):
     ord_chip_nun = models.CharField(max_length=35, null=True, blank=True)
     shipping = models.CharField(max_length=40, null=True, blank=True)
     order_date = models.DateTimeField()
-    activation_date = models.DateField()
+    activation_date = models.DateField(null=True, blank=True)
     order_status = models.CharField(max_length=20, choices=ORDER_STATUS, default='PR')
     type_sim = models.CharField(max_length=4, null=True, blank=True, default='sim')
     id_sim = models.ForeignKey(Sims, on_delete=models.DO_NOTHING, null=True, blank=True)
