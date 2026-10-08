@@ -193,14 +193,7 @@
                 </div>
               </td>
               <td>{{ order.id_sim.get_operator_display|default:'-' }}</td>
-              <td>
-                {{ order.get_product_display }}
-                {% if order.data_day == '20gb' %}A
-                {% elif order.data_day == '50gb' %}B
-                {% elif order.data_day == 'ilimitado' %}
-                {% else %}{{ order.get_data_day_display }}
-                {% endif %}
-              </td>
+              <td>{{ order.get_product_display }} {{ order.get_data_day_display }}</td>
               <td class="text-center">
                 <div class="flex justify-center gap-1">
                   {% if order.cell_mod != '-' %}
@@ -374,7 +367,8 @@
                       <span id="detalhe-dados-consumidos">0.00</span> MB
                     </span>
                   </div>
-                  <div id="detalhe-disponivel-row" class="flex items-center justify-between gap-3">
+                  <div id="detalhe-disponivel-row"
+                       class="flex items-center justify-between gap-3">
                     <span class="flex items-center gap-2">
                       <span class="bg-default-200 size-2.5 rounded-full"></span>
                       Disponível
@@ -383,7 +377,8 @@
                   </div>
                 </div>
               </div>
-              <div id="detalhe-consumo-chart-wrap" class="flex min-w-0 items-center justify-center overflow-hidden">
+              <div id="detalhe-consumo-chart-wrap"
+                   class="flex min-w-0 items-center justify-center overflow-hidden">
                 <div id="detalhe-consumo-chart" class="w-44"></div>
               </div>
             </div>
