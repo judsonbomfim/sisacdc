@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import date, datetime
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
@@ -17,6 +18,23 @@ from apps.orders.classes import DateFormats
 import pandas as pd
 import logging
 logger = logging.getLogger(__name__)
+
+
+def _python_date(value):
+    """Timestamp ou NaT do pandas vira date, ou None quando a data está em aberto."""
+    try:
+        missing = value is None or pd.isna(value)
+    except (TypeError, ValueError):
+        missing = False
+    if missing:
+        return None
+    if hasattr(value, 'to_pydatetime'):
+        value = value.to_pydatetime()
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    return None
 
 
 def _voice_list_params(request):
@@ -171,6 +189,11 @@ def voice_index(request):
 
     url_filter = _voice_list_url_filter(params)
     voice_count = int(voices_l.shape[0])
+    if not voices_l.empty and 'activation_date' in voices_l.columns:
+        voices_l = voices_l.copy()
+        voices_l['activation_date'] = voices_l['activation_date'].map(_python_date)
+        if 'return_date' in voices_l.columns:
+            voices_l['return_date'] = voices_l['return_date'].map(_python_date)
     voices_l = voices_l.to_dict('records')
 
     vox_st_list = [

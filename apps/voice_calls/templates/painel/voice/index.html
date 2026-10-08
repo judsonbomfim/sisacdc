@@ -149,8 +149,20 @@
                 {% endif %}
               </td>
               <td class="text-center">{{ voice.days }}</td>
-              <td class="text-center whitespace-nowrap">{{ voice.activation_date|date:'d/m/Y' }}</td>
-              <td class="text-center whitespace-nowrap">{{ voice.return_date|date:'d/m/Y' }}</td>
+              <td class="text-center whitespace-nowrap">
+                {% if voice.activation_date %}
+                  {{ voice.activation_date|date:'d/m/Y' }}
+                {% else %}
+                  <span class="text-default-400">-</span>
+                {% endif %}
+              </td>
+              <td class="text-center whitespace-nowrap">
+                {% if voice.return_date %}
+                  {{ voice.return_date|date:'d/m/Y' }}
+                {% else %}
+                  <span class="text-default-400">-</span>
+                {% endif %}
+              </td>
               <td class="text-center">
                 <span class="badge py-0 font-semibold text-2xs bg-primary/15 text-primary">{{ voice.call_status }}</span>
               </td>
