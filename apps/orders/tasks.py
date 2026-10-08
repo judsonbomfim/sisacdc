@@ -298,16 +298,16 @@ def order_import():
 
                         simOR = None
                         simAT = None
-
-                        if product_i in operPlan.listPlan('OR'):
-                            if product_i == 'chip-internacional-global-franquia-total':
-                                data_day_i = 'world'
-                            elif data_day_i == '50gb-30-dias':
-                                data_day_i = '50gb'
-                            elif data_day_i == '20gb-30-dias':
-                                data_day_i = '20gb'
-                                                        
                         shipping_i = shipping_i[:40]
+                        
+                        # Franquia total:
+                        if 'franquia-total' in product_i:
+                            parts = (data_day_i or '').split('-')
+                            if parts and parts[0]:
+                                data_day_i = parts[0]
+                            if len(parts) > 1 and parts[1]:
+                                days_i = parts[1]
+                                                        
 
                         # USO DE get_or_create - EVITA DUPLICAÇÃO
                         defaults_data = {

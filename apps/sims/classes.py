@@ -1351,6 +1351,12 @@ class operPlan():
                 'chip-internacional-america-central',
                 'chip-internacional-global',
                 'chip-internacional-eua-premium',
+                'chip-internacional-global-franquia-total',
+                # Franquia total
+                'chip-internacional-europa-franquia-total',
+                'chip-internacional-america-do-sul-franquia-total',
+                'chip-internacional-asia-franquia-total',
+                'chip-internacional-america-do-norte-franquia-total',
                 # Legado
                 'chip-internacional-europa-ilimitado',
                 'chip-internacional-europa-premium',
@@ -1449,14 +1455,23 @@ class selectPlanCMHK():
     def selectPlanList(selList):
         plans = {
             "chip-internacional-europa": "list_cmhk_europe",
+            "chip-internacional-europa-franquia-total": "list_cmhk_europe_ft",
             "chip-internacional-america-do-sul": "list_cmhk_south_america",
+            "chip-internacional-america-do-sul-franquia-total": "list_cmhk_south_america_ft",
             "chip-internacional-asia": "list_cmhk_asia",
+            "chip-internacional-asia-franquia-total": "list_cmhk_asia_ft",
             "chip-internacional-america-do-norte": "list_cmhk_north_america",
+            "chip-internacional-america-do-norte-franquia-total": "list_cmhk_north_america_ft",
             "chip-internacional-africa": "list_cmhk_africa",
+            "chip-internacional-africa-franquia-total": "list_cmhk_africa_ft",
             "chip-internacional-oriente-medio": "list_cmhk_middle_east",
+            "chip-internacional-oriente-medio-franquia-total": "list_cmhk_middle_east_ft",
             "chip-internacional-oceania": "list_cmhk_oceania",
+            "chip-internacional-oceania-franquia-total": "list_cmhk_oceania_ft",
             "chip-internacional-america-central": "list_cmhk_central_america",
+            "chip-internacional-america-central-franquia-total": "list_cmhk_central_america_ft",
             "chip-internacional-global": "list_cmhk_global",
+            "chip-internacional-global-franquia-total": "list_cmhk_global_ft",
             "chip-internacional-eua-premium": "list_cmhk_eua_premium",
             "chip-internacional-eua": "list_cmhk_eua_premium",
             # legado
@@ -1573,6 +1588,11 @@ class selectPlanCMHK():
                 ["31", "ilimitado", "D2608120120391706913"],
             ],
             "list_cmhk_europe_ft": [
+                ["4", "3gb", "D2610022317151688967"],
+                ["8", "5gb", "D2610022318100941539"],
+                ["11", "10gb", "D2610022319353556102"],
+                ["16", "10gb", "D2610022320126752599"],
+                ["31", "15gb", "D2610022320533788140"],
                 ["31", "20gb", "D2608120706515270186"],
                 ["31", "50gb", "D2608120706087558161"],
             ],
@@ -1671,6 +1691,14 @@ class selectPlanCMHK():
                 ["30", "ilimitado", "D2608120729260624668"],
                 ["31", "ilimitado", "D2608180027136794831"],
             ],
+            "list_cmhk_south_america_ft": [
+                ["4", "3gb", "D2610022322171299632"],
+                ["8", "5gb", "D2610022323199449820"],
+                ["11", "10gb", "D2610022324098980715"],
+                ["16", "10gb", "D2610022325507326280"],
+                ["31", "20gb", "D2608120804281013240"],
+                ["31", "50gb", "D2608120804589930247"],
+            ],
             "list_cmhk_asia": [
                 ["2", "500mb-dia", "D2608180232451989874"],
                 ["3", "500mb-dia", "D2608180232322962185"],
@@ -1762,6 +1790,15 @@ class selectPlanCMHK():
                 ["29", "ilimitado", "D2608180229590016013"],
                 ["30", "ilimitado", "D2608120816197750293"],
                 ["31", "ilimitado", "D2608180438045656259"],
+            ],
+            "list_cmhk_asia_ft": [
+                ["4", "3gb", "D2610022327138929740"],
+                ["8", "5gb", "D2610022327471151156"],
+                ["11", "10gb", "D2610022328207562129"],
+                ["16", "10gb", "D2610022328505997893"],
+                ["31", "15gb", "D2610022329232716229"],
+                ["31", "20gb", "D2608120840150493045"],
+                ["31", "50gb", "D2608120840405950865"],
             ],
             "list_cmhk_north_america": [
                 ["2", "500mb-dia", "D2608180429433836835"],
@@ -1855,6 +1892,13 @@ class selectPlanCMHK():
                 ["30", "ilimitado", "D2608120910212831833"],
                 ["31", "ilimitado", "D2608180448261140605"],
             ],
+            "list_cmhk_north_america_ft": [
+                ["4", "3gb", "D2610022322171299632"],
+                ["8", "5gb", "D2610022323199449820"],
+                ["11", "10gb", "D2610022324098980715"],
+                ["31", "20gb", "D2608120804281013240"],
+                ["31", "50gb", "D2608120804589930247"],
+            ],
             "list_cmhk_africa": [
                 ["2", "500mb-dia", "D2608180515362822599"],
                 ["3", "500mb-dia", "D2608180515239839862"],
@@ -1946,6 +1990,10 @@ class selectPlanCMHK():
                 ["29", "ilimitado", "D2608180512458271133"],
                 ["30", "ilimitado", "D2608140335093619962"],
                 ["31", "ilimitado", "D2608180513008041629"],
+            ],
+            "list_cmhk_africa_ft": [
+                ["31", "20gb", "D2608142246033946981"],
+                ["31", "50gb", "D2608142246236914831"],
             ],
             "list_cmhk_middle_east": [
                 ["2", "500mb-dia", "D2608182310206032770"],
@@ -2039,6 +2087,10 @@ class selectPlanCMHK():
                 ["30", "ilimitado", "D2608142250343877479"],
                 ["31", "ilimitado", "D2608182155397837418"],
             ],
+             "list_cmhk_middle_east_ft": [
+                ["31", "20gb", "D2608142322120533319"],
+                ["31", "50gb", "D2608142322326253106"],
+            ],
             "list_cmhk_oceania": [
                 ["2", "500mb-dia", "D2608182349312759763"],
                 ["3", "500mb-dia", "D2608182349180627592"],
@@ -2130,6 +2182,10 @@ class selectPlanCMHK():
                 ["29", "ilimitado", "D2608182335331934770"],
                 ["30", "ilimitado", "D2608142327335514916"],
                 ["31", "ilimitado", "D2608182327283947623"],
+            ],
+             "list_cmhk_oceania_ft": [
+                ["31", "20gb", "D2608150027122472348"],
+                ["31", "50gb", "D2608150027418362859"],
             ],
             "list_cmhk_central_america": [
                 ["2", "500mb-dia", "D2608190037262234920"],
@@ -2223,6 +2279,10 @@ class selectPlanCMHK():
                 ["30", "ilimitado", "D2608150036385833000"],
                 ["31", "ilimitado", "D2608190021301690489"],
             ],
+            "list_cmhk_central_america_ft": [
+                ["31", "20gb", "D2608150059477712853"],
+                ["31", "50gb", "D2608150100122249957"],
+            ],
             "list_cmhk_global": [
                 ["2", "500mb-dia", "D2608190123211486720"],
                 ["3", "500mb-dia", "D2608190123391843059"],
@@ -2314,6 +2374,12 @@ class selectPlanCMHK():
                 ["29", "ilimitado", "D2608190112219043457"],
                 ["30", "ilimitado", "D2608190112366733189"],
                 ["31", "ilimitado", "D2608190112532483138"],
+            ],
+            "list_cmhk_global_ft": [
+                ["31", "3gb", "D2610022333128870361"],
+                ["31", "5gb", "D2610022335027103726"],
+                ["31", "10gb", "D2610022336099268012"],
+                ["31", "20gb", "D2608190055314835700"],
             ],
             "list_cmhk_eua_premium": [
                 ["2", "500mb-dia", "D2608200154347598265"],
