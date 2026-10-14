@@ -105,6 +105,22 @@ def _orders_list_redirect(params=None):
     return redirect(f'{url}?{query[1:]}' if query else url)
 
 
+def _orders_without_activation_date(ord_ids):
+    """Separa pedidos sem data de ativação dos que podem ir para Agd. Ativação."""
+    missing = Orders.objects.filter(pk__in=ord_ids, activation_date__isnull=True)
+    missing_pks = {str(pk) for pk in missing.values_list('pk', flat=True)}
+    missing_numbers = list(missing.values_list('order_id', flat=True))
+    allowed = [pk for pk in ord_ids if str(pk) not in missing_pks]
+    return allowed, missing_numbers
+
+
+def _notify_missing_activation_date(request, order_numbers):
+    if not order_numbers:
+        return
+    numeros = ', '.join(str(n) for n in order_numbers)
+    messages.error(request, f'O pedido precisa ter uma data de ativação: {numeros}')
+
+
 # Order list
 @login_required(login_url='/login/')
 @has_permission_decorator('view_orders')
@@ -122,9 +138,13 @@ def orders_list(request):
 
         if ord_s and ord_id:
             status = dict(Orders.order_status.field.choices).get(ord_s, ord_s)
-            print(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
-            orders_up_status.delay(ord_id, ord_s, id_user)
-            messages.success(request, f'Atualizando {len(ord_id)} pedido(s) para status: {status}')
+            if ord_s == 'AA':
+                ord_id, sem_data = _orders_without_activation_date(ord_id)
+                _notify_missing_activation_date(request, sem_data)
+            if ord_id:
+                print(f"[VIEW] Enfileirando orders_up_status: ord_id={ord_id}, status={ord_s}, user={id_user}")
+                orders_up_status.delay(ord_id, ord_s, id_user)
+                messages.success(request, f'Atualizando {len(ord_id)} pedido(s) para status: {status}')
         else:
             print(f"[VIEW] Dados inválidos: ord_id={ord_id}, status={ord_s}")
             messages.error(request, 'Selecione pedidos e status antes de atualizar')
@@ -467,6 +487,10 @@ def ord_edit(request,id):
             days = order.days
         if ord_st == 'DA':
             activation_date = None
+
+        if ord_st == 'AA' and ord_st != order_status and not activation_date:
+            msg_error.append('O pedido precisa ter uma data de ativação')
+            ord_st = order_status
                 
         order_put = Orders.objects.get(pk=order.id)
         order_put.days = days
@@ -739,6 +763,12 @@ def orders_activations(request):
                 return redirect('orders_activations')
             
             id_user = request.user.id
+
+            if ord_s == 'AA':
+                ord_id, sem_data = _orders_without_activation_date(ord_id)
+                _notify_missing_activation_date(request, sem_data)
+                if not ord_id:
+                    return redirect('orders_activations')
             
             # Log para debug
             print(f">>>>>>>>>> ATUALIZAÇÃO EM MASSA (ACTIVATIONS)")

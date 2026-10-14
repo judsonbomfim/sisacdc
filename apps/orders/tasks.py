@@ -291,7 +291,7 @@ def order_import():
                             order_status_i = 'MB'
                         elif condition_i == 'reuso-sim':
                             order_status_i = 'RS'
-                        elif activation_date_i is None or activation_date_i == '':
+                        elif (activation_date_i is None or activation_date_i == '') and type_sim_i == 'esim':
                             order_status_i = 'DA'
                         else:
                             order_status_i = 'AS'
@@ -521,7 +521,7 @@ def order_import_voice():
                 order_date_i = DateFormats.dateHour(order['date_created'])
                 calls_i = True
          
-                if activation_date_i == '' or activation_date_i is None:
+                if (activation_date_i is None or activation_date_i == '') and type_sim_i == 'esim':
                     order_status_i = 'DA'
                 else:
                     order_status_i = 'PV'
@@ -627,6 +627,9 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None, skip_sim_deactivat
     # Verificar se ord_id é uma lista
     if not isinstance(ord_id, list):
         ord_id = [ord_id]
+
+    skipped = []
+    updated = []
     
     for o_id in ord_id:
         
@@ -643,9 +646,16 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None, skip_sim_deactivat
         try: type_sim = order.id_sim.type_sim
         except: type_sim = 'esim'
 
+        if ord_s == 'AA' and not order.activation_date:
+            msg = f'Pedido {order.order_id} precisa ter uma data de ativação'
+            logger.warning(f"[orders_up_status] {msg}")
+            skipped.append({'order_id': order.order_id, 'message': msg})
+            continue
+
         # Save status System
         order.order_status = ord_s
         order.save()
+        updated.append(order.order_id)
         logger.info(f"[orders_up_status] atualizado order.pk={order.pk} para {ord_s}")
         
         # Desativar (e)SIM
@@ -763,6 +773,8 @@ def orders_up_status(ord_id, ord_s, id_user, ord_s_prev=None, skip_sim_deactivat
         # Enviar email
         if ord_s == 'CN' and (type_sim == 'sim' or order_plan == 'USA'):
             send_email_sims.delay(id=order.id)
+
+    return {'updated': updated, 'skipped': skipped}
 
     
 @shared_task(time_limit=300)
