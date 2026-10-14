@@ -340,6 +340,11 @@ def ord_edit(request,id):
         ord_note = request.POST.get('ord_note')
         up_oper = request.POST.get('upOper')
         esim_v = None
+
+        data_ativacao = order.activation_date if activation_date == '' else activation_date
+        if ord_st == 'AA' and ord_st != order_status and not data_ativacao:
+            messages.error(request, 'O pedido precisa ter uma data de ativação')
+            return redirect('ord_edit', id=order.id)
                 
         # Update SIM in Order and update SIM
         def updateSIM():
@@ -487,10 +492,6 @@ def ord_edit(request,id):
             days = order.days
         if ord_st == 'DA':
             activation_date = None
-
-        if ord_st == 'AA' and ord_st != order_status and not activation_date:
-            msg_error.append('O pedido precisa ter uma data de ativação')
-            ord_st = order_status
                 
         order_put = Orders.objects.get(pk=order.id)
         order_put.days = days
